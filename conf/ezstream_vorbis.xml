@@ -1,8 +1,12 @@
+<!-- This example is for a input playlist that must contain
+     all OggVorbis files. ezstream will perform NO reencoding, and
+     the destination stream bitrate, channels, etc. will be those
+     of the input files -->
 <ezstream>
-    <url>http://localhost:8000/testmount.ogg</url>
+    <url>http://localhost:8000/vorbis.ogg</url>
     <sourcepassword>hackme</sourcepassword>
-    <format>OGGVORBIS</format>
-    <filename>sunking.ogg</filename>
+    <format>VORBIS</format>
+    <filename>playlist.m3u</filename>
     <svrinfoname>My Stream</svrinfoname>    
     <svrinfourl>http://www.oddsock.org</svrinfourl> 
     <svrinfogenre>RockNRoll</svrinfogenre>

@@ -42,7 +42,7 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../oggvorbis-win32sdk-1.0.1/include" /I "../../libshout/include" /I "../src" /I "../../libxml2/include" /I "../../iconv/include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MT /W3 /GX /O2 /I "../../ogg/include" /I "../../vorbis/include" /I "../../libshout/include" /I "../src" /I "../../libxml2/include" /I "../../iconv/include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
 # ADD BASE RSC /l 0x409 /d "NDEBUG"
 # ADD RSC /l 0x409 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -50,7 +50,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ..\..\libshout\win32\Release\libshout.lib ..\..\oggvorbis-win32sdk-1.0.1\lib\ogg_static.lib ..\..\oggvorbis-win32sdk-1.0.1\lib\vorbis_static.lib ..\..\pthreads\pthreadVSE.lib ws2_32.lib winmm.lib libxml2.lib iconv.lib vorbisfile.lib /nologo /subsystem:console /machine:I386 /libpath:"../../oggvorbis-win32sdk-1.0.1/lib" /libpath:"../../libshout-2.0/win32/Release" /libpath:"../../libxml2/lib" /libpath:"../../iconv/lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ..\..\libshout\win32\Release\libshout.lib ogg_static.lib vorbis_static.lib ..\..\pthreads\pthreadVSE.lib ws2_32.lib winmm.lib libxml2.lib iconv.lib vorbisfile_static.lib /nologo /subsystem:console /machine:I386 /libpath:"../../oggvorbis-win32sdk-1.0.1/lib" /libpath:"../../libshout-2.0/win32/Release" /libpath:"../../libxml2/lib" /libpath:"../../iconv/lib" /libpath:"../../ogg/win32/Static_Release" /libpath:"../../vorbis/win32/Vorbis_Static_Release" /libpath:"../../vorbis/win32/VorbisFile_Static_Release"
 
 !ELSEIF  "$(CFG)" == "ezstream - Win32 Debug"
 
@@ -66,7 +66,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../../oggvorbis-win32sdk-1.0.1/include" /I "../../libshout/include" /I "../src" /I "../../libxml2/include" /I "../../iconv/include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
+# ADD CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /I "../../ogg/include" /I "../../vorbis/include" /I "../../libshout/include" /I "../src" /I "../../libxml2/include" /I "../../iconv/include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
 # ADD BASE RSC /l 0x409 /d "_DEBUG"
 # ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
@@ -74,7 +74,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ..\..\libshout\win32\Debug\libshout.lib ..\..\oggvorbis-win32sdk-1.0.1\lib\ogg_static.lib ..\..\oggvorbis-win32sdk-1.0.1\lib\vorbis_static.lib ..\..\pthreads\pthreadVSE.lib ws2_32.lib winmm.lib libxml2.lib iconv.lib vorbisfile.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /libpath:"../../oggvorbis-win32sdk-1.0.1/lib" /libpath:"../../libshout-2.0/win32/Debug" /libpath:"../../libxml2/lib" /libpath:"../../iconv/lib"
+# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib ..\..\libshout\win32\Debug\libshout.lib ogg_static_d.lib vorbis_static_d.lib ..\..\pthreads\pthreadVSE.lib ws2_32.lib winmm.lib libxml2.lib iconv.lib vorbisfile_static_d.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept /libpath:"../../libshout-2.0/win32/Debug" /libpath:"../../libxml2/lib" /libpath:"../../iconv/lib" /libpath:"../../ogg/win32/Static_Debug" /libpath:"../../vorbis/win32/Vorbis_Static_Debug" /libpath:"../../vorbis/win32/VorbisFile_Static_Debug"
 
 !ENDIF 
 

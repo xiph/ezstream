@@ -1,8 +1,12 @@
+<!-- This example is for a input playlist that must contain
+     all MP3 files. ezstream will perform NO reencoding, and
+     the destination stream bitrate, channels, etc. will be those
+     of the input files -->
 <ezstream>
-    <url>http://localhost:8000/testmount</url>
+    <url>http://localhost:8000/stream</url>
     <sourcepassword>hackme</sourcepassword>
     <format>MP3</format>
-    <filename>Track13.mp3</filename>
+    <filename>playlist.m3u</filename>
 	<!-- The following settings are used to describe your stream
          to the server.  It's up to you to make sure the 
          bitrate/quality/samplerate/channels

@@ -6,6 +6,7 @@
 #ifdef WIN32
 #include <fcntl.h>
 #include <io.h>
+#include <windows.h>
 #endif
 #include <shout/shout.h>
 #include <getopt.h>
@@ -293,6 +294,7 @@ FILE *openResource(shout_t *shout, char *fileName)
 {
 	FILE	*filep = NULL;
 
+    printf("Opening file (%s)\n", fileName);
 	if (!strcmp(fileName, "stdin")) {
 #ifdef WIN32
 		_setmode(_fileno(stdin), _O_BINARY);
@@ -318,6 +320,9 @@ FILE *openResource(shout_t *shout, char *fileName)
 				pCommandString = buildCommandString(extension, fileName, pMetadata);	
 				/* Open up the decode/encode loop using popen() */
 				filep = popen(pCommandString, "r");
+#ifdef WIN32
+                _setmode(_fileno(filep), _O_BINARY );
+#endif
 				free(pMetadata);
 				free(pCommandString);
 				return filep;
@@ -361,8 +366,26 @@ int streamFile(shout_t *shout, char *fileName) {
 		if (read > 0) {
 			ret = shout_send(shout, buff, read);
 			if (ret != SHOUTERR_SUCCESS) {
+                int loop = 1;
 				printf("DEBUG: Send error: %s\n", shout_get_error(shout));
-				break;
+                
+                while (loop) {
+                    printf("Disconnected from server, reconnecting....\n");                    
+                    shout_close(shout);
+                    if (shout_open(shout) == SHOUTERR_SUCCESS) {
+                        printf("Successful reconnection....\n");                    
+            			ret = shout_send(shout, buff, read);
+                        loop = 0;
+                    }
+                    else {
+                        printf("Reconnect failed..waiting 5 seconds.\n");                    
+#ifdef WIN32
+                        Sleep(5000);
+#else
+                        sleep(5);
+#endif
+                    }
+                }
 			}
 			shout_delay(shout);
 		} else {
@@ -373,13 +396,14 @@ int streamFile(shout_t *shout, char *fileName) {
 	}
 	fclose(filepstream);
 	filepstream = NULL;
-	return 1;
+	return ret;
 }
 int streamPlaylist(shout_t *shout, char *fileName) {
 	FILE	*filep = NULL;
 	char	streamFileName[8096] = "";
 	char	lastStreamFileName[8096] = "";
 	int		loop = 1;
+    int     ret = 1;
 
 	filep = fopen(fileName, "r");
 	if (filep == 0) {
