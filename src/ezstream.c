@@ -10,9 +10,14 @@
 #include <shout/shout.h>
 #include <getopt.h>
 #include "configfile.h"
+#ifndef WIN32
+#include <libgen.h>
+#endif
+#include <vorbis/vorbisfile.h>
 
 EZCONFIG	*pezConfig = NULL;
 int rereadPlaylist = 0;
+static char	*blankString = "";
 
 #ifndef WIN32
 #include <signal.h>
@@ -22,6 +27,12 @@ void hup_handler(int sig)
 	rereadPlaylist = 1;	
 	printf("Will reread the playlist on next song\n");
 }
+#endif
+#ifdef WIN32
+#define STRNCASECMP strnicmp
+#define popen _popen
+#else
+#define STRNCASECMP strncasecmp
 #endif
 
 typedef struct tag_ID3Tag {
@@ -87,43 +98,240 @@ int urlParse(char *url, char *hostname, int *port, char *mountname)
 	
 }
 
+void ReplaceString(char *source, char *dest, char *from, char *to)
+{
+	char *p2 = (char *)1;
+	char	*p1 = source;
+	while (p2) {
+		p2 = strstr(p1, from);
+		if (p2) {
+			strncat(dest, p1, p2-p1);
+			strcat(dest, to);
+			p1 = p2 + strlen(from);
+		}
+		else {
+			strcat(dest, p1);
+		}
+	}
+}
+
+void setMetadata(shout_t *shout, char *metadata)
+{
+	shout_metadata_t *shoutMetadata = shout_metadata_new();
+	shout_metadata_add(shoutMetadata, "song", metadata); 
+	shout_set_metadata(shout, shoutMetadata);
+	shout_metadata_free(shoutMetadata);
+}
+
+char* buildCommandString(char *extension, char *fileName, char *metadata)
+{
+	char	*commandString = NULL;
+	char *encoder = NULL;
+	char *decoder = NULL;
+	int	newDecoderLen = 0;
+	char *newDecoder = NULL;
+	char *newEncoder = NULL;
+	int	newEncoderLen = 0;
+	int	commandStringLen = 0;
+
+	decoder = strdup(getFormatDecoder(extension));
+	if (strlen(decoder) == 0) {
+		printf("Unknown extension %s, cannot decode\n", extension);
+		return commandString;
+	}
+	encoder = strdup(getFormatEncoder(pezConfig->format));
+	if (strlen(encoder) == 0) {
+		printf("Unknown format %s, cannot encode\n", pezConfig->format);
+		return commandString;
+	}
+	newDecoderLen = strlen(decoder) + strlen(fileName) + 1;
+	newDecoder = (char *)malloc(newDecoderLen);
+	memset(newDecoder, '\000', newDecoderLen);
+	ReplaceString(decoder, newDecoder, "@T@", fileName);
+
+	newEncoderLen = strlen(encoder) + strlen(metadata) + 1;
+	newEncoder = (char *)malloc(newEncoderLen);
+	memset(newEncoder, '\000', newEncoderLen);
+	ReplaceString(encoder, newEncoder, "@M@", metadata);
+
+	commandStringLen = strlen(newDecoder) + strlen(" | ") + strlen(newEncoder) + 1;
+	commandString = (char *)malloc(commandStringLen);
+	memset(commandString, '\000', commandStringLen);
+	sprintf(commandString, "%s | %s", newDecoder, newEncoder);
+	printf("Going to execute (%s)\n", commandString);
+	return(commandString);
+}
+
+#ifdef WIN32
+char *basename(char *fileName) {
+	char *pLast = strrchr(fileName, '\\');
+	if (pLast) {
+		return pLast+1;
+	}
+	return NULL;
+}
+#endif
+char * processMetadata(shout_t *shout, char *extension, char *fileName) {
+	FILE	*filepstream = NULL;
+	char	*artist = NULL;
+	char	*title = NULL;
+	char	*songInfo = NULL;
+	int songLen = 0;
+	ID3Tag	id3tag;
+
+	filepstream = fopen(fileName, "rb");
+	if (filepstream == NULL) {
+		printf("Cannot open (%s) - No metadata support.\n", fileName);
+		return strdup(blankString);
+	}
+
+	if (!strcmp(extension, ".mp3")) {
+		/* Look for the ID3 tag */
+		if (filepstream) {
+			memset(&id3tag, '\000', sizeof(id3tag));
+			fseek(filepstream, -128L, SEEK_END);
+			fread(&id3tag, 1, 127, filepstream);
+			if (!strncmp(id3tag.tag, "TAG", strlen("TAG"))) {
+				/* We have an Id3 tag */
+				songLen = strlen(id3tag.artistName) + strlen(" - ") + strlen(id3tag.trackName);
+				songInfo = (char *)malloc(songLen);
+				memset(songInfo, '\000', songLen);
+
+				sprintf(songInfo, "%s - %s", id3tag.artistName, id3tag.trackName);
+			}
+		}
+	}
+	if (!strcmp(extension, ".ogg")) {
+		OggVorbis_File vf;
+		if(ov_open(filepstream, &vf, NULL, 0) < 0) {
+			printf("Input does not appear to be an Ogg Vorbis bitstream. No metadata support.\n");
+		}
+		else {
+			char **ptr=ov_comment(&vf,-1)->user_comments;
+			while(*ptr){
+				if (!STRNCASECMP(*ptr, "ARTIST", strlen("ARTIST"))) {
+					artist = (char *)strdup(*ptr + strlen("ARTIST="));
+				}
+				if (!STRNCASECMP(*ptr, "TITLE", strlen("TITLE"))) {
+					title = (char *)strdup(*ptr + strlen("TITLE="));
+				}
+				++ptr;
+			}
+			if (artist) {
+				songLen = songLen + strlen(artist);
+			}
+			if (title) {
+				songLen = songLen + strlen(title);
+			}
+			songLen = songLen + strlen(" - ") + 1;
+			songInfo = (char *)malloc(songLen);
+			memset(songInfo, '\000', songLen);
+			if (artist) {
+				strcat(songInfo, artist);
+				strcat(songInfo, " - ");
+				free(artist);
+			}
+			if (title) {
+				strcat(songInfo, title);
+				free(title);
+			}
+			ov_clear(&vf);
+			filepstream = NULL;
+		}
+
+	}
+	if (!songInfo) {
+		/* If we didn't get any song info via tags or comments,
+		   then lets just use the filename */
+		char *p1 = NULL;
+		char *p2 = basename(fileName);
+		if (p2) {
+			songInfo = strdup(p2);
+			p1 = strrchr(songInfo, '.');
+			if (p1) {
+				*p1 = '\000';
+			}
+		}
+	}
+
+	if (songInfo) {
+		shout_metadata_t *pmetadata = shout_metadata_new();
+		shout_metadata_add(pmetadata, "song", songInfo);
+		shout_set_metadata(shout, pmetadata);
+		shout_metadata_free(pmetadata);
+	}
+	else {
+		songInfo = strdup(blankString);
+	}
+	if (filepstream) {
+		fclose(filepstream);
+	}
+	printf("Songinfo is (%s)\n", songInfo);
+	return songInfo;
+}
+
+FILE *openResource(shout_t *shout, char *fileName)
+{
+	FILE	*filep = NULL;
+
+	if (!strcmp(fileName, "stdin")) {
+#ifdef WIN32
+		_setmode(_fileno(stdin), _O_BINARY);
+#endif
+		filep = stdin;
+	}
+	else {
+		char extension[25];
+		char *p1 = NULL;
+		char *pMetadata = NULL;
+		char *pCommandString = NULL;
+		memset(extension, '\000', sizeof(extension));
+		p1 = strrchr(fileName, '.');
+		if (p1) {
+			strncpy(extension, p1, sizeof(extension)-1);
+		}
+
+		pMetadata = processMetadata(shout, extension, fileName);
+		if (pezConfig->reencode) {
+			/* Lets set the metadata first */
+			if (strlen(extension) > 0) {
+				pCommandString = buildCommandString(extension, fileName, pMetadata);	
+				/* Open up the decode/encode loop using popen() */
+				filep = popen(pCommandString, "r");
+				free(pMetadata);
+				free(pCommandString);
+				return filep;
+			}
+			else {
+				printf("Cannot determine extension, don't know how to deal with (%s)\n", fileName);
+				free(pMetadata);
+				return NULL;
+			}
+			free(pMetadata);
+
+		}
+		else {
+			filep = fopen(fileName, "rb");
+			return filep;
+		}
+	}
+	return NULL;
+	
+}
+
+
 int streamFile(shout_t *shout, char *fileName) {
 	FILE	*filepstream = NULL;
 	char buff[4096];
 	long read, ret, total;
-	ID3Tag	id3tag;
 	
 	
 	printf("Streaming %s\n", fileName);
 	
-	if (!strcmp(pezConfig->fileName, "stdin")) {
-#ifdef WIN32
-		_setmode(_fileno(stdin), _O_BINARY);
-#endif
-		filepstream = stdin;
-	}
-	else {
-		filepstream = fopen(fileName, "rb");
-	}
+	filepstream = openResource(shout, fileName);
 	if (!filepstream) {
 		printf("Cannot open %s\n", fileName);
 		return 0;
-	}
-	if (pezConfig->format == MP3_FORMAT) {
-		/* Look for the ID3 tag */
-		memset(&id3tag, '\000', sizeof(id3tag));
-		fseek(filepstream, -128L, SEEK_END);
-		fread(&id3tag, 1, sizeof(id3tag), filepstream);
-		if (!strncmp(id3tag.tag, "TAG", strlen("TAG"))) {
-			/* We have an Id3 tag */
-			shout_metadata_t	*pmetadata = shout_metadata_new();
-			char	songInfo[135] = "";
-			sprintf(songInfo, "%s - %s", id3tag.artistName, id3tag.trackName);
-			shout_metadata_add(pmetadata, "song", songInfo);
-			shout_set_metadata(shout, pmetadata);
-			shout_metadata_free(pmetadata);
-		}
-		rewind(filepstream);
 	}
 	total = 0;
 	while (!feof(filepstream)) {
@@ -159,52 +367,52 @@ int streamPlaylist(shout_t *shout, char *fileName) {
 		return(0);
 	}
 	while (loop) {
-			while (!feof(filep)) {
-				memset(streamFileName, '\000', sizeof(streamFileName));
-				fgets(streamFileName, sizeof(streamFileName), filep);
-				streamFileName[strlen(streamFileName)-1] = '\000';
-				if (strlen(streamFileName) > 0) {
-					memset(lastStreamFileName, '\000', sizeof(lastStreamFileName));
-					strcpy(lastStreamFileName, streamFileName);
-					/* Skip entries that begin with a # */
-					if (strncmp(streamFileName, "#", 1)) {
-						streamFile(shout, streamFileName);
-					}
-				}
-				if (rereadPlaylist) {
-					rereadPlaylist = 0;
-					fclose(filep);
-					printf("Reopening playlist\n");
-					filep = fopen(fileName, "r");
-					if (filep == 0) {
-						printf("Cannot open %s\n", fileName);
-						return(0);
-					}
-					else {
-						int loop2 = 1;
-						printf("Repositioning to (%s)\n", lastStreamFileName);
-						while (loop2) {
-							/* If we reach the end before finding
-							   our last spot, we will start over at the
-							   beginning */
-							if (feof(filep)) {
-								loop2 = 0;
-							}
-							else {
-								memset(streamFileName, '\000', sizeof(streamFileName));
-								fgets(streamFileName, sizeof(streamFileName), filep);
-								streamFileName[strlen(streamFileName)-1] = '\000';
-								if (!strcmp(streamFileName, lastStreamFileName)) {
-								/* If we found our last position, then bump out of the loop */
-									loop2 = 0;
-								}
-							}
-						}
-
-					}
+		while (!feof(filep)) {
+			memset(streamFileName, '\000', sizeof(streamFileName));
+			fgets(streamFileName, sizeof(streamFileName), filep);
+			streamFileName[strlen(streamFileName)-1] = '\000';
+			if (strlen(streamFileName) > 0) {
+				memset(lastStreamFileName, '\000', sizeof(lastStreamFileName));
+				strcpy(lastStreamFileName, streamFileName);
+				/* Skip entries that begin with a # */
+				if (strncmp(streamFileName, "#", 1)) {
+					streamFile(shout, streamFileName);
 				}
 			}
-			rewind(filep);
+			if (rereadPlaylist) {
+				rereadPlaylist = 0;
+				fclose(filep);
+				printf("Reopening playlist\n");
+				filep = fopen(fileName, "r");
+				if (filep == 0) {
+					printf("Cannot open %s\n", fileName);
+					return(0);
+				}
+				else {
+					int loop2 = 1;
+					printf("Repositioning to (%s)\n", lastStreamFileName);
+					while (loop2) {
+						/* If we reach the end before finding
+						   our last spot, we will start over at the
+						   beginning */
+						if (feof(filep)) {
+							loop2 = 0;
+						}
+						else {
+							memset(streamFileName, '\000', sizeof(streamFileName));
+							fgets(streamFileName, sizeof(streamFileName), filep);
+							streamFileName[strlen(streamFileName)-1] = '\000';
+							if (!strcmp(streamFileName, lastStreamFileName)) {
+							/* If we found our last position, then bump out of the loop */
+								loop2 = 0;
+							}
+						}
+					}
+
+				}
+			}
+		}
+		rewind(filep);
 	}
 	return(1);
 }
@@ -246,7 +454,7 @@ int main(int argc, char **argv)
 	else {
 		parseConfig(configFile);
 	}
-	
+
 	if (pezConfig->URL) {
 		host = (char *)malloc(strlen(pezConfig->URL) +1);
 		memset(host, '\000', strlen(pezConfig->URL) +1);
@@ -277,7 +485,7 @@ int main(int argc, char **argv)
 		usage();
 	}
 	if (pezConfig->format == 0) {
-		printf("You must specify a format type of MP3 or OGGVORBIS\n");
+		printf("You must specify a format type of MP3, VORBIS, or THEORA\n");
 	}
 	if (!(shout = shout_new())) {
 		printf("Could not allocate shout_t\n");
@@ -314,13 +522,19 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	if (pezConfig->format == MP3_FORMAT) {
+	if (!strcmp(pezConfig->format, MP3_FORMAT)) {
 		if (shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
 			printf("Error setting user: %s\n", shout_get_error(shout));
 			return 1;
 		}
 	}
-	if (pezConfig->format == OGG_FORMAT) {
+	if (!strcmp(pezConfig->format, VORBIS_FORMAT)) {
+		if (shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
+			printf("Error setting user: %s\n", shout_get_error(shout));
+			return 1;
+		}
+	}
+	if (!strcmp(pezConfig->format, THEORA_FORMAT)) {
 		if (shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
 			printf("Error setting user: %s\n", shout_get_error(shout));
 			return 1;

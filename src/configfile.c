@@ -2,13 +2,54 @@
 #include "configfile.h"
 
 static EZCONFIG	ezConfig;
+static char	*blankString = "";
 
 EZCONFIG *getEZConfig() {
 	return &ezConfig;
 }
 
+char*	getFormatEncoder(char *format)
+{
+	int i = 0;
+	for (i=0;i<ezConfig.numEncoderDecoders;i++) {
+		if (ezConfig.encoderDecoders[i]) {
+			if (ezConfig.encoderDecoders[i]->format) {
+				if (!strcmp(ezConfig.encoderDecoders[i]->format, format)) {
+					if (ezConfig.encoderDecoders[i]->encoder) {
+						return ezConfig.encoderDecoders[i]->encoder;
+					}
+					else {
+						return blankString;
+					}
+				}
+			}
+		}
+	}
+	return blankString;
+}
+
+char*	getFormatDecoder(char *match)
+{
+	int i = 0;
+	for (i=0;i<ezConfig.numEncoderDecoders;i++) {
+		if (ezConfig.encoderDecoders[i]) {
+			if (ezConfig.encoderDecoders[i]->match) {
+				if (!strcmp(ezConfig.encoderDecoders[i]->match, match)) {
+					if (ezConfig.encoderDecoders[i]->decoder) {
+						return ezConfig.encoderDecoders[i]->decoder;
+					}
+					else {
+						return blankString;
+					}
+				}
+			}
+		}
+	}
+	return blankString;
+}
 void printConfig()
 {
+	int i = 0;
 	if (ezConfig.URL) {
 		printf("URL to connect to (%s)\n", ezConfig.URL);
 	}
@@ -24,8 +65,11 @@ void printConfig()
 	if (ezConfig.format == MP3_FORMAT) {
 		printf("Broadcasting in MP3 format\n");
 	}
-	if (ezConfig.format == OGG_FORMAT) {
-		printf("Broadcasting in Ogg format\n");
+	if (ezConfig.format == VORBIS_FORMAT) {
+		printf("Broadcasting in Ogg Vorbis format\n");
+	}
+	if (ezConfig.format == THEORA_FORMAT) {
+		printf("Broadcasting in Ogg Theora format\n");
 	}
 	if (ezConfig.format == 0) {
 		printf("Broadcast format not set\n");
@@ -90,6 +134,44 @@ void printConfig()
 	else {
 		printf("Server is a private server\n");
 	}
+	if (ezConfig.reencode) {
+		printf("We will reencode using the following information:\n");
+		printf("\tEncoders/Decoders:\n");
+		for (i=0;i<ezConfig.numEncoderDecoders;i++) {
+			if (ezConfig.encoderDecoders[i]) {
+				if (ezConfig.encoderDecoders[i]->match) {
+					if (ezConfig.encoderDecoders[i]->decoder) {
+							printf("\t\tFor files of extension (%s)\n", ezConfig.encoderDecoders[i]->match);
+							printf("\t\t\tDecoder: (%s)\n", ezConfig.encoderDecoders[i]->decoder);
+					}
+					else {
+						printf("\t\tNull decoder\n");
+					}
+				}
+				else {
+					printf("\t\tNull match\n");
+				}
+				if (ezConfig.encoderDecoders[i]->format) {
+					if (ezConfig.encoderDecoders[i]->encoder) {
+						printf("\t\tFor output formats of type (%s)\n", ezConfig.encoderDecoders[i]->format);
+						printf("\t\t\tEncoder: (%s)\n", ezConfig.encoderDecoders[i]->encoder);
+					}
+					else {
+						printf("\t\tNull encoder\n");
+					}
+				}
+				else {
+					printf("\t\tNull match\n");
+				}
+			}
+			else {
+				printf("Error, NULL GRABBER\n");
+			}
+		}
+	}
+	else {
+		printf("We will NOT reencode.\n");
+	}
 
 }
 int parseConfig(char *fileName)
@@ -142,12 +224,9 @@ int parseConfig(char *fileName)
 			if (cur->xmlChildrenNode != NULL) {
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
 				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					if (!strcmp(ls_xmlContentPtr, "MP3")) {
-						ezConfig.format = MP3_FORMAT;
-					}
-					if (!strcmp(ls_xmlContentPtr, "OGG")) {
-						ezConfig.format = OGG_FORMAT;
-					}
+					ezConfig.format = (char *)malloc(strlen(ls_xmlContentPtr) +1);
+					memset(ezConfig.format, '\000', strlen(ls_xmlContentPtr) +1);
+					strcpy(ezConfig.format, ls_xmlContentPtr);
 				}
 				xmlFree(ls_xmlContentPtr);
 			}
@@ -259,6 +338,77 @@ int parseConfig(char *fileName)
 					ezConfig.serverPublic = atoi(ls_xmlContentPtr);
 				}
 				xmlFree(ls_xmlContentPtr);
+			}
+		}
+		if (!xmlStrcmp(cur->name, (const xmlChar *) "reencode")) {
+			xmlNodePtr cur2;
+			cur2 = cur->xmlChildrenNode;
+			while (cur2 != NULL) {
+				if (!xmlStrcmp(cur2->name, (const xmlChar *) "enable")) {
+					if (cur2->xmlChildrenNode != NULL) {
+						ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur2->xmlChildrenNode,1);
+						if ( strlen(ls_xmlContentPtr) > 0 ) {
+							ezConfig.reencode = atoi(ls_xmlContentPtr);
+						}
+						xmlFree(ls_xmlContentPtr);
+					}
+				}
+				if (!xmlStrcmp(cur2->name, (const xmlChar *) "encdec")) {
+					FORMAT_ENCDEC	*pformatEncDec = malloc(sizeof(FORMAT_ENCDEC));
+					memset(pformatEncDec, '\000', sizeof(FORMAT_ENCDEC));
+					xmlNodePtr cur3;
+					cur3 = cur2->xmlChildrenNode;
+					while (cur3 != NULL) {
+						if (!xmlStrcmp(cur3->name, (const xmlChar *) "format")) {
+							if (cur3->xmlChildrenNode != NULL) {
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
+								if ( strlen(ls_xmlContentPtr) > 0 ) {
+									pformatEncDec->format = (char *)malloc(strlen(ls_xmlContentPtr) +1);
+									memset(pformatEncDec->format, '\000', strlen(ls_xmlContentPtr) +1);
+									strcpy(pformatEncDec->format, ls_xmlContentPtr);
+								}
+								xmlFree(ls_xmlContentPtr);
+							}
+						}
+						if (!xmlStrcmp(cur3->name, (const xmlChar *) "match")) {
+							if (cur3->xmlChildrenNode != NULL) {
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
+								if ( strlen(ls_xmlContentPtr) > 0 ) {
+									pformatEncDec->match = (char *)malloc(strlen(ls_xmlContentPtr) +1);
+									memset(pformatEncDec->match, '\000', strlen(ls_xmlContentPtr) +1);
+									strcpy(pformatEncDec->match, ls_xmlContentPtr);
+								}
+								xmlFree(ls_xmlContentPtr);
+							}
+						}
+						if (!xmlStrcmp(cur3->name, (const xmlChar *) "decode")) {
+							if (cur3->xmlChildrenNode != NULL) {
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
+								if ( strlen(ls_xmlContentPtr) > 0 ) {
+									pformatEncDec->decoder = (char *)malloc(strlen(ls_xmlContentPtr) +1);
+									memset(pformatEncDec->decoder, '\000', strlen(ls_xmlContentPtr) +1);
+									strcpy(pformatEncDec->decoder, ls_xmlContentPtr);
+								}
+								xmlFree(ls_xmlContentPtr);
+							}
+						}
+						if (!xmlStrcmp(cur3->name, (const xmlChar *) "encode")) {
+							if (cur3->xmlChildrenNode != NULL) {
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
+								if ( strlen(ls_xmlContentPtr) > 0 ) {
+									pformatEncDec->encoder = (char *)malloc(strlen(ls_xmlContentPtr) +1);
+									memset(pformatEncDec->encoder, '\000', strlen(ls_xmlContentPtr) +1);
+									strcpy(pformatEncDec->encoder, ls_xmlContentPtr);
+								}
+								xmlFree(ls_xmlContentPtr);
+							}
+						}
+						cur3 = cur3->next;
+					}
+					ezConfig.encoderDecoders[ezConfig.numEncoderDecoders] = pformatEncDec;
+					ezConfig.numEncoderDecoders++;
+				}
+				cur2 = cur2->next;
 			}
 		}
 		cur = cur->next;
