@@ -354,9 +354,9 @@ int parseConfig(char *fileName)
 					}
 				}
 				if (!xmlStrcmp(cur2->name, (const xmlChar *) "encdec")) {
+					xmlNodePtr cur3;
 					FORMAT_ENCDEC	*pformatEncDec = malloc(sizeof(FORMAT_ENCDEC));
 					memset(pformatEncDec, '\000', sizeof(FORMAT_ENCDEC));
-					xmlNodePtr cur3;
 					cur3 = cur2->xmlChildrenNode;
 					while (cur3 != NULL) {
 						if (!xmlStrcmp(cur3->name, (const xmlChar *) "format")) {

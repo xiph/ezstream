@@ -30,8 +30,12 @@ Source: "..\..\pthreads\pthreadVSE.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\conf\ezstream_mp3.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\conf\ezstream_m3u.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\conf\ezstream_vorbis.xml"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\conf\ezstream_reencoding_example.xml"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\iconv\lib\iconv.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\..\libxml2\lib\libxml2.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\oggvorbis-win32sdk-1.0.1\bin\vorbisfile.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\oggvorbis-win32sdk-1.0.1\bin\ogg.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\oggvorbis-win32sdk-1.0.1\bin\vorbis.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 [Icons]
 
