@@ -3,7 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#ifdef WIN32
+#include <fcntl.h>
+#include <io.h>
+#endif
 #include <shout/shout.h>
 #include <getopt.h>
 #include "configfile.h"
@@ -83,6 +86,9 @@ int streamFile(shout_t *shout, char *fileName) {
 	printf("Streaming %s\n", fileName);
 	
 	if (!strcmp(pezConfig->fileName, "stdin")) {
+#ifdef WIN32
+		_setmode(_fileno(stdin), _O_BINARY);
+#endif
 		filepstream = stdin;
 	}
 	else {
