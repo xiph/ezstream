@@ -320,8 +320,8 @@ int main(int argc, char **argv)
 			return 1;
 		}
 	}
-	if (pezConfig->format == OGGVORBIS_FORMAT) {
-		if (shout_set_format(shout, SHOUT_FORMAT_VORBIS) != SHOUTERR_SUCCESS) {
+	if (pezConfig->format == OGG_FORMAT) {
+		if (shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
 			printf("Error setting user: %s\n", shout_get_error(shout));
 			return 1;
 		}

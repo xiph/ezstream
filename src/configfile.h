@@ -5,7 +5,7 @@
 
 
 #define MP3_FORMAT 1
-#define OGGVORBIS_FORMAT 2
+#define OGG_FORMAT 2
 
 typedef struct tag_EZCONFIG {
 	char	*URL;

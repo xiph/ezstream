@@ -24,8 +24,8 @@ void printConfig()
 	if (ezConfig.format == MP3_FORMAT) {
 		printf("Broadcasting in MP3 format\n");
 	}
-	if (ezConfig.format == OGGVORBIS_FORMAT) {
-		printf("Broadcasting in Ogg Vorbis format\n");
+	if (ezConfig.format == OGG_FORMAT) {
+		printf("Broadcasting in Ogg format\n");
 	}
 	if (ezConfig.format == 0) {
 		printf("Broadcast format not set\n");
@@ -145,8 +145,8 @@ int parseConfig(char *fileName)
 					if (!strcmp(ls_xmlContentPtr, "MP3")) {
 						ezConfig.format = MP3_FORMAT;
 					}
-					if (!strcmp(ls_xmlContentPtr, "OGGVORBIS")) {
-						ezConfig.format = OGGVORBIS_FORMAT;
+					if (!strcmp(ls_xmlContentPtr, "OGG")) {
+						ezConfig.format = OGG_FORMAT;
 					}
 				}
 				xmlFree(ls_xmlContentPtr);
