@@ -1,0 +1,15 @@
+<ezstream>
+    <url>http://localhost:8000/testmount.ogg</url>
+    <sourcepassword>hackme</sourcepassword>
+    <format>OGGVORBIS</format>
+    <filename>sunking.ogg</filename>
+    <svrinfoname>My Stream</svrinfoname>    
+    <svrinfourl>http://www.oddsock.org</svrinfourl> 
+    <svrinfogenre>RockNRoll</svrinfogenre>
+    <svrinfodescription>This is a stream description</svrinfodescription>
+    <svrinfobitrate>192</svrinfobitrate>    
+    <svrinfoquality>4.0</svrinfoquality>    
+    <svrinfochannels>2</svrinfochannels>
+    <svrinfosamplerate>44100</svrinfosamplerate>
+    <svrinfopublic>1</svrinfopublic>    
+</ezstream>

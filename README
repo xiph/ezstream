@@ -1,0 +1,63 @@
+ezstream README
+------------------------------
+
+WHAT IS IT ?
+::::::::::::
+
+ezstream is a command line utility which is a improved version of the old 
+"shout" utility.  It enables you to stream mp3 or vorbis files to an icecast 
+server without reencoding and thus requires very little CPU.  ezstream is 
+controlled via a XML config file (a few examples are provided in the conf
+directory).
+
+ezstream can stream mp3 and ogg vorbis files as well as reading from stdin.
+Currently, reading from stdin is not working under win32.
+ID3v1 tags are supported in mp3 files and all ogg vorbis tags are propagated
+as metadata as well.
+
+
+CONFIG FILE
+:::::::::::
+
+The following is an example config file :
+
+<ezstream>
+    <url>http://localhost:8000/testmount.ogg</url>
+    <sourcepassword>hackme</sourcepassword>
+    <format>OGGVORBIS</format>
+    <filename>sunking.ogg</filename>
+    <svrinfoname>My Stream</svrinfoname>    
+    <svrinfourl>http://www.oddsock.org</svrinfourl> 
+    <svrinfogenre>RockNRoll</svrinfogenre>
+    <svrinfodescription>This is a stream description</svrinfodescription>
+    <svrinfobitrate>192</svrinfobitrate>    
+    <svrinfoquality>4.0</svrinfoquality>    
+    <svrinfochannels>2</svrinfochannels>
+    <svrinfosamplerate>44100</svrinfosamplerate>
+    <svrinfopublic>1</svrinfopublic>    
+</ezstream>
+
+URL - this URL specified the location and mountpoint of the icecast server 
+	  to which the stream will be sent.
+SOURCEPASSWORD - the source password for the icecast server
+FORMAT - either MP3 or OGGVORBIS, you must specify which format you input
+         files are in.
+FILENAME - This can be a single file (in which ezstream will stream that
+           file over and over continuously) or can be a .m3u file which
+           is a playlist of files.  currently, ezstream will go through 
+           the files sequentially.  If you specify "stdin" as the filename
+           then ezstream will read the input from stdin.
+SVRINFONAME - Broadcast name (informational only)
+SVRINFOURL - Website associated with the broadcast (informational only)
+SVRINFOGENRE - Genre of broadcast (informational only) (used for YP)
+SVRINFODESCRIPTION - Description of broadcast (informational only) (used for YP)
+SVRINFOBITRATE - Bitrate of broadcast (informational only) (used for YP)
+                 It is YOUR responsibility to ensure that the bitrate specified
+                 here matches up with your input.  Note that this info is not
+                 for anything OTHER than YP listing info.
+SVRINFOQUALITY - Used only for OggVorbis streams, similar to the bitrate
+                 in that it is used only for informational and YP purposes.
+SVRINFOCHANNELS - 1 = MONO, 2 = STEREO (informational only) (used for YP)
+SVRINFOSAMPLERATE - (informational only) (used for YP)
+SVRINFOPUBLIC - Indicates wether to list this stream in a public YP.
+         

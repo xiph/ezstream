@@ -1,0 +1,94 @@
+AC_INIT([ezstream], [0.1.0], [icecast@xiph.org])
+
+AC_PREREQ(2.54)
+AC_CONFIG_SRCDIR(src/ezstream.c)
+dnl Process this file with autoconf to produce a configure script.
+
+AM_INIT_AUTOMAKE
+AM_CONFIG_HEADER(config.h)
+AM_MAINTAINER_MODE
+
+AC_PROG_CC
+AC_CANONICAL_HOST
+AM_PROG_LIBTOOL
+
+dnl Set some options based on environment
+
+DEBUG="-g"
+if test -z "$GCC"; then
+    XIPH_CPPFLAGS="-D_REENTRANT"
+    case $host in 
+        *-*-irix*)
+                XIPH_CPPFLAGS="$XIPH_CPPFLAGS -w -signed"
+                PROFILE="-p -g3 -O2 -signed -D_REENTRANT"
+                ;;
+        *-*-solaris*)
+                XIPH_CFLAGS="-xO4 -xcg92"
+                XIPH_CPPFLAGS="$XIPH_CPPFLAGS -v -w -fsimple -fast"
+                PROFILE="-xpg -g -Dsuncc"
+                ;;
+        *)
+                XIPH_CFLAGS="-O"
+                PROFILE="-g -p"
+                ;;
+    esac
+
+    case "$host" in
+        *openbsd* | *irix*)
+        ;;
+        *) AC_DEFINE([_XOPEN_SOURCE], 600, [Define if you have POSIX and XPG specifications])
+        ;;
+    esac
+
+else
+    XIPH_CPPFLAGS="-Wall -ffast-math -fsigned-char"
+    PROFILE="-pg -g"
+    AC_DEFINE([_GNU_SOURCE], 1, [Define to include GNU extensions to POSIX])
+fi
+
+dnl Checks for programs.
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_HEADER_STDC
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Check for types
+
+dnl Checks for library functions.
+
+dnl -- configure options --
+
+XIPH_PATH_SHOUT(, AC_MSG_ERROR([must have libshout installed!]))
+if test "$SHOUT_THREADSAFE" != "yes"
+then
+  AC_MSG_ERROR([This libshout isn't threadsafe])
+fi 
+
+XIPH_PATH_XML
+
+XIPH_VAR_APPEND([XIPH_CFLAGS], [$XML_CFLAGS])
+XIPH_VAR_PREPEND([XIPH_LIBS], [$XML_LIBS])
+
+XIPH_VAR_APPEND([XIPH_CPPFLAGS], [$SHOUT_CPPFLAGS])
+XIPH_VAR_APPEND([XIPH_CFLAGS], [$SHOUT_CFLAGS])
+XIPH_VAR_PREPEND([XIPH_LIBS], [$SHOUT_LIBS])
+
+XIPH_PATH_VORBIS(, AC_MSG_ERROR([must have Ogg Vorbis v1.0 installed!]))
+XIPH_VAR_APPEND([XIPH_CPPFLAGS],[$VORBIS_CFLAGS])
+XIPH_VAR_PREPEND([XIPH_LIBS],[$VORBIS_LIBS])
+
+dnl Make substitutions
+
+AC_SUBST(XIPH_CPPFLAGS)
+AC_SUBST(XIPH_CFLAGS)
+AC_SUBST(XIPH_LIBS)
+AC_SUBST(LIBTOOL_DEPS)
+AC_SUBST(LIBS)
+AC_SUBST(DEBUG)
+AC_SUBST(CFLAGS)
+AC_SUBST(PROFILE)
+
+AC_OUTPUT([Makefile win32/Makefile conf/Makefile src/Makefile]) 
