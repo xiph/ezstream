@@ -139,25 +139,44 @@ char* buildCommandString(char *extension, char *fileName, char *metadata)
 		printf("Unknown extension %s, cannot decode\n", extension);
 		return commandString;
 	}
-	encoder = strdup(getFormatEncoder(pezConfig->format));
-	if (strlen(encoder) == 0) {
-		printf("Unknown format %s, cannot encode\n", pezConfig->format);
-		return commandString;
-	}
 	newDecoderLen = strlen(decoder) + strlen(fileName) + 1;
 	newDecoder = (char *)malloc(newDecoderLen);
 	memset(newDecoder, '\000', newDecoderLen);
 	ReplaceString(decoder, newDecoder, "@T@", fileName);
 
-	newEncoderLen = strlen(encoder) + strlen(metadata) + 1;
-	newEncoder = (char *)malloc(newEncoderLen);
-	memset(newEncoder, '\000', newEncoderLen);
-	ReplaceString(encoder, newEncoder, "@M@", metadata);
+	encoder = strdup(getFormatEncoder(pezConfig->format));
+	if (strlen(encoder) == 0) {
+		printf("Unknown format %s, passing right on through!\n", pezConfig->format);
+		commandStringLen = strlen(newDecoder) + 1;
+		commandString = (char *)malloc(commandStringLen);
+		memset(commandString, '\000', commandStringLen);
+		sprintf(commandString, "%s", newDecoder);
+		if (decoder) {
+			free(decoder);
+		}
+		if (encoder) {
+			free(encoder);
+		}
+		return commandString;
+	}
+	else {
 
-	commandStringLen = strlen(newDecoder) + strlen(" | ") + strlen(newEncoder) + 1;
-	commandString = (char *)malloc(commandStringLen);
-	memset(commandString, '\000', commandStringLen);
-	sprintf(commandString, "%s | %s", newDecoder, newEncoder);
+		newEncoderLen = strlen(encoder) + strlen(metadata) + 1;
+		newEncoder = (char *)malloc(newEncoderLen);
+		memset(newEncoder, '\000', newEncoderLen);
+		ReplaceString(encoder, newEncoder, "@M@", metadata);
+
+		commandStringLen = strlen(newDecoder) + strlen(" | ") + strlen(newEncoder) + 1;
+		commandString = (char *)malloc(commandStringLen);
+		memset(commandString, '\000', commandStringLen);
+		sprintf(commandString, "%s | %s", newDecoder, newEncoder);
+	}
+	if (decoder) {
+		free(decoder);
+	}
+	if (encoder) {
+		free(encoder);
+	}
 	printf("Going to execute (%s)\n", commandString);
 	return(commandString);
 }
@@ -279,6 +298,7 @@ FILE *openResource(shout_t *shout, char *fileName)
 		_setmode(_fileno(stdin), _O_BINARY);
 #endif
 		filep = stdin;
+		return filep;
 	}
 	else {
 		char extension[25];
