@@ -12,6 +12,17 @@
 #include "configfile.h"
 
 EZCONFIG	*pezConfig = NULL;
+int rereadPlaylist = 0;
+
+#ifndef WIN32
+#include <signal.h>
+
+void hup_handler(int sig) 
+{
+	rereadPlaylist = 1;	
+	printf("Will reread the playlist on next song\n");
+}
+#endif
 
 typedef struct tag_ID3Tag {
 	char tag[3];
@@ -139,6 +150,7 @@ int streamFile(shout_t *shout, char *fileName) {
 int streamPlaylist(shout_t *shout, char *fileName) {
 	FILE	*filep = NULL;
 	char	streamFileName[8096] = "";
+	char	lastStreamFileName[8096] = "";
 	int		loop = 1;
 
 	filep = fopen(fileName, "r");
@@ -152,9 +164,43 @@ int streamPlaylist(shout_t *shout, char *fileName) {
 				fgets(streamFileName, sizeof(streamFileName), filep);
 				streamFileName[strlen(streamFileName)-1] = '\000';
 				if (strlen(streamFileName) > 0) {
+					memset(lastStreamFileName, '\000', sizeof(lastStreamFileName));
+					strcpy(lastStreamFileName, streamFileName);
 					/* Skip entries that begin with a # */
 					if (strncmp(streamFileName, "#", 1)) {
 						streamFile(shout, streamFileName);
+					}
+				}
+				if (rereadPlaylist) {
+					rereadPlaylist = 0;
+					fclose(filep);
+					printf("Reopening playlist\n");
+					filep = fopen(fileName, "r");
+					if (filep == 0) {
+						printf("Cannot open %s\n", fileName);
+						return(0);
+					}
+					else {
+						int loop2 = 1;
+						printf("Repositioning to (%s)\n", lastStreamFileName);
+						while (loop2) {
+							/* If we reach the end before finding
+							   our last spot, we will start over at the
+							   beginning */
+							if (feof(filep)) {
+								loop2 = 0;
+							}
+							else {
+								memset(streamFileName, '\000', sizeof(streamFileName));
+								fgets(streamFileName, sizeof(streamFileName), filep);
+								streamFileName[strlen(streamFileName)-1] = '\000';
+								if (!strcmp(streamFileName, lastStreamFileName)) {
+								/* If we found our last position, then bump out of the loop */
+									loop2 = 0;
+								}
+							}
+						}
+
 					}
 				}
 			}
@@ -174,6 +220,9 @@ int main(int argc, char **argv)
 
 
 	pezConfig = getEZConfig();
+#ifndef WIN32
+	signal(SIGHUP, hup_handler);
+#endif
 
 	shout_init();
 
