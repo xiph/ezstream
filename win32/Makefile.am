@@ -2,4 +2,4 @@
 
 AUTOMAKE_OPTIONS = foreign
 
-EXTRA_DIST = ezstream.dsp  ezstream.dsw
+EXTRA_DIST = ezstream.dsp  ezstream.dsw ezstream.iss
