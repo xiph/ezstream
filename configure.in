@@ -1,4 +1,4 @@
-AC_INIT([ezstream], [0.2.0], [oddsock@xiph.org])
+AC_INIT([ezstream], [0.2.1], [oddsock@xiph.org])
 
 AC_PREREQ(2.54)
 AC_CONFIG_SRCDIR(src/ezstream.c)

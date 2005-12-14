@@ -13,6 +13,7 @@
 #include "configfile.h"
 #ifndef WIN32
 #include <libgen.h>
+#include <unistd.h>
 #endif
 #include <vorbis/vorbisfile.h>
 
@@ -32,6 +33,8 @@ void hup_handler(int sig)
 #ifdef WIN32
 #define STRNCASECMP strnicmp
 #define popen _popen
+#define pclose _pclose
+#define snprintf _snprintf
 #else
 #define STRNCASECMP strncasecmp
 #endif
@@ -198,6 +201,8 @@ char * processMetadata(shout_t *shout, char *extension, char *fileName) {
 	char	*songInfo = NULL;
 	int songLen = 0;
 	ID3Tag	id3tag;
+	char 	temptrackName[31];
+	char 	tempartistName[31];
 
 	filepstream = fopen(fileName, "rb");
 	if (filepstream == NULL) {
@@ -213,11 +218,16 @@ char * processMetadata(shout_t *shout, char *extension, char *fileName) {
 			fread(&id3tag, 1, 127, filepstream);
 			if (!strncmp(id3tag.tag, "TAG", strlen("TAG"))) {
 				/* We have an Id3 tag */
-				songLen = strlen(id3tag.artistName) + strlen(" - ") + strlen(id3tag.trackName);
+				memset(temptrackName, '\000', sizeof(temptrackName));
+				memset(tempartistName, '\000', sizeof(tempartistName));
+				snprintf(temptrackName, sizeof(temptrackName)-1, "%s", id3tag.trackName);
+				snprintf(tempartistName, sizeof(tempartistName)-1, "%s", id3tag.artistName);
+
+				songLen = sizeof(tempartistName) + strlen(" - ") + sizeof(temptrackName) + 1;
 				songInfo = (char *)malloc(songLen);
 				memset(songInfo, '\000', songLen);
 
-				sprintf(songInfo, "%s - %s", id3tag.artistName, id3tag.trackName);
+				snprintf(songInfo, songLen-1, "%s - %s", tempartistName, temptrackName);
 			}
 		}
 	}
@@ -290,7 +300,7 @@ char * processMetadata(shout_t *shout, char *extension, char *fileName) {
 	return songInfo;
 }
 
-FILE *openResource(shout_t *shout, char *fileName)
+FILE *openResource(shout_t *shout, char *fileName, int *popenFlag)
 {
 	FILE	*filep = NULL;
 
@@ -314,12 +324,14 @@ FILE *openResource(shout_t *shout, char *fileName)
 		}
 
 		pMetadata = processMetadata(shout, extension, fileName);
+		*popenFlag = 0;
 		if (pezConfig->reencode) {
 			/* Lets set the metadata first */
 			if (strlen(extension) > 0) {
 				pCommandString = buildCommandString(extension, fileName, pMetadata);	
 				/* Open up the decode/encode loop using popen() */
 				filep = popen(pCommandString, "r");
+				*popenFlag = 1;
 #ifdef WIN32
                 _setmode(_fileno(filep), _O_BINARY );
 #endif
@@ -348,12 +360,13 @@ FILE *openResource(shout_t *shout, char *fileName)
 int streamFile(shout_t *shout, char *fileName) {
 	FILE	*filepstream = NULL;
 	char buff[4096];
-	long read, ret, total;
+	long read, ret = 0, total;
+	int	popenFlag = 0;
 	
 	
 	printf("Streaming %s\n", fileName);
 	
-	filepstream = openResource(shout, fileName);
+	filepstream = openResource(shout, fileName, &popenFlag);
 	if (!filepstream) {
 		printf("Cannot open %s\n", fileName);
 		return 0;
@@ -394,7 +407,13 @@ int streamFile(shout_t *shout, char *fileName) {
 
 		shout_sync(shout);
 	}
-	fclose(filepstream);
+	if (popenFlag) {
+		printf("Closing via pclose\n");
+		pclose(filepstream);
+	}
+	else {
+		fclose(filepstream);
+	}
 	filepstream = NULL;
 	return ret;
 }
@@ -403,7 +422,6 @@ int streamPlaylist(shout_t *shout, char *fileName) {
 	char	streamFileName[8096] = "";
 	char	lastStreamFileName[8096] = "";
 	int		loop = 1;
-    int     ret = 1;
 
 	filep = fopen(fileName, "r");
 	if (filep == 0) {
