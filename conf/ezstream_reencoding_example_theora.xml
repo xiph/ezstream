@@ -1,58 +1,71 @@
-<!-- This example is for a input playlist that can contain
-     avi and mpg (video) files files and a output stream that
-     is OggTheora.  The output stream settings  (bitrate, channels, etc.)
-     are controlled by the parameters to ffmpeg2theora. (see the decode setting
-     for the THEORA format later in this file). -->
+<!--
+   EXAMPLE: Ogg Theora playlist stream WITH reencoding and sequential playback
+
+   This example streams a playlist that may contain .avi and MPEG files.
+   Ezstream will use the ffmpeg2theora program to both decode and reencode the
+   video files to Ogg Theora. The output stream settings are controlled via the
+   paramters to ffmpeg2theora.
+ -->
 <ezstream>
     <url>http://localhost:8000/theora.ogg</url>
     <sourcepassword>hackme</sourcepassword>
-    <!-- This is what form your output will take. If you are
-         reencoding, this is the format to reencode to, if not
-         then you need to make sure all your input files are in this
-         format.  -->
+    <!--
+       Since the reencoding feature is enabled below, <format /> sets the
+       output format of the stream.
+     -->
     <format>THEORA</format>
-    <filename>tracks.m3u</filename>
-    <!-- The following settings are used to describe your stream
-         to the server.  It's up to you to make sure the 
-         bitrate/quality/samplerate/channels
-         match up to your output stream -->
-    <svrinfoname>My Stream</svrinfoname>    
-    <svrinfourl>http://www.oddsock.org</svrinfourl> 
-    <svrinfogenre>RockNRoll</svrinfogenre>
+    <filename>playlist.m3u</filename>
+    <!--
+       Playlist shuffling is disabled, when the <shuffle /> element does not
+       exist or is commented out:
+     -->
+    <!-- <shuffle>1</shuffle> -->
+    <!--
+      The following settings are used to describe your stream to the server.
+      It's up to you to make sure that the bitrate/quality/samplerate/channels
+      information matches up with your oggenc encoder settings below.
+     -->
+    <svrinfoname>My Stream</svrinfoname>
+    <svrinfourl>http://www.oddsock.org</svrinfourl>
+    <svrinfogenre>Documentary</svrinfogenre>
     <svrinfodescription>This is a stream description</svrinfodescription>
-    <svrinfobitrate>128</svrinfobitrate>    
-    <!-- Quality is only applicable to ogg vorbis streams -->
-    <!-- <svrinfoquality>1.0</svrinfoquality> -->
+    <svrinfobitrate>200</svrinfobitrate>
     <svrinfochannels>2</svrinfochannels>
     <svrinfosamplerate>44100</svrinfosamplerate>
-    <svrinfopublic>1</svrinfopublic>    
+    <!--
+       A missing or commented out <svrinfopublic /> element means no
+       advertising on YP for this broadcast:
+     -->
+    <!-- <svrinfopublic>1</svrinfopublic> -->
     <reencode>
-	<enable>1</enable>
-        <!-- Each encdec block specifies a pair of programs used for decoding and
-             encoding of the stream.  If reencoding is enabled, then all input files
-             must be first decoded before being sent to the encoder.  EZSTREAM uses
-             file extensions to match up input files with the appropraite decoder, 
-             and uses the <format> setting to match up the output format with the
-             appropriate encoder.
-        
-             Note: It it up to you to set the appropriate bitrate/samplerate/channels
-             of the output stream by using command line paramters to the encoders. Use
-             the examples defined here as a guide.  All output from decoders should be in
-             RAW format, and all input to the encoders should also be in RAW format. -->
+        <!-- Enable the reencoding feature: -->
+        <enable>1</enable>
+        <!--
+           Each <encdec /> element specifies a pair of programs to be used for
+           decoding and encoding, respectively, and which file extension and
+           output stream format they apply to.
+
+           All the configuration of the output stream is usually done by using
+           the appropriate command line parameters of the encoders in the
+           <encode /> elements.
+
+           New encdec sections can be added for new input/output formats.
+         -->
         <encdec>
-                <!-- Support for THEORA (ffmpeg2theora does both decoding and encoding
-                                         so we don't need an encode part) -->
-                <format>THEORA</format>
-                <match>.avi</match>
-                <decode>ffmpeg2theora -x 192 -y 128 -a -1 -v 0 "@T@" -o -</decode>
+            <!--
+               Support for THEORA. Ogg Theora streams are created differently
+               with ffmpeg2theora, which does the complete reencoding on its
+               own. Therefore, we only supply a <decode /> element and let
+               ezstream pass through the resulting stream unaltered to Icecast.
+             -->
+            <format>THEORA</format>
+            <match>.avi</match>
+            <decode>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title "@M@" -o - "@T@"</decode>
         </encdec>
         <encdec>
-                <!-- Support for THEORA (ffmpeg2theora does both decoding and encoding
-                                         so we don't need an encode part) -->
-                <format>THEORA</format>
-                <match>.mpg</match>
-                <decode>ffmpeg2theora -a -1 -v 2 "@T@" -o -</decode>
+            <format>THEORA</format>
+            <match>.mpg</match>
+            <decode>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title "@M@" -o - "@T@"</decode>
         </encdec>
-	<!-- New encdec sections can be added for new input/output formats -->
     </reencode>
 </ezstream>

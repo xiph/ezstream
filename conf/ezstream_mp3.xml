@@ -1,24 +1,31 @@
-<!-- This example is for a input playlist that must contain
-     all MP3 files. ezstream will perform NO reencoding, and
-     the destination stream bitrate, channels, etc. will be those
-     of the input files -->
+<!--
+   EXAMPLE: MP3 playlist stream WITHOUT reencoding
+
+   This example streams a playlist that contains only MP3 files. No other file
+   formats may be listed. Since ezstream will not be doing any reencoding, the
+   resulting stream format (bitrate, samplerate, channels) will be of the
+   respective input files.
+ -->
 <ezstream>
     <url>http://localhost:8000/stream</url>
     <sourcepassword>hackme</sourcepassword>
     <format>MP3</format>
     <filename>playlist.m3u</filename>
-	<!-- The following settings are used to describe your stream
-         to the server.  It's up to you to make sure the 
-         bitrate/quality/samplerate/channels
-         match up to your input stream -->
-    <svrinfoname>My Stream</svrinfoname>    
-    <svrinfourl>http://www.oddsock.org</svrinfourl> 
+	  <!--
+      The following settings are used to describe your stream to the server.
+      It's up to you to make sure that the bitrate/samplerate/channels
+      information matches up with your input stream files. Note that
+      <svrinfoquality /> only applies to Ogg Vorbis streams.
+     -->
+    <svrinfoname>My Stream</svrinfoname>
+    <svrinfourl>http://www.oddsock.org</svrinfourl>
     <svrinfogenre>RockNRoll</svrinfogenre>
     <svrinfodescription>This is a stream description</svrinfodescription>
-    <svrinfobitrate>128</svrinfobitrate>    
-    <!-- Quality is only applicable to ogg vorbis streams -->
-    <!-- <svrinfoquality>1.0</svrinfoquality> -->
+    <svrinfobitrate>128</svrinfobitrate>
     <svrinfochannels>2</svrinfochannels>
     <svrinfosamplerate>44100</svrinfosamplerate>
-    <svrinfopublic>1</svrinfopublic>    
+    <!--
+      Prohibit the server to advertise the stream on a public YP directory:
+     -->
+    <svrinfopublic>0</svrinfopublic>
 </ezstream>
