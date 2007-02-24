@@ -4,7 +4,7 @@ AC_INIT([ezstream], [0.3.0], [grmo@users.sourceforge.net])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR(src/ezstream.c)
 AM_INIT_AUTOMAKE
-AM_CONFIG_HEADER(config.h)
+AC_CONFIG_HEADERS(src/config.h)
 AM_MAINTAINER_MODE
 AC_USE_SYSTEM_EXTENSIONS
 
