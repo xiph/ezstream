@@ -1,11 +1,46 @@
-#include <string.h>
-#include "configfile.h"
+/*
+ *  ezstream - source client for Icecast with external en-/decoder support
+ *  Copyright (C) 2003, 2004, 2005, 2006  Ed Zaleski <oddsock@oddsock.org>
+ *  Copyright (C) 2007                    Moritz Grimm <gtgbr@gmx.net>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
-static EZCONFIG	ezConfig;
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#include <ctype.h>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "configfile.h"
+#include "util.h"
+
+#ifndef PATH_MAX
+# define PATH_MAX	256
+#endif
+
+static EZCONFIG	 ezConfig;
 static char	*blankString = "";
 
-EZCONFIG *getEZConfig() {
-	return &ezConfig;
+EZCONFIG *
+getEZConfig(void)
+{
+	return (&ezConfig);
 }
 
 char*	getFormatEncoder(char *format)
@@ -47,133 +82,7 @@ char*	getFormatDecoder(char *match)
 	}
 	return blankString;
 }
-void printConfig()
-{
-	int i = 0;
-	if (ezConfig.URL) {
-		printf("URL to connect to (%s)\n", ezConfig.URL);
-	}
-	else {
-		printf("URL not SET\n");
-	}
-	if (ezConfig.password) {
-		printf("source password (%s)\n", ezConfig.password);
-	}
-	else {
-		printf("source password not SET\n");
-	}
-	if (ezConfig.format == MP3_FORMAT) {
-		printf("Broadcasting in MP3 format\n");
-	}
-	if (ezConfig.format == VORBIS_FORMAT) {
-		printf("Broadcasting in Ogg Vorbis format\n");
-	}
-	if (ezConfig.format == THEORA_FORMAT) {
-		printf("Broadcasting in Ogg Theora format\n");
-	}
-	if (ezConfig.format == 0) {
-		printf("Broadcast format not set\n");
-	}
-	if (ezConfig.fileName) {
-		printf("File to broadcast (%s)\n", ezConfig.fileName);
-	}
-	else {
-		printf("broadcast file not SET\n");
-	}
-	if (ezConfig.serverName) {
-		printf("Server Info Name (%s)\n", ezConfig.serverName);
-	}
-	else {
-		printf("Server Info Name not SET\n");
-	}
-	if (ezConfig.serverURL) {
-		printf("Server Info URL (%s)\n", ezConfig.serverURL);
-	}
-	else {
-		printf("Server Info URL not SET\n");
-	}
-	if (ezConfig.serverGenre) {
-		printf("Server Info Genre (%s)\n", ezConfig.serverGenre);
-	}
-	else {
-		printf("Server Info Genre not SET\n");
-	}
-	if (ezConfig.serverDescription) {
-		printf("Server Info Description (%s)\n", ezConfig.serverDescription);
-	}
-	else {
-		printf("Server Info Description not SET\n");
-	}
-	if (ezConfig.serverBitrate) {
-		printf("Server Info Bitrate (%s)\n", ezConfig.serverBitrate);
-	}
-	else {
-		printf("Server Info Bitrate not SET\n");
-	}
-	if (ezConfig.serverChannels) {
-		printf("Server Info Channels (%s)\n", ezConfig.serverChannels);
-	}
-	else {
-		printf("Server Info Channels not SET\n");
-	}
-	if (ezConfig.serverSamplerate) {
-		printf("Server Info Samplerate (%s)\n", ezConfig.serverSamplerate);
-	}
-	else {
-		printf("Server Info Samplerate not SET\n");
-	}
-	if (ezConfig.serverQuality) {
-		printf("Server Info Quality (%s)\n", ezConfig.serverQuality);
-	}
-	else {
-		printf("Server Info Quality not SET\n");
-	}
-	if (ezConfig.serverPublic) {
-		printf("Server is a public server\n");
-	}
-	else {
-		printf("Server is a private server\n");
-	}
-	if (ezConfig.reencode) {
-		printf("We will reencode using the following information:\n");
-		printf("\tEncoders/Decoders:\n");
-		for (i=0;i<ezConfig.numEncoderDecoders;i++) {
-			if (ezConfig.encoderDecoders[i]) {
-				if (ezConfig.encoderDecoders[i]->match) {
-					if (ezConfig.encoderDecoders[i]->decoder) {
-							printf("\t\tFor files of extension (%s)\n", ezConfig.encoderDecoders[i]->match);
-							printf("\t\t\tDecoder: (%s)\n", ezConfig.encoderDecoders[i]->decoder);
-					}
-					else {
-						printf("\t\tNull decoder\n");
-					}
-				}
-				else {
-					printf("\t\tNull match\n");
-				}
-				if (ezConfig.encoderDecoders[i]->format) {
-					if (ezConfig.encoderDecoders[i]->encoder) {
-						printf("\t\tFor output formats of type (%s)\n", ezConfig.encoderDecoders[i]->format);
-						printf("\t\t\tEncoder: (%s)\n", ezConfig.encoderDecoders[i]->encoder);
-					}
-					else {
-						printf("\t\tNull encoder\n");
-					}
-				}
-				else {
-					printf("\t\tNull match\n");
-				}
-			}
-			else {
-				printf("Error, NULL GRABBER\n");
-			}
-		}
-	}
-	else {
-		printf("We will NOT reencode.\n");
-	}
 
-}
 int parseConfig(char *fileName)
 {
 	xmlDocPtr doc;

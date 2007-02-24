@@ -59,7 +59,6 @@ typedef struct tag_EZCONFIG {
 	int		 shuffle;
 } EZCONFIG;
 
-void		printConfig(void);
 EZCONFIG *	getEZConfig(void);
 char *		getFormatEncoder(char *format);
 char *		getFormatDecoder(char *match);
