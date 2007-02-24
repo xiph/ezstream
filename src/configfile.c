@@ -43,7 +43,7 @@ getEZConfig(void)
 	return (&ezConfig);
 }
 
-char*	getFormatEncoder(char *format)
+char*	getFormatEncoder(const char *format)
 {
 	int i = 0;
 	for (i=0;i<ezConfig.numEncoderDecoders;i++) {
@@ -63,7 +63,7 @@ char*	getFormatEncoder(char *format)
 	return blankString;
 }
 
-char*	getFormatDecoder(char *match)
+char*	getFormatDecoder(const char *match)
 {
 	int i = 0;
 	for (i=0;i<ezConfig.numEncoderDecoders;i++) {
@@ -83,7 +83,7 @@ char*	getFormatDecoder(char *match)
 	return blankString;
 }
 
-int parseConfig(char *fileName)
+int parseConfig(const char *fileName)
 {
 	xmlDocPtr doc;
 	xmlNodePtr cur;

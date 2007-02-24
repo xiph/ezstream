@@ -60,8 +60,8 @@ typedef struct tag_EZCONFIG {
 } EZCONFIG;
 
 EZCONFIG *	getEZConfig(void);
-char *		getFormatEncoder(char *format);
-char *		getFormatDecoder(char *match);
-int		parseConfig(char *fileName);
+char *		getFormatEncoder(const char *format);
+char *		getFormatDecoder(const char *match);
+int		parseConfig(const char *fileName);
 
 #endif /* __CONFIGFILE_H__ */
