@@ -2,4 +2,6 @@
 
 AUTOMAKE_OPTIONS = foreign
 
+CLEANFILES = core *.core *~ .*~
+
 EXTRA_DIST = ezstream.dsp  ezstream.dsw ezstream.iss
