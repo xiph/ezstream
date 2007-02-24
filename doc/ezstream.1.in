@@ -1,0 +1,326 @@
+.\" Copyright (C) 2007 Moritz Grimm <gtgbr@gmx.net>
+.\"
+.\" This document may be be used and/or modified under the licensing terms
+.\" of the Ezstream software.
+.\"
+.Dd February 20, 2007
+.Dt EZSTREAM 1
+.Os
+.Sh NAME
+.Nm ezstream
+.Nd source client for Icecast with external en-/decoder support
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl hqv
+.Op Fl c Ar configfile
+.Ek
+.Sh DESCRIPTION
+The
+.Nm
+utility is a source client for the Icecast media streaming server.
+In its basic mode of operation, it streams media files and data from standard
+input
+.Qq as-is
+\(em such as Ogg Vorbis, Ogg Theora and MP3 \(em to a server.
+It can also use various external decoders and encoders to reencode from one
+format to another, and stream the result.
+The only requirement is that the external programs support writing to or
+reading from standard input, and can be used from the command line.
+.Ss Command line parameters
+.Bl -tag -width Ds
+.It Fl c Ar configfile
+Use the XML configuration in
+.Ar configfile .
+.Pq Mandatory.
+.It Fl h
+Print a summary of available command line parameters with short descriptions
+and exit.
+.It Fl q
+Be more quiet.
+Suppress the output that external programs send to standard error.
+.It Fl v
+Produce more verbose output from
+.Nm .
+Use twice for even more verbose output.
+.El
+.Pp
+When the
+.Fl q
+and
+.Fl v
+parameters are provided simultaneously, an additional line of information about
+the currently streamed file \(em playlist position, approximate playing time
+and bitrate \(em is displayed.
+.Ss Runtime control
+On POSIX systems,
+.Nm
+offers limited runtime control via signals when it is not streaming data from
+standard input.
+By sending a signal to the ezstream process, e.g. with the
+.Xr kill 1
+utility, a certain action will be triggered.
+.Bl -tag -width -Ds
+.It Cd SIGHUP
+Rereads the playlist file after the track that is currently streamed.
+If the playlist is not to be shuffled,
+.Nm
+attempts to find the previously streamed file and continue with the one
+following it, or restarts from the beginning of the list otherwise.
+.It Cd SIGUSR1
+Skips the currently playing track and moves on to the next in playlist mode, or
+restarts the current track when streaming a single file.
+.El
+.Pp
+.Sh CONFIGURATION FILE SYNTAX
+The
+.Nm
+utility uses a simple XML configuration file format.
+It has a tree-like structure and is made up of
+.Em XML elements .
+Of all the possible XML features, only regular elements that contain text or
+other elements, and comments, appear in an
+.Nm
+configuration file.
+.Pp
+Each element in the configuration file consists of a
+.Li start tag ,
+its content and an
+.Li end tag .
+For example:
+.Pp
+.Dl \&<filename\&>playlist.m3u<\&/filename\&>
+.Dl \&<\&!-- XML comments look like this. --\&>
+.Sh XML CONFIGURATION
+In this section, each available element is listed and described.
+Note that for this purpose, elements are introduced in their short, i.e. empty
+form.
+In the configuration file, they need to be used as
+.Em start tag + content + end tag ,
+like in the introductory example shown above.
+.Ss Root element
+.Bl -ohang
+.It Sy \&<ezstream\ /\&>
+.Pq Mandatory.
+The configuration file's root element.
+It contains all other configuration elements.
+.El
+.Ss Global configuration elements
+Each of the global configuration elements have the \&<ezstream\ /\&> element as
+their parent.
+.Bl -ohang
+.It Sy \&<url\ /\&>
+.Pq Mandatory.
+Specifies the location and mountpoint of the Icecast server, to which the
+stream will be sent.
+The content must be of the form
+.Pa http://server:port/mountpoint
+For example:
+.Pp
+.Dl \&<url\&>http://example.com:8000/stream.ogg\&</url\&>
+.It Sy \&<sourcepassword\ /\&>
+.Pq Mandatory.
+Sets the source password for authentication with the Icecast server.
+.It Sy \&<format\ /\&>
+.Pq Mandatory.
+This element has two different meanings, depending on whether reencoding is
+enabled or not.
+It specifies the
+.Em output format
+of the stream if reencoding is enabled.
+Otherwise, it specifies the
+.Em input format
+of
+.Sy all
+input files.
+Recognized and supported values are
+.Sy VORBIS ,
+.Sy MP3
+and
+.Sy THEORA .
+Other values will be ignored and cause
+.Nm
+to simply pass through the data, which may or may not work.
+.It Sy \&<filename\ /\&>
+.Pq Mandatory.
+Set the path and name of a single media file, a playlist or the keyword
+.Pa stdin
+for streaming from standard input.
+Playlists are recognized by their filename extension and end with either
+.Em .m3u
+or
+.Em .txt .
+.Pp
+A playlist consists of filenames, one entry per line.
+Comments in playlists are introduced by a
+.Sq Li #
+sign at the beginning of a line and ignored by
+.Nm .
+.It Sy \&<shuffle\ /\&>
+.Pq Optional.
+Set to
+.Sy 1
+.Pq one
+to randomly shuffle the entries of the playlist specified in \&<filename\ /\&>.
+Files are played sequentially if set to
+.Sy 0
+.Pq zero
+or when the \&<shuffle\ /\&> element is absent.
+.It Sy \&<svrinfoname\ /\&>
+.Pq Optional.
+Set the name of the broadcast.
+Informational only.
+.It Sy \&<svrinfourl\ /\&>
+.Pq Optional.
+Set the URL of the web site associated with the broadcast.
+Informational only.
+.It Sy \&<svrinfogenre\ /\&>
+.Pq Optional.
+Set the genre of the broadcast.
+Informational only, used for YP.
+.It Sy \&<svrinfodescription\ /\&>
+.Pq Optional.
+Set the description of the broadcast.
+Informational only, used for YP.
+.It Sy \&<svrinfobitrate\ /\&>
+.Pq Optional.
+Set the bitrate of the broadcast.
+This setting is also purely informational and only used for YP.
+The value is set by the user and not
+.Nm ,
+and should match the bitrate of the stream.
+.It Sy \&<svrinfoquality\ /\&>
+.Pq Optional.
+Set the quality setting of an Ogg Vorbis broadcast.
+Informational only and needs to be set by the user, used for YP.
+.It Sy \&<svrinfochannels\ /\&>
+.Pq Optional.
+Set the number of audio channels in the broadcast, e.g.
+.Sy 1
+.Pq one
+for mono or
+.Sy 2
+for stereo.
+Informational only and needs to be set by the user, used for YP.
+.It Sy \&<svrinfosamplerate\ /\&>
+.Pq Optional.
+Set the sample rate of the broadcast.
+Informational only and needs to be set by the user, used for YP.
+.It Sy \&<svrinfopublic\ /\&>
+.Pq Optional.
+Set to
+.Sy 1
+.Pq one
+if the broadcast may be listed in a public YP directory.
+If set to
+.Sy 0
+.Pq zero ,
+the Icecast server will not submit this stream to a YP directory, which is also
+the default if the \&<svrinfopublic\ /\&> element is absent.
+.It Sy \&<reencode\ /\&>
+.Pq Optional.
+Element that contains child elements, which specify if and how reencoding
+should be done.
+.El
+.Ss Reencoding settings
+Each of the reencoding configuration elements have the \&<reencode\ /\&>
+element as their parent.
+.Bl -ohang
+.It Sy \&<enable\ /\&>
+Set to
+.Sy 1
+.Pq one
+to enable reencoding.
+If set to
+.Sy 0
+.Pq zero ,
+no reencoding will be done, which is also the default if the \&<enable\ /\&>
+element is absent.
+.It Sy \&<encdec\ /\&>
+Element that contains child elements, which specify how to decode and encode
+a certain media file format for streaming.
+Each format is described by a separate \&<encdec\ /\&> element.
+.El
+.Ss Dencoder/Encoder settings
+Each of the decoder/encoder configuration elements have the \&<encdec\ /\&>
+element as their parent.
+.Bl -ohang
+.It Sy \&<format\ /\&>
+This element is used by
+.Nm
+to find the appropriate encoder for the output stream format specified in the
+\&<format\ /\&> element inside the global configuration.
+It is recommended that this element is always supplied, even for currently
+unsupported output formats, with content such as
+.Sy VORBIS ,
+.Sy MP3 ,
+.Sy THEORA ,
+.Sy FLAC ,
+et cetera.
+.It Sy \&<match\ /\&>
+Set the filename extension used to identify a given media file format.
+This allows
+.Nm
+to find the appropriate decoder for a given file.
+Should be set to
+.Em .mp3
+for MP3,
+.Em .flac
+for FLAC,
+.Em .ogg
+for Ogg Vorbis, and so on.
+.It Sy \&<decode\ /\&>
+Set the command to decode the specified media file format to raw data and send
+it to standard output.
+During runtime, the placeholder
+.Sq Li @T@
+is replaced with the fully qualified name of the media file, as specified in
+the \&<filename\ /\&> element or a playlist file.
+It should always be enclosed in quotes, to prevent problems with filenames that
+contain whitespaces.
+.Pp
+The metadata placeholder,
+.Sq @M@ ,
+is also available in the \&<decode\ /\&> element.
+That way it can be used for combined de-/encoder programs that produce readily
+streamable data.
+.Pp
+For example, to decode Ogg Vorbis files using the
+.Cm oggdec
+utility:
+.Pp
+.Dl \&<decode\&>oggdec -R -o - \&"@T@\&"\&</decode\&>
+.It Sy \&<encode\ /\&>
+Set the command to encode raw data, received from standard input, to the
+specified stream format.
+During runtime, the placeholder
+.Sq Li @M@
+is replaced with the metadata
+.Po
+e.g.
+.Dq Artist - Title
+.Pc
+for the current track.
+It also should be enclosed in quotes at all times.
+.Pp
+For example, to encode an Ogg Vorbis stream using the quality setting 1.5 with
+the
+.Cm oggenc
+utility:
+.Pp
+.Dl \&<encode\&>oggenc -r -q 1.5 -t \&"@M@\&" -\&</encode\&>
+.El
+.Sh FILES
+.Bl -tag -width "!!EXAMPLES_DIR!!" -compact
+.It Pa !!EXAMPLES_DIR!!
+Directory containing example configuration files for various uses of
+.Nm .
+.El
+.Sh AUTHORS
+.Nm
+was written by:
+.Pp
+.An Ed Zaleski Aq oddsock@oddsock.org
+.An Moritz Grimm Aq gtgbr@gmx.net
+.Pp
+This manual was written by Moritz Grimm.
