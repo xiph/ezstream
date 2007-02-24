@@ -43,44 +43,42 @@ getEZConfig(void)
 	return (&ezConfig);
 }
 
-char*	getFormatEncoder(const char *format)
+char *
+getFormatEncoder(const char *format)
 {
-	int i = 0;
-	for (i=0;i<ezConfig.numEncoderDecoders;i++) {
-		if (ezConfig.encoderDecoders[i]) {
-			if (ezConfig.encoderDecoders[i]->format) {
-				if (!strcmp(ezConfig.encoderDecoders[i]->format, format)) {
-					if (ezConfig.encoderDecoders[i]->encoder) {
-						return ezConfig.encoderDecoders[i]->encoder;
-					}
-					else {
-						return blankString;
-					}
-				}
-			}
+	int	i;
+
+	for (i = 0; i < ezConfig.numEncoderDecoders; i++) {
+		if (ezConfig.encoderDecoders[i] != NULL &&
+		    ezConfig.encoderDecoders[i]->format != NULL &&
+		    strcmp(ezConfig.encoderDecoders[i]->format, format) == 0) {
+			if (ezConfig.encoderDecoders[i]->encoder != NULL)
+				return (ezConfig.encoderDecoders[i]->encoder);
+			else
+				return (blankString);
 		}
 	}
-	return blankString;
+
+	return (blankString);
 }
 
-char*	getFormatDecoder(const char *match)
+char*
+getFormatDecoder(const char *match)
 {
-	int i = 0;
-	for (i=0;i<ezConfig.numEncoderDecoders;i++) {
-		if (ezConfig.encoderDecoders[i]) {
-			if (ezConfig.encoderDecoders[i]->match) {
-				if (!strcmp(ezConfig.encoderDecoders[i]->match, match)) {
-					if (ezConfig.encoderDecoders[i]->decoder) {
-						return ezConfig.encoderDecoders[i]->decoder;
-					}
-					else {
-						return blankString;
-					}
-				}
-			}
+	int	i;
+
+	for (i = 0; i < ezConfig.numEncoderDecoders; i++) {
+		if (ezConfig.encoderDecoders[i] != NULL &&
+		    ezConfig.encoderDecoders[i]->match != NULL &&
+		    strcmp(ezConfig.encoderDecoders[i]->match, match) == 0) {
+			if (ezConfig.encoderDecoders[i]->decoder != NULL)
+				return (ezConfig.encoderDecoders[i]->decoder);
+			else
+				return (blankString);
 		}
 	}
-	return blankString;
+
+	return (blankString);
 }
 
 int parseConfig(const char *fileName)
