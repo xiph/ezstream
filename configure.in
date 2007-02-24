@@ -1,18 +1,18 @@
-AC_INIT([ezstream], [0.3.0], [grmo@users.sourceforge.net])
+dnl INITIALIZATION
 
+AC_INIT([ezstream], [0.3.0], [grmo@users.sourceforge.net])
 AC_PREREQ(2.54)
 AC_CONFIG_SRCDIR(src/ezstream.c)
-dnl Process this file with autoconf to produce a configure script.
-
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 
+
+dnl SETUP
+
 AC_PROG_CC
 AC_CANONICAL_HOST
 AM_PROG_LIBTOOL
-
-dnl Set some options based on environment
 
 DEBUG="-g"
 if test -z "$GCC"; then
@@ -46,20 +46,13 @@ else
     AC_DEFINE([_GNU_SOURCE], 1, [Define to include GNU extensions to POSIX])
 fi
 
-dnl Checks for programs.
 
-dnl Checks for libraries.
+dnl USEFUL HEADERS
 
-dnl Checks for header files.
 AC_HEADER_STDC
 
-dnl Checks for typedefs, structures, and compiler characteristics.
 
-dnl Check for types
-
-dnl Checks for library functions.
-
-dnl -- configure options --
+dnl CONFIGURE OPTIONS
 
 XIPH_PATH_SHOUT(, AC_MSG_ERROR([must have libshout installed!]))
 if test "$SHOUT_THREADSAFE" != "yes"
@@ -80,7 +73,8 @@ XIPH_PATH_VORBIS(, AC_MSG_ERROR([must have Ogg Vorbis v1.0 installed!]))
 XIPH_VAR_APPEND([XIPH_CPPFLAGS],[$VORBIS_CFLAGS $VORBISFILE_CFLAGS])
 XIPH_VAR_PREPEND([XIPH_LIBS],[$VORBIS_LIBS $VORBISFILE_LIBS])
 
-dnl Make substitutions
+
+dnl OUTPUT
 
 AC_SUBST(XIPH_CPPFLAGS)
 AC_SUBST(XIPH_CFLAGS)
