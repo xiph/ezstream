@@ -37,6 +37,8 @@
 static EZCONFIG	 ezConfig;
 static char	*blankString = "";
 
+void	freeConfig(EZCONFIG *);
+
 EZCONFIG *
 getEZConfig(void)
 {
@@ -79,6 +81,57 @@ getFormatDecoder(const char *match)
 	}
 
 	return (blankString);
+}
+
+void
+freeConfig(EZCONFIG *cfg)
+{
+	unsigned int	i;
+
+	if (cfg == NULL)
+		return;
+
+	if (cfg->URL != NULL)
+		xfree(cfg->URL);
+	if (cfg->password != NULL)
+		xfree(cfg->password);
+	if (cfg->format != NULL)
+		xfree(cfg->format);
+	if (cfg->fileName != NULL)
+		xfree(cfg->fileName);
+	if (cfg->serverName != NULL)
+		xfree(cfg->serverName);
+	if (cfg->serverURL != NULL)
+		xfree(cfg->serverURL);
+	if (cfg->serverGenre != NULL)
+		xfree(cfg->serverGenre);
+	if (cfg->serverDescription != NULL)
+		xfree(cfg->serverDescription);
+	if (cfg->serverBitrate != NULL)
+		xfree(cfg->serverBitrate);
+	if (cfg->serverChannels != NULL)
+		xfree(cfg->serverChannels);
+	if (cfg->serverSamplerate != NULL)
+		xfree(cfg->serverSamplerate);
+	if (cfg->serverQuality != NULL)
+		xfree(cfg->serverQuality);
+	if (cfg->encoderDecoders != NULL) {
+		for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
+			if (cfg->encoderDecoders[i] != NULL) {
+				if (cfg->encoderDecoders[i]->format != NULL)
+					xfree(cfg->encoderDecoders[i]->format);
+				if (cfg->encoderDecoders[i]->match != NULL)
+					xfree(cfg->encoderDecoders[i]->match);
+				if (cfg->encoderDecoders[i]->encoder != NULL)
+					xfree(cfg->encoderDecoders[i]->encoder);
+				if (cfg->encoderDecoders[i]->decoder != NULL)
+					xfree(cfg->encoderDecoders[i]->decoder);
+				xfree(cfg->encoderDecoders[i]);
+			}
+		}
+	}
+
+	memset(cfg, 0, sizeof(EZCONFIG));
 }
 
 int parseConfig(const char *fileName)
