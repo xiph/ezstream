@@ -134,233 +134,335 @@ freeConfig(EZCONFIG *cfg)
 	memset(cfg, 0, sizeof(EZCONFIG));
 }
 
-int parseConfig(const char *fileName)
+int
+parseConfig(const char *fileName)
 {
-	xmlDocPtr doc;
-	xmlNodePtr cur;
-	char    *ls_xmlContentPtr;
+	xmlDocPtr	 doc;
+	xmlNodePtr	 cur;
+	char		*ls_xmlContentPtr;
+	int		 shuffle_set, svrinfopublic_set;
 
-	doc = xmlParseFile(fileName);
-	if (doc == NULL) {
-		printf("Unable to parse config file (%s)", fileName);
-		return 0;
+	xmlLineNumbersDefault(1);
+	if ((doc = xmlParseFile(fileName)) == NULL) {
+		printf("%s: Parse error (not well-formed XML.)\n", fileName);
+		return (0);
 	}
 
 	cur = xmlDocGetRootElement(doc);
 
 	if (cur == NULL) {
-		printf("Unable to parse config file (empty document)(%s)", fileName);
+		printf("%s: Parse error (empty XML document.)\n", fileName);
 		xmlFreeDoc(doc);
-		return 0;
+		return (0);
 	}
 
 	memset(&ezConfig, '\000', sizeof(ezConfig));
 
+	shuffle_set = 0;
+	svrinfopublic_set = 0;
 	cur = cur->xmlChildrenNode;
 	while (cur != NULL) {
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "url")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "url")) {
+			if (ezConfig.URL != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <url> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.URL = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.URL, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.URL, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.URL = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "sourcepassword")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "sourcepassword")) {
+			if (ezConfig.password != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <sourcepassword> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.password = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.password, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.password, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.password = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "format")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "format")) {
+			if (ezConfig.format != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <format> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.format = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.format, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.format, ls_xmlContentPtr);
+				char *p;
+
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.format = xstrdup(ls_xmlContentPtr);
+				xmlFree(ls_xmlContentPtr);
+				for (p = ezConfig.format; *p != '\0'; p++)
+					*p = toupper((int)*p);
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "filename")) {
+			if (ezConfig.fileName != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <filename> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				if (strlen(ls_xmlContentPtr) > PATH_MAX - 1) {
+					printf("%s[%ld]: Error: Path or filename in <filename> is too long.\n",
+					       fileName, xmlGetLineNo(cur));
+					goto config_error;
 				}
+				ezConfig.fileName = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "filename")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "shuffle")) {
+			if (shuffle_set) {
+				printf("%s[%ld]: Error: Cannot have multiple <shuffle> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.fileName = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.fileName, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.fileName, ls_xmlContentPtr);
-				}
+				int tmp;
+
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				tmp = atoi(ls_xmlContentPtr);
+				ezConfig.shuffle = (tmp == 0) ? 0 : 1;
+				xmlFree(ls_xmlContentPtr);
+				shuffle_set = 1;
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfoname")) {
+			if (ezConfig.serverName != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfoname> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverName = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfoname")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfourl")) {
+			if (ezConfig.serverURL != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfourl> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverName = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverName, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverName, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverURL = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfourl")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfogenre")) {
+			if (ezConfig.serverGenre != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfogenre> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverURL = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverURL, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverURL, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverGenre = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfogenre")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfodescription")) {
+			if (ezConfig.serverDescription != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfodescription> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverGenre = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverGenre, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverGenre, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverDescription = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfodescription")) {
-			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverDescription = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverDescription, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverDescription, ls_xmlContentPtr);
-				}
-				xmlFree(ls_xmlContentPtr);
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfobitrate")) {
+			if (ezConfig.serverBitrate != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfobitrate> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
 			}
-		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfobitrate")) {
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverBitrate = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverBitrate, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverBitrate, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverBitrate = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
 
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfochannels")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfochannels")) {
+			if (ezConfig.serverChannels != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfochannels> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverChannels = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverChannels, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverChannels, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverChannels = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfosamplerate")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfosamplerate")) {
+			if (ezConfig.serverSamplerate != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfosamplerate> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverSamplerate = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverSamplerate, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverSamplerate, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverSamplerate = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfoquality")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfoquality")) {
+			if (ezConfig.serverQuality != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfoquality> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverQuality = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-					memset(ezConfig.serverQuality, '\000', strlen(ls_xmlContentPtr) +1);
-					strcpy(ezConfig.serverQuality, ls_xmlContentPtr);
-				}
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.serverQuality = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "svrinfopublic")) {
+		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfopublic")) {
+			if (svrinfopublic_set) {
+				printf("%s[%ld]: Error: Cannot have multiple <svrinfopublic> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
 			if (cur->xmlChildrenNode != NULL) {
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode,1);
-				if ( strlen(ls_xmlContentPtr) > 0 ) {
-					ezConfig.serverPublic = atoi(ls_xmlContentPtr);
-				}
+				int tmp;
+
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				tmp = atoi(ls_xmlContentPtr);
+				ezConfig.serverPublic = (tmp == 0) ? 0 : 1;
 				xmlFree(ls_xmlContentPtr);
+				svrinfopublic_set = 1;
 			}
 		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *) "reencode")) {
-			xmlNodePtr cur2;
+		if (!xmlStrcmp(cur->name, BAD_CAST "reencode")) {
+			xmlNodePtr	cur2;
+			int		enable_set;
+
+			enable_set = 0;
 			cur2 = cur->xmlChildrenNode;
 			while (cur2 != NULL) {
-				if (!xmlStrcmp(cur2->name, (const xmlChar *) "enable")) {
+				if (!xmlStrcmp(cur2->name, BAD_CAST "enable")) {
+					if (enable_set) {
+						printf("%s[%ld]: Error: Cannot have multiple <enable> elements.\n",
+						       fileName, xmlGetLineNo(cur));
+						goto config_error;
+					}
 					if (cur2->xmlChildrenNode != NULL) {
-						ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur2->xmlChildrenNode,1);
-						if ( strlen(ls_xmlContentPtr) > 0 ) {
-							ezConfig.reencode = atoi(ls_xmlContentPtr);
-						}
+						int tmp;
+
+						ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
+						tmp = atoi(ls_xmlContentPtr);
+						ezConfig.reencode = (tmp == 0) ? 0 : 1;
 						xmlFree(ls_xmlContentPtr);
+						enable_set = 1;
 					}
 				}
-				if (!xmlStrcmp(cur2->name, (const xmlChar *) "encdec")) {
-					xmlNodePtr cur3;
-					FORMAT_ENCDEC	*pformatEncDec = malloc(sizeof(FORMAT_ENCDEC));
-					memset(pformatEncDec, '\000', sizeof(FORMAT_ENCDEC));
+				if (!xmlStrcmp(cur2->name, BAD_CAST "encdec")) {
+					xmlNodePtr	 cur3;
+					FORMAT_ENCDEC	*pformatEncDec;
+					char		*p;
+
+					pformatEncDec = xcalloc(1, sizeof(FORMAT_ENCDEC));
+
 					cur3 = cur2->xmlChildrenNode;
 					while (cur3 != NULL) {
-						if (!xmlStrcmp(cur3->name, (const xmlChar *) "format")) {
+						if (!xmlStrcmp(cur3->name, BAD_CAST "format")) {
+							if (pformatEncDec->format != NULL) {
+								printf("%s[%ld]: Error: Cannot have multiple <format> elements.\n",
+								       fileName, xmlGetLineNo(cur3));
+								goto config_error;
+							}
 							if (cur3->xmlChildrenNode != NULL) {
-								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
-								if ( strlen(ls_xmlContentPtr) > 0 ) {
-									pformatEncDec->format = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-									memset(pformatEncDec->format, '\000', strlen(ls_xmlContentPtr) +1);
-									strcpy(pformatEncDec->format, ls_xmlContentPtr);
-								}
+								char *p;
+
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
+								pformatEncDec->format = xstrdup(ls_xmlContentPtr);
 								xmlFree(ls_xmlContentPtr);
+								for (p = pformatEncDec->format; *p != '\0'; p++)
+									*p = toupper((int)*p);
 							}
 						}
-						if (!xmlStrcmp(cur3->name, (const xmlChar *) "match")) {
+						if (!xmlStrcmp(cur3->name, BAD_CAST "match")) {
+							if (pformatEncDec->match != NULL) {
+								printf("%s[%ld]: Error: Cannot have multiple <match> elements.\n",
+								       fileName, xmlGetLineNo(cur3));
+								goto config_error;
+							}
 							if (cur3->xmlChildrenNode != NULL) {
-								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
-								if ( strlen(ls_xmlContentPtr) > 0 ) {
-									pformatEncDec->match = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-									memset(pformatEncDec->match, '\000', strlen(ls_xmlContentPtr) +1);
-									strcpy(pformatEncDec->match, ls_xmlContentPtr);
-								}
+								char *p;
+
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
+								pformatEncDec->match = xstrdup(ls_xmlContentPtr);
 								xmlFree(ls_xmlContentPtr);
+								for (p = pformatEncDec->match; *p != '\0'; p++)
+									*p = tolower((int)*p);
 							}
 						}
-						if (!xmlStrcmp(cur3->name, (const xmlChar *) "decode")) {
+						if (!xmlStrcmp(cur3->name, BAD_CAST "decode")) {
+							if (pformatEncDec->decoder != NULL) {
+								printf("%s[%ld]: Error: Cannot have multiple <decode> elements.\n",
+								       fileName, xmlGetLineNo(cur3));
+								goto config_error;
+							}
 							if (cur3->xmlChildrenNode != NULL) {
-								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
-								if ( strlen(ls_xmlContentPtr) > 0 ) {
-									pformatEncDec->decoder = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-									memset(pformatEncDec->decoder, '\000', strlen(ls_xmlContentPtr) +1);
-									strcpy(pformatEncDec->decoder, ls_xmlContentPtr);
-								}
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
+								pformatEncDec->decoder = xstrdup(ls_xmlContentPtr);
 								xmlFree(ls_xmlContentPtr);
+								if ((p = strstr(pformatEncDec->decoder, TRACK_PLACEHOLDER)) != NULL) {
+									p += strlen(TRACK_PLACEHOLDER);
+									if ((p = strstr(p, TRACK_PLACEHOLDER)) != NULL) {
+										printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
+										       fileName, xmlGetLineNo(cur3), TRACK_PLACEHOLDER);
+										goto config_error;
+									}
+								}
+								if ((p = strstr(pformatEncDec->decoder, METADATA_PLACEHOLDER)) != NULL) {
+									p += strlen(METADATA_PLACEHOLDER);
+									if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {
+										printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
+										       fileName, xmlGetLineNo(cur3), METADATA_PLACEHOLDER);
+										goto config_error;
+									}
+								}
 							}
 						}
-						if (!xmlStrcmp(cur3->name, (const xmlChar *) "encode")) {
+						if (!xmlStrcmp(cur3->name, BAD_CAST "encode")) {
+							if (pformatEncDec->encoder != NULL) {
+								printf("%s[%ld]: Error: Cannot have multiple <encode> elements.\n",
+								       fileName, xmlGetLineNo(cur3));
+								goto config_error;
+							}
 							if (cur3->xmlChildrenNode != NULL) {
-								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode,1);
-								if ( strlen(ls_xmlContentPtr) > 0 ) {
-									pformatEncDec->encoder = (char *)malloc(strlen(ls_xmlContentPtr) +1);
-									memset(pformatEncDec->encoder, '\000', strlen(ls_xmlContentPtr) +1);
-									strcpy(pformatEncDec->encoder, ls_xmlContentPtr);
-								}
+								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
+								pformatEncDec->encoder = xstrdup(ls_xmlContentPtr);
 								xmlFree(ls_xmlContentPtr);
+								if ((p = strstr(pformatEncDec->encoder, TRACK_PLACEHOLDER)) != NULL) {
+									printf("%s[%ld]: Error: `%s' placeholder not allowed in encoder command\n",
+									       fileName, xmlGetLineNo(cur3), TRACK_PLACEHOLDER);
+									goto config_error;
+								}
+								if ((p = strstr(pformatEncDec->encoder, METADATA_PLACEHOLDER)) != NULL) {
+									p += strlen(METADATA_PLACEHOLDER);
+									if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {
+										printf("%s[%ld]: Error: Multiple `%s' placeholders in encoder command\n",
+										       fileName, xmlGetLineNo(cur3), METADATA_PLACEHOLDER);
+										goto config_error;
+									}
+								}
 							}
 						}
 						cur3 = cur3->next;
@@ -373,5 +475,13 @@ int parseConfig(const char *fileName)
 		}
 		cur = cur->next;
 	}
+
+	xmlFreeDoc(doc);
 	return(1);
+
+config_error:
+
+	xmlFreeDoc(doc);
+	freeConfig(&ezConfig);
+	return (0);
 }
