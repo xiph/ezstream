@@ -12,7 +12,7 @@ AC_USE_SYSTEM_EXTENSIONS
 
 dnl SETUP
 
-dnl  XXX  This should be make configurable.
+dnl  XXX  This should be made configurable.
 EXAMPLES_DIR="\$(datadir)/examples/${PACKAGE}"
 AC_SUBST(EXAMPLES_DIR)
 
