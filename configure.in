@@ -5,6 +5,7 @@ AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR(src/ezstream.c)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(src/config.h)
+AC_CONFIG_LIBOBJ_DIR(src)
 AM_MAINTAINER_MODE
 AC_USE_SYSTEM_EXTENSIONS
 
@@ -37,7 +38,41 @@ else
 fi
 
 
+dnl MISC SYSTEM CHARACTERISTICS
+
+dnl __progname check adapted from OpenNTPd-portable's configure.ac
+AC_MSG_CHECKING([whether libc defines __progname])
+AC_LINK_IFELSE(
+	[AC_LANG_PROGRAM([[#include <stdio.h>]],
+		[[extern char *__progname; printf("%s\n", __progname); ]])],
+	[ac_cv_libc_defines___progname="yes"],
+	[ac_cv_libc_defines___progname="no"]
+)
+if test x"$ac_cv_libc_defines___progname" = "xyes"; then
+	AC_MSG_RESULT([yes])
+	AC_DEFINE(HAVE___PROGNAME, 1, [Define whether libc defines __progname])
+else
+	AC_MSG_RESULT([no])
+fi
+
+AC_C_CONST
+AC_TYPE_SIZE_T
+
+
 dnl USEFUL HEADERS
+
+AC_CHECK_HEADERS(sys/time.h paths.h signal.h)
+
+
+dnl LIBRARY FUNCTIONS
+
+AC_CHECK_FUNCS(arc4random gettimeofday random srandomdev)
+AC_REPLACE_FUNCS(getopt strlcat strlcpy)
+if test x"$ac_cv_header_signal_h" = "xyes"; then
+	AC_CHECK_FUNCS([sigaction], [
+		AC_DEFINE(HAVE_SIGNALS, 1, [Define whether we have BSD signals])
+		], [], [#include <signal.h>])
+fi
 
 
 dnl CONFIGURE OPTIONS
