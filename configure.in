@@ -72,6 +72,12 @@ XIPH_VAR_PREPEND([XIPH_LIBS],[$VORBIS_LIBS $VORBISFILE_LIBS])
 
 dnl OUTPUT
 
+AC_CONFIG_FILES(Makefile \
+		conf/Makefile \
+		doc/Makefile \
+		src/Makefile \
+		win32/Makefile)
+
 AC_SUBST(XIPH_CPPFLAGS)
 AC_SUBST(XIPH_CFLAGS)
 AC_SUBST(XIPH_LIBS)
@@ -80,4 +86,4 @@ AC_SUBST(DEBUG)
 AC_SUBST(CFLAGS)
 AC_SUBST(PROFILE)
 
-AC_OUTPUT([Makefile win32/Makefile conf/Makefile src/Makefile]) 
+AC_OUTPUT
