@@ -1,11 +1,12 @@
 dnl INITIALIZATION
 
 AC_INIT([ezstream], [0.3.0], [grmo@users.sourceforge.net])
-AC_PREREQ(2.54)
+AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR(src/ezstream.c)
 AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
+AC_USE_SYSTEM_EXTENSIONS
 
 
 dnl SETUP
@@ -30,18 +31,9 @@ if test -z "$GCC"; then
                 PROFILE="-g -p"
                 ;;
     esac
-
-    case "$host" in
-        *openbsd* | *irix*)
-        ;;
-        *) AC_DEFINE([_XOPEN_SOURCE], 600, [Define if you have POSIX and XPG specifications])
-        ;;
-    esac
-
 else
     XIPH_CPPFLAGS="-Wall -ffast-math -fsigned-char"
     PROFILE="-pg -g"
-    AC_DEFINE([_GNU_SOURCE], 1, [Define to include GNU extensions to POSIX])
 fi
 
 
