@@ -1,138 +1,114 @@
 ezstream README
-------------------------------
+---------------------------------------
 
-WHAT IS IT ?
-::::::::::::
 
-ezstream is a command line utility which is a improved version of the old 
-"shout" utility.  It enables you to stream mp3 or vorbis files to an icecast 
-server without reencoding and thus requires very little CPU.  ezstream is 
-controlled via a XML config file (a few examples are provided in the conf
-directory).
 
-ezstream can stream mp3, ogg vorbis, and ogg theora files as well as reading from stdin.
-ID3v1 tags are supported in mp3 files and all ogg vorbis tags are propagated
-as metadata as well.
+ABOUT EZSTREAM
+::::::::::::::::
 
-CONFIG FILE
-:::::::::::
 
-The following is an example config file :
+Ezstream is a command line source client for Icecast media streaming servers,
+and the successor of the old "shout" utility.
 
-<ezstream>
-    <url>http://localhost:8000/testmount.ogg</url>
-    <sourcepassword>hackme</sourcepassword>
-    <format>VORBIS</format>
-    <filename>sunking.ogg</filename>
-    <svrinfoname>My Stream</svrinfoname>    
-    <svrinfourl>http://www.oddsock.org</svrinfourl> 
-    <svrinfogenre>RockNRoll</svrinfogenre>
-    <svrinfodescription>This is a stream description</svrinfodescription>
-    <svrinfobitrate>192</svrinfobitrate>    
-    <svrinfoquality>4.0</svrinfoquality>    
-    <svrinfochannels>2</svrinfochannels>
-    <svrinfosamplerate>44100</svrinfosamplerate>
-    <svrinfopublic>1</svrinfopublic>    
-    <reencode>
-	<enable>0</enable>
-    </reencode>
-</ezstream>
+In its basic mode of operation, it streams media files or data from standard
+input without reencoding and thus requires only very little CPU resources. It
+can also use various external decoders and encoders to reencode from one
+format to another, and stream the result to an Icecast server.
 
-URL - this URL specified the location and mountpoint of the icecast server 
-	  to which the stream will be sent.
-SOURCEPASSWORD - the source password for the icecast server
-FORMAT - either MP3, VORBIS or THEORA, This is the output format of your stream.
-         If you are not reencoding, then this also must be the same format as your
-	 input files.
-FILENAME - This can be a single file (in which ezstream will stream that
-           file over and over continuously) or can be a .m3u file which
-           is a playlist of files.  currently, ezstream will go through 
-           the files sequentially.  If you specify "stdin" as the filename
-           then ezstream will read the input from stdin.
-SVRINFONAME - Broadcast name (informational only)
-SVRINFOURL - Website associated with the broadcast (informational only)
-SVRINFOGENRE - Genre of broadcast (informational only) (used for YP)
-SVRINFODESCRIPTION - Description of broadcast (informational only) (used for YP)
-SVRINFOBITRATE - Bitrate of broadcast (informational only) (used for YP)
-                 It is YOUR responsibility to ensure that the bitrate specified
-                 here matches up with your input.  Note that this info is not
-                 for anything OTHER than YP listing info.
-SVRINFOQUALITY - Used only for OggVorbis streams, similar to the bitrate
-                 in that it is used only for informational and YP purposes.
-SVRINFOCHANNELS - 1 = MONO, 2 = STEREO (informational only) (used for YP)
-SVRINFOSAMPLERATE - (informational only) (used for YP)
-SVRINFOPUBLIC - Indicates wether to list this stream in a public YP.
-         
+Directly supported media formats are MP3, Ogg Vorbis and Ogg Theora. Metadata
+support is available for MP3 (ID3v1 only) and Ogg Vorbis.
 
-REENCODING
+Ezstream is free software and licensed under the GNU General Public License.
+See the COPYING file for details.
+
+
+
+PREREQUISITES
 :::::::::::::::
-ezstream now support reencoding.  This means that your output stream need not
-be the same bitrate/samplerate or even format as your input files.
-
-Reencoding is supported via the use of external programs.  When you enable reencoding
-you need to make sure of a few things :
-
-1. You define a "decoder" for each type of input file.
-2. You define a "encoder" for each possible type of output stream.
-
-So if you had a mixture of mp3 and vorbis files in your playlist, you will need to make
-sure that a decoder is provided for each type.  Ezstream will take the output of the 
-decoder and send it directly to the specific encoder.  All output of the decoder should
-be written to stdout and should be in raw form.  Most decoder support this mode.  Encoders
-should all be configured also with raw input and should read it from stdin.
-
-The following decoder/encoders can be used :
-
-For MP3 :
-decoder : madplay
-encoder : lame
-
-For Vorbis :
-decoder : oggdec
-encoder : oggenc
-
-For FLAC :
-decoder : FLAC
-encoder : not yet supported by libshout, and thus not by ezstream.
-
-Additional decoders and encoders may be used, as long as they follow the rules defined above.
-
-The following config file section defines the reencoding parameters :
-
-<reencode>
-	<enable>1</enable>
-	<encdec>
-	<!-- Support for FLAC decoding (input files) -->
-		<format>FLAC</format> <!-- format = output stream format -->
-		<match>.flac</match>  <!-- match = input file format -->
-		<decode>flac -s -d --force-raw-format --sign=signed --endian=little @T@ -o -</decode>
-		<encode>Not supported Yet</encode>
-	</encdec>
-	<encdec>
-	<!-- Support for MP3 decoding via madplay, and encoding via LAME -->
-		<format>MP3</format>
-		<match>.mp3</match>
-		<decode>madplay -o raw:- @T@ 2>/dev/null</decode>
-		<encode>lame -r -x -b 56 -s 44.1 --resample 22.05 -a - - 2>/dev/null</encode>
-	</encdec>
-	<encdec>
-	<!-- Support for Vorbis decoding via oggdec, and encoding via oggenc -->
-		<format>VORBIS</format>
-		<match>.ogg</match>
-		<decode>oggdec --raw=1 @T@ -o - 2>/dev/null</decode>
-		<encode>oggenc -Q -r -q 0 --resample=44100 --downmix -t "@M@" -c STREAMER=ezstream -</encode>
-	</encdec>
-</reencode>
 
 
-Note that the following keywords can be used :
+Ezstream depends on:
+ * libshout 2.2.x (http://www.icecast.org/)
+ * libshout dependencies, such as libogg, libvorbis, libtheora, etc.
+   (http://www.vorbis.com/ and http://www.theora.org/)
+ * libxml 2.x (http://xmlsoft.org/)
 
-@T@ = The fully qualified name of the track being played in the playlist
-@M@ = The metadata for the current track
 
-All encoding options (bitrate/samplerate/channels/quality) are set as command line options of
-each of the encoders.  Each encoder has slightly different options that control these values.
-The examples here can be used as a guide, but please make sure you check the manual for each
-encoder for the correct encoding options.  In all cases, the encoder should be configured to
-read RAW audio data from stdin.
 
+INSTALLATION
+::::::::::::::
+
+
+The ezstream software uses the GNU auto-tools to configure, build and install
+on a variety of systems. Aside from the standard autoconf options of the
+configure script, a couple of additional options are available:
+
+  --with-xml-config=PATH  use xml-config in PATH to find libxml
+  --with-ogg=PREFIX       Prefix where libogg is installed (optional)
+  --with-vorbis=PREFIX    Prefix where libvorbis is installed (optional)
+
+The compilation and installation process boils down to the usual
+
+    $ ./configure --help | less         # Skim over the available options
+    $ ./configure [options] && make && [sudo] make install
+                                        # Configure, build and install
+                                        # [as root] the software
+
+If this procedure is unfamiliar to you, please consult the INSTALL file for
+more detailed instructions.
+
+
+
+USAGE
+:::::::
+
+
+Once ezstream is successfully installed, type "man ezstream" (without quotes)
+on the command line for a comprehensive manual. This distribution package also
+comes with example configuration files that can be used as a guide to configure
+ezstream.
+
+Note that all by itself, ezstream is not particularly useful. It requires a
+running Icecast server to stream to, which then relays the stream to many
+listeners. If this comes as a surprise, browse to http://www.icecast.org/ for
+a lot more information, resources, and other source clients.
+
+
+
+EXTERNAL DECODERS/ENCODERS
+::::::::::::::::::::::::::::
+
+
+Ezstream should be able to work with any media decoder and encoder that
+fulfills the following requirements:
+
+ 1. It needs to be executable on the command line and not require a graphical
+    display to function.
+ 2.1. A decoder needs to be capable of sending RAW data to standard output.
+ 2.2. An encoder needs to be capable of reading RAW data from standard input.
+ 2.3. A combined de-/encoder needs to be capable of sending streamable media
+      to standard output.
+
+Media formats that ezstream does not support directly are passed through
+unaltered. Whether they work or not depends on the level of support offered
+by the version of libshout ezstream is linked with.
+
+The following incomplete list of programs shows a few that are known to work.
+These are also used in the example configuration files:
+
+ * MP3
+   - Decoder: madplay (http://mad.sf.net/)
+   - Encoder: lame (http://lame.sf.net/)
+
+ * Ogg Vorbis:
+   - Decoder: oggdec
+   - Encoder: oggenc
+   Both utilities are in the vorbis-tools package (http://www.vorbis.com/).
+
+ * FLAC:
+   - Decoder: flac (http://flac.sf.net/)
+   - Encoder: (None. Not supported by libshout at the time of writing, and
+              thus cannot be used by ezstream.)
+
+ * Ogg Theora:
+   - Decoder/Encoder: ffmpeg2theora (http://v2v.cc/~j/ffmpeg2theora/)
