@@ -1,5 +1,3 @@
-## Process this file with automake to produce Makefile.in
-
 AUTOMAKE_OPTIONS = 1.9 foreign
 ACLOCAL_AMFLAGS = -I m4
 
@@ -9,8 +7,7 @@ dist_doc_DATA = COPYING README
 
 CLEANFILES =	core *.core *~ .*~
 
-debug:
-	$(MAKE) all CFLAGS="@DEBUG@"
+.PHONY:		snapshot
 
-profile:
-	$(MAKE) all CFLAGS="@PROFILE@"
+snapshot:
+	${MAKE} dist distdir=${PACKAGE}-snapshot-`date +'%Y%m%d'`

@@ -89,10 +89,10 @@ char		*__progname;
 int		 qFlag;
 int		 vFlag;
 
-EZCONFIG	*pezConfig = NULL;
-static char	*blankString = "";
-playlist_t	*playlist = NULL;
-int		 playlistMode = 0;
+EZCONFIG		*pezConfig = NULL;
+static const char	*blankString = "";
+playlist_t		*playlist = NULL;
+int			 playlistMode = 0;
 
 #ifdef HAVE_SIGNALS
 volatile sig_atomic_t	rereadPlaylist = 0;
@@ -197,7 +197,7 @@ urlParse(const char *url, char **hostname, int *port, char **mountname)
 
 	p2++;
 	p3 = strchr(p2, '/');
-	if (p3 == NULL || p3 - p2 >= sizeof(tmpPort))
+	if (p3 == NULL || p3 - p2 >= (int)sizeof(tmpPort))
 		return (0);
 
 	strlcpy(tmpPort, p2, (p3 - p2) + 1);
@@ -432,7 +432,7 @@ processMetadata(shout_t *shout, const char *extension, const char *fileName)
 		 * let's just use the filename.
 		 */
 		char	*p1 = NULL;
-		char	*p2 = NULL;;
+		char	*p2 = NULL;
 		char	*filename_copy = NULL;
 
 		filename_copy = xstrdup(fileName);
@@ -668,7 +668,7 @@ streamFile(shout_t *shout, const char *fileName)
 		printf("%s: streamFile(): Error while reading '%s': %s\n",
 		       __progname, fileName, strerror(errno));
 	else
-		retval = 1;;
+		retval = 1;
 
 	if (popenFlag)
 		pclose(filepstream);
@@ -732,7 +732,7 @@ getProgname(const char *argv0)
 		return ((char *)"ezstream");
 	p = strrchr(argv0, '/');
 	if (p == NULL)
-		p = argv0;
+		p = (char *)argv0;
 	else
 		p++;
 

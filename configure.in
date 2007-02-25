@@ -18,27 +18,19 @@ AC_SUBST(EXAMPLES_DIR)
 
 AC_CANONICAL_HOST
 
-DEBUG="-g"
 if test -z "$GCC"; then
-    XIPH_CPPFLAGS="-D_REENTRANT"
-    case $host in 
-        *-*-irix*)
-                XIPH_CPPFLAGS="$XIPH_CPPFLAGS -w -signed"
-                PROFILE="-p -g3 -O2 -signed -D_REENTRANT"
-                ;;
-        *-*-solaris*)
-                XIPH_CFLAGS="-xO4 -xcg92"
-                XIPH_CPPFLAGS="$XIPH_CPPFLAGS -v -w -fsimple -fast"
-                PROFILE="-xpg -g -Dsuncc"
-                ;;
-        *)
-                XIPH_CFLAGS="-O"
-                PROFILE="-g -p"
-                ;;
-    esac
+	case $host in 
+	*-irix*)
+		XIPH_CPPFLAGS="-w -signed"
+		;;
+	*-solaris*)
+		XIPH_CPPFLAGS="-v"
+		;;
+	*)
+		;;
+	esac
 else
-    XIPH_CPPFLAGS="-Wall -ffast-math -fsigned-char"
-    PROFILE="-pg -g"
+	XIPH_CPPFLAGS="-Wall -Wwrite-strings -Wpointer-arith"
 fi
 
 
@@ -82,9 +74,8 @@ fi
 dnl CONFIGURE OPTIONS
 
 XIPH_PATH_SHOUT(, AC_MSG_ERROR([must have libshout installed!]))
-if test "$SHOUT_THREADSAFE" != "yes"
-then
-  AC_MSG_ERROR([This libshout isn't threadsafe])
+if test "$SHOUT_THREADSAFE" != "yes"; then
+	AC_MSG_ERROR([This libshout isn't threadsafe])
 fi 
 
 XIPH_PATH_XML
@@ -113,8 +104,6 @@ AC_SUBST(XIPH_CPPFLAGS)
 AC_SUBST(XIPH_CFLAGS)
 AC_SUBST(XIPH_LIBS)
 AC_SUBST(LIBS)
-AC_SUBST(DEBUG)
 AC_SUBST(CFLAGS)
-AC_SUBST(PROFILE)
 
 AC_OUTPUT

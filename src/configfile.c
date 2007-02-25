@@ -34,8 +34,8 @@
 # define PATH_MAX	256
 #endif
 
-static EZCONFIG	 ezConfig;
-static char	*blankString = "";
+static EZCONFIG		 ezConfig;
+static const char	*blankString = "";
 
 void	freeConfig(EZCONFIG *);
 
@@ -45,7 +45,7 @@ getEZConfig(void)
 	return (&ezConfig);
 }
 
-char *
+const char *
 getFormatEncoder(const char *format)
 {
 	int	i;
@@ -64,7 +64,7 @@ getFormatEncoder(const char *format)
 	return (blankString);
 }
 
-char*
+const char *
 getFormatDecoder(const char *match)
 {
 	int	i;
