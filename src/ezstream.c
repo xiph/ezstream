@@ -135,6 +135,9 @@ char *	basename(const char *);
 #endif
 int	strrcmp(const char *, const char *);
 int	urlParse(const char *, char **, int *, char **);
+void	replaceString(const char *, char *, size_t, const char *, const char *);
+void	setMetadata(shout_t *, const char *);
+char *	buildCommandString(const char *, const char *, const char *);
 int	streamPlaylist(shout_t *, const char *);
 char *	getProgname(const char *);
 void	usage(void);
@@ -204,87 +207,103 @@ urlParse(const char *url, char **hostname, int *port, char **mountname)
 	return (1);
 }
 
-void replaceString(char *source, char *dest, char *from, char *to)
+void
+replaceString(const char *source, char *dest, size_t size,
+	      const char *from, const char *to)
 {
-	char *p2 = (char *)1;
-	char	*p1 = source;
-	while (p2) {
-		p2 = strstr(p1, from);
-		if (p2) {
-			strncat(dest, p1, p2-p1);
-			strcat(dest, to);
-			p1 = p2 + strlen(from);
+	char	*p1 = (char *)source;
+	char	*p2;
+
+	p2 = strstr(p1, from);
+	if (p2 != NULL) {
+		if (p2 - p1 >= size) {
+			printf("%s: replaceString(): Internal error: p2 - p1 >= size\n",
+			       __progname);
+			abort();
 		}
-		else {
-			strcat(dest, p1);
-		}
+		strncat(dest, p1, p2 - p1);
+		strlcat(dest, to, size);
+		p1 = p2 + strlen(from);
 	}
+	strlcat(dest, p1, size);
 }
 
-void setMetadata(shout_t *shout, char *metadata)
+void
+setMetadata(shout_t *shout, const char *metadata)
 {
 	shout_metadata_t *shoutMetadata = shout_metadata_new();
+
 	shout_metadata_add(shoutMetadata, "song", metadata); 
 	shout_set_metadata(shout, shoutMetadata);
 	shout_metadata_free(shoutMetadata);
 }
 
-char* buildCommandString(char *extension, char *fileName, char *metadata)
+char*
+buildCommandString(const char *extension, const char *fileName,
+		   const char *metadata)
 {
 	char	*commandString = NULL;
-	char *encoder = NULL;
-	char *decoder = NULL;
-	int	newDecoderLen = 0;
-	char *newDecoder = NULL;
-	char *newEncoder = NULL;
-	int	newEncoderLen = 0;
-	int	commandStringLen = 0;
+	size_t	 commandStringLen = 0;
+	char	*encoder = NULL;
+	char	*decoder = NULL;
+	char	*newDecoder = NULL;
+	size_t	 newDecoderLen = 0;
+	char	*newEncoder = NULL;
+	size_t	 newEncoderLen = 0;
 
-	decoder = strdup(getFormatDecoder(extension));
+	decoder = xstrdup(getFormatDecoder(extension));
 	if (strlen(decoder) == 0) {
-		printf("Unknown extension %s, cannot decode\n", extension);
-		return commandString;
+		printf("%s: Unknown extension '%s', cannot decode '%s'.\n",
+		       __progname, extension, fileName);
+		xfree(decoder);
+		return (NULL);
 	}
 	newDecoderLen = strlen(decoder) + strlen(fileName) + 1;
-	newDecoder = (char *)malloc(newDecoderLen);
-	memset(newDecoder, '\000', newDecoderLen);
-	replaceString(decoder, newDecoder, "@T@", fileName);
+	newDecoder = xcalloc(1, newDecoderLen);
+	replaceString(decoder, newDecoder, newDecoderLen, TRACK_PLACEHOLDER,
+		      fileName);
+	if (strstr(decoder, METADATA_PLACEHOLDER) != NULL) {
+		size_t tmpLen = strlen(newDecoder) + strlen(metadata) + 1;
+		char *tmpStr = xcalloc(1, tmpLen);
+		replaceString(newDecoder, tmpStr, tmpLen, METADATA_PLACEHOLDER,
+			      metadata);
+		xfree(newDecoder);
+		newDecoder = tmpStr;
+	}
 
-	encoder = strdup(getFormatEncoder(pezConfig->format));
+	encoder = xstrdup(getFormatEncoder(pezConfig->format));
 	if (strlen(encoder) == 0) {
-		printf("Unknown format %s, passing right on through!\n", pezConfig->format);
+		if (vFlag)
+			printf("%s: Passing through%s%s data from the decoder\n",
+			       __progname,
+			       (strcmp(pezConfig->format, THEORA_FORMAT) != 0) ? " (unsupported) " : " ",
+			       pezConfig->format);
 		commandStringLen = strlen(newDecoder) + 1;
-		commandString = (char *)malloc(commandStringLen);
-		memset(commandString, '\000', commandStringLen);
-		sprintf(commandString, "%s", newDecoder);
-		if (decoder) {
-			free(decoder);
-		}
-		if (encoder) {
-			free(encoder);
-		}
-		return commandString;
+		commandString = xcalloc(1, commandStringLen);
+		strlcpy(commandString, newDecoder, commandStringLen);
+		xfree(decoder);
+		xfree(encoder);
+		xfree(newDecoder);
+		return (commandString);
 	}
-	else {
 
-		newEncoderLen = strlen(encoder) + strlen(metadata) + 1;
-		newEncoder = (char *)malloc(newEncoderLen);
-		memset(newEncoder, '\000', newEncoderLen);
-		replaceString(encoder, newEncoder, "@M@", metadata);
+	newEncoderLen = strlen(encoder) + strlen(metadata) + 1;
+	newEncoder = xcalloc(1, newEncoderLen);
+	replaceString(encoder, newEncoder, newEncoderLen, METADATA_PLACEHOLDER,
+		      metadata);
 
-		commandStringLen = strlen(newDecoder) + strlen(" | ") + strlen(newEncoder) + 1;
-		commandString = (char *)malloc(commandStringLen);
-		memset(commandString, '\000', commandStringLen);
-		sprintf(commandString, "%s | %s", newDecoder, newEncoder);
-	}
-	if (decoder) {
-		free(decoder);
-	}
-	if (encoder) {
-		free(encoder);
-	}
-	printf("Going to execute (%s)\n", commandString);
-	return(commandString);
+	commandStringLen = strlen(newDecoder) + strlen(" | ") +
+		strlen(newEncoder) + 1;
+	commandString = xcalloc(1, commandStringLen);
+	snprintf(commandString, commandStringLen, "%s | %s", newDecoder,
+		 newEncoder);
+
+	xfree(decoder);
+	xfree(encoder);
+	xfree(newDecoder);
+	xfree(newEncoder);
+
+	return (commandString);
 }
 
 char * processMetadata(shout_t *shout, char *extension, char *fileName) {
