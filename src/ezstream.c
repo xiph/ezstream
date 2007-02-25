@@ -58,6 +58,7 @@
 # include "strlfctns.h"
 #endif
 #include "configfile.h"
+#include "ezsignals.h"
 #include "playlist.h"
 #include "util.h"
 
@@ -81,13 +82,13 @@
 #endif /* WIN32 */
 
 #ifdef HAVE___PROGNAME
-extern char	*__progname;
+extern char		*__progname;
 #else
-char		*__progname;
+char			*__progname;
 #endif /* HAVE___PROGNAME */
 
-int		 qFlag;
-int		 vFlag;
+int			 qFlag;
+int			 vFlag;
 
 EZCONFIG		*pezConfig = NULL;
 static const char	*blankString = "";
@@ -95,9 +96,11 @@ playlist_t		*playlist = NULL;
 int			 playlistMode = 0;
 
 #ifdef HAVE_SIGNALS
-volatile sig_atomic_t	rereadPlaylist = 0;
-volatile sig_atomic_t	rereadPlaylist_notify = 0;
-volatile sig_atomic_t	skipTrack = 0;
+const int		 ezstream_signals[] = { SIGHUP, SIGUSR1 };
+
+volatile sig_atomic_t	 rereadPlaylist = 0;
+volatile sig_atomic_t	 rereadPlaylist_notify = 0;
+volatile sig_atomic_t	 skipTrack = 0;
 
 void
 sig_handler(int sig)
@@ -115,9 +118,9 @@ sig_handler(int sig)
 	}
 }
 #else
-int		 rereadPlaylist = 0;
-int		 rereadPlaylist_notify = 0;
-int		 skipTrack = 0;
+int			 rereadPlaylist = 0;
+int			 rereadPlaylist_notify = 0;
+int			 skipTrack = 0;
 #endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
@@ -664,10 +667,14 @@ streamFile(shout_t *shout, const char *fileName)
 			break;
 		}
 	}
-	if (ferror(filepstream))
-		printf("%s: streamFile(): Error while reading '%s': %s\n",
-		       __progname, fileName, strerror(errno));
-	else
+	if (ferror(filepstream)) {
+		if (errno == EINTR) {
+			clearerr(filepstream);
+			retval = 1;
+		} else
+			printf("%s: streamFile(): Error while reading '%s': %s\n",
+			       __progname, fileName, strerror(errno));
+	} else
 		retval = 1;
 
 	if (popenFlag)
@@ -769,6 +776,9 @@ main(int argc, char *argv[])
 	shout_t 	*shout;
 	extern char	*optarg;
 	extern int	 optind;
+#ifdef HAVE_SIGNALS
+	struct sigaction act;
+#endif
 
 	__progname = getProgname(argv[0]);
 	pezConfig = getEZConfig();
@@ -994,8 +1004,12 @@ main(int argc, char *argv[])
 	}
 
 #ifdef HAVE_SIGNALS
-	signal(SIGHUP, sig_handler);
-	signal(SIGUSR1, sig_handler);
+	memset(&act, 0, sizeof(act));
+	act.sa_handler = sig_handler;
+# ifdef SA_RESTART
+	act.sa_flags = SA_RESTART;
+# endif
+	SIGS_INSTALL(ezstream_signals, &act);
 #endif /* HAVE_SIGNALS */
 
 	if (qFlag) {
