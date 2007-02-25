@@ -1,43 +1,124 @@
-/* example.c: Demonstration of the libshout API. */
+/*
+ *  ezstream - source client for Icecast with external en-/decoder support
+ *  Copyright (C) 2003, 2004, 2005, 2006  Ed Zaleski <oddsock@oddsock.org>
+ *  Copyright (C) 2007                    Moritz Grimm <gtgbr@gmx.net>
+ *
+ *  This program is free software; you can redistribute it and/or modify
+ *  it under the terms of the GNU General Public License as published by
+ *  the Free Software Foundation; either version 2 of the License, or
+ *  (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU General Public License for more details.
+ *
+ *  You should have received a copy of the GNU General Public License
+ *  along with this program; if not, write to the Free Software
+ *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
+#ifdef HAVE_CONFIG_H
+# include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#endif
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#ifdef HAVE_PATHS_H
+# include <paths.h>
+#endif
+#ifdef HAVE_SIGNAL_H
+# include <signal.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #ifdef WIN32
-#include <fcntl.h>
-#include <io.h>
-#include <windows.h>
-#endif
+# include <io.h>
+# include <windows.h>
+#else
+# include <libgen.h>
+# include <unistd.h>
+#endif /* WIN32 */
 #include <shout/shout.h>
-#include <getopt.h>
-#include "configfile.h"
-#ifndef WIN32
-#include <libgen.h>
-#include <unistd.h>
-#endif
 #include <vorbis/vorbisfile.h>
 
-EZCONFIG	*pezConfig = NULL;
-int rereadPlaylist = 0;
-static char	*blankString = "";
-
-#ifndef WIN32
-#include <signal.h>
-
-void hup_handler(int sig) 
-{
-	rereadPlaylist = 1;	
-	printf("Will reread the playlist on next song\n");
-}
+#ifndef HAVE_GETOPT
+# include "getopt.h"
 #endif
+#if !defined(HAVE_STRLCAT) || !defined(HAVE_STRLCPY)
+# include "strlfctns.h"
+#endif
+#include "configfile.h"
+#include "playlist.h"
+#include "util.h"
+
+#ifndef PATH_MAX
+# define PATH_MAX	256
+#endif
+
+/* For Solaris, possibly others (usually defined in <paths.h>.) */
+#ifndef _PATH_DEVNULL
+#  define _PATH_DEVNULL "/dev/null"
+#endif /* _PATH_DEVNULL */
+
 #ifdef WIN32
-#define STRNCASECMP strnicmp
-#define popen _popen
-#define pclose _pclose
-#define snprintf _snprintf
+# define STRNCASECMP	strnicmp
+# define popen		_popen
+# define pclose 	_pclose
+# define snprintf	_snprintf
+# define stat		_stat
 #else
-#define STRNCASECMP strncasecmp
-#endif
+# define STRNCASECMP	strncasecmp
+#endif /* WIN32 */
+
+#ifdef HAVE___PROGNAME
+extern char	*__progname;
+#else
+char		*__progname;
+#endif /* HAVE___PROGNAME */
+
+int		 qFlag;
+int		 vFlag;
+
+EZCONFIG	*pezConfig = NULL;
+static char	*blankString = "";
+playlist_t	*playlist = NULL;
+int		 playlistMode = 0;
+
+#ifdef HAVE_SIGNALS
+volatile sig_atomic_t	rereadPlaylist = 0;
+volatile sig_atomic_t	rereadPlaylist_notify = 0;
+volatile sig_atomic_t	skipTrack = 0;
+
+void
+sig_handler(int sig)
+{
+	switch (sig) {
+	case SIGHUP:
+		rereadPlaylist = 1;
+		rereadPlaylist_notify = 1;
+		break;
+	case SIGUSR1:
+		skipTrack = 1;
+		break;
+	default:
+		break;
+	}
+}
+#else
+int		 rereadPlaylist = 0;
+int		 rereadPlaylist_notify = 0;
+int		 skipTrack = 0;
+#endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
 	char tag[3];
@@ -49,26 +130,38 @@ typedef struct tag_ID3Tag {
 	char genre;
 } ID3Tag;
 
-void usage() {
-	fprintf(stdout, "usage: ezstream -h -c ezstream.xml\n");
-	fprintf(stdout, "where :\n");
-	fprintf(stdout, "	-h = display this help\n");
-	fprintf(stdout, "	-c = ezstream config file\n");
-	
-	exit(1);
-}
+#ifdef WIN32
+char *	basename(const char *);
+#endif
+int	strrcmp(const char *, const char *);
+char *	getProgname(const char *);
+void	usage(void);
+void	usageHelp(void);
 
-int strrcmp(char *s, char *sub)
+#ifdef WIN32
+char *
+basename(const char *fileName)
 {
-	int slen = strlen(s);
-	int sublen = strlen(sub);
+	char	*pLast = strrchr(fileName, '\\');
 
-	if (sublen > slen) {
-		return 1;
-	}
-	return memcmp(s + slen - sublen, sub, sublen);
+	if (pLast != NULL)
+		return (pLast + 1);
+
+	return (NULL);
 }
+#endif /* WIN32 */
 
+int
+strrcmp(const char *s, const char *sub)
+{
+	int	slen = strlen(s);
+	int	sublen = strlen(sub);
+
+	if (sublen > slen)
+		return (1);
+
+	return (memcmp(s + slen - sublen, sub, sublen));
+}
 
 int urlParse(char *url, char *hostname, int *port, char *mountname)
 {
@@ -102,7 +195,7 @@ int urlParse(char *url, char *hostname, int *port, char *mountname)
 	
 }
 
-void ReplaceString(char *source, char *dest, char *from, char *to)
+void replaceString(char *source, char *dest, char *from, char *to)
 {
 	char *p2 = (char *)1;
 	char	*p1 = source;
@@ -146,7 +239,7 @@ char* buildCommandString(char *extension, char *fileName, char *metadata)
 	newDecoderLen = strlen(decoder) + strlen(fileName) + 1;
 	newDecoder = (char *)malloc(newDecoderLen);
 	memset(newDecoder, '\000', newDecoderLen);
-	ReplaceString(decoder, newDecoder, "@T@", fileName);
+	replaceString(decoder, newDecoder, "@T@", fileName);
 
 	encoder = strdup(getFormatEncoder(pezConfig->format));
 	if (strlen(encoder) == 0) {
@@ -168,7 +261,7 @@ char* buildCommandString(char *extension, char *fileName, char *metadata)
 		newEncoderLen = strlen(encoder) + strlen(metadata) + 1;
 		newEncoder = (char *)malloc(newEncoderLen);
 		memset(newEncoder, '\000', newEncoderLen);
-		ReplaceString(encoder, newEncoder, "@M@", metadata);
+		replaceString(encoder, newEncoder, "@M@", metadata);
 
 		commandStringLen = strlen(newDecoder) + strlen(" | ") + strlen(newEncoder) + 1;
 		commandString = (char *)malloc(commandStringLen);
@@ -185,15 +278,6 @@ char* buildCommandString(char *extension, char *fileName, char *metadata)
 	return(commandString);
 }
 
-#ifdef WIN32
-char *basename(char *fileName) {
-	char *pLast = strrchr(fileName, '\\');
-	if (pLast) {
-		return pLast+1;
-	}
-	return NULL;
-}
-#endif
 char * processMetadata(shout_t *shout, char *extension, char *fileName) {
 	FILE	*filepstream = NULL;
 	char	*artist = NULL;
@@ -356,7 +440,6 @@ FILE *openResource(shout_t *shout, char *fileName, int *popenFlag)
 	
 }
 
-
 int streamFile(shout_t *shout, char *fileName) {
 	FILE	*filepstream = NULL;
 	char buff[4096];
@@ -417,6 +500,7 @@ int streamFile(shout_t *shout, char *fileName) {
 	filepstream = NULL;
 	return ret;
 }
+
 int streamPlaylist(shout_t *shout, char *fileName) {
 	FILE	*filep = NULL;
 	char	streamFileName[8096] = "";
@@ -479,7 +563,47 @@ int streamPlaylist(shout_t *shout, char *fileName) {
 	return(1);
 }
 
-int main(int argc, char **argv)
+/* Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c */
+char *
+getProgname(const char *argv0)
+{
+#ifdef HAVE___PROGNAME
+	return (xstrdup(__progname));
+#else
+	char	*p;
+
+	if (argv0 == NULL)
+		return ((char *)"ezstream");
+	p = strrchr(argv0, '/');
+	if (p == NULL)
+		p = argv0;
+	else
+		p++;
+
+	return (xstrdup(p));
+#endif /* HAVE___PROGNAME */
+}
+
+void
+usage(void)
+{
+	printf("usage: %s [-hqv] [-c configfile]\n", __progname);
+}
+
+void
+usageHelp(void)
+{
+	printf("\n");
+	printf("  -c configfile  use XML configuration in configfile\n");
+	printf("  -h             display this additional help and exit\n");
+	printf("  -q             suppress STDERR output from external en-/decoders\n");
+	printf("  -v             verbose output\n");
+	printf("\n");
+	printf("See the ezstream(1) manual for detailed information.\n");
+}
+
+int
+main(int argc, char **argv)
 {
 	char	c;
 	char	*configFile = NULL;
@@ -491,7 +615,7 @@ int main(int argc, char **argv)
 
 	pezConfig = getEZConfig();
 #ifndef WIN32
-	signal(SIGHUP, hup_handler);
+	signal(SIGHUP, sig_handler);
 #endif
 
 	shout_init();
@@ -503,7 +627,8 @@ int main(int argc, char **argv)
 				break;
 			case 'h':
 				usage();
-				break;
+				usageHelp();
+				return (0);
 			default:
 				break;
 		}
