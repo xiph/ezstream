@@ -143,6 +143,7 @@ void	setMetadata(shout_t *, const char *);
 char *	buildCommandString(const char *, const char *, const char *);
 char *	processMetadata(shout_t *, const char *, const char *);
 FILE *	openResource(shout_t *, const char *, int *, char **, int *);
+int	sendStream(shout_t *, FILE *, const char *, int, void *);
 int	streamFile(shout_t *, const char *);
 int	streamPlaylist(shout_t *, const char *);
 char *	getProgname(const char *);
@@ -542,44 +543,40 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 }
 
 int
-streamFile(shout_t *shout, const char *fileName)
+sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
+	   int isStdin, void *tv)
 {
-	int              retval = 0;
-	FILE		*filepstream = NULL;
 	unsigned char	 buff[4096];
 	size_t		 read, total, oldTotal;
-	int		 popenFlag = 0;
-	char		*metaData = NULL;
-	int		 isStdin = 0;
+	int		 retval = 0;
 #ifdef HAVE_GETTIMEOFDAY
 	double		 kbps = -1.0;
-	struct timeval	 timeStamp, startTime;
+	struct timeval	 timeStamp, *startTime = (struct timeval *)tv;
 
-	gettimeofday(&startTime, NULL);
-	timeStamp.tv_sec = startTime.tv_sec;
-	timeStamp.tv_usec = startTime.tv_usec;
+	if (startTime == NULL) {
+		printf("%s: sendStream(): Internal error: startTime is NULL\n",
+		       __progname);
+		abort();
+	}
+
+	timeStamp.tv_sec = startTime->tv_sec;
+	timeStamp.tv_usec = startTime->tv_usec;
 #endif /* HAVE_GETTIMEOFDAY */
-
-	if ((filepstream = openResource(shout, fileName, &popenFlag,
-					&metaData, &isStdin))
-	    == NULL) {
-		return (retval);
-	}
-
-	if (metaData != NULL) {
-		printf("%s: Streaming ``%s''", __progname, metaData);
-		if (vFlag)
-			printf(" (file: %s)\n", fileName);
-		else
-			printf("\n");
-		xfree(metaData);
-	}
 
 	total = oldTotal = 0;
 	while ((read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
 		int	ret;
 
-		total += read;
+		if (rereadPlaylist_notify) {
+			rereadPlaylist_notify = 0;
+			printf("%s: SIGHUP signal received, will reread playlist after this file.\n",
+			       __progname);
+		}
+		if (skipTrack) {
+			skipTrack = 0;
+			retval = 2;
+			break;
+		}
 
 		ret = shout_send(shout, buff, read);
 		if (ret != SHOUTERR_SUCCESS) {
@@ -611,14 +608,9 @@ streamFile(shout_t *shout, const char *fileName)
 			}
 		}
 
-		if (rereadPlaylist_notify) {
-			rereadPlaylist_notify = 0;
-			printf("%s: SIGHUP signal received, will reread playlist after this file.\n",
-			       __progname);
-		}
-
 		shout_sync(shout);
 
+		total += read;
 		if (qFlag && vFlag) {
 #ifdef HAVE_GETTIMEOFDAY
 			struct timeval	tv;
@@ -637,7 +629,7 @@ streamFile(shout_t *shout, const char *fileName)
 			gettimeofday(&tv, NULL);
 			newTime = (double)tv.tv_sec
 				+ (double)tv.tv_usec / 1000000.0;
-			secs = tv.tv_sec - startTime.tv_sec;
+			secs = tv.tv_sec - startTime->tv_sec;
 			hrs = secs / 3600;
 			secs %= 3600;
 			mins = secs / 60;
@@ -658,14 +650,6 @@ streamFile(shout_t *shout, const char *fileName)
 			printf("  \r");
 			fflush(stdout);
 		}
-
-		if (skipTrack) {
-			skipTrack = 0;
-			if (!isStdin && vFlag)
-				printf("%s: SIGUSR1 signal received, skipping current track.\n",
-				       __progname);
-			break;
-		}
 	}
 	if (ferror(filepstream)) {
 		if (errno == EINTR) {
@@ -674,8 +658,63 @@ streamFile(shout_t *shout, const char *fileName)
 		} else
 			printf("%s: streamFile(): Error while reading '%s': %s\n",
 			       __progname, fileName, strerror(errno));
-	} else
-		retval = 1;
+	}
+
+	return (retval);
+}
+
+int
+streamFile(shout_t *shout, const char *fileName)
+{
+	FILE		*filepstream = NULL;
+	int		 popenFlag = 0;
+	char		*metaData = NULL;
+	int		 isStdin = 0;
+	int              ret, retval = 0;
+#ifdef HAVE_GETTIMEOFDAY
+	struct timeval	 startTime;
+#endif
+
+	if ((filepstream = openResource(shout, fileName, &popenFlag,
+					&metaData, &isStdin))
+	    == NULL) {
+		return (retval);
+	}
+
+	if (metaData != NULL) {
+		printf("%s: Streaming ``%s''", __progname, metaData);
+		if (vFlag)
+			printf(" (file: %s)\n", fileName);
+		else
+			printf("\n");
+		xfree(metaData);
+	}
+
+#ifdef HAVE_GETTIMEOFDAY
+	gettimeofday(&startTime, NULL);
+	do {
+		ret = sendStream(shout, filepstream, fileName, isStdin,
+				 (void *)&startTime);
+#else
+	do {
+		ret = sendStream(shout, filepstream, fileName, isStdin, NULL);
+#endif
+		if (ret != 0) {
+			if (skipTrack && rereadPlaylist) {
+				skipTrack = 0;
+				ret = 1;
+			}
+			if (ret == 2 || skipTrack) {
+				skipTrack = 0;
+				if (!isStdin && vFlag)
+					printf("%s: SIGUSR1 signal received, skipping current track.\n",
+					       __progname);
+				retval = 1;
+				ret = 0;
+			}
+		} else
+			retval = 1;
+	} while (ret);
 
 	if (popenFlag)
 		pclose(filepstream);
