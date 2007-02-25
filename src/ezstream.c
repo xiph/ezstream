@@ -134,6 +134,8 @@ typedef struct tag_ID3Tag {
 char *	basename(const char *);
 #endif
 int	strrcmp(const char *, const char *);
+int	urlParse(const char *, char **, int *, char **);
+int	streamPlaylist(shout_t *, const char *);
 char *	getProgname(const char *);
 void	usage(void);
 void	usageHelp(void);
@@ -163,36 +165,43 @@ strrcmp(const char *s, const char *sub)
 	return (memcmp(s + slen - sublen, sub, sublen));
 }
 
-int urlParse(char *url, char *hostname, int *port, char *mountname)
+int
+urlParse(const char *url, char **hostname, int *port, char **mountname)
 {
-	char	*p1;
-	char	*p2;
-	char	*p3;
-	char	tmpPort[25] = "";
+	char	*p1, *p2, *p3;
+	char	 tmpPort[25] = "";
+	size_t	 hostsiz, mountsiz;
 
-	if (strncmp(url, "http://", strlen("http://"))) {
-		printf("Invalid URL, must be of the form http://server:port/mountpoint\n");
-		return 0;
+	if (hostname == NULL || port == NULL || mountname == NULL) {
+		printf("%s: urlParse(): Internal error: Bad arguments\n",
+		       __progname);
+		exit(1);
 	}
-	p1 = url + strlen("http://");
+
+	if (strncmp(url, "http://", strlen("http://")) != 0)
+		return (0);
+
+	p1 = (char *)(url) + strlen("http://");
 	p2 = strchr(p1, ':');
-	if (!p2) {
-		printf("Invalid URL, must be of the form http://server:port/mountpoint\n");
-		return 0;
-	}
-	strncpy(hostname, p1, p2-p1);
+	if (p2 == NULL)
+		return (0);
+	hostsiz = (p2 - p1) + 1;
+	*hostname = xmalloc(hostsiz);
+	strlcpy(*hostname, p1, hostsiz);
+
 	p2++;
 	p3 = strchr(p2, '/');
-	if (!p3) {
-		printf("Invalid URL, must be of the form http://server:port/mountpoint\n");
-		return 0;
-	}
-	memset(tmpPort, '\000', sizeof(tmpPort));
-	strncpy(tmpPort, p2, p3-p2);
+	if (p3 == NULL || p3 - p2 >= sizeof(tmpPort))
+		return (0);
+
+	strlcpy(tmpPort, p2, (p3 - p2) + 1);
 	*port = atoi(tmpPort);
-	strcpy(mountname, p3);
-	return 1;
-	
+
+	mountsiz = strlen(p3) + 1;
+	*mountname = xmalloc(mountsiz);
+	strlcpy(*mountname, p3, mountsiz);
+
+	return (1);
 }
 
 void replaceString(char *source, char *dest, char *from, char *to)
@@ -501,66 +510,45 @@ int streamFile(shout_t *shout, char *fileName) {
 	return ret;
 }
 
-int streamPlaylist(shout_t *shout, char *fileName) {
-	FILE	*filep = NULL;
-	char	streamFileName[8096] = "";
-	char	lastStreamFileName[8096] = "";
-	int		loop = 1;
+int
+streamPlaylist(shout_t *shout, const char *fileName)
+{
+	const char	*song;
+	char		 lastSong[PATH_MAX + 1];
 
-	filep = fopen(fileName, "r");
-	if (filep == 0) {
-		printf("Cannot open %s\n", fileName);
-		return(0);
-	}
-	while (loop) {
-		while (!feof(filep)) {
-			memset(streamFileName, '\000', sizeof(streamFileName));
-			fgets(streamFileName, sizeof(streamFileName), filep);
-			streamFileName[strlen(streamFileName)-1] = '\000';
-			if (strlen(streamFileName) > 0) {
-				memset(lastStreamFileName, '\000', sizeof(lastStreamFileName));
-				strcpy(lastStreamFileName, streamFileName);
-				/* Skip entries that begin with a # */
-				if (strncmp(streamFileName, "#", 1)) {
-					streamFile(shout, streamFileName);
-				}
-			}
-			if (rereadPlaylist) {
-				rereadPlaylist = 0;
-				fclose(filep);
-				printf("Reopening playlist\n");
-				filep = fopen(fileName, "r");
-				if (filep == 0) {
-					printf("Cannot open %s\n", fileName);
-					return(0);
-				}
-				else {
-					int loop2 = 1;
-					printf("Repositioning to (%s)\n", lastStreamFileName);
-					while (loop2) {
-						/* If we reach the end before finding
-						   our last spot, we will start over at the
-						   beginning */
-						if (feof(filep)) {
-							loop2 = 0;
-						}
-						else {
-							memset(streamFileName, '\000', sizeof(streamFileName));
-							fgets(streamFileName, sizeof(streamFileName), filep);
-							streamFileName[strlen(streamFileName)-1] = '\000';
-							if (!strcmp(streamFileName, lastStreamFileName)) {
-							/* If we found our last position, then bump out of the loop */
-								loop2 = 0;
-							}
-						}
-					}
+	/*
+	 * XXX: This preserves traditional behavior, however, rereading the
+	 *      playlist after each walkthrough seems a bit more logical.
+	 */
+	if (playlist == NULL) {
+		if ((playlist = playlist_read(fileName)) == NULL)
+			return (0);
+	} else
+		playlist_rewind(playlist);
 
-				}
+	if (pezConfig->shuffle)
+		playlist_shuffle(playlist);
+
+	while ((song = playlist_get_next(playlist)) != NULL) {
+		strlcpy(lastSong, song, sizeof(lastSong));
+		if (!streamFile(shout, song))
+			return (0);
+		if (rereadPlaylist) {
+			rereadPlaylist = rereadPlaylist_notify = 0;
+			printf("%s: Rereading playlist\n", __progname);
+			if (!playlist_reread(&playlist))
+				return (0);
+			if (pezConfig->shuffle)
+				playlist_shuffle(playlist);
+			else {
+				playlist_goto_entry(playlist, lastSong);
+				playlist_skip_next(playlist);
 			}
+			continue;
 		}
-		rewind(filep);
 	}
-	return(1);
+
+	return (1);
 }
 
 /* Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c */
@@ -603,210 +591,297 @@ usageHelp(void)
 }
 
 int
-main(int argc, char **argv)
+main(int argc, char *argv[])
 {
-	char	c;
-	char	*configFile = NULL;
-	char	*host = NULL;
-	int		port = 0;
-	char	*mount = NULL;
-	shout_t *shout;
+	char		 c;
+	char		*configFile = NULL;
+	char		*host = NULL;
+	int		 port = 0;
+	char		*mount = NULL;
+	shout_t 	*shout;
+	extern char	*optarg;
+	extern int	 optind;
 
-
+	__progname = getProgname(argv[0]);
 	pezConfig = getEZConfig();
-#ifndef WIN32
-	signal(SIGHUP, sig_handler);
+
+	qFlag = 0;
+	vFlag = 0;
+
+#ifdef HAVE_GETEUID
+	if (geteuid() == 0) {
+		printf("WARNING: You should not run %s as root. It can run other programs, which\n",
+		       __progname);
+		printf("         may cause serious security problems.\n");
+	}
 #endif
 
-	shout_init();
-
-	while ((c = getopt(argc, argv, "hc:")) != -1) {
+	while ((c = getopt(argc, argv, "c:hqv")) != -1) {
 		switch (c) {
-			case 'c':
-				configFile = optarg;
-				break;
-			case 'h':
+		case 'c':
+			if (configFile != NULL) {
+				printf("Error: multiple -c arguments given.\n");
 				usage();
-				usageHelp();
-				return (0);
-			default:
-				break;
+				return (2);
+			}
+			configFile = xstrdup(optarg);
+			break;
+		case 'h':
+			usage();
+			usageHelp();
+			return (0);
+		case 'q':
+			qFlag = 1;
+			break;
+		case 'v':
+			vFlag++;
+			break;
+		case '?':
+			usage();
+			return (2);
+		default:
+			break;
 		}
 	}
+	argc -= optind;
+	argv += optind;
 
-	if (!configFile) {
-		printf("You must supply a config file\n");
+	if (configFile == NULL) {
+		printf("You must supply a config file with the -c argument.\n");
 		usage();
-	}
-	else {
-		parseConfig(configFile);
+		return (2);
+	} else {
+		/*
+		 * Attempt to open configFile here for a more meaningful error
+		 * message.
+		 */
+		FILE	*tmp;
+
+		if ((tmp = fopen(configFile, "r")) == NULL) {
+			printf("%s: %s\n", configFile, strerror(errno));
+			usage();
+			return (2);
+		} else
+			fclose(tmp);
 	}
 
-	if (pezConfig->URL) {
-		host = (char *)malloc(strlen(pezConfig->URL) +1);
-		memset(host, '\000', strlen(pezConfig->URL) +1);
-		mount = (char *)malloc(strlen(pezConfig->URL) +1);
-		memset(mount, '\000', strlen(pezConfig->URL) +1);
-		if (!urlParse(pezConfig->URL, host, &port, mount)) {
-			exit(0);
-		}
+	if (!parseConfig(configFile))
+		return (2);
+
+	shout_init();
+	playlist_init();
+
+	if (pezConfig->URL == NULL) {
+		printf("%s: Error: Missing <url>\n", configFile);
+		return (2);
+	}
+	if (!urlParse(pezConfig->URL, &host, &port, &mount)) {
+		printf("%s: Error: Invalid <url>:\n", configFile);
+		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		return (2);
 	}
 	if ((host == NULL)) {
-		printf("server is required\n");
-		usage();
+		printf("%s: Error: Invalid <url>: Missing server:\n", configFile);
+		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		return (2);
 	}
-	if ((port == 0)) {
-		printf("port is required\n");
-		usage();
-	}
-	if ((pezConfig->password == NULL)) {
-		printf("-p password is required\n");
-		usage();
+	if ((port < 1 || port > 65535)) {
+		printf("%s: Error: Invalid <url>: Missing or invalid port:\n", configFile);
+		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		return (2);
 	}
 	if ((mount == NULL)) {
-		printf("mountpoint is required\n");
-		usage();
+		printf("%s: Error: Invalid <url>: Missing mountpoint:\n", configFile);
+		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		return (2);
+	}
+	if ((pezConfig->password == NULL)) {
+		printf("%s: Error: Missing <sourcepassword>\n", configFile);
+		return (2);
 	}
 	if ((pezConfig->fileName == NULL)) {
-		printf("-f fileName is required\n");
-		usage();
+		printf("%s: Error: Missing <filename>\n", configFile);
+		return (2);
 	}
-	if (pezConfig->format == 0) {
-		printf("You must specify a format type of MP3, VORBIS, or THEORA\n");
+	if (pezConfig->format == NULL) {
+		printf("%s: Warning: Missing <format>:\n", configFile);
+		printf("Specify a stream format of either MP3, VORBIS or THEORA.\n");
 	}
-	if (!(shout = shout_new())) {
-		printf("Could not allocate shout_t\n");
-		return 1;
+
+	xfree(configFile);
+
+	if ((shout = shout_new()) == NULL) {
+		printf("%s: shout_new(): %s", __progname, strerror(ENOMEM));
+		return (1);
 	}
-	
 
 	if (shout_set_host(shout, host) != SHOUTERR_SUCCESS) {
-		printf("Error setting hostname: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_host(): %s\n", __progname,
+			shout_get_error(shout));
+		return (1);
 	}
-
 	if (shout_set_protocol(shout, SHOUT_PROTOCOL_HTTP) != SHOUTERR_SUCCESS) {
-		printf("Error setting protocol: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_protocol(): %s\n", __progname,
+			shout_get_error(shout));
+		return (1);
 	}
-
 	if (shout_set_port(shout, port) != SHOUTERR_SUCCESS) {
-		printf("Error setting port: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_port: %s\n", __progname,
+			shout_get_error(shout));
+		return (1);
 	}
-
 	if (shout_set_password(shout, pezConfig->password) != SHOUTERR_SUCCESS) {
-		printf("Error setting password: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_password(): %s\n", __progname,
+			shout_get_error(shout));
+		return (1);
 	}
 	if (shout_set_mount(shout, mount) != SHOUTERR_SUCCESS) {
-		printf("Error setting mount: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_mount(): %s\n", __progname,
+			shout_get_error(shout));
+		return (1);
 	}
-
 	if (shout_set_user(shout, "source") != SHOUTERR_SUCCESS) {
-		printf("Error setting user: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_user(): %s\n", __progname,
+			shout_get_error(shout));
+		return (1);
 	}
 
 	if (!strcmp(pezConfig->format, MP3_FORMAT)) {
 		if (shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
-			printf("Error setting user: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_format(MP3): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
-	if (!strcmp(pezConfig->format, VORBIS_FORMAT)) {
+	if (!strcmp(pezConfig->format, VORBIS_FORMAT) ||
+	    !strcmp(pezConfig->format, THEORA_FORMAT)) {
 		if (shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
-			printf("Error setting user: %s\n", shout_get_error(shout));
-			return 1;
-		}
-	}
-	if (!strcmp(pezConfig->format, THEORA_FORMAT)) {
-		if (shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
-			printf("Error setting user: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_format(OGG): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 
 	if (pezConfig->serverName) {
 		if (shout_set_name(shout, pezConfig->serverName) != SHOUTERR_SUCCESS) {
-			printf("Error setting server name: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_name(): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverURL) {
 		if (shout_set_url(shout, pezConfig->serverURL) != SHOUTERR_SUCCESS) {
-			printf("Error setting server url: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_url(): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverGenre) {
 		if (shout_set_genre(shout, pezConfig->serverGenre) != SHOUTERR_SUCCESS) {
-			printf("Error setting server genre: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_genre(): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverDescription) {
 		if (shout_set_description(shout, pezConfig->serverDescription) != SHOUTERR_SUCCESS) {
-			printf("Error setting server description: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_description(): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverBitrate) {
 		if (shout_set_audio_info(shout, SHOUT_AI_BITRATE, pezConfig->serverBitrate) != SHOUTERR_SUCCESS) {
-			printf("Error setting server bitrate: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_audio_info(AI_BITRATE): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverChannels) {
 		if (shout_set_audio_info(shout, SHOUT_AI_CHANNELS, pezConfig->serverChannels) != SHOUTERR_SUCCESS) {
-			printf("Error setting server channels: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_audio_info(AI_CHANNELS): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverSamplerate) {
 		if (shout_set_audio_info(shout, SHOUT_AI_SAMPLERATE, pezConfig->serverSamplerate) != SHOUTERR_SUCCESS) {
-			printf("Error setting server samplerate: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_audio_info(AI_SAMPLERATE): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 	if (pezConfig->serverQuality) {
 		if (shout_set_audio_info(shout, SHOUT_AI_QUALITY, pezConfig->serverQuality) != SHOUTERR_SUCCESS) {
-			printf("Error setting server quality: %s\n", shout_get_error(shout));
-			return 1;
+			printf("%s: shout_set_audio_info(AI_QUALITY): %s\n",
+			       __progname, shout_get_error(shout));
+			return (1);
 		}
 	}
 
 	if (shout_set_public(shout, pezConfig->serverPublic) != SHOUTERR_SUCCESS) {
-		printf("Error setting server public flag: %s\n", shout_get_error(shout));
-		return 1;
+		printf("%s: shout_set_public(): %s\n",
+		       __progname, shout_get_error(shout));
+		return (1);
 	}
 
-	printf("Connecting to %s...", pezConfig->URL);
-	if (shout_open(shout) == SHOUTERR_SUCCESS) {
-		printf("SUCCESS.\n");
-		while (1) {
-			if (!strrcmp(pezConfig->fileName, ".m3u")) {
-				streamPlaylist(shout, pezConfig->fileName);
-			}
-			else {
-				streamFile(shout, pezConfig->fileName);
-			}
+#ifdef HAVE_SIGNALS
+	signal(SIGHUP, sig_handler);
+	signal(SIGUSR1, sig_handler);
+#endif /* HAVE_SIGNALS */
+
+	if (qFlag) {
+		int fd;
+
+		if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
+			printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
+			       __progname, _PATH_DEVNULL, strerror(errno));
+			return (1);
 		}
-	} else {
-		printf("FAILED: %s\n", shout_get_error(shout));
+
+		dup2(fd, STDERR_FILENO);
+		if (fd > 2)
+			close(fd);
 	}
+
+	if (shout_open(shout) == SHOUTERR_SUCCESS) {
+		int	ret;
+		char	*tmpFileName, *p;
+
+		printf("%s: Connected to http://%s:%d%s\n", __progname,
+		       host, port, mount);
+
+		tmpFileName = xstrdup(pezConfig->fileName);
+		for (p = tmpFileName; *p != '\0'; p++)
+			*p = tolower((int)*p);
+		if (strrcmp(tmpFileName, ".m3u") == 0 ||
+		    strrcmp(tmpFileName, ".txt") == 0)
+			playlistMode = 1;
+		else
+			playlistMode = 0;
+		xfree(tmpFileName);
+
+		ret = 1;
+		do {
+			if (playlistMode)
+				ret = streamPlaylist(shout,
+						     pezConfig->fileName);
+			else
+				ret = streamFile(shout, pezConfig->fileName);
+		} while (ret);
+	} else
+		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,
+		       host, port, mount, shout_get_error(shout));
 
 	shout_close(shout);
 
+	playlist_free(playlist);
+	playlist_shutdown();
+
 	shout_shutdown();
 
-	if (host) {
-		free(host);
-	}
-	if (mount) {
-		free(mount);
-	}
+	xfree(host);
+	xfree(mount);
 
 	return 0;
 }
