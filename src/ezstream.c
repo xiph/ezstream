@@ -139,6 +139,8 @@ void	replaceString(const char *, char *, size_t, const char *, const char *);
 void	setMetadata(shout_t *, const char *);
 char *	buildCommandString(const char *, const char *, const char *);
 char *	processMetadata(shout_t *, const char *, const char *);
+FILE *	openResource(shout_t *, const char *, int *, char **, int *);
+int	streamFile(shout_t *, const char *);
 int	streamPlaylist(shout_t *, const char *);
 char *	getProgname(const char *);
 void	usage(void);
@@ -460,121 +462,220 @@ processMetadata(shout_t *shout, const char *extension, const char *fileName)
 	return (songInfo);
 }
 
-FILE *openResource(shout_t *shout, char *fileName, int *popenFlag)
+FILE *
+openResource(shout_t *shout, const char *fileName, int *popenFlag,
+	     char **metaCopy, int *isStdin)
 {
 	FILE	*filep = NULL;
+	char	 extension[25];
+	char	*p1 = NULL;
+	char	*pMetadata = NULL;
+	char	*pCommandString = NULL;
 
-    printf("Opening file (%s)\n", fileName);
-	if (!strcmp(fileName, "stdin")) {
+	if (strcmp(fileName, "stdin") == 0) {
+		if (vFlag)
+			printf("%s: Reading from standard input.\n",
+			       __progname);
+		if (isStdin != NULL)
+			*isStdin = 1;
 #ifdef WIN32
 		_setmode(_fileno(stdin), _O_BINARY);
 #endif
 		filep = stdin;
-		return filep;
+		return (filep);
 	}
-	else {
-		char extension[25];
-		char *p1 = NULL;
-		char *pMetadata = NULL;
-		char *pCommandString = NULL;
-		memset(extension, '\000', sizeof(extension));
-		p1 = strrchr(fileName, '.');
-		if (p1) {
-			strncpy(extension, p1, sizeof(extension)-1);
-		}
+	if (isStdin != NULL)
+		*isStdin = 0;
 
-		pMetadata = processMetadata(shout, extension, fileName);
-		*popenFlag = 0;
-		if (pezConfig->reencode) {
-			/* Lets set the metadata first */
-			if (strlen(extension) > 0) {
-				pCommandString = buildCommandString(extension, fileName, pMetadata);	
-				/* Open up the decode/encode loop using popen() */
-				filep = popen(pCommandString, "r");
+	extension[0] = '\0';
+	p1 = strrchr(fileName, '.');
+	if (p1 != NULL)
+		strlcpy(extension, p1, sizeof(extension));
+	for (p1 = extension; *p1 != '\0'; p1++)
+		*p1 = tolower((int)*p1);
+	pMetadata = processMetadata(shout, extension, fileName);
+	if (metaCopy != NULL)
+		*metaCopy = xstrdup(pMetadata);
+
+	*popenFlag = 0;
+	if (pezConfig->reencode) {
+		if (strlen(extension) > 0) {
+			pCommandString = buildCommandString(extension, fileName, pMetadata);
+			if (vFlag > 1)
+				printf("%s: Running command `%s`\n", __progname,
+				       pCommandString);
+			fflush(NULL);
+			errno = 0;
+			if ((filep = popen(pCommandString, "r")) == NULL) {
+				printf("%s: popen(): Error while executing '%s'",
+				       __progname, pCommandString);
+				/* popen() does not set errno reliably ... */
+				if (errno)
+					printf(": %s\n", strerror(errno));
+				else
+					printf("\n");
+			} else {
 				*popenFlag = 1;
 #ifdef WIN32
-                _setmode(_fileno(filep), _O_BINARY );
+				_setmode(_fileno(filep), _O_BINARY );
 #endif
-				free(pMetadata);
-				free(pCommandString);
-				return filep;
 			}
-			else {
-				printf("Cannot determine extension, don't know how to deal with (%s)\n", fileName);
-				free(pMetadata);
-				return NULL;
-			}
-			free(pMetadata);
+			xfree(pCommandString);
+		} else
+			printf("%s: Error: Cannot determine file type of '%s'.\n",
+			       __progname, fileName);
 
-		}
-		else {
-			filep = fopen(fileName, "rb");
-			return filep;
-		}
+		xfree(pMetadata);
+		return (filep);
 	}
-	return NULL;
-	
+
+	xfree(pMetadata);
+
+	if ((filep = fopen(fileName, "rb")) == NULL)
+		printf("%s: %s: %s\n", __progname, fileName,
+		       strerror(errno));
+
+	return (filep);
 }
 
-int streamFile(shout_t *shout, char *fileName) {
-	FILE	*filepstream = NULL;
-	char buff[4096];
-	long read, ret = 0, total;
-	int	popenFlag = 0;
-	
-	
-	printf("Streaming %s\n", fileName);
-	
-	filepstream = openResource(shout, fileName, &popenFlag);
-	if (!filepstream) {
-		printf("Cannot open %s\n", fileName);
-		return 0;
-	}
-	total = 0;
-	while (!feof(filepstream)) {
-		read = fread(buff, 1, sizeof(buff), filepstream);
-		total = total + read;
+int
+streamFile(shout_t *shout, const char *fileName)
+{
+	int              retval = 0;
+	FILE		*filepstream = NULL;
+	unsigned char	 buff[4096];
+	size_t		 read, total, oldTotal;
+	int		 popenFlag = 0;
+	char		*metaData = NULL;
+	int		 isStdin = 0;
+#ifdef HAVE_GETTIMEOFDAY
+	double		 kbps = -1.0;
+	struct timeval	 timeStamp, startTime;
 
-		if (read > 0) {
-			ret = shout_send(shout, buff, read);
-			if (ret != SHOUTERR_SUCCESS) {
-                int loop = 1;
-				printf("DEBUG: Send error: %s\n", shout_get_error(shout));
-                
-                while (loop) {
-                    printf("Disconnected from server, reconnecting....\n");                    
-                    shout_close(shout);
-                    if (shout_open(shout) == SHOUTERR_SUCCESS) {
-                        printf("Successful reconnection....\n");                    
-            			ret = shout_send(shout, buff, read);
-                        loop = 0;
-                    }
-                    else {
-                        printf("Reconnect failed..waiting 5 seconds.\n");                    
+	gettimeofday(&startTime, NULL);
+	timeStamp.tv_sec = startTime.tv_sec;
+	timeStamp.tv_usec = startTime.tv_usec;
+#endif /* HAVE_GETTIMEOFDAY */
+
+	if ((filepstream = openResource(shout, fileName, &popenFlag,
+					&metaData, &isStdin))
+	    == NULL) {
+		return (retval);
+	}
+
+	if (metaData != NULL) {
+		printf("%s: Streaming ``%s''", __progname, metaData);
+		if (vFlag)
+			printf(" (file: %s)\n", fileName);
+		else
+			printf("\n");
+		xfree(metaData);
+	}
+
+	total = oldTotal = 0;
+	while ((read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
+		int	ret;
+
+		total += read;
+
+		ret = shout_send(shout, buff, read);
+		if (ret != SHOUTERR_SUCCESS) {
+			printf("%s: shout_send(): %s\n", __progname,
+			       shout_get_error(shout));
+			while (1) {
+				printf("%s: Disconnected from server, reconnecting ...\n",
+				       __progname);
+				shout_close(shout);
+				if (shout_open(shout) == SHOUTERR_SUCCESS) {
+					printf("%s: Reconnect to server successful.\n",
+					       __progname);
+					ret = shout_send(shout, buff, read);
+					if (ret != SHOUTERR_SUCCESS)
+						printf("%s: shout_send(): %s\n",
+						       __progname,
+						       shout_get_error(shout));
+					else
+						break;
+				} else {
+					printf("%s: Reconnect failed. Waiting 5 seconds ...\n",
+					       __progname);
 #ifdef WIN32
-                        Sleep(5000);
+					Sleep(5000);
 #else
-                        sleep(5);
+					sleep(5);
 #endif
-                    }
-                }
+				}
 			}
-			shout_delay(shout);
-		} else {
-			break;
+		}
+
+		if (rereadPlaylist_notify) {
+			rereadPlaylist_notify = 0;
+			printf("%s: SIGHUP signal received, will reread playlist after this file.\n",
+			       __progname);
 		}
 
 		shout_sync(shout);
+
+		if (qFlag && vFlag) {
+#ifdef HAVE_GETTIMEOFDAY
+			struct timeval	tv;
+			double		oldTime, newTime;
+			unsigned int	hrs, mins, secs;
+#endif /* HAVE_GETTIMEOFDAY */
+
+			if (!isStdin && playlistMode)
+				printf("  [%4lu/%-4lu]",
+				       playlist_get_position(playlist),
+				       playlist_get_num_items(playlist));
+
+#ifdef HAVE_GETTIMEOFDAY
+			oldTime = (double)timeStamp.tv_sec
+				+ (double)timeStamp.tv_usec / 1000000.0;
+			gettimeofday(&tv, NULL);
+			newTime = (double)tv.tv_sec
+				+ (double)tv.tv_usec / 1000000.0;
+			secs = tv.tv_sec - startTime.tv_sec;
+			hrs = secs / 3600;
+			secs %= 3600;
+			mins = secs / 60;
+			secs %= 60;
+			if (newTime - oldTime >= 1.0) {
+				kbps = (((double)(total - oldTotal) / (newTime - oldTime)) * 8.0) / 1000.0;
+				timeStamp.tv_sec = tv.tv_sec;
+				timeStamp.tv_usec = tv.tv_usec;
+				oldTotal = total;
+			}
+			printf("  [ %uh%02um%02us]", hrs, mins, secs);
+			if (kbps < 0)
+				printf("                 ");
+			else
+				printf("  [%8.2f kbps]", kbps);
+#endif /* HAVE_GETTIMEOFDAY */
+
+			printf("  \r");
+			fflush(stdout);
+		}
+
+		if (skipTrack) {
+			skipTrack = 0;
+			if (!isStdin && vFlag)
+				printf("%s: SIGUSR1 signal received, skipping current track.\n",
+				       __progname);
+			break;
+		}
 	}
-	if (popenFlag) {
-		printf("Closing via pclose\n");
+	if (ferror(filepstream))
+		printf("%s: streamFile(): Error while reading '%s': %s\n",
+		       __progname, fileName, strerror(errno));
+	else
+		retval = 1;;
+
+	if (popenFlag)
 		pclose(filepstream);
-	}
-	else {
+	else
 		fclose(filepstream);
-	}
-	filepstream = NULL;
-	return ret;
+
+	return (retval);
 }
 
 int
