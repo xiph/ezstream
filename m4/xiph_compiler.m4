@@ -1,5 +1,5 @@
 dnl xiph_compiler.m4
-dnl $Id: xiph_compiler.m4,v 1.1 2004/01/30 17:19:56 oddsock Exp $
+dnl $Id: xiph_compiler.m4 8320 2004-11-30 20:36:09Z karl $
 
 dnl XIPH_FUNC_VA_COPY
 dnl Karl Heyes
@@ -34,7 +34,8 @@ AC_DEFUN([XIPH_C_ATTRIBUTE],
 [dnl
 AC_TRY_COMPILE([int func(void) __attribute__((unused));],
   [int x __attribute__ ((unused));],,[dnl
-  AC_DEFINE([__attribute__(x)],, [Define to empty if __attribute__ is not supported])
+  AH_TEMPLATE([__attribute__],[Define to empty if __attribute__ is not supported])
+  AC_DEFINE([__attribute__(x)],[])
 ])
 ])dnl XIPH_C_ATTRIBUTE
 
@@ -166,3 +167,21 @@ EOF
 done
 $1="$xt_filtered $$1"
 ])dnl XIPH_VAR_PREPEND
+
+dnl XIPH_C__FUNC__
+dnl Karl Heyes <karl@xiph.org> 07/2004
+AC_DEFUN([XIPH_C__FUNC__],
+[dnl
+AC_MSG_CHECKING([for __func__])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM(,[const char *x = __func__;])],
+    [ AC_MSG_RESULT([yes])],
+    [ AH_TEMPLATE([__func__], [Replace __func__ if not supported])
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[const char *x = __FUNCTION__;])],
+        [ AC_DEFINE([__func__],[__FUNCTION__])
+        AC_MSG_RESULT([yes])],
+        [ AC_DEFINE([__func__],[""])
+        AC_MSG_RESULT([no])
+        ])
+    ])
+])dnl XIPH_C__FUNC__
+
