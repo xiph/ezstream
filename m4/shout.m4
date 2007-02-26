@@ -47,6 +47,14 @@ else
   fi
 fi
 
+dnl XXX - Up until and including speex-1.2beta1, '-lm' has been missing from
+dnl       --libs in speex.pc, even though Speex (still) depends on it. This is
+dnl       a problem for Solaris' linker and at least some static archs using
+dnl       GNU ld. '-lm' now comes from the libshout's libvorbis dependency and
+dnl       is in the wrong place.
+xt_shout_TEMP="`echo $SHOUT_LIBS | sed -e 's,-lm,,g'`"
+SHOUT_LIBS="$xt_shout_TEMP -lm"
+
 # Now try actually using libshout
 if test "$xt_have_shout" != "no"
 then
