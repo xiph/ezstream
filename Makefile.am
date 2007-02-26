@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = 1.9 foreign
 ACLOCAL_AMFLAGS = -I m4
 
-SUBDIRS =	conf doc src win32
+SUBDIRS =	conf doc m4 src win32
 
 dist_doc_DATA = COPYING README
 

@@ -97,6 +97,7 @@ dnl OUTPUT
 AC_CONFIG_FILES(Makefile \
 		conf/Makefile \
 		doc/Makefile \
+		m4/Makefile \
 		src/Makefile \
 		win32/Makefile)
 
