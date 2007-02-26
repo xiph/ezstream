@@ -14,14 +14,18 @@ AC_REQUIRE([XIPH_PATH_OGG])
 
 dnl Get the cflags and libraries for vorbis
 dnl
-AC_ARG_VAR([VORBIS_PREFIX],[path to vorbis installation])
+AC_ARG_VAR([VORBIS_PREFIX],[path to Vorbis installation])
 AC_ARG_WITH(vorbis,
-    AC_HELP_STRING([--with-vorbis=PREFIX],
+    AS_HELP_STRING([--with-vorbis=PREFIX],
         [Prefix where libvorbis is installed (optional)]),
-    vorbis_prefix="$withval",
-    vorbis_prefix="$VORBIS_PREFIX"
-    )
-if test "x$vorbis_prefix" = "x" -o "x$vorbis_prefix" = "xyes"; then
+    [vorbis_prefix="$withval"], [
+    if test x"$VORBIS_PREFIX" != "x"; then
+        vorbis_prefix="$VORBIS_PREFIX"
+    else
+        vorbis_prefix=/usr/local
+    fi
+    ])
+if test "x$vorbis_prefix" = "xyes"; then
     if test "x$prefix" = "xNONE"; then
         vorbis_prefix="/usr/local"
     else

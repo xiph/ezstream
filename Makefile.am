@@ -10,4 +10,4 @@ CLEANFILES =	core *.core *~ .*~
 .PHONY:		snapshot
 
 snapshot:
-	${MAKE} dist distdir=${PACKAGE}-snapshot-`date +'%Y%m%d'`
+	${MAKE} distcheck distdir=${PACKAGE}-snapshot-`date +'%Y%m%d'`

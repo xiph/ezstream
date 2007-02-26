@@ -7,15 +7,19 @@ dnl XIPH_PATH_OGG([ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl Test for libogg, and define OGG_CFLAGS OGG_LDFLAGS and OGG_LIBS
 dnl
 AC_DEFUN([XIPH_PATH_OGG],
-[dnl 
-AC_ARG_VAR([OGG_PREFIX],[path to ogg installation])
+[dnl
+AC_ARG_VAR([OGG_PREFIX],[path to Ogg installation])
 AC_ARG_WITH(ogg,
-    [AC_HELP_STRING([--with-ogg=PREFIX],
+    [AS_HELP_STRING([--with-ogg=PREFIX],
         [Prefix where libogg is installed (optional)])],
-    ogg_prefix="$withval",
-    ogg_prefix="$OGG_PREFIX"
-    )
-if test "x$ogg_prefix" = "x" -o "x$ogg_prefix" = "xyes"; then
+    [ogg_prefix="$withval"], [
+    if test x"$OGG_PREFIX" != "x"; then
+        ogg_prefix="$OGG_PREFIX"
+    else
+        ogg_prefix=/usr/local
+    fi
+    ])
+if test "x$ogg_prefix" = "xyes"; then
     if test "x$prefix" = "xNONE"; then
         ogg_prefix=/usr/local
     else
