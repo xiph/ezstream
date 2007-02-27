@@ -15,8 +15,8 @@ input without reencoding and thus requires only very little CPU resources. It
 can also use various external decoders and encoders to reencode from one
 format to another, and stream the result to an Icecast server.
 
-Directly supported media formats are MP3, Ogg Vorbis and Ogg Theora. Metadata
-support is available for MP3 (ID3v1 only) and Ogg Vorbis.
+Supported media formats for streaming are MP3, Ogg Vorbis and Ogg Theora.
+Metadata support is available for MP3 (ID3v1 only) and Ogg Vorbis.
 
 Ezstream is free software and licensed under the GNU General Public License.
 See the COPYING file for details.
@@ -112,3 +112,24 @@ These are also used in the example configuration files:
 
  * Ogg Theora:
    - Decoder/Encoder: ffmpeg2theora (http://v2v.cc/~j/ffmpeg2theora/)
+
+
+
+OPERATING SYSTEM SPECIFIC NOTES
+:::::::::::::::::::::::::::::::::
+
+
+ * Ezstream and SunPRO cc/c99 on Solaris:
+
+   Ezstream may not build with SunPRO cc/c99 "out of the box" if a threaded
+   libshout was built with gcc. This known issue results in the following error
+   message from the linker:
+
+     ld: fatal: option -h and building a dynamic executable are incompatible
+
+   This is related to gcc and GNU ld using different compiler/linker flags,
+   related to POSIX threads, than the SunPRO compilers. These are being passed
+   on to ezstream, where cc or c99 ultimately chokes on them.
+
+   Ezstream compiles with both cc/c99 and gcc if libshout was built with Sun's
+   compiler. If libshout was built with gcc, compile ezstream with gcc as well.
