@@ -807,7 +807,7 @@ usageHelp(void)
 int
 main(int argc, char *argv[])
 {
-	char		 c;
+	int		 c;
 	char		*configFile = NULL;
 	char		*host = NULL;
 	int		 port = 0;
