@@ -21,7 +21,7 @@ AC_CANONICAL_HOST
 if test -z "$GCC"; then
 	case $host in 
 	*-irix*)
-		XIPH_CPPFLAGS="-w -signed"
+		XIPH_CPPFLAGS="-fullwarn"
 		;;
 	*-solaris*)
 		XIPH_CPPFLAGS="-v"
@@ -62,6 +62,7 @@ AC_CHECK_HEADERS(sys/time.h paths.h signal.h)
 
 dnl LIBRARY FUNCTIONS
 
+AC_CHECK_LIB(gen, basename)
 AC_CHECK_FUNCS(arc4random geteuid gettimeofday random srandomdev)
 AC_REPLACE_FUNCS(getopt strlcat strlcpy)
 if test x"$ac_cv_header_signal_h" = "xyes"; then
