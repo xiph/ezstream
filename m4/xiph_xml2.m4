@@ -17,8 +17,8 @@ fi
 if ! test -x "$XMLCONFIG"; then
     AC_MSG_ERROR([$XMLCONFIG cannot be executed])
 fi
-XML_LIBS="$($XMLCONFIG --libs)"
-XML_CFLAGS="$($XMLCONFIG --cflags)"
+XML_LIBS="`$XMLCONFIG --libs`"
+XML_CFLAGS="`$XMLCONFIG --cflags`"
 ac_xml_save_LIBS="$LIBS"
 ac_xml_save_CFLAGS="$CFLAGS"
 LIBS="$XML_LIBS $LIBS"
@@ -46,8 +46,8 @@ fi
 if ! test -x "$XSLTCONFIG"; then
     AC_MSG_ERROR([$XSLTCONFIG cannot be executed])
 fi
-XSLT_LIBS="$($XSLTCONFIG --libs)"
-XSLT_CFLAGS="$($XSLTCONFIG --cflags)"
+XSLT_LIBS="`$XSLTCONFIG --libs`"
+XSLT_CFLAGS="`$XSLTCONFIG --cflags`"
 ac_xslt_save_LIBS="$LIBS"
 ac_xslt_save_CFLAGS="$CFLAGS"
 LIBS="$XSLT_LIBS $LIBS"
