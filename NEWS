@@ -3,10 +3,6 @@ Changes in 0.3.0, (SVN trunk):
  * The original author, Ed Zaleski, hands over ezstream maintainership to
    Moritz Grimm.
 
- * There have been changes in almost all parts of ezstream. For a complete,
-   detailed list of changes, please consult the Subversion log, like so:
-     $ svn log -r '{YYYY-MM-DD}:12521' http://svn.xiph.org/trunk/ezstream/
-
  * New features:
    - Playlist shuffling support, enabled via the new <shuffle> configuration
      option.
