@@ -799,7 +799,7 @@ usageHelp(void)
 	printf("  -c configfile  use XML configuration in configfile\n");
 	printf("  -h             display this additional help and exit\n");
 	printf("  -q             suppress STDERR output from external en-/decoders\n");
-	printf("  -v             verbose output\n");
+	printf("  -v             verbose output (use twice for more effect)\n");
 	printf("\n");
 	printf("See the ezstream(1) manual for detailed information.\n");
 }
