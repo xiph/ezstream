@@ -106,7 +106,7 @@ The configuration file's root element.
 It contains all other configuration elements.
 .El
 .Ss Global configuration elements
-Each of the global configuration elements have the \&<ezstream\ /\&> element as
+Each of the global configuration elements have the \&<ezstream/\&> element as
 their parent.
 .Bl -ohang
 .It Sy \&<url\ /\&>
@@ -143,7 +143,10 @@ Other values will be ignored and cause
 to simply pass through the data, which may or may not work.
 .It Sy \&<filename\ /\&>
 .Pq Mandatory.
-Set the path and name of a single media file, a playlist or the keyword
+Set the path and name of a single media file, a playlist, the name of an
+external program
+.Pq see below ,
+or the keyword
 .Pa stdin
 for streaming from standard input.
 Playlists are recognized by their filename extension and end with either
@@ -156,16 +159,24 @@ Comments in playlists are introduced by a
 .Sq Li #
 sign at the beginning of a line and ignored by
 .Nm .
+.It Sy \&<playlist_program\ /\&>
+Indicates that the file in \&<filename/\&> is actually an executable program
+or script.
+This program is supposed to print
+.Pq to standard output
+one line with the name of a file that should be streamed next and then exit.
 .It Sy \&<shuffle\ /\&>
 .Pq Optional.
 Set to
 .Sy 1
 .Pq one
-to randomly shuffle the entries of the playlist specified in \&<filename\ /\&>.
+to randomly shuffle the entries of the playlist specified in \&<filename/\&>.
 Files are played sequentially if set to
 .Sy 0
 .Pq zero
-or when the \&<shuffle\ /\&> element is absent.
+or when the \&<shuffle/\&> element is absent.
+This option will be ignored if \&<playlist_program/\&> is set to 1
+.Pq one.
 .It Sy \&<svrinfoname\ /\&>
 .Pq Optional.
 Set the name of the broadcast.
@@ -216,14 +227,14 @@ If set to
 .Sy 0
 .Pq zero ,
 the Icecast server will not submit this stream to a YP directory, which is also
-the default if the \&<svrinfopublic\ /\&> element is absent.
+the default if the \&<svrinfopublic/\&> element is absent.
 .It Sy \&<reencode\ /\&>
 .Pq Optional.
 Element that contains child elements, which specify if and how reencoding
 should be done.
 .El
 .Ss Reencoding settings
-Each of the reencoding configuration elements have the \&<reencode\ /\&>
+Each of the reencoding configuration elements have the \&<reencode/\&>
 element as their parent.
 .Bl -ohang
 .It Sy \&<enable\ /\&>
@@ -234,22 +245,22 @@ to enable reencoding.
 If set to
 .Sy 0
 .Pq zero ,
-no reencoding will be done, which is also the default if the \&<enable\ /\&>
+no reencoding will be done, which is also the default if the \&<enable/\&>
 element is absent.
 .It Sy \&<encdec\ /\&>
 Element that contains child elements, which specify how to decode and encode
 a certain media file format for streaming.
-Each format is described by a separate \&<encdec\ /\&> element.
+Each format is described by a separate \&<encdec/\&> element.
 .El
 .Ss Dencoder/Encoder settings
-Each of the decoder/encoder configuration elements have the \&<encdec\ /\&>
+Each of the decoder/encoder configuration elements have the \&<encdec/\&>
 element as their parent.
 .Bl -ohang
 .It Sy \&<format\ /\&>
 This element is used by
 .Nm
 to find the appropriate encoder for the output stream format specified in the
-\&<format\ /\&> element inside the global configuration.
+\&<format/\&> element inside the global configuration.
 It is recommended that this element is always supplied, even for currently
 unsupported output formats, with content such as
 .Sy VORBIS ,
@@ -275,13 +286,13 @@ it to standard output.
 During runtime, the placeholder
 .Sq Li @T@
 is replaced with the fully qualified name of the media file, as specified in
-the \&<filename\ /\&> element or a playlist file.
+the \&<filename/\&> element or a playlist file.
 It should always be enclosed in quotes, to prevent problems with filenames that
 contain whitespaces.
 .Pp
 The metadata placeholder,
 .Sq @M@ ,
-is also available in the \&<decode\ /\&> element.
+is also available in the \&<decode/\&> element.
 That way it can be used for combined de-/encoder programs that produce readily
 streamable data.
 .Pp

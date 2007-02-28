@@ -21,6 +21,9 @@
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
 #include <errno.h>
 #include <limits.h>
 #include <stdio.h>
@@ -33,6 +36,9 @@
 
 #ifdef WIN32
 # define snprintf	_snprintf
+# define popen		_popen
+# define pclose 	_pclose
+# define stat		_stat
 #endif
 
 #ifndef SIZE_T_MAX
@@ -47,21 +53,24 @@ extern int	errno;
 extern char    *__progname;
 
 struct playlist {
-	char	       *filename;
-	char	      **list;
-	size_t		size;
-	size_t		num;
-	size_t		index;
+	char	 *filename;
+	char	**list;
+	size_t	  size;
+	size_t	  num;
+	size_t	  index;
+	int	  program;
+	char	 *prog_track;
 };
 
 playlist_t *	playlist_create(const char *);
 int		playlist_add(playlist_t *, const char *);
 unsigned int	playlist_random(void);
+const char *	playlist_run_program(playlist_t *);
 
 playlist_t *
 playlist_create(const char *filename)
 {
-	playlist_t *pl;
+	playlist_t	*pl;
 
 	pl = xcalloc(1, sizeof(playlist_t));
 	pl->filename = xstrdup(filename);
@@ -145,16 +154,15 @@ void playlist_shutdown(void) {}
 playlist_t *
 playlist_read(const char *filename)
 {
-	playlist_t     *pl;
-	unsigned long	line;
-	FILE	       *filep;
-	char		buf[PATH_MAX + 1];
+	playlist_t	*pl;
+	unsigned long	 line;
+	FILE		*filep;
+	char		 buf[PATH_MAX + 1];
 
 	pl = playlist_create(filename);
 
 	if ((filep = fopen(filename, "r")) == NULL) {
-		printf("%s: playlist_read(): %s: %s\n", __progname, filename,
-		       strerror(errno));
+		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
 		playlist_free(pl);
 		return (NULL);
 	}
@@ -213,6 +221,42 @@ playlist_read(const char *filename)
 	return (pl);
 }
 
+playlist_t *
+playlist_program(const char *filename)
+{
+	playlist_t	*pl;
+#ifdef HAVE_STAT
+	struct stat	 st;
+#else
+	FILE		*filep;
+#endif
+
+	pl = playlist_create(filename);
+	pl->program = 1;
+
+#ifdef HAVE_STAT
+	if (stat(filename, &st) == -1) {
+		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
+		playlist_free(pl);
+		return (NULL);
+	}
+	if (!(st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
+		printf("%s: %s: Not an executable program\n", __progname, filename);
+		playlist_free(pl);
+		return (NULL);
+	}
+#else
+	if ((filep = fopen(filename, "r")) == NULL) {
+		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
+		playlist_free(pl);
+		return (NULL);
+	}
+	fclose(filep);
+#endif /* HAVE_STAT */
+
+	return (pl);
+}
+
 void
 playlist_free(playlist_t *pl)
 {
@@ -239,6 +283,9 @@ playlist_free(playlist_t *pl)
 			pl->list = NULL;
 		}
 
+		if (pl->prog_track != NULL)
+			xfree(pl->prog_track);
+
 		xfree(pl);
 		pl = NULL;
 	}
@@ -253,6 +300,9 @@ playlist_get_next(playlist_t *pl)
 		exit(1);
 	}
 
+	if (pl->program)
+		return (playlist_run_program(pl));
+
 	return ((const char *)pl->list[pl->index++]);
 }
 
@@ -265,6 +315,9 @@ playlist_peek_next(playlist_t *pl)
 		exit(1);
 	}
 
+	if (pl->program)
+		return (NULL);
+
 	return ((const char *)pl->list[pl->index]);
 }
 
@@ -276,6 +329,9 @@ playlist_skip_next(playlist_t *pl)
 		       __progname);
 		exit(1);
 	}
+
+	if (pl->program)
+		return;
 
 	if (pl->list[pl->index] != NULL)
 		pl->index++;
@@ -290,6 +346,9 @@ playlist_get_num_items(playlist_t *pl)
 		exit(1);
 	}
 
+	if (pl->program)
+		return (0);
+
 	return ((unsigned long)pl->num);
 }
 
@@ -301,6 +360,9 @@ playlist_get_position(playlist_t *pl)
 		       __progname);
 		exit(1);
 	}
+
+	if (pl->program)
+		return (0);
 
 	return ((unsigned long)pl->index);
 }
@@ -314,7 +376,7 @@ playlist_set_position(playlist_t *pl, unsigned long index)
 		exit(1);
 	}
 
-	if (index > pl->num - 1)
+	if (pl->program || index > pl->num - 1)
 		return (0);
 
 	pl->index = (size_t)index;
@@ -333,7 +395,7 @@ playlist_goto_entry(playlist_t *pl, const char *entry)
 		exit(1);
 	}
 
-	if (pl->num == 0)
+	if (pl->program || pl->num == 0)
 		return (0);
 
 	for (i = 0; i < pl->num; i++) {
@@ -355,6 +417,9 @@ playlist_rewind(playlist_t *pl)
 		exit(1);
 	}
 
+	if (pl->program)
+		return;
+
 	pl->index = 0;
 }
 
@@ -371,6 +436,9 @@ playlist_reread(playlist_t **plist)
 
 	pl = *plist;
 
+	if (pl->program)
+		return (0);
+
 	if ((new_pl = playlist_read(pl->filename)) == NULL)
 		return (0);
 
@@ -386,8 +454,8 @@ playlist_reread(playlist_t **plist)
 void
 playlist_shuffle(playlist_t *pl)
 {
-	unsigned long	d, i, range;
-	char	       *temp;
+	unsigned long	 d, i, range;
+	char		*temp;
 
 	if (pl == NULL) {
 		printf("%s: playlist_shuffle(): Internal error: NULL argument\n",
@@ -395,7 +463,7 @@ playlist_shuffle(playlist_t *pl)
 		exit(1);
 	}
 
-	if (pl->num < 2)
+	if (pl->program || pl->num < 2)
 		return;
 
 	for (i = 0; i < pl->num; i++) {
@@ -419,4 +487,67 @@ playlist_shuffle(playlist_t *pl)
 		pl->list[d] = pl->list[i];
 		pl->list[i] = temp;
 	}
+}
+
+const char *
+playlist_run_program(playlist_t *pl)
+{
+	FILE	*filep;
+	char	 buf[PATH_MAX + 1];
+
+	if (pl == NULL) {
+		printf("%s: playlist_run_program(): Internal error: NULL argument\n",
+		       __progname);
+		exit(1);
+	}
+
+	if (!pl->program)
+		return (NULL);
+
+	fflush(NULL);
+	errno = 0;
+	if ((filep = popen(pl->filename, "r")) == NULL) {
+		printf("%s: playlist_run_program(): Error while executing '%s'",
+		       __progname, pl->filename);
+		/* popen() does not set errno reliably ... */
+		if (errno)
+			printf(": %s\n", strerror(errno));
+		else
+			printf("\n");
+		return (NULL);
+	}
+
+	if (fgets(buf, sizeof(buf), filep) == NULL) {
+		if (ferror(filep))
+			printf("%s: Error while reading output from program '%s': %s\n",
+			       __progname, pl->filename, strerror(errno));
+		pclose(filep);
+		printf("%s: FATAL: External program '%s' not (or no longer) usable.\n",
+		       __progname, pl->filename);
+		exit(1);
+	}
+
+	pclose(filep);
+
+	if (strlen(buf) == sizeof(buf) - 1) {
+		printf("%s: Output from program '%s' too long\n", __progname,
+		       pl->filename);
+		return (NULL);
+	}
+
+	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\n')
+		buf[strlen(buf) - 1] = '\0';
+	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\r')
+		buf[strlen(buf) - 1] = '\0';
+	if (buf[0] == '\0') {
+		printf("%s: Empty line received from program '%s'\n",
+		       __progname, pl->filename);
+		return (NULL);
+	}
+
+	if (pl->prog_track != NULL)
+		xfree(pl->prog_track);
+	pl->prog_track = xstrdup(buf);
+
+	return ((const char *)pl->prog_track);
 }

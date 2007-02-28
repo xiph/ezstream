@@ -57,6 +57,7 @@ typedef struct tag_EZCONFIG {
 	FORMAT_ENCDEC	*encoderDecoders[MAX_FORMAT_ENCDEC];
 	int		 numEncoderDecoders;
 	int		 shuffle;
+	int		 fileNameIsProgram;
 } EZCONFIG;
 
 EZCONFIG *	getEZConfig(void);

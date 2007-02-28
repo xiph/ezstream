@@ -550,7 +550,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 {
 	unsigned char	 buff[4096];
 	size_t		 read, total, oldTotal;
-	int		 retval = 0;
+	int		 ret = 0;
 #ifdef HAVE_GETTIMEOFDAY
 	double		 kbps = -1.0;
 	struct timeval	 timeStamp, *startTime = (struct timeval *)tv;
@@ -567,21 +567,21 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 	total = oldTotal = 0;
 	while ((read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
-		int	ret;
-
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
-			printf("%s: SIGHUP signal received, will reread playlist after this file.\n",
-			       __progname);
+			if (!pezConfig->fileNameIsProgram)
+				printf("%s: SIGHUP signal received, will reread playlist after this file.\n",
+				       __progname);
 		}
 		if (skipTrack) {
 			skipTrack = 0;
-			retval = 2;
+			ret = 2;
 			break;
 		}
 
-		ret = shout_send(shout, buff, read);
-		if (ret != SHOUTERR_SUCCESS) {
+		shout_sync(shout);
+
+		if (shout_send(shout, buff, read) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_send(): %s\n", __progname,
 			       shout_get_error(shout));
 			while (1) {
@@ -591,13 +591,11 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 				if (shout_open(shout) == SHOUTERR_SUCCESS) {
 					printf("%s: Reconnect to server successful.\n",
 					       __progname);
-					ret = shout_send(shout, buff, read);
-					if (ret != SHOUTERR_SUCCESS)
-						printf("%s: shout_send(): %s\n",
-						       __progname,
-						       shout_get_error(shout));
-					else
+					if (shout_send(shout, buff, read) == SHOUTERR_SUCCESS)
 						break;
+					printf("%s: shout_send(): %s\n",
+					       __progname,
+					       shout_get_error(shout));
 				} else {
 					printf("%s: Reconnect failed. Waiting 5 seconds ...\n",
 					       __progname);
@@ -610,8 +608,6 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			}
 		}
 
-		shout_sync(shout);
-
 		total += read;
 		if (qFlag && vFlag) {
 #ifdef HAVE_GETTIMEOFDAY
@@ -620,10 +616,17 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			unsigned int	hrs, mins, secs;
 #endif /* HAVE_GETTIMEOFDAY */
 
-			if (!isStdin && playlistMode)
-				printf("  [%4lu/%-4lu]",
-				       playlist_get_position(playlist),
-				       playlist_get_num_items(playlist));
+			if (!isStdin && playlistMode) {
+				if (pezConfig->fileNameIsProgram) {
+					char *tmp = xstrdup(pezConfig->fileName);
+					printf("  [%s]",
+					       basename(tmp));
+					xfree(tmp);
+				} else
+					printf("  [%4lu/%-4lu]",
+					       playlist_get_position(playlist),
+					       playlist_get_num_items(playlist));
+			}
 
 #ifdef HAVE_GETTIMEOFDAY
 			oldTime = (double)timeStamp.tv_sec
@@ -656,13 +659,13 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 	if (ferror(filepstream)) {
 		if (errno == EINTR) {
 			clearerr(filepstream);
-			retval = 1;
+			ret = 1;
 		} else
 			printf("%s: streamFile(): Error while reading '%s': %s\n",
 			       __progname, fileName, strerror(errno));
 	}
 
-	return (retval);
+	return (ret);
 }
 
 int
@@ -732,17 +735,23 @@ streamPlaylist(shout_t *shout, const char *fileName)
 	const char	*song;
 	char		 lastSong[PATH_MAX + 1];
 
-	/*
-	 * XXX: This preserves traditional behavior, however, rereading the
-	 *      playlist after each walkthrough seems a bit more logical.
-	 */
 	if (playlist == NULL) {
-		if ((playlist = playlist_read(fileName)) == NULL)
-			return (0);
+		if (pezConfig->fileNameIsProgram) {
+			if ((playlist = playlist_program(fileName)) == NULL)
+				return (0);
+		} else {
+			if ((playlist = playlist_read(fileName)) == NULL)
+				return (0);
+		}
 	} else
+		/*
+		 * XXX: This preserves traditional behavior, however,
+		 *      rereading the playlist after each walkthrough seems a
+		 *      bit more logical.
+		 */
 		playlist_rewind(playlist);
 
-	if (pezConfig->shuffle)
+	if (!pezConfig->fileNameIsProgram && pezConfig->shuffle)
 		playlist_shuffle(playlist);
 
 	while ((song = playlist_get_next(playlist)) != NULL) {
@@ -751,6 +760,8 @@ streamPlaylist(shout_t *shout, const char *fileName)
 			return (0);
 		if (rereadPlaylist) {
 			rereadPlaylist = rereadPlaylist_notify = 0;
+			if (pezConfig->fileNameIsProgram)
+				continue;
 			printf("%s: Rereading playlist\n", __progname);
 			if (!playlist_reread(&playlist))
 				return (0);
@@ -1095,12 +1106,17 @@ main(int argc, char *argv[])
 		tmpFileName = xstrdup(pezConfig->fileName);
 		for (p = tmpFileName; *p != '\0'; p++)
 			*p = tolower((int)*p);
-		if (strrcmp(tmpFileName, ".m3u") == 0 ||
+		if (pezConfig->fileNameIsProgram ||
+		    strrcmp(tmpFileName, ".m3u") == 0 ||
 		    strrcmp(tmpFileName, ".txt") == 0)
 			playlistMode = 1;
 		else
 			playlistMode = 0;
 		xfree(tmpFileName);
+
+		if (vFlag && pezConfig->fileNameIsProgram)
+			printf("%s: Using program '%s' to get filenames for streaming\n",
+			       __progname, pezConfig->fileName);
 
 		ret = 1;
 		do {
@@ -1113,6 +1129,9 @@ main(int argc, char *argv[])
 	} else
 		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,
 		       host, port, mount, shout_get_error(shout));
+
+	if (vFlag)
+		printf("%s: Exiting ...\n", __progname);
 
 	shout_close(shout);
 

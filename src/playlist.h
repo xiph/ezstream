@@ -37,6 +37,13 @@ void		playlist_shutdown(void);
 playlist_t *	playlist_read(const char * /* filename */);
 
 /*
+ * For each call to playlist_get_next(), the specified program is run. This
+ * program is supposed to print one line to standard output, containing the
+ * path and filename of a media file.
+ */
+playlist_t *	playlist_program(const char * /* program name */);
+
+/*
  * Free all memory used by a playlist handler that was created with
  * playlist_read().
  */
@@ -47,6 +54,11 @@ void		playlist_free(playlist_t *);
  * playlist entry, or NULL if the end of the list has been reached.
  */
 const char *	playlist_get_next(playlist_t *);
+
+/*
+ * The functions below work on playlist handlers obtained with playlist_read()
+ * and are no-ops (i.e. return failure) for playlists from playlist_program().
+ */
 
 /*
  * Get the next item in the playlist without moving on to the following entry.

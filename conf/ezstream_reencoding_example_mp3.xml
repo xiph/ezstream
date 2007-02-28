@@ -1,5 +1,5 @@
 <!--
-   EXAMPLE: MP3 playlist stream WITH reencoding and sequential playback
+   EXAMPLE: MP3 stream using an external playlist program, WITH reencoding
 
    This example streams a playlist that may contain MP3, Ogg Vorbis and FLAC
    files. Ezstream will use external decoders to read the media files, and
@@ -14,12 +14,12 @@
        output format of the stream.
      -->
     <format>MP3</format>
-    <filename>playlist.m3u</filename>
+    <filename>playlist.pl</filename>
     <!--
-       Explicitly disable playlist shuffling. Sequential playback is also the
-       default.
+       Indicate that <filename> contains an executable program or script,
+       which prints a single line with a filename to standard output:
      -->
-    <shuffle>0</shuffle>
+    <playlist_program>1</playlist_program>
     <!--
       The following settings are used to describe your stream to the server.
       It's up to you to make sure that the bitrate/samplerate/channels

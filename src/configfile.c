@@ -140,7 +140,7 @@ parseConfig(const char *fileName)
 	xmlDocPtr	 doc;
 	xmlNodePtr	 cur;
 	char		*ls_xmlContentPtr;
-	int		 shuffle_set, svrinfopublic_set;
+	int		 shuffle_set, svrinfopublic_set, program_set;
 
 	xmlLineNumbersDefault(1);
 	if ((doc = xmlParseFile(fileName)) == NULL) {
@@ -160,6 +160,7 @@ parseConfig(const char *fileName)
 
 	shuffle_set = 0;
 	svrinfopublic_set = 0;
+	program_set = 0;
 	cur = cur->xmlChildrenNode;
 	while (cur != NULL) {
 		if (!xmlStrcmp(cur->name, BAD_CAST "url")) {
@@ -217,6 +218,22 @@ parseConfig(const char *fileName)
 				}
 				ezConfig.fileName = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "playlist_program")) {
+			if (program_set) {
+				printf("%s[%ld]: Error: Cannot have multiple <playlist_program> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				int tmp;
+
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				tmp = atoi(ls_xmlContentPtr);
+				ezConfig.fileNameIsProgram = (tmp == 0) ? 0 : 1;
+				xmlFree(ls_xmlContentPtr);
+				program_set = 1;
 			}
 		}
 		if (!xmlStrcmp(cur->name, BAD_CAST "shuffle")) {
