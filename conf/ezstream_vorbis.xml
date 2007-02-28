@@ -11,7 +11,9 @@
     <sourcepassword>hackme</sourcepassword>
     <format>VORBIS</format>
     <filename>playlist.m3u</filename>
-	  <!--
+    <!-- For demonstrational purposes, explicitly set continuous streaming: -->
+    <stream_once>0</stream_once>
+    <!--
       The following settings are used to describe your stream to the server.
       It's up to you to make sure that the bitrate/quality/samplerate/channels
       information matches up with your input stream files.

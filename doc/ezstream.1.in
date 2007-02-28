@@ -160,11 +160,23 @@ Comments in playlists are introduced by a
 sign at the beginning of a line and ignored by
 .Nm .
 .It Sy \&<playlist_program\ /\&>
-Indicates that the file in \&<filename/\&> is actually an executable program
+.Pq Optional.
+Set to
+.Sy 1
+.Pq one
+to indicate that the file in \&<filename/\&> is actually an executable program
 or script.
 This program is supposed to print
 .Pq to standard output
 one line with the name of a file that should be streamed next and then exit.
+.Pp
+If set to
+.Sy 0
+.Pq zero ,
+\&<filename/\&> content is assumed to be a media file, playlist file or the
+keyword
+.Pa stdin
+.Pq the default .
 .It Sy \&<shuffle\ /\&>
 .Pq Optional.
 Set to
@@ -177,6 +189,15 @@ Files are played sequentially if set to
 or when the \&<shuffle/\&> element is absent.
 This option will be ignored if \&<playlist_program/\&> is set to 1
 .Pq one.
+.It Sy \&<stream_once\ /\&>
+Set to
+.Sy 1
+.Pq one
+to stream \&<filename/\&> content only once, and to
+.Sy 0
+.Pq zero
+for continuous streaming
+.Pq the default .
 .It Sy \&<svrinfoname\ /\&>
 .Pq Optional.
 Set the name of the broadcast.

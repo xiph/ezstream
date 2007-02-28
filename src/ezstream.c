@@ -775,7 +775,10 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		}
 	}
 
-	return (1);
+	if (pezConfig->streamOnce)
+		return (0);
+	else
+		return (1);
 }
 
 /* Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c */
@@ -1123,8 +1126,11 @@ main(int argc, char *argv[])
 			if (playlistMode)
 				ret = streamPlaylist(shout,
 						     pezConfig->fileName);
-			else
+			else {
 				ret = streamFile(shout, pezConfig->fileName);
+				if (pezConfig->streamOnce)
+					break;
+			}
 		} while (ret);
 	} else
 		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,

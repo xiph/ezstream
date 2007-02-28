@@ -58,6 +58,7 @@ typedef struct tag_EZCONFIG {
 	int		 numEncoderDecoders;
 	int		 shuffle;
 	int		 fileNameIsProgram;
+	int		 streamOnce;
 } EZCONFIG;
 
 EZCONFIG *	getEZConfig(void);

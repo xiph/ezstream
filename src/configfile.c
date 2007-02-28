@@ -140,7 +140,8 @@ parseConfig(const char *fileName)
 	xmlDocPtr	 doc;
 	xmlNodePtr	 cur;
 	char		*ls_xmlContentPtr;
-	int		 shuffle_set, svrinfopublic_set, program_set;
+	int		 program_set, shuffle_set, streamOnce_set,
+			 svrinfopublic_set;
 
 	xmlLineNumbersDefault(1);
 	if ((doc = xmlParseFile(fileName)) == NULL) {
@@ -158,9 +159,10 @@ parseConfig(const char *fileName)
 
 	memset(&ezConfig, '\000', sizeof(ezConfig));
 
-	shuffle_set = 0;
-	svrinfopublic_set = 0;
 	program_set = 0;
+	shuffle_set = 0;
+	streamOnce_set = 0;
+	svrinfopublic_set = 0;
 	cur = cur->xmlChildrenNode;
 	while (cur != NULL) {
 		if (!xmlStrcmp(cur->name, BAD_CAST "url")) {
@@ -250,6 +252,22 @@ parseConfig(const char *fileName)
 				ezConfig.shuffle = (tmp == 0) ? 0 : 1;
 				xmlFree(ls_xmlContentPtr);
 				shuffle_set = 1;
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "stream_once")) {
+			if (streamOnce_set) {
+				printf("%s[%ld]: Error: Cannot have multiple <stream_once> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				int tmp;
+
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				tmp = atoi(ls_xmlContentPtr);
+				ezConfig.streamOnce = (tmp == 0) ? 0 : 1;
+				xmlFree(ls_xmlContentPtr);
+				streamOnce_set = 1;
 			}
 		}
 		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfoname")) {
