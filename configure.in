@@ -63,7 +63,7 @@ AC_CHECK_HEADERS(sys/time.h paths.h signal.h)
 dnl LIBRARY FUNCTIONS
 
 AC_CHECK_LIB(gen, basename)
-AC_CHECK_FUNCS(arc4random geteuid gettimeofday random srandomdev)
+AC_CHECK_FUNCS(arc4random gettimeofday random srandomdev stat)
 AC_REPLACE_FUNCS(getopt strlcat strlcpy)
 if test x"$ac_cv_header_signal_h" = "xyes"; then
 	AC_CHECK_FUNCS([sigaction], [

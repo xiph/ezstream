@@ -25,6 +25,9 @@
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
 #endif
@@ -825,14 +828,6 @@ main(int argc, char *argv[])
 	qFlag = 0;
 	vFlag = 0;
 
-#ifdef HAVE_GETEUID
-	if (geteuid() == 0) {
-		printf("WARNING: You should not run %s as root. It can run other programs, which\n",
-		       __progname);
-		printf("         may cause serious security problems.\n");
-	}
-#endif
-
 	while ((c = getopt(argc, argv, "c:hqv")) != -1) {
 		switch (c) {
 		case 'c':
@@ -870,16 +865,35 @@ main(int argc, char *argv[])
 	} else {
 		/*
 		 * Attempt to open configFile here for a more meaningful error
-		 * message.
+		 * message. Where possible, do it with stat() and check for
+		 * safe config file permissions.
 		 */
-		FILE	*tmp;
+#ifdef HAVE_STAT
+		struct stat	  st;
+
+		if (stat(configFile, &st) == -1) {
+			printf("%s: %s\n", configFile, strerror(errno));
+			usage();
+			return (2);
+		}
+		if (vFlag && (st.st_mode & (S_IRGRP | S_IROTH)))
+			printf("%s: Warning: %s is group and/or world readable.\n",
+			       __progname, configFile);
+		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
+			printf("%s: Error: %s is group and/or world writeable.\n",
+			       __progname, configFile);
+			return (2);
+		}
+#else
+		FILE		 *tmp;
 
 		if ((tmp = fopen(configFile, "r")) == NULL) {
 			printf("%s: %s\n", configFile, strerror(errno));
 			usage();
 			return (2);
-		} else
-			fclose(tmp);
+		}
+		fclose(tmp);
+#endif /* HAVE_STAT */
 	}
 
 	if (!parseConfig(configFile))
