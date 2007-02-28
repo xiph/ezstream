@@ -1,0 +1,517 @@
+2007-02-28 11:06  moritz
+
+	* [r12586] CHANGELOG, ChangeLog, Makefile.am:
+	  Switch from a generated ChangeLog to a manually maintained and
+	  more compact CHANGELOG.
+
+2007-02-28 11:03  moritz
+
+	* [r12585] src/ezstream.c:
+	  Sync usageHelp() with new reality.
+
+2007-02-27 14:44  moritz
+
+	* [r12576] configure.in:
+	  Let MIPS[pro] C be chatty with warnings and check for basename()
+	  in libgen. Ezstream now builds on IRIX.
+
+2007-02-27 14:42  moritz
+
+	* [r12575] src/ezstream.c:
+	  getopt() returns int, not char.
+
+2007-02-27 14:41  moritz
+
+	* [r12574] m4/xiph_xml2.m4:
+	  Use backticks to execute xml2-config/xslt-config, which is more
+	  portable.
+
+2007-02-27 12:46  moritz
+
+	* [r12573] README:
+	  Document a caveat when building ezstream on Solaris with a
+	  different compiler than the one used to build libshout.
+
+2007-02-26 20:29  moritz
+
+	* [r12572] configure.in, m4/shout.m4:
+	  Make this work on static archs, and get one step closer to SunCC
+	  support on Solaris. Also, don't complain if libshout isn't
+	  thread-safe, as Ezstream isn't multithreaded.
+
+2007-02-26 19:59  moritz
+
+	* [r12571] Makefile.am, configure.in, m4/Makefile.am:
+	  Add m4/ to the distribution tarball.
+
+2007-02-26 15:28  moritz
+
+	* [r12570] Makefile.am, m4/ogg.m4, m4/vorbis.m4:
+	  Unbreak "make distcheck": $prefix is not a good default, use
+	  /usr/local instead. This makes it more likely that installed
+	  libogg and libvorbis are found, when the user (or autoconf)
+	  specifies a different --prefix. Users who installed their
+	  libraries in their homedir now have to set $OGG_PREFIX and
+	  $VORBIS_PREFIX, or set their respective --with arguments. Let the
+	  snapshot target use distcheck now that it works.
+
+2007-02-26 02:56  moritz
+
+	* [r12565] m4/ac_config_libconfig_in.m4, m4/acx_pthread.m4,
+	  m4/ogg.m4, m4/shout.m4, m4/vorbis.m4, m4/xiph_compiler.m4,
+	  m4/xiph_curl.m4, m4/xiph_net.m4, m4/xiph_path_python.m4,
+	  m4/xiph_types.m4, m4/xiph_xml2.m4:
+	  Remove unused .m4 files and sync the used ones with Icecast.
+
+2007-02-25 18:28  moritz
+
+	* [r12564] src/ezstream.c:
+	  Make Ezstream work properly and do the right thing, even when
+	  bombarded with a flurry of simultaneous SIGHUP and SIGUSR1
+	  signals. From what I can tell, signal handling is now quite solid
+	  now. Achieve this by moving most of streamFile() into a new
+	  sendStream() function, which is called within a new do-while loop
+	  inside streamFile(). There, proper behavior is ensured and a race
+	  condition resolved in favor of SIGHUP.
+
+2007-02-25 16:00  moritz
+
+	* [r12563] src/ezstream.c:
+	  Switch from using signal() to sigaction() and friends, so that
+	  SA_RESTART can be used. This is required for Solaris and possibly
+	  others, where signal handlers have to be reinstalled after having
+	  caught one signal via signal(). Also prevent Ezstream from being
+	  killed by a handled signal in streamFile(), where they can
+	  interrupt fread()'s system calls. This improves matters, but
+	  isn't perfect, yet. A SIGHUP signal can still cause skipping to
+	  the next track, which should be triggered only by SIGUSR1.
+
+2007-02-25 14:00  moritz
+
+	* [r12562] Makefile.am, conf/Makefile.am, configure.in,
+	  src/Makefile.am, src/configfile.c, src/configfile.h,
+	  src/ezstream.c, win32/Makefile.am:
+	  Various cleanups and auto-fu tweaks. * Make Makefile.am files
+	  look alike as much as possible. * Remove debug: target and don't
+	  mess with the users DEBUG environment variable: Autoconf checks
+	  for -g and automatically adds it to CFLAGS, which is overridden
+	  by the user's $DEBUG. If the user didn't specify one, "make
+	  install" will strip the resulting binaries and leave the
+	  debugging symbols intact otherwise. * Remove profile: target, as
+	  it is quite pointless in Ezstream. Also, the user can add
+	  profiling flags via the $DEBUG variable as well. * Remove
+	  -ffast-math and -fsigned-char from gcc, and enable two additional
+	  warnings instead. * Unconfuse Solaris compiler flags
+	  (unfortunately, the configure script still fails in the libshout
+	  check with some obscure linker error): Do not force -x04 and
+	  -fast optimizations, let the user decide (it doesn't matter for
+	  Ezstream anyways.) Remove -xgc92, which is deprecated and
+	  actually makes the resulting binary run slower on SPARC. Also
+	  remove -fsimple, which does not help and has the potential of
+	  causing trouble, and don't enable verbose warnings just to
+	  disable them afterwards with -w. Leave only -v for verbose
+	  warnings. * Const'ify getFormat*() functions and blankString, and
+	  squelch a few const- related warnings. * Squelch a signedness
+	  warning and fix two ;; syntax errors. * Add a snapshot target to
+	  Makefile.am that creates a tarball of the form
+	  ezstream-snapshot-YYYYMMDD.tar.gz.
+
+2007-02-25 03:49  moritz
+
+	* [r12557] src/ezstream.c:
+	  Merge changes to the remaining two functions, openResource() and
+	  streamFile(), after which the merge is complete. Changes in
+	  openResource(): * Let the caller know whether we're streaming
+	  from standard input, and give it a copy of the metadata
+	  information. * Make filename extension matching case insensitive.
+	  Ezstream can now stream foo.Ogg out of playlist.tXt. (On that
+	  note, another item from the parseConfig() commit log message was
+	  missing: <format/> and <match/> are also case insensitive now.)
+	  Changes in streamFile(): * New feature: Skip currently playing
+	  track when receiving SIGUSR1. * New feature: When using both the
+	  new -q and -v command line parameters, Ezstream now displays some
+	  "real-time" information: playlist position, elapsed time
+	  streaming the current track, and approximate bitrate in kbps. *
+	  Fix the fread() loop by moving the "if read bytes > 0" condition
+	  into the while statement, and check with ferror() afterwards
+	  whether an error occured. * Remove redundant shout_delay() call.
+	  Ezstream puts itself to sleep with shout_sync(). * Return a value
+	  that makes sense in main()'s do-while loop, instead of whatever
+	  shout_send() returned last. * Remove or prettify a few messages.
+
+2007-02-25 03:10  moritz
+
+	* [r12554] src/ezstream.c:
+	  Merge processMetadata() changes: * Fix how the metadata string is
+	  generated. Don't include the " - " in the output if either artist
+	  or title are missing from ID3v1/Vorbis tags. * Print the correct
+	  error message when ov_open() fails. * Improve filename-based
+	  generation of metadata. Use a copy of fileName for basename(),
+	  which may modify its argument in some places where the old, weird
+	  POSIX implementation is used. Also, basename() is not infallible,
+	  but when it fails, it is annoying for us. Assert that it cannot
+	  fail since we feed it with path names < PATH_MAX (handled in
+	  playlist.c and configfile.c.) In short, make processMetadata()
+	  always return something more or less useful as long as the file
+	  in question can be opened.
+
+2007-02-25 02:36  moritz
+
+	* [r12553] src/ezstream.c:
+	  Merge changes to replaceString() and buildCommandString(), and do
+	  the formatting nitpickery to setMetadata(). Changes in
+	  replaceString(): * Fix a heap overflow. replaceString() would
+	  happily replace multiple '@T@' and '@M@' placeholders and write
+	  into *dest until things blow up. Fix this by using safe string
+	  functions. Then completely prevent it by ensuring that it
+	  replaces only one placeholder per call (adjusting
+	  buildCommandString() accordingly) and already complaining to the
+	  user in parseConfig() about illegal, multiple placeholders in
+	  their command lines. (That parseConfig() change was missing from
+	  the commit log earlier.) In buildCommandString(): * Use xcalloc()
+	  instead of malloc() and get rid of the now redundant memset()
+	  calls. * Allow decoder command lines to contain the '@M@'
+	  metadata placeholder. Useful for combined de-/encoders like
+	  ffmpeg2theora. * Tweak message about "unsupported" format, which
+	  used to be false in the case of Ogg Theora streams. * Plug
+	  several memory leaks. * Don't print the "Executing command 'foo'"
+	  message in this function.
+
+2007-02-25 01:14  moritz
+
+	* [r12552] src/ezstream.c:
+	  Merge changes to main(), urlParse() and streamPlaylist(). In
+	  main(): * Install the signal handler as late as possible. * Add
+	  new command line options: -v (verbose, use twice for even more
+	  verbose output) and -q (quiet, redirect standard error output
+	  from external de-/ encoders to /dev/null.) * It is now an error
+	  to supply more than one -c parameter. This prevents unexpected
+	  results. * Add a stern warning when ezstream is running as root.
+	  Just Don't Do It. Leaving the configfile writeable to others by
+	  accident could mean instant root compromise. * Before handing the
+	  config file over to libxml, try to open it ourselves first. The
+	  error message from strerror() is a lot more helpful than the
+	  cryption I/O error printed by libxml. * Don't preallocate memory
+	  for urlParse(). * Fix command line error messages, they seem to
+	  be for a different program than Ezstream. * More terse libshout
+	  error messages, just print which function failed. I consider
+	  these errors of questionable value for an end user, but at least
+	  a knowledgeable one will know instantly what went wrong. * Case
+	  insensitive matching of playlist file extensions. * Print the
+	  address, port and mountpoint that Ezstream is actually trying to
+	  connect to, instead of what the user supplied. That should make
+	  it easier to spot reasons for connect failures (e.g. typos.)
+	  Changes in urlParse(): * Let urlParse() allocate memory for
+	  hostname and mountpoint, as it knows how much memory is actually
+	  required. * Fix a buffer overflow of the tmpPort buffer by adding
+	  checks and using safe string functions. * Let the caller print an
+	  error message, instead of having the same printf() twice in
+	  urlParse(). The streamPlaylist() function has been rewritten to
+	  use the new playlist_*() routines. Apart from the added playlist
+	  shuffle feature no functional change.
+
+2007-02-25 00:35  moritz
+
+	* [r12551] configure.in:
+	  Add check for geteuid(), which is better than checking for WIN32.
+
+2007-02-25 00:25  moritz
+
+	* [r12550] src/ezstream.c:
+	  Begin merging ezstream.c changes. This first batch includes: *
+	  License reference and various #include cleanups and additions
+	  that are required later. * Add new usage() and usageHelp()
+	  functions (which already contain what's to come.) Move them close
+	  to main() where getopt() is called. * New signal handler, which
+	  now no longer uses printf(). printf() is not safe to use in
+	  signal handlers. Use volatile sig_atomic_t types instead of ints
+	  as flags to set in the handler. * Formatting and const'ifying of
+	  WIN32-basename() and strrcmp(). Rearrange them so that the actual
+	  "worker functions" are grouped together. * Add function
+	  prototypes for those that are already up-to-date. * Rename
+	  ReplaceString() to replaceString() for consistency with other
+	  function names in Ezstream. * Prepare for portable *__progname
+	  usage.
+
+2007-02-24 23:26  moritz
+
+	* [r12549] src/configfile.c:
+	  Merge new parseConfig() function. There were many changes, but
+	  those are too cumbersome to merge separately. They are: * The
+	  usual formatting nitpickings. * Don't leak memory in case of
+	  duplicate entries. Instead make it an error and print a helpful
+	  error message, with config file line number, to the user. *
+	  Replace the manual cast to (const xmlChar *) with libxml2's
+	  BAD_CAST. There probably won't be any UTF8 support in Ezstream
+	  any time soon ... * Remove redundant strlen() check -
+	  xmlNodeListGetString() never returns an empty string if
+	  (cur->xmlChildrenNode != NULL). * Use xstrdup() instead of
+	  malloc() + memset() + strcpy(). * Ensure that boolean
+	  configration options are always either 1 or 0. * Ensure that path
+	  names given via <filename /> do not exceed PATH_MAX. * Add
+	  <shuffle /> configuration option for playlist shuffling.
+
+2007-02-24 23:05  moritz
+
+	* [r12548] src/configfile.c:
+	  Add function to free a configuration in case of an error.
+
+2007-02-24 23:03  moritz
+
+	* [r12547] configure.in:
+	  Fix typo in comment.
+
+2007-02-24 22:56  moritz
+
+	* [r12546] src/configfile.c:
+	  Replace three if-conditionals with one, both in
+	  getFormatEncoder() and getFormatDecoder(), with prettier
+	  formatting.
+
+2007-02-24 22:50  moritz
+
+	* [r12545] src/configfile.c, src/configfile.h:
+	  Const'ify configfile functions.
+
+2007-02-24 22:25  moritz
+
+	* [r12544] src/configfile.c, src/configfile.h:
+	  Add license reference to configfile.c, sync #includes with what
+	  will be required later, getEZConfig() formatting and remove
+	  unused printConfig() function.
+
+2007-02-24 22:16  moritz
+
+	* [r12543] src/configfile.h:
+	  Begin merging configfile.* changes by cleaning up the .h file:
+	  Add license reference, remove prototype of nonexistent
+	  getMetadataGrabber() function, and do some formatting.
+
+2007-02-24 22:03  moritz
+
+	* [r12542] win32/Makefile.am:
+	  Clean core and backup files in this directory as well. Only ~2500
+	  lines of diffs left to merge.
+
+2007-02-24 22:01  moritz
+
+	* [r12541] src/ezsignals.h:
+	  Commit header with three macros that help with signal handling.
+	  Will be actually used later. Now, all new files are in.
+
+2007-02-24 21:59  moritz
+
+	* [r12540] configure.in:
+	  Let the configure script set a (hard-coded, for now) examples
+	  installation directory. This will be made configurable later.
+
+2007-02-24 21:50  moritz
+
+	* [r12539] configure.in:
+	  Add several checks that we need now, i.e. very soon.
+
+2007-02-24 21:46  moritz
+
+	* [r12538] configure.in:
+	  AM_CONFIG_HEADER -> AC_CONFIG_HEADERS, and move config.h into
+	  src/.
+
+2007-02-24 21:44  moritz
+
+	* [r12537] configure.in:
+	  Autoconf 2.61 has a nice macro AC_USE_SYSTEM_EXTENSIONS. Use it,
+	  depend on autoconf-2.61 for it and remove the annoying
+	  _GNU_SOURCE and _XOPEN_SOURCE ... dung. Autoconf takes care of
+	  this, and even checks for more useful stuff for us.
+
+2007-02-24 21:37  moritz
+
+	* [r12536] configure.in:
+	  Generate a Makefile in doc/, and switch to AC_CONFIG_FILES.
+
+2007-02-24 21:34  moritz
+
+	* [r12535] configure.in:
+	  Ezstream does not need libtool, so remove it. Remove other
+	  redundant configure checks as well: AC_PROG_CC and AC_HEADER_STDC
+	  are automatically checked in packages written in C, no need to do
+	  it twice. This shaves a lot off configure runtime.
+
+2007-02-24 21:29  moritz
+
+	* [r12534] configure.in:
+	  Start to incrementally merge configure.in changes by simply
+	  shuffling code around a bit. No functional change, yet.
+
+2007-02-24 21:19  moritz
+
+	* [r12533] Makefile.am:
+	  Hook up doc/ with the build, depend on automake 1.9 and remove
+	  dist-zip for now. The latter will come back after testing on
+	  Windows has been done.
+
+2007-02-24 21:16  moritz
+
+	* [r12532] autogen.sh:
+	  Replace the autogen behemoth with something much simpler.
+	  AC_PREREQ and AUTOMAKE_OPTIONS already take care of version
+	  checks.
+
+2007-02-24 21:12  moritz
+
+	* [r12531] conf/Makefile.am, conf/ezstream_mp3.xml,
+	  conf/ezstream_reencoding_example_mp3.xml,
+	  conf/ezstream_reencoding_example_theora.xml,
+	  conf/ezstream_reencoding_example_vorbis.xml,
+	  conf/ezstream_vorbis.xml:
+	  Clean up and install example configuration files.
+
+2007-02-24 21:11  moritz
+
+	* [r12530] README:
+	  Commit rewritten README file.
+
+2007-02-24 20:59  moritz
+
+	* [r12529] AUTHORS:
+	  Remove AUTHORS. Credits are in the man page.
+
+2007-02-24 20:58  moritz
+
+	* [r12528] INSTALL:
+	  Add INSTALL file for those not familiar with the configure+make
+	  dance. From autoconf-2.61.
+
+2007-02-24 20:57  moritz
+
+	* [r12527] src/Makefile.am, src/strlcat.c, src/strlcpy.c,
+	  src/strlfctns.h:
+	  Add files with safe strlc*() string functions, and hook all new
+	  files into Makefile.am. Also let "make clean" clean up coredumps
+	  and editor backup files.
+
+2007-02-24 20:52  moritz
+
+	* [r12526] doc, doc/Makefile.am, doc/ezstream.1.in:
+	  Add ezstream man page.
+
+2007-02-24 20:50  moritz
+
+	* [r12525] src/playlist.c, src/playlist.h:
+	  Add new playlist handling functions.
+
+2007-02-24 20:49  moritz
+
+	* [r12524] src/util.c, src/util.h:
+	  Add new utility functions, for memory management. These do The
+	  Right Thing and never return NULL.
+
+2007-02-24 18:55  moritz
+
+	* [r12521] configure.in:
+	  Begin to incrementally merge my changes to Ezstream by bumping
+	  the version number and shifting blame to me. This should keep
+	  most of the history in my local CVS repository. There may be
+	  temporary breakages where it doesn't build or package until I'm
+	  done.
+
+2005-12-14 21:40  oddsock
+
+	* [r10593] win32/Makefile.am:
+	  forgot to add the inno setup installer to the dist
+
+2005-12-14 21:16  oddsock
+
+	* [r10592] win32/ezstream.iss:
+	  version bump
+
+2005-12-14 21:14  oddsock
+
+	* [r10590] ChangeLog:
+	  added changelog
+
+2005-12-14 21:13  oddsock
+
+	* [r10589] conf/Makefile.am, configure.in, src/ezstream.c:
+	  added some reconnect logic fixed a buffer overflow on large
+	  id3tags use pclose for popen'd file handles
+
+2005-01-05 00:38  oddsock
+
+	* [r8612] README, conf/ezstream_m3u.xml, conf/ezstream_mp3.xml,
+	  conf/ezstream_reencoding_example.xml,
+	  conf/ezstream_reencoding_example_mp3.xml,
+	  conf/ezstream_reencoding_example_theora.xml,
+	  conf/ezstream_reencoding_example_vorbis.xml,
+	  conf/ezstream_vorbis.xml, configure.in, src/ezstream.c,
+	  win32/ezstream.dsp, win32/ezstream.dsw, win32/ezstream.iss:
+	  cleanup of config files fixed reencoding bug on win32 bump to
+	  version 0.2.0
+
+2004-12-22 01:49  oddsock
+
+	* [r8519] src/ezstream.c:
+	  add passthorough support for unknown types
+
+2004-07-19 03:48  oddsock
+
+	* [r7171] src/configfile.c, win32/ezstream.dsp, win32/ezstream.iss:
+	  some win32 compilation fixes
+
+2004-07-19 03:12  oddsock
+
+	* [r7170] README, conf/Makefile.am,
+	  conf/ezstream_reencoding_example.xml, configure.in,
+	  src/configfile.c, src/configfile.h, src/ezstream.c,
+	  win32/ezstream.dsp:
+	  Added reencoding capabilities to ezstream.
+
+2004-07-16 04:02  oddsock
+
+	* [r7152] win32/ezstream.dsp:
+	  
+
+2004-07-12 19:13  oddsock
+
+	* [r7103] src/configfile.c, src/configfile.h, src/ezstream.c:
+	  support for theora streams
+
+2004-04-21 13:48  oddsock
+
+	* [r6563] configure.in, src/.deps, src/ezstream.c:
+	  added ability to send a signal (SIGHUP) which will re-read the
+	  current playlist (m3u) that is being processed. When this
+	  happens, ezstream will pick up from the last track that was
+	  played.
+
+2004-02-02 04:56  oddsock
+
+	* [r5806] README:
+	  stdin now working :)
+
+2004-02-02 04:39  oddsock
+
+	* [r5805] aclocal.m4, configure.in:
+	  * version bump * remove unneeded file
+
+2004-02-02 04:37  oddsock
+
+	* [r5804] src/ezstream.c, win32/ezstream.dsp, win32/ezstream.iss:
+	  * set read mode to binary for stdin on win32 * add libXML to
+	  project file * bump version number
+
+2004-01-30 17:19  oddsock
+
+	* [r5800] ., AUTHORS, COPYING, Makefile.am, README, aclocal.m4,
+	  autogen.sh, conf, conf/Makefile.am, conf/ezstream_m3u.xml,
+	  conf/ezstream_mp3.xml, conf/ezstream_vorbis.xml, configure.in,
+	  m4, m4/ac_config_libconfig_in.m4, m4/acx_pthread.m4, m4/ogg.m4,
+	  m4/shout.m4, m4/vorbis.m4, m4/xiph_compiler.m4, m4/xiph_curl.m4,
+	  m4/xiph_net.m4, m4/xiph_path_python.m4, m4/xiph_types.m4,
+	  m4/xiph_xml2.m4, src, src/.deps, src/.deps/configfile.Po,
+	  src/.deps/ezstream.Po, src/Makefile.am, src/configfile.c,
+	  src/configfile.h, src/ezstream.c, src/getopt.c, src/getopt.h,
+	  win32, win32/Makefile.am, win32/ezstream.dsp, win32/ezstream.dsw,
+	  win32/ezstream.iss:
+	  Initial revision
+

@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS = -I m4
 
 SUBDIRS =	conf doc m4 src win32
 
-dist_doc_DATA = CHANGELOG COPYING README
+dist_doc_DATA = COPYING NEWS README
 
 CLEANFILES =	core *.core *~ .*~
 
