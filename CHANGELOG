@@ -1,0 +1,100 @@
+Changes in 0.3.0, (SVN trunk):
+
+ * The original author, Ed Zaleski, hands over ezstream maintainership to
+   Moritz Grimm.
+
+ * There have been changes in almost all parts of ezstream. For a complete,
+   detailed list of changes, please consult the Subversion log, like so:
+     $ svn log -r '{YYYY-MM-DD}:12521' http://svn.xiph.org/trunk/ezstream/
+
+ * New features:
+   - Playlist shuffling support, enabled via the new <shuffle> configuration
+     option.
+   - Add feature to skip the currently streaming track, done by sending the
+     SIGUSR1 signal to the ezstream process.
+   - New command line option `-q': Suppress standard error output from external
+     de-/encoders.
+   - New command line option `-v': Produce more verbose output.
+   - New "real-time" status display of the stream when both -q and -v are given
+     on the command line.
+   - Thorough configuration file checks with helpful error messages.
+   - The @M@ metadata placeholder is now supported in <decode>.
+
+ * Fixes:
+   - At least one stack and one heap overflow have been fixed.
+   - Several memory leaks have been fixed.
+   - Strict checking of the configuration file prevents unexpected behavior and
+     adds another safeguard to prevent crashes.
+   - Fixed and more portable signal handling.
+
+ * Miscellaneous, user-visible changes:
+   - Improved documentation. Ezstream now has a comprehensive man page and the
+     README file has been rewritten.
+   - Consistency improvements in the configuration examples. The examples are
+     now also installed.
+   - The <format/> and <match/> configuration elements, as well as filename
+     extension matching to detect playlists in the <filename> element, are
+     now case insensitive.
+   - Various improvements in the build system and portability fixes.
+   - Consistent and more helpful messages from ezstream. By default, ezstream
+     no longer clutters the screen with lots of output (some information that
+     used to be available needs to be enabled with the new `-v' command line
+     parameter.)
+   - Tweaked metadata string generation: no more lone " - " dashes at the
+     beginning or end of the string.
+
+
+
+Changes in 0.2.1, released on 2005-12-14:
+
+ * ezstream.c:
+   - [FIX]   Prevent a heap overflow with large ID3v1 tags.
+   - [FIX]   Use pclose() on FILE* handles that were opened with popen().
+
+
+
+Changes in 0.2.0, released on 2005-01-05:
+
+ * various:
+   - [MISC]  Clean up and improve example configuration files, and add more
+             examples.
+
+ * ezstream.c:
+   - [FIX]   Fix reencoding support on Windows.
+   - [ADD]   Attempt to reconnect to a server if the connection goes down
+             during streaming.
+
+
+
+Changes in 0.1.3, released on 2004-12-22:
+
+ * various:
+   - [ADD]   Add support for streaming Ogg Theora.
+   - [ADD]   Add reencoding support via external de-/encoders.
+   - [ADD]   Support passing through unknown media types.
+
+
+
+Changes in 0.1.2, released on 2004-04-21:
+
+ * src/ezstream.c:
+   - [ADD]   Add feature to reread the playlist after the currently streaming
+             track, done by sending the SIGHUP signal to the ezstream process.
+
+
+
+Changes is 0.1.1, released on 2004-02-02:
+
+ * src/ezstream.c:
+   - [FIX]   Set read mode to binary for stdin on WIN32.
+
+ * win32/ezstream.dsp:
+   - [MISC]  Add libxml to project file.
+
+
+
+2004-01-30:
+
+ * Initial import of ezstream 0.1.0 into Xiph.org SVN.
+
+ * Ezstream 0.1.0 released.
