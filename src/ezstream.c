@@ -58,7 +58,6 @@
 # include "strlfctns.h"
 #endif
 #include "configfile.h"
-#include "ezsignals.h"
 #include "playlist.h"
 #include "util.h"
 
@@ -817,6 +816,7 @@ main(int argc, char *argv[])
 	extern int	 optind;
 #ifdef HAVE_SIGNALS
 	struct sigaction act;
+	unsigned int	 i;
 #endif
 
 	__progname = getProgname(argv[0]);
@@ -1048,7 +1048,13 @@ main(int argc, char *argv[])
 # ifdef SA_RESTART
 	act.sa_flags = SA_RESTART;
 # endif
-	SIGS_INSTALL(ezstream_signals, &act);
+	for (i = 0; i < sizeof(ezstream_signals) / sizeof(int); i++) {
+		if (sigaction(ezstream_signals[i], &act, NULL) == -1) {
+			printf("%s: sigaction(): %s\n",
+			       __progname, strerror(errno));
+			return (1);
+		}
+	}
 #endif /* HAVE_SIGNALS */
 
 	if (qFlag) {

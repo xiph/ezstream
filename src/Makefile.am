@@ -8,7 +8,6 @@ ezstream_LDADD = @LIBOBJS@ @XIPH_LIBS@
 AM_CFLAGS =	@XIPH_CFLAGS@
 AM_CPPFLAGS =	@XIPH_CPPFLAGS@
 
-EXTRA_DIST =	configfile.h ezsignals.h getopt.h playlist.h strlfctns.h \
-		util.h
+EXTRA_DIST =	configfile.h getopt.h playlist.h strlfctns.h util.h
 
 CLEANFILES =	core *.core *~ .*~
