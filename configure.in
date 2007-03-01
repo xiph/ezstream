@@ -12,8 +12,15 @@ AC_USE_SYSTEM_EXTENSIONS
 
 dnl SETUP
 
-dnl  XXX  This should be made configurable.
-EXAMPLES_DIR="\$(datadir)/examples/${PACKAGE}"
+EXAMPLES_DIR="\$(datadir)/examples/${PACKAGE_TARNAME}"
+AC_ARG_ENABLE(examplesdir,
+	AS_HELP_STRING([--enable-examplesdir=DIR],
+		[example configuration files installation directory (default: DATADIR/examples/ezstream)]),
+[case "$enableval" in
+	yes) ;;
+	no) AC_MSG_ERROR([Must have an example configuration files install dir.]) ;;
+	*) EXAMPLES_DIR="$enableval" ;;
+esac], [])
 AC_SUBST(EXAMPLES_DIR)
 
 AC_CANONICAL_HOST
