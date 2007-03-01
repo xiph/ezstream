@@ -37,7 +37,7 @@ if test -z "$GCC"; then
 		;;
 	esac
 else
-	XIPH_CPPFLAGS="-Wall -Wwrite-strings -Wpointer-arith"
+	XIPH_CPPFLAGS="-Wall -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
 fi
 
 

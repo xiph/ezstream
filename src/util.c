@@ -33,7 +33,6 @@
 # define SIZE_T_MAX	UINT_MAX
 #endif
 
-extern int	errno;
 extern char    *__progname;
 
 void *

@@ -103,22 +103,6 @@ const int		 ezstream_signals[] = { SIGHUP, SIGUSR1 };
 volatile sig_atomic_t	 rereadPlaylist = 0;
 volatile sig_atomic_t	 rereadPlaylist_notify = 0;
 volatile sig_atomic_t	 skipTrack = 0;
-
-void
-sig_handler(int sig)
-{
-	switch (sig) {
-	case SIGHUP:
-		rereadPlaylist = 1;
-		rereadPlaylist_notify = 1;
-		break;
-	case SIGUSR1:
-		skipTrack = 1;
-		break;
-	default:
-		break;
-	}
-}
 #else
 int			 rereadPlaylist = 0;
 int			 rereadPlaylist_notify = 0;
@@ -135,6 +119,7 @@ typedef struct tag_ID3Tag {
 	char genre;
 } ID3Tag;
 
+void	sig_handler(int);
 #ifdef WIN32
 char *	basename(const char *);
 #endif
@@ -151,6 +136,22 @@ int	streamPlaylist(shout_t *, const char *);
 char *	getProgname(const char *);
 void	usage(void);
 void	usageHelp(void);
+
+void
+sig_handler(int sig)
+{
+	switch (sig) {
+	case SIGHUP:
+		rereadPlaylist = 1;
+		rereadPlaylist_notify = 1;
+		break;
+	case SIGUSR1:
+		skipTrack = 1;
+		break;
+	default:
+		break;
+	}
+}
 
 #ifdef WIN32
 char *
@@ -225,7 +226,7 @@ replaceString(const char *source, char *dest, size_t size,
 
 	p2 = strstr(p1, from);
 	if (p2 != NULL) {
-		if (p2 - p1 >= size) {
+		if ((unsigned int)(p2 - p1) >= size) {
 			printf("%s: replaceString(): Internal error: p2 - p1 >= size\n",
 			       __progname);
 			abort();

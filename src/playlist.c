@@ -49,7 +49,6 @@
 # define PATH_MAX	256
 #endif
 
-extern int	errno;
 extern char    *__progname;
 
 struct playlist {

@@ -24,6 +24,7 @@
 # include <sys/types.h>
 #endif
 #include <string.h>
+#include "strlfctns.h"
 
 /*
  * Copy src to string dst of size siz.  At most siz-1 characters
