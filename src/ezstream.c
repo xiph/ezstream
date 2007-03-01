@@ -506,10 +506,27 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 	*popenFlag = 0;
 	if (pezConfig->reencode) {
 		if (strlen(extension) > 0) {
+			int	stderr_fd = dup(STDERR_FILENO);
+
 			pCommandString = buildCommandString(extension, fileName, pMetadata);
 			if (vFlag > 1)
 				printf("%s: Running command `%s`\n", __progname,
 				       pCommandString);
+
+			if (qFlag) {
+				int fd;
+
+				if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
+					printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
+					       __progname, _PATH_DEVNULL, strerror(errno));
+					exit(1);
+				}
+
+				dup2(fd, STDERR_FILENO);
+				if (fd > 2)
+					close(fd);
+			}
+
 			fflush(NULL);
 			errno = 0;
 			if ((filep = popen(pCommandString, "r")) == NULL) {
@@ -527,6 +544,9 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 #endif
 			}
 			xfree(pCommandString);
+
+			if (qFlag)
+				dup2(stderr_fd, STDERR_FILENO);
 		} else
 			printf("%s: Error: Cannot determine file type of '%s'.\n",
 			       __progname, fileName);
@@ -1084,20 +1104,6 @@ main(int argc, char *argv[])
 		}
 	}
 #endif /* HAVE_SIGNALS */
-
-	if (qFlag) {
-		int fd;
-
-		if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
-			printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
-			       __progname, _PATH_DEVNULL, strerror(errno));
-			return (1);
-		}
-
-		dup2(fd, STDERR_FILENO);
-		if (fd > 2)
-			close(fd);
-	}
 
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
 		int	ret;
