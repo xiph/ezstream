@@ -11,6 +11,8 @@ Changes in 0.3.0, (SVN trunk):
      the new <playlist_program> configuration option to 1.
    - New <stream_once> configuration option, which makes ezstream play a media
      file or playlist once and then exit.
+   - New <reconnect_tries> option to restrict the number of reconnection
+     attempts to a server in case the connection goes down.
    - Add feature to skip the currently streaming track, done by sending the
      SIGUSR1 signal to the ezstream process.
    - New command line option `-q': Suppress standard error output from external

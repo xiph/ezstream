@@ -198,6 +198,13 @@ to stream \&<filename/\&> content only once, and to
 .Pq zero
 for continuous streaming
 .Pq the default .
+.It Sy \&<reconnect_tries\ /\&>
+Set how many attempts should be made to reconnect to the Icecast server in case
+the connection is interrupted.
+The default is to try indefinitely, which is equal to setting this
+configuration option to
+.Sy 0
+.Pq zero .
 .It Sy \&<svrinfoname\ /\&>
 .Pq Optional.
 Set the name of the broadcast.

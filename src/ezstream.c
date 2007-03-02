@@ -83,6 +83,11 @@
 # define STRNCASECMP	strncasecmp
 #endif /* WIN32 */
 
+#define STREAM_DONE	0
+#define STREAM_CONT	1
+#define STREAM_SKIP	2
+#define STREAM_SERVERR	3
+
 #ifdef HAVE___PROGNAME
 extern char		*__progname;
 #else
@@ -130,6 +135,7 @@ void	setMetadata(shout_t *, const char *);
 char *	buildCommandString(const char *, const char *, const char *);
 char *	processMetadata(shout_t *, const char *, const char *);
 FILE *	openResource(shout_t *, const char *, int *, char **, int *);
+int	reconnectServer(shout_t *, int);
 int	sendStream(shout_t *, FILE *, const char *, int, void *);
 int	streamFile(shout_t *, const char *);
 int	streamPlaylist(shout_t *, const char *);
@@ -566,12 +572,58 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 }
 
 int
+reconnectServer(shout_t *shout, int closeConn)
+{
+	unsigned int	i;
+	int		close_conn = closeConn;
+
+	printf("%s: Connection to %s lost.\n", __progname, pezConfig->URL);
+
+	i = 0;
+	while (++i) {
+		printf("%s: Attempting reconnection #", __progname);
+		if (pezConfig->reconnectAttempts > 0)
+			printf("%u/%u: ", i,
+			       pezConfig->reconnectAttempts);
+		else
+			printf("%u: ", i);
+
+		if (close_conn == 0)
+			close_conn = 1;
+		else
+			shout_close(shout);
+		if (shout_open(shout) == SHOUTERR_SUCCESS) {
+			printf("OK\n%s: Reconnect to %s successful.\n",
+			       __progname, pezConfig->URL);
+			return (1);
+		}
+
+		printf("FAILED: %s\n", shout_get_error(shout));
+
+		if (pezConfig->reconnectAttempts > 0 &&
+		    i >= pezConfig->reconnectAttempts)
+			break;
+
+		printf("%s: Waiting 5s for %s to come back ...\n",
+		       __progname, pezConfig->URL);
+#ifdef WIN32
+		Sleep(5000);
+#else
+		sleep(5);
+#endif
+	};
+
+	printf("%s: Giving up.\n", __progname);
+	return (0);
+}
+
+int
 sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 	   int isStdin, void *tv)
 {
 	unsigned char	 buff[4096];
 	size_t		 read, total, oldTotal;
-	int		 ret = 0;
+	int		 ret;
 #ifdef HAVE_GETTIMEOFDAY
 	double		 kbps = -1.0;
 	struct timeval	 timeStamp, *startTime = (struct timeval *)tv;
@@ -587,7 +639,14 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 #endif /* HAVE_GETTIMEOFDAY */
 
 	total = oldTotal = 0;
+	ret = STREAM_DONE;
 	while ((read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
+		if (shout_get_connected(shout) != SHOUTERR_CONNECTED &&
+		    reconnectServer(shout, 0) == 0) {
+			ret = STREAM_SERVERR;
+			break;
+		}
+
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
 			if (!pezConfig->fileNameIsProgram)
@@ -596,7 +655,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		}
 		if (skipTrack) {
 			skipTrack = 0;
-			ret = 2;
+			ret = STREAM_SKIP;
 			break;
 		}
 
@@ -605,27 +664,11 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		if (shout_send(shout, buff, read) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_send(): %s\n", __progname,
 			       shout_get_error(shout));
-			while (1) {
-				printf("%s: Disconnected from server, reconnecting ...\n",
-				       __progname);
-				shout_close(shout);
-				if (shout_open(shout) == SHOUTERR_SUCCESS) {
-					printf("%s: Reconnect to server successful.\n",
-					       __progname);
-					if (shout_send(shout, buff, read) == SHOUTERR_SUCCESS)
-						break;
-					printf("%s: shout_send(): %s\n",
-					       __progname,
-					       shout_get_error(shout));
-				} else {
-					printf("%s: Reconnect failed. Waiting 5 seconds ...\n",
-					       __progname);
-#ifdef WIN32
-					Sleep(5000);
-#else
-					sleep(5);
-#endif
-				}
+			if (reconnectServer(shout, 1))
+				break;
+			else {
+				ret = STREAM_SERVERR;
+				break;
 			}
 		}
 
@@ -680,7 +723,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 	if (ferror(filepstream)) {
 		if (errno == EINTR) {
 			clearerr(filepstream);
-			ret = 1;
+			ret = STREAM_CONT;
 		} else
 			printf("%s: streamFile(): Error while reading '%s': %s\n",
 			       __progname, fileName, strerror(errno));
@@ -725,18 +768,22 @@ streamFile(shout_t *shout, const char *fileName)
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin, NULL);
 #endif
-		if (ret != 0) {
+		if (ret != STREAM_DONE) {
 			if (skipTrack && rereadPlaylist) {
 				skipTrack = 0;
 				ret = 1;
 			}
-			if (ret == 2 || skipTrack) {
+			if (ret == STREAM_SKIP || skipTrack) {
 				skipTrack = 0;
 				if (!isStdin && vFlag)
 					printf("%s: SIGUSR1 signal received, skipping current track.\n",
 					       __progname);
 				retval = 1;
-				ret = 0;
+				ret = STREAM_DONE;
+			}
+			if (ret == STREAM_SERVERR) {
+				retval = 0;
+				ret = STREAM_DONE;
 			}
 		} else
 			retval = 1;

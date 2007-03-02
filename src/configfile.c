@@ -140,8 +140,8 @@ parseConfig(const char *fileName)
 	xmlDocPtr	 doc;
 	xmlNodePtr	 cur;
 	char		*ls_xmlContentPtr;
-	int		 program_set, shuffle_set, streamOnce_set,
-			 svrinfopublic_set;
+	int		 program_set, reconnect_set, shuffle_set,
+			 streamOnce_set, svrinfopublic_set;
 
 	xmlLineNumbersDefault(1);
 	if ((doc = xmlParseFile(fileName)) == NULL) {
@@ -160,6 +160,7 @@ parseConfig(const char *fileName)
 	memset(&ezConfig, '\000', sizeof(ezConfig));
 
 	program_set = 0;
+	reconnect_set = 0;
 	shuffle_set = 0;
 	streamOnce_set = 0;
 	svrinfopublic_set = 0;
@@ -268,6 +269,19 @@ parseConfig(const char *fileName)
 				ezConfig.streamOnce = (tmp == 0) ? 0 : 1;
 				xmlFree(ls_xmlContentPtr);
 				streamOnce_set = 1;
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "reconnect_tries")) {
+			if (reconnect_set) {
+				printf("%s[%ld]: Error: Cannot have multiple <reconnect_tries> elements.\n",
+				       fileName, xmlGetLineNo(cur));
+				goto config_error;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.reconnectAttempts = atoi(ls_xmlContentPtr);
+				xmlFree(ls_xmlContentPtr);
+				reconnect_set = 1;
 			}
 		}
 		if (!xmlStrcmp(cur->name, BAD_CAST "svrinfoname")) {
