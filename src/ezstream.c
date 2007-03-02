@@ -57,11 +57,9 @@
 #ifndef HAVE_GETOPT
 # include "getopt.h"
 #endif
-#if !defined(HAVE_STRLCAT) || !defined(HAVE_STRLCPY)
-# include "strlfctns.h"
-#endif
 #include "configfile.h"
 #include "playlist.h"
+#include "strfctns.h"
 #include "util.h"
 
 #ifndef PATH_MAX
@@ -187,9 +185,10 @@ strrcmp(const char *s, const char *sub)
 int
 urlParse(const char *url, char **hostname, int *port, char **mountname)
 {
-	char	*p1, *p2, *p3;
-	char	 tmpPort[25] = "";
-	size_t	 hostsiz, mountsiz;
+	char		*p1, *p2, *p3;
+	char		 tmpPort[6] = "";
+	size_t		 hostsiz, mountsiz;
+	const char	*errstr;
 
 	if (hostname == NULL || port == NULL || mountname == NULL) {
 		printf("%s: urlParse(): Internal error: Bad arguments\n",
@@ -197,24 +196,40 @@ urlParse(const char *url, char **hostname, int *port, char **mountname)
 		exit(1);
 	}
 
-	if (strncmp(url, "http://", strlen("http://")) != 0)
+	if (strncmp(url, "http://", strlen("http://")) != 0) {
+		printf("%s: Error: Invalid <url>: Not an HTTP address\n",
+		       __progname);
 		return (0);
+	}
 
 	p1 = (char *)(url) + strlen("http://");
 	p2 = strchr(p1, ':');
-	if (p2 == NULL)
+	if (p2 == NULL) {
+		printf("%s: Error: Invalid <url>: Missing port\n",
+		       __progname);
 		return (0);
+	}
 	hostsiz = (p2 - p1) + 1;
 	*hostname = xmalloc(hostsiz);
 	strlcpy(*hostname, p1, hostsiz);
 
 	p2++;
 	p3 = strchr(p2, '/');
-	if (p3 == NULL || p3 - p2 >= (int)sizeof(tmpPort))
+	if (p3 == NULL || p3 - p2 >= (int)sizeof(tmpPort)) {
+		printf("%s: Error: Invalid <url>: Missing mountpoint or too long port number\n",
+		       __progname);
+		xfree(*hostname);
 		return (0);
+	}
 
 	strlcpy(tmpPort, p2, (p3 - p2) + 1);
-	*port = atoi(tmpPort);
+	*port = strtonum(tmpPort, 1, 65535, &errstr);
+	if (errstr) {
+		printf("%s: Error: Invalid <url>: Port '%s' is %s\n",
+		       __progname, tmpPort, errstr);
+		xfree(*hostname);
+		return (0);
+	}
 
 	mountsiz = strlen(p3) + 1;
 	*mountname = xmalloc(mountsiz);
@@ -269,7 +284,7 @@ buildCommandString(const char *extension, const char *fileName,
 
 	decoder = xstrdup(getFormatDecoder(extension));
 	if (strlen(decoder) == 0) {
-		printf("%s: Unknown extension '%s', cannot decode '%s'.\n",
+		printf("%s: Unknown extension '%s', cannot decode '%s'\n",
 		       __progname, extension, fileName);
 		xfree(decoder);
 		return (NULL);
@@ -371,27 +386,27 @@ processMetadata(shout_t *shout, const char *extension, const char *fileName)
 		if ((ret = ov_open(filepstream, &vf, NULL, 0)) != 0) {
 			switch (ret) {
 			case OV_EREAD:
-				printf("%s: No metadata support: %s: Media read error.\n",
+				printf("%s: No metadata support: %s: Media read error\n",
 				       __progname, fileName);
 				break;
 			case OV_ENOTVORBIS:
-				printf("%s: No metadata support: %s: Invalid Vorbis bitstream.\n",
+				printf("%s: No metadata support: %s: Invalid Vorbis bitstream\n",
 				       __progname, fileName);
 				break;
 			case OV_EVERSION:
-				printf("%s: No metadata support: %s: Vorbis version mismatch.\n",
+				printf("%s: No metadata support: %s: Vorbis version mismatch\n",
 				       __progname, fileName);
 				break;
 			case OV_EBADHEADER:
-				printf("%s: No metadata support: %s: Invalid Vorbis bitstream header.\n",
+				printf("%s: No metadata support: %s: Invalid Vorbis bitstream header\n",
 				       __progname, fileName);
 				break;
 			case OV_EFAULT:
-				printf("%s: Fatal: Internal libvorbisfile fault.\n",
+				printf("%s: Fatal: Internal libvorbisfile fault\n",
 				       __progname);
 				abort();
 			default:
-				printf("%s: No metadata support: %s: ov_read() returned unknown error.\n",
+				printf("%s: No metadata support: %s: ov_read() returned unknown error\n",
 				       __progname, fileName);
 				break;
 			}
@@ -487,7 +502,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 	if (strcmp(fileName, "stdin") == 0) {
 		if (vFlag)
-			printf("%s: Reading from standard input.\n",
+			printf("%s: Reading from standard input\n",
 			       __progname);
 		if (isStdin != NULL)
 			*isStdin = 1;
@@ -555,7 +570,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 			if (qFlag)
 				dup2(stderr_fd, STDERR_FILENO);
 		} else
-			printf("%s: Error: Cannot determine file type of '%s'.\n",
+			printf("%s: Error: Cannot determine file type of '%s'\n",
 			       __progname, fileName);
 
 		xfree(pMetadata);
@@ -577,7 +592,7 @@ reconnectServer(shout_t *shout, int closeConn)
 	unsigned int	i;
 	int		close_conn = closeConn;
 
-	printf("%s: Connection to %s lost.\n", __progname, pezConfig->URL);
+	printf("%s: Connection to %s lost\n", __progname, pezConfig->URL);
 
 	i = 0;
 	while (++i) {
@@ -593,7 +608,7 @@ reconnectServer(shout_t *shout, int closeConn)
 		else
 			shout_close(shout);
 		if (shout_open(shout) == SHOUTERR_SUCCESS) {
-			printf("OK\n%s: Reconnect to %s successful.\n",
+			printf("OK\n%s: Reconnect to %s successful\n",
 			       __progname, pezConfig->URL);
 			return (1);
 		}
@@ -613,7 +628,7 @@ reconnectServer(shout_t *shout, int closeConn)
 #endif
 	};
 
-	printf("%s: Giving up.\n", __progname);
+	printf("%s: Giving up\n", __progname);
 	return (0);
 }
 
@@ -650,7 +665,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
 			if (!pezConfig->fileNameIsProgram)
-				printf("%s: SIGHUP signal received, will reread playlist after this file.\n",
+				printf("%s: SIGHUP signal received, will reread playlist after this file\n",
 				       __progname);
 		}
 		if (skipTrack) {
@@ -776,7 +791,7 @@ streamFile(shout_t *shout, const char *fileName)
 			if (ret == STREAM_SKIP || skipTrack) {
 				skipTrack = 0;
 				if (!isStdin && vFlag)
-					printf("%s: SIGUSR1 signal received, skipping current track.\n",
+					printf("%s: SIGUSR1 signal received, skipping current track\n",
 					       __progname);
 				retval = 1;
 				ret = STREAM_DONE;
@@ -914,7 +929,7 @@ main(int argc, char *argv[])
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {
-				printf("Error: multiple -c arguments given.\n");
+				printf("Error: multiple -c arguments given\n");
 				usage();
 				return (2);
 			}
@@ -959,10 +974,10 @@ main(int argc, char *argv[])
 			return (2);
 		}
 		if (vFlag && (st.st_mode & (S_IRGRP | S_IROTH)))
-			printf("%s: Warning: %s is group and/or world readable.\n",
+			printf("%s: Warning: %s is group and/or world readable\n",
 			       __progname, configFile);
 		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-			printf("%s: Error: %s is group and/or world writeable.\n",
+			printf("%s: Error: %s is group and/or world writeable\n",
 			       __progname, configFile);
 			return (2);
 		}
@@ -989,36 +1004,30 @@ main(int argc, char *argv[])
 		return (2);
 	}
 	if (!urlParse(pezConfig->URL, &host, &port, &mount)) {
-		printf("%s: Error: Invalid <url>:\n", configFile);
-		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		printf("Must be of the form ``http://server:port/mountpoint''\n");
 		return (2);
 	}
-	if ((host == NULL)) {
+	if (strlen(host) == 0) {
 		printf("%s: Error: Invalid <url>: Missing server:\n", configFile);
-		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		printf("Must be of the form ``http://server:port/mountpoint''\n");
 		return (2);
 	}
-	if ((port < 1 || port > 65535)) {
-		printf("%s: Error: Invalid <url>: Missing or invalid port:\n", configFile);
-		printf("Must be of the form ``http://server:port/mountpoint''.\n");
-		return (2);
-	}
-	if ((mount == NULL)) {
+	if (strlen(mount) == 0) {
 		printf("%s: Error: Invalid <url>: Missing mountpoint:\n", configFile);
-		printf("Must be of the form ``http://server:port/mountpoint''.\n");
+		printf("Must be of the form ``http://server:port/mountpoint''\n");
 		return (2);
 	}
-	if ((pezConfig->password == NULL)) {
+	if (pezConfig->password == NULL) {
 		printf("%s: Error: Missing <sourcepassword>\n", configFile);
 		return (2);
 	}
-	if ((pezConfig->fileName == NULL)) {
+	if (pezConfig->fileName == NULL) {
 		printf("%s: Error: Missing <filename>\n", configFile);
 		return (2);
 	}
 	if (pezConfig->format == NULL) {
 		printf("%s: Warning: Missing <format>:\n", configFile);
-		printf("Specify a stream format of either MP3, VORBIS or THEORA.\n");
+		printf("Specify a stream format of either MP3, VORBIS or THEORA\n");
 	}
 
 	xfree(configFile);

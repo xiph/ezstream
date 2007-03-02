@@ -24,7 +24,7 @@
 # include <sys/types.h>
 #endif
 #include <string.h>
-#include "strlfctns.h"
+#include "strfctns.h"
 
 /*
  * Appends src to string dst of size siz (unlike strncat, siz is the

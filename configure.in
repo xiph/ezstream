@@ -71,7 +71,7 @@ dnl LIBRARY FUNCTIONS
 
 AC_CHECK_LIB(gen, basename)
 AC_CHECK_FUNCS(arc4random gettimeofday random srandomdev stat)
-AC_REPLACE_FUNCS(getopt strlcat strlcpy)
+AC_REPLACE_FUNCS(getopt strlcat strlcpy strtonum)
 if test x"$ac_cv_header_signal_h" = "xyes"; then
 	AC_CHECK_FUNCS([sigaction], [
 		AC_DEFINE(HAVE_SIGNALS, 1, [Define whether we have BSD signals])
