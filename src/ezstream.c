@@ -167,8 +167,8 @@ basename(const char *fileName)
 int
 strrcmp(const char *s, const char *sub)
 {
-	int	slen = strlen(s);
-	int	sublen = strlen(sub);
+	size_t	slen = strlen(s);
+	size_t	sublen = strlen(sub);
 
 	if (sublen > slen)
 		return (1);
