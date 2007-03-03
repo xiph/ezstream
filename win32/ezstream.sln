@@ -1,0 +1,72 @@
+Microsoft Visual Studio Solution File, Format Version 8.00
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg_static", "..\..\ogg\win32\ogg_static.vcproj", "{A0144DD0-0064-46CF-93D3-78DB712034D4}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis_static", "..\..\vorbis\win32\vorbis_static.vcproj", "{FB2ECA7B-D98C-4341-84B7-005E037E25A7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbisfile_static", "..\..\vorbis\win32\vorbisfile_static.vcproj", "{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "theora_static", "..\..\theora\win32\theora_static.vcproj", "{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9} = {5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
+		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libshout", "..\..\shout\win32\libshout.vcproj", "{376BDB5E-7092-44EC-AF16-C087D2D80FC6}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9} = {5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
+		{63A539B9-C6CD-4DC9-80B2-B28DB92C151E} = {63A539B9-C6CD-4DC9-80B2-B28DB92C151E}
+		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ezstream", "ezstream.vcproj", "{4C27B249-0C17-4007-9D51-2ED145DF06C2}"
+	ProjectSection(ProjectDependencies) = postProject
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9} = {5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}
+		{376BDB5E-7092-44EC-AF16-C087D2D80FC6} = {376BDB5E-7092-44EC-AF16-C087D2D80FC6}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfiguration) = preSolution
+		Debug = Debug
+		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectConfiguration) = postSolution
+		{A0144DD0-0064-46CF-93D3-78DB712034D4}.Debug.ActiveCfg = Debug|Win32
+		{A0144DD0-0064-46CF-93D3-78DB712034D4}.Debug.Build.0 = Debug|Win32
+		{A0144DD0-0064-46CF-93D3-78DB712034D4}.Release.ActiveCfg = Release|Win32
+		{A0144DD0-0064-46CF-93D3-78DB712034D4}.Release.Build.0 = Release|Win32
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7}.Debug.ActiveCfg = Debug|Win32
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7}.Debug.Build.0 = Debug|Win32
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7}.Release.ActiveCfg = Release|Win32
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7}.Release.Build.0 = Release|Win32
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}.Debug.ActiveCfg = Debug|Win32
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}.Debug.Build.0 = Debug|Win32
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}.Release.ActiveCfg = Release|Win32
+		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}.Release.Build.0 = Release|Win32
+		{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}.Debug.ActiveCfg = Debug|Win32
+		{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}.Debug.Build.0 = Debug|Win32
+		{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}.Release.ActiveCfg = Release|Win32
+		{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}.Release.Build.0 = Release|Win32
+		{376BDB5E-7092-44EC-AF16-C087D2D80FC6}.Debug.ActiveCfg = Debug|Win32
+		{376BDB5E-7092-44EC-AF16-C087D2D80FC6}.Debug.Build.0 = Debug|Win32
+		{376BDB5E-7092-44EC-AF16-C087D2D80FC6}.Release.ActiveCfg = Release|Win32
+		{376BDB5E-7092-44EC-AF16-C087D2D80FC6}.Release.Build.0 = Release|Win32
+		{4C27B249-0C17-4007-9D51-2ED145DF06C2}.Debug.ActiveCfg = Debug|Win32
+		{4C27B249-0C17-4007-9D51-2ED145DF06C2}.Debug.Build.0 = Debug|Win32
+		{4C27B249-0C17-4007-9D51-2ED145DF06C2}.Release.ActiveCfg = Release|Win32
+		{4C27B249-0C17-4007-9D51-2ED145DF06C2}.Release.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+	EndGlobalSection
+	GlobalSection(ExtensibilityAddIns) = postSolution
+	EndGlobalSection
+EndGlobal

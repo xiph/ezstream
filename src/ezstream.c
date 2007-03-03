@@ -54,10 +54,11 @@
 #include <shout/shout.h>
 #include <vorbis/vorbisfile.h>
 
+#include "compat.h"
+#include "configfile.h"
 #ifndef HAVE_GETOPT
 # include "getopt.h"
 #endif
-#include "configfile.h"
 #include "playlist.h"
 #include "strfctns.h"
 #include "util.h"
@@ -70,16 +71,6 @@
 #ifndef _PATH_DEVNULL
 #  define _PATH_DEVNULL "/dev/null"
 #endif /* _PATH_DEVNULL */
-
-#ifdef WIN32
-# define STRNCASECMP	strnicmp
-# define popen		_popen
-# define pclose 	_pclose
-# define snprintf	_snprintf
-# define stat		_stat
-#else
-# define STRNCASECMP	strncasecmp
-#endif /* WIN32 */
 
 #define STREAM_DONE	0
 #define STREAM_CONT	1
@@ -420,10 +411,10 @@ processMetadata(shout_t *shout, const char *extension, const char *fileName)
 
 			while(*ptr){
 				if (artist == NULL &&
-				    STRNCASECMP(*ptr, "ARTIST", strlen("ARTIST")) == 0)
+				    strncasecmp(*ptr, "ARTIST", strlen("ARTIST")) == 0)
 					artist = xstrdup(*ptr + strlen("ARTIST="));
 				if (title == NULL &&
-				    STRNCASECMP(*ptr, "TITLE", strlen("TITLE")) == 0)
+				    strncasecmp(*ptr, "TITLE", strlen("TITLE")) == 0)
 					title = xstrdup(*ptr + strlen("TITLE="));
 				++ptr;
 			}
@@ -878,7 +869,7 @@ getProgname(const char *argv0)
 
 	if (argv0 == NULL)
 		return ((char *)"ezstream");
-	p = strrchr(argv0, '/');
+	p = strrchr(argv0, PATH_SEPARATOR);
 	if (p == NULL)
 		p = (char *)argv0;
 	else

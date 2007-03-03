@@ -31,15 +31,9 @@
 #include <string.h>
 #include <time.h>
 
+#include "compat.h"
 #include "playlist.h"
 #include "util.h"
-
-#ifdef WIN32
-# define snprintf	_snprintf
-# define popen		_popen
-# define pclose 	_pclose
-# define stat		_stat
-#endif
 
 #ifndef SIZE_T_MAX
 # define SIZE_T_MAX	UINT_MAX
@@ -239,7 +233,7 @@ playlist_program(const char *filename)
 		playlist_free(pl);
 		return (NULL);
 	}
-	if (!(st.st_mode & (S_IXUSR | S_IXGRP | S_IXOTH))) {
+	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		printf("%s: %s: Not an executable program\n", __progname, filename);
 		playlist_free(pl);
 		return (NULL);

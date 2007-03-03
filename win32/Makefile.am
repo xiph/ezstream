@@ -1,5 +1,5 @@
 AUTOMAKE_OPTIONS = 1.9 foreign
 
-EXTRA_DIST =	ezstream.dsp ezstream.dsw ezstream.iss
+EXTRA_DIST =	ezstream.sln ezstream.vcproj
 
 CLEANFILES =	core *.core *~ .*~
