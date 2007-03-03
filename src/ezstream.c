@@ -122,7 +122,6 @@ typedef struct tag_ID3Tag {
 	char genre;
 } ID3Tag;
 
-void	sig_handler(int);
 #ifdef WIN32
 char *	basename(const char *);
 #endif
@@ -141,6 +140,9 @@ char *	getProgname(const char *);
 void	usage(void);
 void	usageHelp(void);
 
+#ifdef HAVE_SIGNALS
+void	sig_handler(int);
+
 void
 sig_handler(int sig)
 {
@@ -156,6 +158,7 @@ sig_handler(int sig)
 		break;
 	}
 }
+#endif /* HAVE_SIGNALS */
 
 #ifdef WIN32
 char *
@@ -528,7 +531,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 	*popenFlag = 0;
 	if (pezConfig->reencode) {
 		if (strlen(extension) > 0) {
-			int	stderr_fd = dup(STDERR_FILENO);
+			int	stderr_fd = dup(fileno(stderr));
 
 			pCommandString = buildCommandString(extension, fileName, pMetadata);
 			if (vFlag > 1)
@@ -544,7 +547,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 					exit(1);
 				}
 
-				dup2(fd, STDERR_FILENO);
+				dup2(fd, fileno(stderr));
 				if (fd > 2)
 					close(fd);
 			}
@@ -568,7 +571,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 			xfree(pCommandString);
 
 			if (qFlag)
-				dup2(stderr_fd, STDERR_FILENO);
+				dup2(stderr_fd, fileno(stderr));
 		} else
 			printf("%s: Error: Cannot determine file type of '%s'\n",
 			       __progname, fileName);
