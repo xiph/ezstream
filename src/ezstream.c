@@ -217,7 +217,7 @@ urlParse(const char *url, char **hostname, int *port, char **mountname)
 	}
 
 	strlcpy(tmpPort, p2, (p3 - p2) + 1);
-	*port = strtonum(tmpPort, 1, 65535, &errstr);
+	*port = (int)strtonum(tmpPort, 1, 65535, &errstr);
 	if (errstr) {
 		printf("%s: Error: Invalid <url>: Port '%s' is %s\n",
 		       __progname, tmpPort, errstr);

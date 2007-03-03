@@ -25,6 +25,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include "strfctns.h"
+#include "compat.h"
 
 #define INVALID 	1
 #define TOOSMALL	2
@@ -35,10 +36,6 @@
 # undef LLONG_MAX
 # define LLONG_MIN	LONG_LONG_MIN
 # define LLONG_MAX	LONG_LONG_MAX
-#endif
-
-#ifdef WIN32
-# define strtoll	_strtoi64
 #endif
 
 long long

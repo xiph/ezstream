@@ -244,7 +244,7 @@ parseConfig(const char *fileName)
 				const char *errstr;
 
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.fileNameIsProgram = strtonum(ls_xmlContentPtr, 0, 1, &errstr);
+				ezConfig.fileNameIsProgram = (int)strtonum(ls_xmlContentPtr, 0, 1, &errstr);
 				if (errstr) {
 					printf("%s[%ld]: Error: <playlist_program> may only contain 1 or 0\n",
 					       fileName, xmlGetLineNo(cur));
@@ -266,7 +266,7 @@ parseConfig(const char *fileName)
 				const char *errstr;
 
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.shuffle = strtonum(ls_xmlContentPtr, 0, 1, &errstr);
+				ezConfig.shuffle = (int)strtonum(ls_xmlContentPtr, 0, 1, &errstr);
 				if (errstr) {
 					printf("%s[%ld]: Error: <shuffle> may only contain 1 or 0\n",
 					       fileName, xmlGetLineNo(cur));
@@ -288,7 +288,7 @@ parseConfig(const char *fileName)
 				const char *errstr;
 
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.streamOnce = strtonum(ls_xmlContentPtr, 0, 1, &errstr);
+				ezConfig.streamOnce = (int)strtonum(ls_xmlContentPtr, 0, 1, &errstr);
 				if (errstr) {
 					printf("%s[%ld]: Error: <stream_once> may only contain 1 or 0\n",
 					       fileName, xmlGetLineNo(cur));
@@ -310,7 +310,7 @@ parseConfig(const char *fileName)
 				const char *errstr;
 
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.reconnectAttempts = strtonum(ls_xmlContentPtr, 0, UINT_MAX, &errstr);
+				ezConfig.reconnectAttempts = (unsigned int)strtonum(ls_xmlContentPtr, 0, UINT_MAX, &errstr);
 				if (errstr) {
 					printf("%s[%ld]: Error: In <reconnect_tries>: '%s' is %s\n",
 					       fileName, xmlGetLineNo(cur), ls_xmlContentPtr, errstr);
@@ -437,7 +437,7 @@ parseConfig(const char *fileName)
 				const char *errstr;
 
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.serverPublic = strtonum(ls_xmlContentPtr, 0, 1, &errstr);
+				ezConfig.serverPublic = (int)strtonum(ls_xmlContentPtr, 0, 1, &errstr);
 				if (errstr) {
 					printf("%s[%ld]: Error: <svrinfopublic> may only contain 1 or 0\n",
 					       fileName, xmlGetLineNo(cur));
@@ -466,7 +466,7 @@ parseConfig(const char *fileName)
 						const char *errstr;
 
 						ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur2->xmlChildrenNode, 1);
-						ezConfig.reencode = strtonum(ls_xmlContentPtr, 0, 1, &errstr);
+						ezConfig.reencode = (int)strtonum(ls_xmlContentPtr, 0, 1, &errstr);
 						if (errstr) {
 							printf("%s[%ld]: Error: <enable> may only contain 1 or 0\n",
 							       fileName, xmlGetLineNo(cur));
