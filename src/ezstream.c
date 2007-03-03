@@ -155,7 +155,7 @@ sig_handler(int sig)
 char *
 basename(const char *fileName)
 {
-	char	*pLast = strrchr(fileName, '\\');
+	char	*pLast = strrchr(fileName, PATH_SEPARATOR);
 
 	if (pLast != NULL)
 		return (pLast + 1);
