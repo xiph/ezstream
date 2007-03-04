@@ -47,6 +47,7 @@ Changes in 0.3.0, (SVN trunk):
      parameter.)
    - Tweaked metadata string generation: no more lone " - " dashes at the
      beginning or end of the string.
+   - New command line option `-V': Print the version number and exit.
 
 
 

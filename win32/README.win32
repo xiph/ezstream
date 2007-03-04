@@ -17,6 +17,8 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 +-----------------------+----------------------------------------------+
 | \ezstream.exe         | The ezstream executable file.                |
 +-----------------------+----------------------------------------------+
+| \ezstream-X.Y.Z.zip   | The ezstream source distribution.            |
++-----------------------+----------------------------------------------+
 | \conf\*.xml           | Ezstream example configuration files.        |
 +-----------------------+----------------------------------------------+
 
@@ -42,8 +44,8 @@ system.
 
 Ezstream uses libxml2 (http://xmlsoft.org/, BSD-like license), libogg and
 libvorbis (http://www.vorbis.com/, BSD-like license) and libshout
-(http://www.icecast.org/, LGPL licensed).
+(http://www.icecast.org/, LGPL licensed). These libraries are statically linked
+into the ezstream.exe file.
 
-Ezstream itself is licensed under the GPL (see COPYING.txt), with the source
-code available at http://www.icecast.org/ezstream.php in the distribution
-tarball (.tar.gz).
+Ezstream itself is licensed under the GPL (see COPYING in the included source
+archive for details.)
