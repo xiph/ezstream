@@ -115,14 +115,7 @@ playlist_random(void)
 #elif HAVE_RANDOM
 	ret = (unsigned int)random();
 #else
-	/*
-	 * Throw away the lower 12 bits; they go through a cyclic pattern.
-	 * While this means that items in gigantic playlists won't be put
-	 * beyond a certain distance from their original place in the list,
-	 * it still improves the quality of the shuffler if this PRNG has
-	 * to be used.
-	 */
-	ret = (unsigned int)rand() >> 12;
+	ret = (unsigned int)rand();
 #endif
 
 	return (ret);
