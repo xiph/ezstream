@@ -168,8 +168,7 @@ parseConfig(const char *fileName)
 	shuffle_set = 0;
 	streamOnce_set = 0;
 	svrinfopublic_set = 0;
-	cur = cur->xmlChildrenNode;
-	while (cur != NULL) {
+	for (cur = cur->xmlChildrenNode; cur != NULL; cur = cur->next) {
 		if (!xmlStrcmp(cur->name, BAD_CAST "url")) {
 			if (ezConfig.URL != NULL) {
 				printf("%s[%ld]: Error: Cannot have multiple <url> elements\n",
@@ -452,8 +451,8 @@ parseConfig(const char *fileName)
 			int		enable_set;
 
 			enable_set = 0;
-			cur2 = cur->xmlChildrenNode;
-			while (cur2 != NULL) {
+			for (cur2 = cur->xmlChildrenNode; cur2 != NULL;
+			     cur2 = cur2->next) {
 				if (!xmlStrcmp(cur2->name, BAD_CAST "enable")) {
 					if (enable_set) {
 						printf("%s[%ld]: Error: Cannot have multiple <enable> elements\n",
@@ -483,8 +482,8 @@ parseConfig(const char *fileName)
 
 					pformatEncDec = xcalloc(1, sizeof(FORMAT_ENCDEC));
 
-					cur3 = cur2->xmlChildrenNode;
-					while (cur3 != NULL) {
+					for (cur3 = cur2->xmlChildrenNode;
+					     cur3 != NULL; cur3 = cur3->next) {
 						if (!xmlStrcmp(cur3->name, BAD_CAST "format")) {
 							if (pformatEncDec->format != NULL) {
 								printf("%s[%ld]: Error: Cannot have multiple <format> elements\n",
@@ -578,15 +577,12 @@ parseConfig(const char *fileName)
 								}
 							}
 						}
-						cur3 = cur3->next;
 					}
 					ezConfig.encoderDecoders[ezConfig.numEncoderDecoders] = pformatEncDec;
 					ezConfig.numEncoderDecoders++;
 				}
-				cur2 = cur2->next;
 			}
 		}
-		cur = cur->next;
 	}
 
 	xmlFreeDoc(doc);
