@@ -1,3 +1,165 @@
+2007-03-04 21:12  moritz
+
+	* [r12633] README:
+	  Sync with the blurb on the new home page.
+
+2007-03-04 15:59  moritz
+
+	* [r12630] src/configfile.c:
+	  Fix logic error and prevent an endless loop on error(s) in the
+	  config file.
+
+2007-03-04 15:50  moritz
+
+	* [r12629] src/playlist.c:
+	  While rand() being crappy is true for most/all *nix systems, on
+	  Windows, this is different. The shifting severely screwed up its
+	  randomness. Just leave it away and systems that only have a bad
+	  version of rand() will have to just deal with it.
+
+2007-03-04 15:16  moritz
+
+	* [r12628] COPYING, NEWS, src/configfile.c, src/ezstream.c,
+	  win32/README.win32:
+	  More pre-release maintenance.
+
+2007-03-04 14:29  moritz
+
+	* [r12627] win32/Makefile.am, win32/README.win32, win32/config.h,
+	  win32/ezstream.1.html, win32/ezstream.sln, win32/ezstream.vcproj:
+	  Yay. I finally managed to build a statically linked and
+	  self-contained ezstream.exe. Update, and regen the HTML man page
+	  for -V.
+
+2007-03-04 14:27  moritz
+
+	* [r12626] doc/ezstream.1.in, src/ezstream.c:
+	  Add -V command line parameter to print the version number and
+	  exit.
+
+2007-03-03 20:20  moritz
+
+	* [r12621] win32/Makefile.am, win32/README.win32,
+	  win32/ezstream.1.html, win32/ezstream.sln, win32/ezstream.vcproj:
+	  More, rather evil Windows stuff. This is about as far as I'm
+	  willing to go for now. Volunteers willing to take all this
+	  Windows stuff off my hands are very welcome. ;-)
+
+2007-03-03 20:17  moritz
+
+	* [r12620] src/compat.h, src/configfile.c, src/ezstream.c,
+	  src/strtonum.c:
+	  Some more cosmetic tweaks.
+
+2007-03-03 17:50  moritz
+
+	* [r12617] src/ezstream.c:
+	  Forgot one PATH_SEPARATOR instance ...
+
+2007-03-03 17:48  moritz
+
+	* [r12616] src/ezstream.c:
+	  Use size_t in strrcmp().
+
+2007-03-03 16:13  moritz
+
+	* [r12615] src/Makefile.am, src/compat.h, src/ezstream.c,
+	  src/playlist.c, win32/Makefile.am, win32/ezstream.dsp,
+	  win32/ezstream.dsw, win32/ezstream.iss, win32/ezstream.sln,
+	  win32/ezstream.vcproj:
+	  Iterate back towards working Windows support.
+
+2007-03-03 12:42  moritz
+
+	* [r12614] src/ezstream.c:
+	  STDERR_FILENO -> fileno(stderr), and fix a brain'o: Systems with
+	  limited or no signals support obviously don't have
+	  SIG_HUP/SIG_USR1 defined.
+
+2007-03-02 12:52  moritz
+
+	* [r12603] configure.in, src/Makefile.am, src/configfile.c,
+	  src/ezstream.c, src/strfctns.h, src/strlcat.c, src/strlcpy.c,
+	  src/strlfctns.h, src/strtonum.c:
+	  Improve string to integer conversion stuff, and have another stab
+	  at the config file parsing. Ezstream now prints each error it can
+	  find and then bails out, instead of bailing out on the first
+	  error. Tweak URL parsing as well, and do some cosmetic changes to
+	  the error messages.
+
+2007-03-02 00:57  moritz
+
+	* [r12599] NEWS, doc/ezstream.1.in, src/configfile.c,
+	  src/configfile.h, src/ezstream.c:
+	  Allow users to restrict the number of reconnection attempts. This
+	  also changes how reconnections are handled in general: A
+	  recovered connection always skips to the next tune as well, as it
+	  seems that at least for Ogg Vorbis, libshout wants to see an Ogg
+	  header after a shout_open(). The new code makes this behavior
+	  consistent among all formats.
+
+2007-03-01 14:50  moritz
+
+	* [r12597] configure.in, src/ezstream.c, src/playlist.c,
+	  src/strlcat.c, src/strlcpy.c, src/util.c:
+	  Enable more warnings on gcc, and do some miscellaneous cleanups.
+
+2007-03-01 01:22  moritz
+
+	* [r12596] src/ezstream.c:
+	  Redirect only de-/encoder screen output to /dev/null with -q, and
+	  restore standard error outside that popen() call.
+
+2007-03-01 00:34  moritz
+
+	* [r12595] m4/shout.m4:
+	  Tweak XXX comment.
+
+2007-03-01 00:10  moritz
+
+	* [r12594] README, configure.in:
+	  Make the example configuration files directory configurable.
+
+2007-02-28 21:48  moritz
+
+	* [r12592] NEWS, conf/ezstream_mp3.xml, conf/ezstream_vorbis.xml,
+	  doc/ezstream.1.in, src/configfile.c, src/configfile.h,
+	  src/ezstream.c:
+	  Add new <stream_once> configuration option for disabling
+	  continuous streaming.
+
+2007-02-28 21:26  moritz
+
+	* [r12591] NEWS, conf/ezstream_reencoding_example_mp3.xml,
+	  conf/ezstream_reencoding_example_vorbis.xml, doc/ezstream.1.in,
+	  src/configfile.c, src/configfile.h, src/ezstream.c,
+	  src/playlist.c, src/playlist.h:
+	  Add new playlist scripting feature (works similar to Ices 2.x.)
+
+2007-02-28 15:35  moritz
+
+	* [r12590] configure.in, src/ezstream.c:
+	  Replace geteuid() check with stat(), and make it an error if the
+	  configuration file is group or world writeable. This is actually
+	  what the warning about root was all about.
+
+2007-02-28 13:53  moritz
+
+	* [r12589] src/Makefile.am, src/ezsignals.h, src/ezstream.c:
+	  Back out hardly used ezsignals.h.
+
+2007-02-28 12:47  moritz
+
+	* [r12588] NEWS:
+	  Remove redundant paragraph.
+
+2007-02-28 12:44  moritz
+
+	* [r12587] CHANGELOG, ChangeLog, Makefile.am, NEWS, mkcl.sh:
+	  Make a more standard distribution: Rename CHANGELOG to NEWS,
+	  bring back the complete ChangeLog and add mkcl.sh that contains
+	  the options to generate ChangeLog.
+
 2007-02-28 11:06  moritz
 
 	* [r12586] CHANGELOG, ChangeLog, Makefile.am:
