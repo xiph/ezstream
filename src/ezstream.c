@@ -882,7 +882,7 @@ getProgname(const char *argv0)
 void
 usage(void)
 {
-	printf("usage: %s [-hqv] [-c configfile]\n", __progname);
+	printf("usage: %s [-hqVv] [-c configfile]\n", __progname);
 }
 
 void
@@ -892,6 +892,7 @@ usageHelp(void)
 	printf("  -c configfile  use XML configuration in configfile\n");
 	printf("  -h             display this additional help and exit\n");
 	printf("  -q             suppress STDERR output from external en-/decoders\n");
+	printf("  -V             print the version number and exit\n");
 	printf("  -v             verbose output (use twice for more effect)\n");
 	printf("\n");
 	printf("See the ezstream(1) manual for detailed information.\n");
@@ -919,7 +920,7 @@ main(int argc, char *argv[])
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = getopt(argc, argv, "c:hqv")) != -1) {
+	while ((c = getopt(argc, argv, "c:hqVv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {
@@ -936,6 +937,9 @@ main(int argc, char *argv[])
 		case 'q':
 			qFlag = 1;
 			break;
+		case 'V':
+			printf("%s\n", PACKAGE_STRING);
+			return (0);
 		case 'v':
 			vFlag++;
 			break;

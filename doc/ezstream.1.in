@@ -12,7 +12,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hqv
+.Op Fl hqVv
 .Op Fl c Ar configfile
 .Ek
 .Sh DESCRIPTION
@@ -39,6 +39,10 @@ and exit.
 .It Fl q
 Be more quiet.
 Suppress the output that external programs send to standard error.
+.It Fl V
+Print the
+.Nm
+version number and exit.
 .It Fl v
 Produce more verbose output from
 .Nm .
