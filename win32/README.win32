@@ -15,11 +15,7 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 |                       | automatically generated and looks very bad,  |
 |                       | but should be readable enough to be useful.  |
 +-----------------------+----------------------------------------------+
-| \bin\ezstream.exe     | The ezstream executable file.                |
-+-----------------------+----------------------------------------------+
-| \bin\*.dll            | .DLL libraries required by ezstream. These   |
-|                       | need to be located in the same directory as  |
-|                       | the ezstream.exe executable.                 |
+| \ezstream.exe         | The ezstream executable file.                |
 +-----------------------+----------------------------------------------+
 | \conf\*.xml           | Ezstream example configuration files.        |
 +-----------------------+----------------------------------------------+
@@ -33,11 +29,10 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 As of version 0.3.0, ezstream no longer comes with an installer. If you have a
 previous version of ezstream installed, you might want to simply uninstall it.
 
-The ezstream.exe file will simply work as long as libxml2.dll, iconv.dll and
-zlib.dll are located in the same directory.
-
-To install ezstream, simply copy the contents of the \bin directory in this
-archive to a location of your choosing.
+The ezstream.exe file will work from any location. To install it, simply copy
+it to a location of your choosing. Add this place to your PATH environment
+variable, if ezstream.exe is supposed to be executable from anywhere on the
+system.
 
 
 
@@ -47,9 +42,7 @@ archive to a location of your choosing.
 
 Ezstream uses libxml2 (http://xmlsoft.org/, BSD-like license), libogg and
 libvorbis (http://www.vorbis.com/, BSD-like license) and libshout
-(http://www.icecast.org/, LGPL licensed). Also, libxml2 depends on zlib
-(http://zlib.net/, BSD-like license) and libiconv
-(http://www.gnu.org/software/libiconv/, LGPL licensed.)
+(http://www.icecast.org/, LGPL licensed).
 
 Ezstream itself is licensed under the GPL (see COPYING.txt), with the source
 code available at http://www.icecast.org/ezstream.php in the distribution

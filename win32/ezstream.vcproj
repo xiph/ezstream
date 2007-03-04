@@ -23,8 +23,8 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="../../ogg/include,../../vorbis/include,../../shout/include,../src,../../../include"
-				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;HAVE_SYS_TYPES_H;HAVE_SYS_STAT_H;HAVE_STAT"
+				AdditionalIncludeDirectories="../../ogg/include;../../vorbis/include;../../shout/include;../src;../../libxml2/include;."
+				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE;HAVE_CONFIG_H"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
@@ -43,11 +43,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="odbc32.lib odbccp32.lib ..\..\shout\win32\Release\libshout.lib ogg_static.lib vorbis_static.lib ws2_32.lib winmm.lib libxml2.lib iconv.lib vorbisfile_static.lib"
+				AdditionalDependencies="odbc32.lib odbccp32.lib libshout.lib ogg_static.lib vorbis_static.lib ws2_32.lib winmm.lib libxml2.lib vorbisfile_static.lib"
 				OutputFile=".\Release/ezstream.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="../../theora/win32/Static_Release,../../shout/win32/Static_Release,../../../lib,../../ogg/win32/Static_Release,../../vorbis/win32/Vorbis_Static_Release,../../vorbis/win32/VorbisFile_Static_Release"
+				AdditionalLibraryDirectories="../../theora/win32/Static_Release,../../shout/win32/Release,../../ogg/win32/Static_Release,../../vorbis/win32/Vorbis_Static_Release,../../vorbis/win32/VorbisFile_Static_Release,../../libxml2/win32/VC7/Release"
 				IgnoreDefaultLibraryNames="libcmt.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib"
 				ProgramDatabaseFile=".\Release/ezstream.pdb"
 				SubSystem="1"
@@ -91,8 +91,8 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../ogg/include,../../vorbis/include,../../shout/include,../src,../../../include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;HAVE_SYS_TYPES_H;HAVE_SYS_STAT_H;HAVE_STAT"
+				AdditionalIncludeDirectories="../../ogg/include,../../vorbis/include,../../shout/include,../src,../../libxml2/include"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;HAVE_CONFIG_H"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="4"
@@ -234,6 +234,9 @@
 			Filter="h;hpp;hxx;hm;inl">
 			<File
 				RelativePath="..\src\compat.h">
+			</File>
+			<File
+				RelativePath=".\config.h">
 			</File>
 			<File
 				RelativePath="..\src\configfile.h">
