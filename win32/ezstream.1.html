@@ -10,7 +10,7 @@
 <a href="#FILES">FILES</a><br>
 <a href="#AUTHORS">AUTHORS</a><br>
 <!-- Creator     : groff version 1.15  -->
-<!-- CreationDate: Sun Mar  4 15:24:39 2007
+<!-- CreationDate: Mon Mar  5 02:00:35 2007
  -->
 <!-- Total number of pages: 4 -->
 <!-- Page: 1 -->
@@ -91,8 +91,9 @@
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;format /&gt;<br>
 <span style=" text-indent: 0.4700in;"></span></B>( Mandatory. ) This element has two different meanings, depending on whether reencoding is enabled or<br>
 <span style=" text-indent: 0.4500in;"></span>not. It specifies the <font size=3><I>output format</I> <font size=3>of the stream if reencoding is enabled. Otherwise, it specifies the <font size=3><I>input<br>
-<span style=" text-indent: 0.4500in;"></span>format</I> <font size=3>of <font size=3><B>all</B> <font size=3>input files. Recognized and supported values are <font size=3><B>VORBIS</B><font size=3>, <font size=3><B>MP3</B> <font size=3>and <font size=3><B>THEORA</B><font size=3>. Other val-<br>
-<span style=" text-indent: 0.4500in;"></span>ues will be ignored and cause <font size=3><tt><B>ezstream</tt></B> <font size=3>to simply pass through the data, which may or may not work.</p>
+<span style=" text-indent: 0.4500in;"></span>format</I> <font size=3>of <font size=3><B>all</B> <font size=3>input files. Recognized and supported values for output stream formats are <font size=3><B>VORBIS</B><font size=3>, <font size=3><B>MP3<br>
+<span style=" text-indent: 0.4500in;"></span></B>and <font size=3><B>THEORA</B><font size=3>. Other values will be ignored and cause <font size=3><tt><B>ezstream</tt></B> <font size=3>to simply pass through the data,<br>
+<span style=" text-indent: 0.4500in;"></span>which may or may not work.</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;filename /&gt;<br>
 <span style=" text-indent: 0.4700in;"></span></B>( Mandatory. ) Set the path and name of a single media file, a playlist, the name of an external program<br>
 <span style=" text-indent: 0.4700in;"></span>( see below ) , or the keyword <font size=3><tt>stdin</tt> <font size=3>for streaming from standard input. Playlists are recognized by their<br>
@@ -110,8 +111,8 @@
 <span style=" text-indent: 0.4500in;"></span>are played sequentially if set to <font size=3><B>0</B> <font size=3>( zero ) or when the &lt;shuffle/&gt; element is absent. This option will be ig-<br>
 <span style=" text-indent: 0.4500in;"></span>nored if &lt;playlist_program/&gt; is set to 1 ( one. )</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;stream_once /&gt;<br>
-<span style=" text-indent: 0.4500in;"></span></B>Set to <font size=3><B>1</B> <font size=3>( one ) to stream &lt;filename/&gt; content only once, and to <font size=3><B>0</B> <font size=3>( zero ) for continuous streaming ( the<br>
-<span style=" text-indent: 0.4500in;"></span>default ) .</p>
+<span style=" text-indent: 0.4500in;"></span></B>Set to <font size=3><B>1</B> <font size=3>( one ) in order to stream the content of &lt;filename/&gt; only once, and to <font size=3><B>0</B> <font size=3>( zero ) for continuous<br>
+<span style=" text-indent: 0.4500in;"></span>streaming ( the default ) .</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;reconnect_tries /&gt;<br>
 <span style=" text-indent: 0.4500in;"></span></B>Set how many attempts should be made to reconnect to the Icecast server in case the connection is inter-<br>
 <span style=" text-indent: 0.4500in;"></span>rupted. The default is to try indefinitely, which is equal to setting this configuration option to <font size=3><B>0</B> <font size=3>( zero ) .</p>
@@ -123,8 +124,6 @@
 <span style=" text-indent: 0.4700in;"></span></B>( Optional.</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfourl<br>
 <span style=" text-indent: 0.4700in;"></span></B>( Optional.</p>
-<p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfogenre<br>
-<span style=" text-indent: 0.4700in;"></span></B>( Optional.</p>
 <p><font size=3>OpenBSD</p>
 </td>
 <td valign="top" align="left"  width="80.1538%">
@@ -132,8 +131,6 @@
 <span style=" text-indent: 0.0200in;"></span></B>( Optional. ) Set the name of the broadcast. Informational only.</p>
 <p><font size=3><B>&lt;svrinfourl /&gt;<br>
 <span style=" text-indent: 0.0200in;"></span></B>( Optional. ) Set the URL of the web site associated with the broadcast. Informational only.</p>
-<p><font size=3><B>&lt;svrinfogenre /&gt;<br>
-<span style=" text-indent: 0.0200in;"></span></B>( Optional. ) Set the genre of the broadcast. Informational only, used for YP.</p>
 <p><span style=" text-indent: 0.1600in;"></span><font size=3>4.1 February 20, 2007</p>
 </td>
 <td valign="top" align="left"  width="1.0769%">
@@ -148,38 +145,27 @@
 
 <table width="100%"  rules="none"  frame="none"  cols="5">
 <tr valign="top" align="left">
-<td valign="top" align="left"  width="36.6154%">
+<td valign="top" align="left"  width="22.1538%">
 <p><font size=3>EZSTREAM ( 1 )</p>
-<p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfodescription /&gt;<br>
-<span style=" text-indent: 0.4700in;"></span></B>( Optional. ) Set the description of</p>
-</td>
-<td valign="top" align="left"  width="1.0000%">
-</td>
-<td valign="top" align="left"  width="41.3846%">
-<p><font size=3>OpenBSD Reference Manual</p>
-<p><font size=3>the broadcast. Informational only, used for YP.</p>
-</td>
-<td valign="top" align="left"  width="6.3077%">
-</td>
-<td valign="top" align="left"  width="15.2308%">
-<p><font size=3>EZSTREAM ( 1 )</p>
-</td>
-</tr>
-<tr valign="top" align="left">
-<td valign="top" align="left"  width="29.6923%">
-<p><font size=3><B> &lt;svrinfobitrate /&gt;</p>
+<p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfogenre /&gt;</p>
 </B></td>
-<td valign="top" align="left"  width="1.0000%">
+<td valign="top" align="left"  width="14.9231%">
 </td>
-<td valign="top" align="left"  width="41.3846%">
+<td valign="top" align="left"  width="25.8462%">
+<p><font size=3>OpenBSD Reference Manual</p>
 </td>
-<td valign="top" align="left"  width="6.3077%">
+<td valign="top" align="left"  width="21.8462%">
 </td>
 <td valign="top" align="left"  width="15.2308%">
+<p><font size=3>EZSTREAM ( 1 )</p>
 </td>
 </tr>
 </table>
-<p><font size=3>( Optional. ) Set the bitrate of the broadcast. This setting is also purely informational and only used for YP.<br>
+<p><font size=3>( Optional. ) Set the genre of the broadcast. Informational only, used for YP.</p>
+<p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfodescription /&gt;<br>
+<span style=" text-indent: 0.4700in;"></span></B>( Optional. ) Set the description of the broadcast. Informational only, used for YP.</p>
+<p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfobitrate /&gt;<br>
+<span style=" text-indent: 0.4700in;"></span></B>( Optional. ) Set the bitrate of the broadcast. This setting is also purely informational and only used for YP.<br>
 <span style=" text-indent: 0.4500in;"></span>The value is set by the user and not <font size=3><tt><B>ezstream</tt></B><font size=3>, and should match the bitrate of the stream.</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;svrinfoquality /&gt;<br>
 <span style=" text-indent: 0.4700in;"></span></B>( Optional. ) Set the quality setting of an Ogg Vorbis broadcast. Informational only and needs to be set by<br>
@@ -204,13 +190,13 @@
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;encdec /&gt;<br>
 <span style=" text-indent: 0.4500in;"></span></B>Element that contains child elements, which specify how to decode and encode a certain media file format<br>
 <span style=" text-indent: 0.4500in;"></span>for streaming. Each format is described by a separate &lt;encdec/&gt; element.</p>
-<p><span style=" text-indent: 0.2000in;"></span><font size=3><B>Dencoder/Encoder settings<br>
+<p><span style=" text-indent: 0.2000in;"></span><font size=3><B>Decoder/Encoder settings<br>
 <span style=" text-indent: 0.4500in;"></span></B>Each of the decoder/encoder configuration elements have the &lt;encdec/&gt; element as their parent.</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;format /&gt;<br>
 <span style=" text-indent: 0.4500in;"></span></B>This element is used by <font size=3><tt><B>ezstream</tt></B> <font size=3>to find the appropriate encoder for the output stream format specified<br>
-<span style=" text-indent: 0.4500in;"></span>in the &lt;format/&gt; element inside the global configuration. It is recommended that this element is always<br>
-<span style=" text-indent: 0.4500in;"></span>supplied, even for currently unsupported output formats, with content such as <font size=3><B>VORBIS</B><font size=3>, <font size=3><B>MP3</B><font size=3>, <font size=3><B>THEORA</B><font size=3>,<br>
-<span style=" text-indent: 0.4500in;"></span><B>FLAC</B><font size=3>, et cetera.</p>
+<span style=" text-indent: 0.4500in;"></span>in the &lt;format/&gt; element inside the global configuration. For consistency reasons, it is recommended that<br>
+<span style=" text-indent: 0.4500in;"></span>this element is always supplied, even for currently unsupported output formats, with content such as<br>
+<span style=" text-indent: 0.4500in;"></span><B>VORBIS</B><font size=3>, <font size=3><B>MP3</B><font size=3>, <font size=3><B>THEORA</B><font size=3>, <font size=3><B>FLAC</B><font size=3>, et cetera.</p>
 <p><span style=" text-indent: 0.4500in;"></span><font size=3><B>&lt;match /&gt;<br>
 <span style=" text-indent: 0.4500in;"></span></B>Set the filename extension used to identify a given media file format. This allows <font size=3><tt><B>ezstream</tt></B> <font size=3>to find the<br>
 <span style=" text-indent: 0.4500in;"></span>appropriate decoder for a given file. Should be set to <font size=3><I>.mp3</I> <font size=3>for MP3, <font size=3><I>.flac</I> <font size=3>for FLAC, <font size=3><I>.ogg</I> <font size=3>for Ogg Vorbis,<br>
