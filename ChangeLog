@@ -1,3 +1,24 @@
+2007-03-05 01:01  moritz
+
+	* [r12637] win32/ezstream.1.html:
+	  regen
+
+2007-03-05 00:51  moritz
+
+	* [r12636] doc/ezstream.1.in:
+	  Fix a typo, and reword a few sentences to make them easier to
+	  understand.
+
+2007-03-04 23:58  moritz
+
+	* [r12635] NEWS:
+	  Add release date. This is definitely going out today...
+
+2007-03-04 21:19  moritz
+
+	* [r12634] ChangeLog:
+	  regen
+
 2007-03-04 21:12  moritz
 
 	* [r12633] README:
