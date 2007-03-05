@@ -137,7 +137,7 @@ Otherwise, it specifies the
 of
 .Sy all
 input files.
-Recognized and supported values are
+Recognized and supported values for output stream formats are
 .Sy VORBIS ,
 .Sy MP3
 and
@@ -197,7 +197,7 @@ This option will be ignored if \&<playlist_program/\&> is set to 1
 Set to
 .Sy 1
 .Pq one
-to stream \&<filename/\&> content only once, and to
+in order to stream the content of \&<filename/\&> only once, and to
 .Sy 0
 .Pq zero
 for continuous streaming
@@ -284,7 +284,7 @@ Element that contains child elements, which specify how to decode and encode
 a certain media file format for streaming.
 Each format is described by a separate \&<encdec/\&> element.
 .El
-.Ss Dencoder/Encoder settings
+.Ss Decoder/Encoder settings
 Each of the decoder/encoder configuration elements have the \&<encdec/\&>
 element as their parent.
 .Bl -ohang
@@ -293,8 +293,8 @@ This element is used by
 .Nm
 to find the appropriate encoder for the output stream format specified in the
 \&<format/\&> element inside the global configuration.
-It is recommended that this element is always supplied, even for currently
-unsupported output formats, with content such as
+For consistency reasons, it is recommended that this element is always
+supplied, even for currently unsupported output formats, with content such as
 .Sy VORBIS ,
 .Sy MP3 ,
 .Sy THEORA ,
