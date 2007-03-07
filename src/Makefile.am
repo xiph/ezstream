@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = 1.9 foreign
 
 bin_PROGRAMS =	ezstream
 
-ezstream_SOURCES = ezstream.c configfile.c playlist.c util.c
+ezstream_SOURCES = ezstream.c compat.c configfile.c playlist.c util.c
 ezstream_LDADD = @LIBOBJS@ @XIPH_LIBS@
     
 AM_CFLAGS =	@XIPH_CFLAGS@

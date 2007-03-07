@@ -26,13 +26,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "compat.h"
 #include "configfile.h"
 #include "strfctns.h"
 #include "util.h"
-
-#ifndef PATH_MAX
-# define PATH_MAX	256
-#endif
 
 extern char		*__progname;
 

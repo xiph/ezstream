@@ -154,6 +154,9 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
+				RelativePath="..\src\compat.c">
+			</File>
+			<File
 				RelativePath="..\src\configfile.c">
 				<FileConfiguration
 					Name="Release|Win32">

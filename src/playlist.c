@@ -35,15 +35,7 @@
 #include "playlist.h"
 #include "util.h"
 
-#ifndef SIZE_T_MAX
-# define SIZE_T_MAX	UINT_MAX
-#endif
-
-#ifndef PATH_MAX
-# define PATH_MAX	256
-#endif
-
-extern char    *__progname;
+extern char	*__progname;
 
 struct playlist {
 	char	 *filename;

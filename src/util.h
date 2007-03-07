@@ -22,5 +22,6 @@ void *	xcalloc(size_t /* nmemb */, size_t /* size */);
 void *	xrealloc(void *, size_t /* nmemb */, size_t /* size */);
 void	xfree(void *);
 char *	xstrdup(const char *);
+int	strrcmp(const char *, const char *);
 
 #endif /* __UTIL_H__ */

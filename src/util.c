@@ -33,7 +33,7 @@
 # define SIZE_T_MAX	UINT_MAX
 #endif
 
-extern char    *__progname;
+extern char	*__progname;
 
 void *
 xmalloc(size_t size)
@@ -136,4 +136,16 @@ xstrdup(const char *str)
 	nstr = xcalloc(1, len);
 	memcpy(nstr, str, len);
 	return (nstr);
+}
+
+int
+strrcmp(const char *s, const char *sub)
+{
+	size_t	slen = strlen(s);
+	size_t	sublen = strlen(sub);
+
+	if (sublen > slen)
+		return (1);
+
+	return (memcmp(s + slen - sublen, sub, sublen));
 }

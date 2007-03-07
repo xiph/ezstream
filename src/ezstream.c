@@ -62,15 +62,6 @@
 #include "strfctns.h"
 #include "util.h"
 
-#ifndef PATH_MAX
-# define PATH_MAX	256
-#endif
-
-/* For Solaris, possibly others (usually defined in <paths.h>.) */
-#ifndef _PATH_DEVNULL
-#  define _PATH_DEVNULL "/dev/null"
-#endif /* _PATH_DEVNULL */
-
 #define STREAM_DONE	0
 #define STREAM_CONT	1
 #define STREAM_SKIP	2
@@ -112,10 +103,6 @@ typedef struct tag_ID3Tag {
 	char genre;
 } ID3Tag;
 
-#ifdef WIN32
-char *	basename(const char *);
-#endif
-int	strrcmp(const char *, const char *);
 int	urlParse(const char *, char **, int *, char **);
 void	replaceString(const char *, char *, size_t, const char *, const char *);
 void	setMetadata(shout_t *, const char *);
@@ -149,31 +136,6 @@ sig_handler(int sig)
 	}
 }
 #endif /* HAVE_SIGNALS */
-
-#ifdef WIN32
-char *
-basename(const char *fileName)
-{
-	char	*pLast = strrchr(fileName, PATH_SEPARATOR);
-
-	if (pLast != NULL)
-		return (pLast + 1);
-
-	return (NULL);
-}
-#endif /* WIN32 */
-
-int
-strrcmp(const char *s, const char *sub)
-{
-	size_t	slen = strlen(s);
-	size_t	sublen = strlen(sub);
-
-	if (sublen > slen)
-		return (1);
-
-	return (memcmp(s + slen - sublen, sub, sublen));
-}
 
 int
 urlParse(const char *url, char **hostname, int *port, char **mountname)
@@ -614,11 +576,7 @@ reconnectServer(shout_t *shout, int closeConn)
 
 		printf("%s: Waiting 5s for %s to come back ...\n",
 		       __progname, pezConfig->URL);
-#ifdef WIN32
-		Sleep(5000);
-#else
 		sleep(5);
-#endif
 	};
 
 	printf("%s: Giving up\n", __progname);
