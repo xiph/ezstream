@@ -591,7 +591,7 @@ parseConfig(const char *fileName)
 		return (1);
 
 	freeConfig(&ezConfig);
-	printf("%s: %u configuration errors in %s\n", __progname,
+	printf("%s: %u configuration error(s) in %s\n", __progname,
 	       config_error, fileName);
 
 	return (0);
