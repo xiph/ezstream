@@ -241,31 +241,26 @@ playlist_free(playlist_t *pl)
 	size_t	i;
 
 	if (pl != NULL) {
-		if (pl->filename != NULL) {
+		if (pl->filename != NULL)
 			xfree(pl->filename);
-			pl->filename = NULL;
-		}
 
 		if (pl->list != NULL) {
 			if (pl->size > 0) {
 				for (i = 0; i < pl->size / sizeof(char *); i++) {
-					if (pl->list[i] != NULL) {
+					if (pl->list[i] != NULL)
 						xfree(pl->list[i]);
-						pl->list[i] = NULL;
-					} else
+					else
 						break;
 				}
 			}
 
 			xfree(pl->list);
-			pl->list = NULL;
 		}
 
 		if (pl->prog_track != NULL)
 			xfree(pl->prog_track);
 
 		xfree(pl);
-		pl = NULL;
 	}
 }
 
