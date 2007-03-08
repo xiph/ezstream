@@ -217,6 +217,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\src\metadata.c">
+			</File>
+			<File
 				RelativePath="..\src\playlist.c">
 			</File>
 			<File
@@ -246,6 +249,9 @@
 			</File>
 			<File
 				RelativePath="..\src\getopt.h">
+			</File>
+			<File
+				RelativePath="..\src\metadata.h">
 			</File>
 			<File
 				RelativePath="..\src\playlist.h">
