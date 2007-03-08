@@ -113,19 +113,6 @@ xrealloc(void *ptr, size_t nmemb, size_t size)
 	return (ret);
 }
 
-void
-xfree(void *ptr)
-{
-	if (ptr == NULL) {
-		printf("%s: xfree(): Internal error: NULL argument\n",
-		       __progname);
-		abort();
-	}
-
-	free(ptr);
-	ptr = NULL;
-}
-
 char *
 xstrdup(const char *str)
 {

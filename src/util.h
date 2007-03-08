@@ -20,8 +20,17 @@
 void *	xmalloc(size_t /* size */);
 void *	xcalloc(size_t /* nmemb */, size_t /* size */);
 void *	xrealloc(void *, size_t /* nmemb */, size_t /* size */);
-void	xfree(void *);
 char *	xstrdup(const char *);
 int	strrcmp(const char *, const char *);
+
+#define xfree(ptr)	do {						\
+	if ((ptr) == NULL) {						\
+		printf("%s: xfree(): Internal error: NULL argument\n",	\
+		       __progname);					\
+		abort();						\
+	}								\
+	free(ptr);							\
+	(ptr) = NULL;							\
+} while (0)
 
 #endif /* __UTIL_H__ */
