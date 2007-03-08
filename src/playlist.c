@@ -141,7 +141,7 @@ playlist_read(const char *filename)
 
 	if ((filep = fopen(filename, "r")) == NULL) {
 		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
-		playlist_free(pl);
+		playlist_free(&pl);
 		return (NULL);
 	}
 
@@ -183,7 +183,7 @@ playlist_read(const char *filename)
 		/* We got one. */
 		if (!playlist_add(pl, buf)) {
 			fclose(filep);
-			playlist_free(pl);
+			playlist_free(&pl);
 			return (NULL);
 		}
 	}
@@ -191,7 +191,7 @@ playlist_read(const char *filename)
 		printf("%s: playlist_read(): Error while reading %s: %s\n",
 		       __progname, filename, strerror(errno));
 		fclose(filep);
-		playlist_free(pl);
+		playlist_free(&pl);
 		return (NULL);
 	}
 
@@ -215,18 +215,18 @@ playlist_program(const char *filename)
 #ifdef HAVE_STAT
 	if (stat(filename, &st) == -1) {
 		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
-		playlist_free(pl);
+		playlist_free(&pl);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		printf("%s: %s: Not an executable program\n", __progname, filename);
-		playlist_free(pl);
+		playlist_free(&pl);
 		return (NULL);
 	}
 #else
 	if ((filep = fopen(filename, "r")) == NULL) {
 		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
-		playlist_free(pl);
+		playlist_free(&pl);
 		return (NULL);
 	}
 	fclose(filep);
@@ -236,32 +236,36 @@ playlist_program(const char *filename)
 }
 
 void
-playlist_free(playlist_t *pl)
+playlist_free(playlist_t **pl)
 {
-	size_t	i;
+	size_t		i;
+	playlist_t	*tmp;
 
-	if (pl != NULL) {
-		if (pl->filename != NULL)
-			xfree(pl->filename);
+	if (pl == NULL || *pl == NULL)
+		return;
 
-		if (pl->list != NULL) {
-			if (pl->size > 0) {
-				for (i = 0; i < pl->size / sizeof(char *); i++) {
-					if (pl->list[i] != NULL)
-						xfree(pl->list[i]);
-					else
-						break;
-				}
+	tmp = *pl;
+
+	if (tmp->filename != NULL)
+		xfree(tmp->filename);
+
+	if (tmp->list != NULL) {
+		if (tmp->size > 0) {
+			for (i = 0; i < tmp->size / sizeof(char *); i++) {
+				if (tmp->list[i] != NULL)
+					xfree(tmp->list[i]);
+				else
+					break;
 			}
-
-			xfree(pl->list);
 		}
 
-		if (pl->prog_track != NULL)
-			xfree(pl->prog_track);
-
-		xfree(pl);
+		xfree(tmp->list);
 	}
+
+	if (tmp->prog_track != NULL)
+		xfree(tmp->prog_track);
+
+	xfree(pl);
 }
 
 const char *
@@ -415,7 +419,7 @@ playlist_reread(playlist_t **plist)
 	if ((new_pl = playlist_read(pl->filename)) == NULL)
 		return (0);
 
-	playlist_free(pl);
+	playlist_free(&pl);
 	*plist = new_pl;
 
 	return (1);

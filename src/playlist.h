@@ -47,7 +47,7 @@ playlist_t *	playlist_program(const char * /* program name */);
  * Free all memory used by a playlist handler that was created with
  * playlist_read().
  */
-void		playlist_free(playlist_t *);
+void		playlist_free(playlist_t **);
 
 /*
  * Get the next item in the playlist. Returns a NUL-terminated string of a

@@ -1033,7 +1033,7 @@ main(int argc, char *argv[])
 
 	shout_close(shout);
 
-	playlist_free(playlist);
+	playlist_free(&playlist);
 	playlist_shutdown();
 
 	shout_shutdown();
