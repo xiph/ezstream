@@ -1,6 +1,6 @@
 dnl INITIALIZATION
 
-AC_INIT([ezstream], [0.3.1], [grmo@users.sourceforge.net])
+AC_INIT([ezstream], [0.4.0], [grmo@users.sourceforge.net])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR(src/ezstream.c)
 AM_INIT_AUTOMAKE
