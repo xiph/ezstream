@@ -1,3 +1,15 @@
+Changes in 0.4.0, (SVN trunk):
+
+ * src/util.c, src/util.h:
+   - [FIX]   The xfree() function did not work as intended due to a programming
+             error. Found, and fix suggested, by Karl Heyes.
+
+ * src/compat.c:
+   - [ADD]   Implement a basename() function for Windows that behaves like the
+             ones used on Windows.
+
+
+
 Changes in 0.3.0, released on 2007-03-05:
 
  * The original author, Ed Zaleski, hands over ezstream maintainership to
@@ -53,7 +65,7 @@ Changes in 0.3.0, released on 2007-03-05:
 
 Changes in 0.2.1, released on 2005-12-14:
 
- * ezstream.c:
+ * src/ezstream.c:
    - [FIX]   Prevent a heap overflow with large ID3v1 tags.
    - [FIX]   Use pclose() on FILE* handles that were opened with popen().
 
@@ -65,7 +77,7 @@ Changes in 0.2.0, released on 2005-01-05:
    - [MISC]  Clean up and improve example configuration files, and add more
              examples.
 
- * ezstream.c:
+ * src/ezstream.c:
    - [FIX]   Fix reencoding support on Windows.
    - [ADD]   Attempt to reconnect to a server if the connection goes down
              during streaming.
