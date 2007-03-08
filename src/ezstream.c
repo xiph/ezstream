@@ -33,6 +33,10 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#ifdef HAVE_LIBGEN_H
+# include <libgen.h>
+#endif
+#include <limits.h>
 #ifdef HAVE_PATHS_H
 # include <paths.h>
 #endif
@@ -42,22 +46,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <limits.h>
 #ifdef WIN32
 # include <io.h>
 # include <windows.h>
-#else
-# include <libgen.h>
-# include <unistd.h>
 #endif /* WIN32 */
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
 #include <shout/shout.h>
-#include <vorbis/vorbisfile.h>
 
 #include "compat.h"
 #include "configfile.h"
 #ifndef HAVE_GETOPT
 # include "getopt.h"
 #endif
+#include "metadata.h"
 #include "playlist.h"
 #include "strfctns.h"
 #include "util.h"
@@ -105,9 +108,8 @@ typedef struct tag_ID3Tag {
 
 int	urlParse(const char *, char **, int *, char **);
 void	replaceString(const char *, char *, size_t, const char *, const char *);
-void	setMetadata(shout_t *, const char *);
 char *	buildCommandString(const char *, const char *, const char *);
-char *	processMetadata(shout_t *, const char *, const char *);
+char *	processMetadata(shout_t *, const char *);
 FILE *	openResource(shout_t *, const char *, int *, char **, int *);
 int	reconnectServer(shout_t *, int);
 int	sendStream(shout_t *, FILE *, const char *, int, void *);
@@ -214,17 +216,7 @@ replaceString(const char *source, char *dest, size_t size,
 	strlcat(dest, p1, size);
 }
 
-void
-setMetadata(shout_t *shout, const char *metadata)
-{
-	shout_metadata_t *shoutMetadata = shout_metadata_new();
-
-	shout_metadata_add(shoutMetadata, "song", metadata); 
-	shout_set_metadata(shout, shoutMetadata);
-	shout_metadata_free(shoutMetadata);
-}
-
-char*
+char *
 buildCommandString(const char *extension, const char *fileName,
 		   const char *metadata)
 {
@@ -293,154 +285,33 @@ buildCommandString(const char *extension, const char *fileName,
 }
 
 char *
-processMetadata(shout_t *shout, const char *extension, const char *fileName)
+processMetadata(shout_t *shout, const char *fileName)
 {
-	FILE			*filepstream = NULL;
 	char			*songInfo = NULL;
-	size_t			 songLen = 0;
-	ID3Tag			 id3tag;
-	shout_metadata_t	*pmetadata = NULL;
+	shout_metadata_t	*shout_mdata = NULL;
+	metadata_t              *mdata = NULL;
 
-	if ((filepstream = fopen(fileName, "rb")) == NULL) {
-		printf("%s: processMetadata(): %s: %s\n",
-		       __progname, fileName, strerror(errno));
-		return (xstrdup(blankString));
+	if ((mdata = metadata_file(fileName)) == NULL) {
+		songInfo = xstrdup(blankString);
+		return (songInfo);
 	}
 
-	if (strcmp(extension, ".mp3") == 0) {
-		/* Look for the ID3 tag */
-		memset(&id3tag, '\000', sizeof(id3tag));
-		fseek(filepstream, -128L, SEEK_END);
-		fread(&id3tag, 1, 127, filepstream);
-		if (strncmp(id3tag.tag, "TAG", strlen("TAG")) == 0) {
-			char 	tempTrackName[31];
-			char 	tempArtistName[31];
-
-			snprintf(tempTrackName, sizeof(tempTrackName), "%s",
-				 id3tag.trackName);
-			snprintf(tempArtistName, sizeof(tempArtistName), "%s",
-				 id3tag.artistName);
-
-			if (strlen(tempTrackName) > 0 ||
-			    strlen(tempArtistName) > 0) {
-				songLen = strlen(tempArtistName) +
-					strlen(" - ") + strlen(tempTrackName)
-					+ 1;
-				songInfo = xmalloc(songLen);
-				strlcpy(songInfo, tempArtistName, songLen);
-				if (strlen(songInfo) > 0 &&
-				    strlen(tempTrackName) > 0)
-					strlcat(songInfo, " - ", songLen);
-				strlcat(songInfo, tempTrackName, songLen);
-			}
-		}
-	} else if (strcmp(extension, ".ogg") == 0) {
-		OggVorbis_File	vf;
-		int		ret;
-
-		if ((ret = ov_open(filepstream, &vf, NULL, 0)) != 0) {
-			switch (ret) {
-			case OV_EREAD:
-				printf("%s: No metadata support: %s: Media read error\n",
-				       __progname, fileName);
-				break;
-			case OV_ENOTVORBIS:
-				printf("%s: No metadata support: %s: Invalid Vorbis bitstream\n",
-				       __progname, fileName);
-				break;
-			case OV_EVERSION:
-				printf("%s: No metadata support: %s: Vorbis version mismatch\n",
-				       __progname, fileName);
-				break;
-			case OV_EBADHEADER:
-				printf("%s: No metadata support: %s: Invalid Vorbis bitstream header\n",
-				       __progname, fileName);
-				break;
-			case OV_EFAULT:
-				printf("%s: Fatal: Internal libvorbisfile fault\n",
-				       __progname);
-				abort();
-			default:
-				printf("%s: No metadata support: %s: ov_read() returned unknown error\n",
-				       __progname, fileName);
-				break;
-			}
-		} else {
-			char	**ptr = ov_comment(&vf, -1)->user_comments;
-			char	*artist = NULL;
-			char	*title = NULL;
-
-			while(*ptr){
-				if (artist == NULL &&
-				    strncasecmp(*ptr, "ARTIST", strlen("ARTIST")) == 0)
-					artist = xstrdup(*ptr + strlen("ARTIST="));
-				if (title == NULL &&
-				    strncasecmp(*ptr, "TITLE", strlen("TITLE")) == 0)
-					title = xstrdup(*ptr + strlen("TITLE="));
-				++ptr;
-			}
-
-			if (artist != NULL || title != NULL) {
-				songLen = 0;
-				if (artist != NULL)
-					songLen += strlen(artist);
-				if (title != NULL)
-					songLen += strlen(title);
-				songLen += strlen(" - ") + 1;
-				songInfo = xcalloc(1, songLen);
-
-				if (artist != NULL)
-					strlcpy(songInfo, artist, songLen);
-				if (title != NULL) {
-					if (artist != NULL)
-						strlcat(songInfo, " - ", songLen);
-					strlcat(songInfo, title, songLen);
-					xfree(title);
-				}
-				if (artist != NULL)
-					xfree(artist);
-			}
-
-			ov_clear(&vf);
-			filepstream = NULL;
-		}
+	if (!metadata_file_update(mdata)) {
+		metadata_free(mdata);
+		songInfo = xstrdup(blankString);
+		return (songInfo);
 	}
+	songInfo = xstrdup(metadata_get_string(mdata));
+	metadata_free(mdata);
 
-	if (filepstream != NULL)
-		fclose(filepstream);
-
-	if (songInfo == NULL) {
-		/*
-		 * If we didn't get any song info via tags or comments, then
-		 * let's just use the filename.
-		 */
-		char	*p1 = NULL;
-		char	*p2 = NULL;
-		char	*filename_copy = NULL;
-
-		filename_copy = xstrdup(fileName);
-		p2 = basename(filename_copy);
-		if (p2 == NULL) {
-			/* Assert that basename() cannot fail. */
-			printf("%s: Internal error: basename() failed with '%s'\n",
-			       __progname, filename_copy);
-			exit(1);
-		}
-		songInfo = xstrdup(p2);
-		xfree(filename_copy);
-		p1 = strrchr(songInfo, '.');
-		if (p1 != NULL)
-			*p1 = '\000';
-	}
-
-	if ((pmetadata = shout_metadata_new()) == NULL) {
+	if ((shout_mdata = shout_metadata_new()) == NULL) {
 		printf("%s: shout_metadata_new(): %s\n", __progname,
 		       strerror(ENOMEM));
 		exit(1);
 	}
-	shout_metadata_add(pmetadata, "song", songInfo);
-	shout_set_metadata(shout, pmetadata);
-	shout_metadata_free(pmetadata);
+	shout_metadata_add(shout_mdata, "song", songInfo);
+	shout_set_metadata(shout, shout_mdata);
+	shout_metadata_free(shout_mdata);
 
 	return (songInfo);
 }
@@ -451,7 +322,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 {
 	FILE	*filep = NULL;
 	char	 extension[25];
-	char	*p1 = NULL;
+	char	*p = NULL;
 	char	*pMetadata = NULL;
 	char	*pCommandString = NULL;
 
@@ -471,62 +342,65 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		*isStdin = 0;
 
 	extension[0] = '\0';
-	p1 = strrchr(fileName, '.');
-	if (p1 != NULL)
-		strlcpy(extension, p1, sizeof(extension));
-	for (p1 = extension; *p1 != '\0'; p1++)
-		*p1 = tolower((int)*p1);
-	pMetadata = processMetadata(shout, extension, fileName);
+	p = strrchr(fileName, '.');
+	if (p != NULL)
+		strlcpy(extension, p, sizeof(extension));
+	for (p = extension; *p != '\0'; p++)
+		*p = tolower((int)*p);
+
+	if (strlen(extension) == 0) {
+		printf("%s: Error: Cannot determine file type of '%s'\n",
+		       __progname, fileName);
+		return (filep);
+	}
+
+	pMetadata = processMetadata(shout, fileName);
 	if (metaCopy != NULL)
 		*metaCopy = xstrdup(pMetadata);
 
 	*popenFlag = 0;
 	if (pezConfig->reencode) {
-		if (strlen(extension) > 0) {
-			int	stderr_fd = dup(fileno(stderr));
+		int	stderr_fd = dup(fileno(stderr));
 
-			pCommandString = buildCommandString(extension, fileName, pMetadata);
-			if (vFlag > 1)
-				printf("%s: Running command `%s`\n", __progname,
-				       pCommandString);
+		pCommandString = buildCommandString(extension, fileName, pMetadata);
+		if (vFlag > 1)
+			printf("%s: Running command `%s`\n", __progname,
+			       pCommandString);
 
-			if (qFlag) {
-				int fd;
+		if (qFlag) {
+			int fd;
 
-				if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
-					printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
-					       __progname, _PATH_DEVNULL, strerror(errno));
-					exit(1);
-				}
-
-				dup2(fd, fileno(stderr));
-				if (fd > 2)
-					close(fd);
+			if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
+				printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
+				       __progname, _PATH_DEVNULL, strerror(errno));
+				exit(1);
 			}
 
-			fflush(NULL);
-			errno = 0;
-			if ((filep = popen(pCommandString, "r")) == NULL) {
-				printf("%s: popen(): Error while executing '%s'",
-				       __progname, pCommandString);
-				/* popen() does not set errno reliably ... */
-				if (errno)
-					printf(": %s\n", strerror(errno));
-				else
-					printf("\n");
-			} else {
-				*popenFlag = 1;
+			dup2(fd, fileno(stderr));
+			if (fd > 2)
+				close(fd);
+		}
+
+		fflush(NULL);
+		errno = 0;
+		if ((filep = popen(pCommandString, "r")) == NULL) {
+			printf("%s: popen(): Error while executing '%s'",
+			       __progname, pCommandString);
+			/* popen() does not set errno reliably ... */
+			if (errno)
+				printf(": %s\n", strerror(errno));
+			else
+				printf("\n");
+		} else {
+			*popenFlag = 1;
 #ifdef WIN32
-				_setmode(_fileno(filep), _O_BINARY );
+			_setmode(_fileno(filep), _O_BINARY );
 #endif
-			}
-			xfree(pCommandString);
+		}
+		xfree(pCommandString);
 
-			if (qFlag)
-				dup2(stderr_fd, fileno(stderr));
-		} else
-			printf("%s: Error: Cannot determine file type of '%s'\n",
-			       __progname, fileName);
+		if (qFlag)
+			dup2(stderr_fd, fileno(stderr));
 
 		xfree(pMetadata);
 		return (filep);

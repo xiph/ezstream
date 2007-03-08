@@ -64,7 +64,7 @@ AC_TYPE_SIZE_T
 
 dnl USEFUL HEADERS
 
-AC_CHECK_HEADERS(sys/time.h paths.h signal.h)
+AC_CHECK_HEADERS(sys/time.h paths.h signal.h libgen.h)
 
 
 dnl LIBRARY FUNCTIONS
