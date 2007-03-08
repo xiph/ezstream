@@ -135,7 +135,7 @@ playlist_read(const char *filename)
 	playlist_t	*pl;
 	unsigned long	 line;
 	FILE		*filep;
-	char		 buf[PATH_MAX + 1];
+	char		 buf[PATH_MAX];
 
 	pl = playlist_create(filename);
 
@@ -470,7 +470,7 @@ const char *
 playlist_run_program(playlist_t *pl)
 {
 	FILE	*filep;
-	char	 buf[PATH_MAX + 1];
+	char	 buf[PATH_MAX];
 
 	if (pl == NULL) {
 		printf("%s: playlist_run_program(): Internal error: NULL argument\n",

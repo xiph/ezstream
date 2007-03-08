@@ -641,7 +641,7 @@ int
 streamPlaylist(shout_t *shout, const char *fileName)
 {
 	const char	*song;
-	char		 lastSong[PATH_MAX + 1];
+	char		 lastSong[PATH_MAX];
 
 	if (playlist == NULL) {
 		if (pezConfig->fileNameIsProgram) {
