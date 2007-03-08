@@ -35,7 +35,7 @@
 
 /* Sometimes defined through <limits.h>. */
 #ifndef SIZE_T_MAX
-# define SIZE_T_MAX	UINT_MAX
+# define SIZE_T_MAX	((size_t)-1)
 #endif /* !SIZE_T_MAX */
 
 #ifdef WIN32
