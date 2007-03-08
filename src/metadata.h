@@ -59,7 +59,7 @@ metadata_t *	metadata_program(const char * /* program name */);
  * Free all memory used by a metadata handle that has been created with
  * metadata_file() or metadata_program().
  */
-void		metadata_free(metadata_t *);
+void		metadata_free(metadata_t **);
 
 /*
  * Update/read the metadata for the given handle. Returns 1 on success, and 0

@@ -337,7 +337,7 @@ metadata_file(const char *filename)
 
 	md = metadata_create(filename);
 	if (!metadata_file_update(md)) {
-		metadata_free(md);
+		metadata_free(&md);
 		return (NULL);
 	}
 
@@ -362,15 +362,19 @@ metadata_program(const char *program)
 }
 
 void
-metadata_free(metadata_t *md)
+metadata_free(metadata_t **md)
 {
-	if (md == NULL)
+	metadata_t	*tmp;
+
+	if (md == NULL || *md == NULL)
 		return;
 
-	if (md->filename != NULL)
-		xfree(md->filename);
-	metadata_clean_md(md);
-	xfree(md);
+	tmp = *md;
+
+	if (tmp->filename != NULL)
+		xfree(tmp->filename);
+	metadata_clean_md(tmp);
+	xfree(*md);
 }
 
 

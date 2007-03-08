@@ -297,12 +297,12 @@ processMetadata(shout_t *shout, const char *fileName)
 	}
 
 	if (!metadata_file_update(mdata)) {
-		metadata_free(mdata);
+		metadata_free(&mdata);
 		songInfo = xstrdup(blankString);
 		return (songInfo);
 	}
 	songInfo = xstrdup(metadata_get_string(mdata));
-	metadata_free(mdata);
+	metadata_free(&mdata);
 
 	if ((shout_mdata = shout_metadata_new()) == NULL) {
 		printf("%s: shout_metadata_new(): %s\n", __progname,
