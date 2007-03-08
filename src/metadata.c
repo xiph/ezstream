@@ -33,6 +33,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifdef HAVE_TAGLIB
+# include <taglib/tag_c.h>
+#endif
 #include <vorbis/vorbisfile.h>
 
 #include "compat.h"
@@ -81,7 +84,7 @@ metadata_create(const char *filename)
 
 void
 metadata_use_taglib(metadata_t *md, FILE **filep)
-#ifdef HAVE_TAG_C
+#ifdef HAVE_TAGLIB
 {
 	TagLib_File	*tf;
 	TagLib_Tag	*tt;
@@ -98,6 +101,7 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 
 	metadata_clean_md(md);
 	taglib_set_string_management_enabled(0);
+	taglib_set_strings_unicode(0);
 
 	if (md->string != NULL)
 		xfree(md->string);
@@ -130,11 +134,11 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 	       __progname);
 	abort();
 }
-#endif /* HAVE_TAG_C */
+#endif /* HAVE_TAGLIB */
 
 void
 metadata_use_self(metadata_t *md, FILE **filep)
-#ifdef HAVE_TAG_C
+#ifdef HAVE_TAGLIB
 {
 	printf("%s: Internal error: metadata_use_self() called with TagLib support\n",
 	       __progname);
@@ -223,7 +227,7 @@ metadata_use_self(metadata_t *md, FILE **filep)
 	if (md->artist == NULL && md->title == NULL)
 		md->string = metadata_get_name(md->filename);
 }
-#endif /* HAVE_TAG_C */
+#endif /* HAVE_TAGLIB */
 
 void
 metadata_clean_md(metadata_t *md)
@@ -400,11 +404,11 @@ metadata_file_update(metadata_t *md)
 		return (0);
 	}
 
-#ifdef HAVE_TAG_C
+#ifdef HAVE_TAGLIB
 	metadata_use_taglib(md, &filep);
 #else
 	metadata_use_self(md, &filep);
-#endif /* HAVE_TAG_C */
+#endif /* HAVE_TAGLIB */
 
 	metadata_process_md(md);
 

@@ -18,7 +18,8 @@ format to another, and stream the result to an Icecast server. With reencoding
 enabled, ezstream is a very flexible source client.
 
 Supported media formats for streaming are MP3, Ogg Vorbis and Ogg Theora.
-Metadata support is available for MP3 (ID3v1 only) and Ogg Vorbis.
+Ezstream natively supports metadata in MP3 (ID3v1 only) and Ogg Vorbis, or many
+more formats when it is built with the TagLib option.
 
 Ezstream is free software and licensed under the GNU General Public License.
 See the COPYING file for details.
@@ -35,6 +36,10 @@ Ezstream depends on:
    (http://www.vorbis.com/ and http://www.theora.org/)
  * libxml 2.x (http://xmlsoft.org/)
 
+Ezstream optionally uses:
+ * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c wrapper)
+   (http://developer.kde.org/~wheeler/taglib.html)
+
 
 
 INSTALLATION
@@ -47,9 +52,11 @@ configure script, a couple of additional options are available:
 
   --enable-examplesdir=DIR  example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
-  --with-xml-config=PATH  use xml-config in PATH to find libxml
+  --with-taglib=PREFIX    Prefix where TagLib is installed (default:
+                          autodetect)
   --with-ogg=PREFIX       Prefix where libogg is installed (optional)
   --with-vorbis=PREFIX    Prefix where libvorbis is installed (optional)
+  --with-xml-config=PATH  use xml-config in PATH to find libxml
 
 The compilation and installation process boils down to the usual
 

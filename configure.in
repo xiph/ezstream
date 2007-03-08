@@ -43,7 +43,7 @@ fi
 
 dnl MISC SYSTEM CHARACTERISTICS
 
-dnl __progname check adapted from OpenNTPd-portable's configure.ac
+dnl __progname check adapted from OpenNTPd-portable configure.ac
 AC_MSG_CHECKING([whether libc defines __progname])
 AC_LINK_IFELSE(
 	[AC_LANG_PROGRAM([[#include <stdio.h>]],
@@ -80,6 +80,99 @@ fi
 
 
 dnl CONFIGURE OPTIONS
+
+dnl Optional: TagLib support
+AC_ARG_VAR([TAGLIB_PREFIX], [path to TagLib installation])
+if test -n "${TAGLIB_PREFIX}"; then
+	taglib_prefix="${TAGLIB_PREFIX}"
+else
+	taglib_prefix=""
+fi
+use_taglib=yes
+require_taglib=no
+AC_ARG_WITH(taglib,
+	[AS_HELP_STRING([--with-taglib=PREFIX],
+		[Prefix where TagLib is installed (default: autodetect)])],
+[case "$withval" in
+	yes) require_taglib=yes
+	     if test -z "$taglib_prefix"; then
+		taglib_prefix=/usr/local
+	     fi
+	     ;;
+	no)  use_taglib=no ;;
+	*)   require_taglib=yes
+	     taglib_prefix="$withval"
+	     ;;
+esac], [])
+
+have_taglib=no
+AC_MSG_CHECKING([for TagLib option])
+if test x"$use_taglib" != "xno"; then
+	if test x"$require_taglib" = "xyes"; then
+		AC_MSG_RESULT([enabled])
+	else
+		AC_MSG_RESULT([autodetect])
+	fi
+
+	TAGLIB_CFLAGS=""
+	TAGLIB_CPPFLAGS=""
+	TAGLIB_LIBS="-ltag_c"
+	if test -n "$taglib_prefix"; then
+		TAGLIB_CPPFLAGS="-I${taglib_prefix}/include"
+		TAGLIB_LIBS="-L${taglib_prefix}/lib ${TAGLIB_LIBS}"
+	fi
+
+	ac_taglib_save_CFLAGS="$CFLAGS"
+	ac_taglib_save_CPPFLAGS="$CPPFLAGS"
+	ac_taglib_save_LIBS="$LIBS"
+
+	CFLAGS="${TAGLIB_CFLAGS}"
+	CPPFLAGS="${TAGLIB_CPPFLAGS}"
+	LIBS="${TAGLIB_LIBS}"
+
+	AC_CHECK_HEADERS([taglib/tag_c.h], [
+			AC_MSG_CHECKING([whether TagLib works])
+			AC_LINK_IFELSE(
+				[AC_LANG_PROGRAM([[#include <taglib/tag_c.h>]],
+					[[ taglib_set_string_management_enabled(0); ]])],
+				[
+				AC_MSG_RESULT([yes])
+				have_taglib=yes
+				], [
+				if test x"$require_taglib" = "xyes"; then
+					AC_MSG_RESULT([no])
+					AC_MSG_ERROR([Cannot link against libtag_c in ${taglib_prefix}/lib])
+				else
+					AC_MSG_RESULT([no])
+					AC_MSG_WARN([Error while linking against libtag_c in ${taglib_prefix}/lib, disabling support])
+				fi
+				]
+			)
+		], [
+			if test x"$require_taglib" = "xyes"; then
+				AC_MSG_ERROR([Cannot find taglib/tag_c.h in ${taglib_prefix}/include])
+			else
+				AC_MSG_NOTICE([No TagLib C header found on this system])
+			fi
+		])
+
+	CFLAGS="$ac_taglib_save_CFLAGS"
+	CPPFLAGS="$ac_taglib_save_CPPFLAGS"
+	LIBS="$ac_taglib_save_LIBS"
+else
+	AC_MSG_RESULT([disabled])
+fi
+
+if test x"$have_taglib" = "xyes"; then
+	AC_DEFINE(HAVE_TAGLIB, 1, [Define whether we're using TagLib])
+else
+	TAGLIB_CFLAGS=""
+	TAGLIB_CPPFLAGS=""
+	TAGLIB_LIBS=""
+fi
+AC_SUBST(TAGLIB_CFLAGS)
+AC_SUBST(TAGLIB_CPPFLAGS)
+AC_SUBST(TAGLIB_LIBS)
 
 dnl Check for Ogg Vorbis
 XIPH_PATH_OGG(, AC_MSG_ERROR([Must have libogg 1.x installed.]))
