@@ -9,5 +9,8 @@ CLEANFILES =	core *.core *~ .*~
 
 .PHONY:		snapshot
 
+regen-win32:
+	cd win32; ${MAKE} regen-win32
+
 snapshot:
 	${MAKE} distcheck distdir=${PACKAGE}-snapshot-`date +'%Y%m%d'`
