@@ -69,6 +69,7 @@
 #define STREAM_CONT	1
 #define STREAM_SKIP	2
 #define STREAM_SERVERR	3
+#define STREAM_UPDMDATA 4
 
 #ifdef HAVE___PROGNAME
 extern char		*__progname;
@@ -78,6 +79,7 @@ char			*__progname;
 
 int			 qFlag;
 int			 vFlag;
+int			 metadataFromProgram;
 
 EZCONFIG		*pezConfig = NULL;
 static const char	*blankString = "";
@@ -85,15 +87,17 @@ playlist_t		*playlist = NULL;
 int			 playlistMode = 0;
 
 #ifdef HAVE_SIGNALS
-const int		 ezstream_signals[] = { SIGHUP, SIGUSR1 };
+const int		 ezstream_signals[] = { SIGHUP, SIGUSR1, SIGUSR2 };
 
 volatile sig_atomic_t	 rereadPlaylist = 0;
 volatile sig_atomic_t	 rereadPlaylist_notify = 0;
 volatile sig_atomic_t	 skipTrack = 0;
+volatile sig_atomic_t    queryMetadata = 0;
 #else
 int			 rereadPlaylist = 0;
 int			 rereadPlaylist_notify = 0;
 int			 skipTrack = 0;
+int			 queryMetadata = 0;
 #endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
@@ -132,6 +136,9 @@ sig_handler(int sig)
 		break;
 	case SIGUSR1:
 		skipTrack = 1;
+		break;
+	case SIGUSR2:
+		queryMetadata = 1;
 		break;
 	default:
 		break;
@@ -291,16 +298,26 @@ processMetadata(shout_t *shout, const char *fileName)
 	shout_metadata_t	*shout_mdata = NULL;
 	metadata_t              *mdata = NULL;
 
-	if ((mdata = metadata_file(fileName)) == NULL) {
-		songInfo = xstrdup(blankString);
-		return (songInfo);
+	if (metadataFromProgram) {
+		if ((mdata = metadata_program(fileName)) == NULL)
+			return (NULL);
+
+		if (!metadata_program_update(mdata, METADATA_STRING)) {
+			metadata_free(&mdata);
+			songInfo = xstrdup(blankString);
+			return (songInfo);
+		}
+	} else {
+		if ((mdata = metadata_file(fileName)) == NULL)
+			return (NULL);
+
+		if (!metadata_file_update(mdata)) {
+			metadata_free(&mdata);
+			songInfo = xstrdup(blankString);
+			return (songInfo);
+		}
 	}
 
-	if (!metadata_file_update(mdata)) {
-		metadata_free(&mdata);
-		songInfo = xstrdup(blankString);
-		return (songInfo);
-	}
 	songInfo = xstrdup(metadata_get_string(mdata));
 	metadata_free(&mdata);
 
@@ -327,6 +344,10 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 	char	*pCommandString = NULL;
 
 	if (strcmp(fileName, "stdin") == 0) {
+		if (metadataFromProgram &&
+		    processMetadata(shout, pezConfig->metadataProgram) == NULL)
+			return (filep);
+
 		if (vFlag)
 			printf("%s: Reading from standard input\n",
 			       __progname);
@@ -354,7 +375,12 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		return (filep);
 	}
 
-	pMetadata = processMetadata(shout, fileName);
+	if (metadataFromProgram)
+		pMetadata = processMetadata(shout, pezConfig->metadataProgram);
+	else
+		pMetadata = processMetadata(shout, fileName);
+	if (pMetadata == NULL)
+		return (filep);
 	if (metaCopy != NULL)
 		*metaCopy = xstrdup(pMetadata);
 
@@ -487,6 +513,19 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			break;
 		}
 
+		shout_sync(shout);
+
+		if (shout_send(shout, buff, read) != SHOUTERR_SUCCESS) {
+			printf("%s: shout_send(): %s\n", __progname,
+			       shout_get_error(shout));
+			if (reconnectServer(shout, 1))
+				break;
+			else {
+				ret = STREAM_SERVERR;
+				break;
+			}
+		}
+
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
 			if (!pezConfig->fileNameIsProgram)
@@ -498,16 +537,10 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			ret = STREAM_SKIP;
 			break;
 		}
-
-		shout_sync(shout);
-
-		if (shout_send(shout, buff, read) != SHOUTERR_SUCCESS) {
-			printf("%s: shout_send(): %s\n", __progname,
-			       shout_get_error(shout));
-			if (reconnectServer(shout, 1))
-				break;
-			else {
-				ret = STREAM_SERVERR;
+		if (queryMetadata) {
+			queryMetadata = 0;
+			if (metadataFromProgram) {
+				ret = STREAM_UPDMDATA;
 				break;
 			}
 		}
@@ -609,9 +642,14 @@ streamFile(shout_t *shout, const char *fileName)
 		ret = sendStream(shout, filepstream, fileName, isStdin, NULL);
 #endif
 		if (ret != STREAM_DONE) {
-			if (skipTrack && rereadPlaylist) {
+			if ((skipTrack && rereadPlaylist) ||
+			    (skipTrack && queryMetadata)) {
 				skipTrack = 0;
-				ret = 1;
+				ret = STREAM_CONT;
+			}
+			if (queryMetadata && rereadPlaylist) {
+				queryMetadata = 0;
+				ret = STREAM_CONT;
 			}
 			if (ret == STREAM_SKIP || skipTrack) {
 				skipTrack = 0;
@@ -621,13 +659,30 @@ streamFile(shout_t *shout, const char *fileName)
 				retval = 1;
 				ret = STREAM_DONE;
 			}
+			if (ret == STREAM_UPDMDATA || queryMetadata) {
+				queryMetadata = 0;
+				if (metadataFromProgram) {
+					char	*mdataStr;
+
+					if (vFlag > 1)
+						printf("%s: Querying '%s' for fresh metadata\n",
+						       __progname, pezConfig->metadataProgram);
+					if ((mdataStr = processMetadata(shout, pezConfig->metadataProgram)) == NULL) {
+						retval = 0;
+						ret = STREAM_DONE;
+					}
+					printf("%s: New metadata: ``%s''\n",
+					       __progname, mdataStr);
+					xfree(mdataStr);
+				}
+			}
 			if (ret == STREAM_SERVERR) {
 				retval = 0;
 				ret = STREAM_DONE;
 			}
 		} else
 			retval = 1;
-	} while (ret);
+	} while (ret != STREAM_DONE);
 
 	if (popenFlag)
 		pclose(filepstream);
@@ -683,10 +738,7 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		}
 	}
 
-	if (pezConfig->streamOnce)
-		return (0);
-	else
-		return (1);
+	return (1);
 }
 
 /* Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c */
@@ -975,6 +1027,11 @@ main(int argc, char *argv[])
 		       __progname, shout_get_error(shout));
 		return (1);
 	}
+
+	if (pezConfig->metadataProgram != NULL)
+		metadataFromProgram = 1;
+	else
+		metadataFromProgram = 0;
 
 #ifdef HAVE_SIGNALS
 	memset(&act, 0, sizeof(act));

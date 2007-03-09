@@ -8,7 +8,7 @@
 .Os
 .Sh NAME
 .Nm ezstream
-.Nd source client for Icecast with external en-/decoder support
+.Nd source client for Icecast with external de-/encoder support
 .Sh SYNOPSIS
 .Nm
 .Bk -words
@@ -59,8 +59,7 @@ and bitrate \(em is displayed.
 .Ss Runtime control
 On POSIX systems,
 .Nm
-offers limited runtime control via signals when it is not streaming data from
-standard input.
+offers limited runtime control via signals.
 By sending a signal to the ezstream process, e.g. with the
 .Xr kill 1
 utility, a certain action will be triggered.
@@ -74,6 +73,11 @@ following it, or restarts from the beginning of the list otherwise.
 .It Cd SIGUSR1
 Skips the currently playing track and moves on to the next in playlist mode, or
 restarts the current track when streaming a single file.
+.It Cd SIGUSR2
+Triggers rereading of metadata for the stream by running the program or script
+specified in \&<metadata_progname/\&>
+.Pq see below.
+This is the only meaningful signal when streaming from standard input.
 .El
 .Pp
 .Sh CONFIGURATION FILE SYNTAX
@@ -103,7 +107,7 @@ In the configuration file, they need to be used as
 .Em start tag + content + end tag ,
 like in the introductory example shown above.
 .Ss Root element
-.Bl -ohang
+.Bl -tag -width -Ds
 .It Sy \&<ezstream\ /\&>
 .Pq Mandatory.
 The configuration file's root element.
@@ -112,7 +116,7 @@ It contains all other configuration elements.
 .Ss Global configuration elements
 Each of the global configuration elements have the \&<ezstream/\&> element as
 their parent.
-.Bl -ohang
+.Bl -tag -width -Ds
 .It Sy \&<url\ /\&>
 .Pq Mandatory.
 Specifies the location and mountpoint of the Icecast server, to which the
@@ -170,10 +174,6 @@ Set to
 .Pq one
 to indicate that the file in \&<filename/\&> is actually an executable program
 or script.
-This program is supposed to print
-.Pq to standard output
-one line with the name of a file that should be streamed next and then exit.
-.Pp
 If set to
 .Sy 0
 .Pq zero ,
@@ -181,6 +181,10 @@ If set to
 keyword
 .Pa stdin
 .Pq the default .
+.Pp
+See the
+.Sy SCRIPTING
+section for details on how the playlist program must behave.
 .It Sy \&<shuffle\ /\&>
 .Pq Optional.
 Set to
@@ -193,6 +197,24 @@ Files are played sequentially if set to
 or when the \&<shuffle/\&> element is absent.
 This option will be ignored if \&<playlist_program/\&> is set to 1
 .Pq one.
+.It Sy \&<metadata_progname\ /\&>
+.Pq Optional.
+Set the path and name of an executable program or script that should be used by
+.Nm
+to set the metadata of the stream.
+The program is automatically queried when a new track is streamed, or whenever
+the
+.Sy SIGUSR2
+signal is received.
+.Pp
+If the \&<metadata_progname/\&> element is present in the configuration, no
+attempts will be made to read metadata from files that are being streamed.
+If this behavior is not desired, it should be removed or commented out in the
+configuration file.
+.Pp
+See the
+.Sy SCRIPTING
+section for details on how the metadata program must behave.
 .It Sy \&<stream_once\ /\&>
 Set to
 .Sy 1
@@ -268,7 +290,7 @@ should be done.
 .Ss Reencoding settings
 Each of the reencoding configuration elements have the \&<reencode/\&>
 element as their parent.
-.Bl -ohang
+.Bl -tag -width -Ds
 .It Sy \&<enable\ /\&>
 Set to
 .Sy 1
@@ -287,7 +309,7 @@ Each format is described by a separate \&<encdec/\&> element.
 .Ss Decoder/Encoder settings
 Each of the decoder/encoder configuration elements have the \&<encdec/\&>
 element as their parent.
-.Bl -ohang
+.Bl -tag -width -Ds
 .It Sy \&<format\ /\&>
 This element is used by
 .Nm
@@ -352,6 +374,54 @@ the
 utility:
 .Pp
 .Dl \&<encode\&>oggenc -r -q 1.5 -t \&"@M@\&" -\&</encode\&>
+.El
+.Sh SCRIPTING
+The
+.Nm
+utility provides hooks for externally controlled playlist and metadata
+management.
+This is done by running external programs or scripts that need to behave in
+ways explained here.
+.Ss Common Rules
+.Bl -dash -compact
+.It
+The program must be an executable file.
+.It
+The program must write one line to standard output and exit.
+.It
+The program must not require arbitary command line options to function.
+A wrapper script must be used if there is no other way.
+.El
+.Ss Playlist Programs
+.Bl -dash -compact
+.It
+The program must return only filenames, with one filename per execution.
+.It
+The program should not return an empty line unless
+.Nm
+is supposed to know that the end of the playlist has been reached.
+This is significant when the \&<stream_once/\&> option is enabled.
+.El
+.Ss Metadata Programs
+.Bl -dash -compact
+.It
+The program must not return anything (just a newline character is okay) if it
+is called by
+.Nm
+with a command line parameter that the program does not support.
+.It
+When called without command line parameters, the program should return a
+complete string that should be used for metadata.
+.It
+When called with the command line parameter
+.Qq artist ,
+the program should return only the artist information of the metadata.
+.Pq Optional.
+.It
+When called with the command line parameter
+.Qq title ,
+the program should return only the title information of the metadata.
+.Pq Optional.
 .El
 .Sh FILES
 .Bl -tag -width "!!EXAMPLES_DIR!!" -compact

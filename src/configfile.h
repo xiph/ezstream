@@ -44,6 +44,7 @@ typedef struct tag_EZCONFIG {
 	char		*password;
 	char		*format;
 	char		*fileName;
+	char		*metadataProgram;
 	char		*serverName;
 	char		*serverURL;
 	char		*serverGenre;

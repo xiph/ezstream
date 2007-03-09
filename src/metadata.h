@@ -45,8 +45,7 @@ metadata_t *	metadata_file(const char * /* filename */);
  *   - Accept no command line parameter and return a complete metadata string
  *     (for metadata_get_string()). The program *should* always return
  *     something in this case (e.g. something based on the filename in case no
- *     metadata is available.) This string will default to "[unknown]"
- *     otherwise.
+ *     metadata is available.)
  *   - Accept the command line parameter "artist" and return only the artist
  *     metadata, or an empty string if no artist information is available.
  *   - Accept the command line parameter "title" and return only the song title

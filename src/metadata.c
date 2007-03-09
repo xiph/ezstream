@@ -352,6 +352,11 @@ metadata_t *
 metadata_program(const char *program)
 {
 	metadata_t	*md;
+#ifdef HAVE_STAT
+	struct stat	 st;
+#else
+	FILE		*filep;
+#endif
 
 	if (program == NULL || strlen(program) == 0) {
 		printf("%s: metadata_program(): Internal error: Bad arguments\n",
@@ -361,6 +366,27 @@ metadata_program(const char *program)
 
 	md = metadata_create(program);
 	md->program = 1;
+	md->string = xstrdup("");
+
+#ifdef HAVE_STAT
+	if (stat(program, &st) == -1) {
+		printf("%s: %s: %s\n", __progname, program, strerror(errno));
+		metadata_free(&md);
+		return (NULL);
+	}
+	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
+		printf("%s: %s: Not an executable program\n", __progname, program);
+		metadata_free(&md);
+		return (NULL);
+	}
+#else
+	if ((filep = fopen(program, "r")) == NULL) {
+		printf("%s: %s: %s\n", __progname, program, strerror(errno));
+		metadata_free(&md);
+		return (NULL);
+	}
+	fclose(filep);
+#endif /* HAVE_STAT */
 
 	return (md);
 }
@@ -418,8 +444,110 @@ metadata_file_update(metadata_t *md)
 int
 metadata_program_update(metadata_t *md, enum metadata_request md_req)
 {
-	/* XXX not implemented */
-	return (0);
+	FILE	*filep;
+	char	 buf[METADATA_MAX + 1];
+	char	 command[PATH_MAX + strlen(" artist") + 1];
+
+	if (md == NULL) {
+		printf("%s: metadata_program_update(): Internal error: NULL argument\n",
+		       __progname);
+		abort();
+	}
+
+	if (!md->program) {
+		printf("%s: metadata_program_update(): Internal error: Received file handle\n",
+		       __progname);
+		abort();
+	}
+
+	switch (md_req) {
+	case METADATA_ALL:
+		metadata_clean_md(md);
+		if (!metadata_program_update(md, METADATA_STRING) ||
+		    !metadata_program_update(md, METADATA_ARTIST) ||
+		    !metadata_program_update(md, METADATA_TITLE))
+			return (0);
+		break;
+	case METADATA_STRING:
+		strlcpy(command, md->filename, sizeof(command));
+		if (md->string != NULL)
+			xfree(md->string);
+		break;
+	case METADATA_ARTIST:
+		snprintf(command, sizeof(command), "%s artist", md->filename);
+		if (md->artist != NULL)
+			xfree(md->artist);
+		break;
+	case METADATA_TITLE:
+		snprintf(command, sizeof(command), "%s title", md->filename);
+		if (md->title != NULL)
+			xfree(md->title);
+		break;
+	default:
+		printf("%s: metadata_program_update(): Internal error: Unknown md_req\n",
+		       __progname);
+		abort();
+	}
+
+	fflush(NULL);
+	errno = 0;
+	if ((filep = popen(command, "r")) == NULL) {
+		printf("%s: playlist_run_program(): Error while executing '%s'",
+		       __progname, command);
+		/* popen() does not set errno reliably ... */
+		if (errno)
+			printf(": %s\n", strerror(errno));
+		else
+			printf("\n");
+		return (0);
+	}
+
+	if (fgets(buf, sizeof(buf), filep) == NULL) {
+		if (ferror(filep))
+			printf("%s: Error while reading output from program '%s': %s\n",
+			       __progname, md->filename, strerror(errno));
+		pclose(filep);
+		printf("%s: FATAL: External program '%s' not (or no longer) usable.\n",
+		       __progname, md->filename);
+		exit(1);
+	}
+
+	pclose(filep);
+
+	if (strlen(buf) == sizeof(buf) - 1)
+		printf("%s: Warning: Metadata string received via '%s' is too long and has been truncated\n",
+		       __progname, command);
+
+	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\n')
+		buf[strlen(buf) - 1] = '\0';
+	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\r')
+		buf[strlen(buf) - 1] = '\0';
+
+	switch (md_req) {
+	case METADATA_STRING:
+		if (strlen(buf) == 0) {
+			printf("%s: Warning: Empty metadata string received from '%s'\n",
+			       __progname, md->filename);
+			md->string = xstrdup("");
+		} else
+			md->string = xstrdup(buf);
+		break;
+	case METADATA_ARTIST:
+		if (strlen(buf) > 0)
+			md->artist = xstrdup(buf);
+		break;
+	case METADATA_TITLE:
+		if (strlen(buf) > 0)
+			md->title = xstrdup(buf);
+		break;
+	case METADATA_ALL:
+	default:
+		printf("%s: metadata_program_update(): Internal error: METADATA_ALL in code unreachable by METADATA_ALL\n",
+		       __progname);
+		abort();
+	}
+
+	return (1);
 }
 
 const char *

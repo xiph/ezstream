@@ -98,6 +98,8 @@ freeConfig(EZCONFIG *cfg)
 		xfree(cfg->format);
 	if (cfg->fileName != NULL)
 		xfree(cfg->fileName);
+	if (cfg->metadataProgram != NULL)
+		xfree(cfg->metadataProgram);
 	if (cfg->serverName != NULL)
 		xfree(cfg->serverName);
 	if (cfg->serverURL != NULL)
@@ -225,6 +227,25 @@ parseConfig(const char *fileName)
 					continue;
 				}
 				ezConfig.fileName = xstrdup(ls_xmlContentPtr);
+				xmlFree(ls_xmlContentPtr);
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "metadata_progname")) {
+			if (ezConfig.metadataProgram != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <metadata_progname> elements\n",
+				       fileName, xmlGetLineNo(cur));
+				config_error++;
+				continue;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				if (strlen(ls_xmlContentPtr) > PATH_MAX - 1) {
+					printf("%s[%ld]: Error: Path or filename in <metadata_progname> is too long\n",
+					       fileName, xmlGetLineNo(cur));
+					config_error++;
+					continue;
+				}
+				ezConfig.metadataProgram = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
