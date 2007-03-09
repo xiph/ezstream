@@ -1,12 +1,20 @@
 Changes in 0.4.0, (SVN trunk):
 
- * src/util.c, src/util.h:
+ * src/util.*:
    - [FIX]   The xfree() function did not work as intended due to a programming
              error. Found, and fix suggested, by Karl Heyes.
+
+ * src/playlist.*:
+   - [FIX]   An error compareable to the one about xfree() in src/util.* has
+             been fixed.
 
  * src/compat.c:
    - [ADD]   Implement a basename() function for Windows that behaves like the
              ones used on Windows.
+
+ * win32/:
+   - [MISC]  Remove the rather ugly HTML version of the man page from the
+             distribution, and provide a much better PDF version instead.
 
  * various:
    - [ADD]   Allow ezstream to use TagLib for reading metadata from media
