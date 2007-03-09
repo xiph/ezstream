@@ -38,7 +38,17 @@ system.
 
 
 
-3. Source code
+3. Limited functionality
+------------------------
+
+
+A few useful features are missing in the Windows version of ezstream. Runtime
+control via signals is not possible, and native metadata support is restricted
+to MP3 (ID3v1) and Ogg Vorbis tags.
+
+
+
+4. Source code
 --------------
 
 
