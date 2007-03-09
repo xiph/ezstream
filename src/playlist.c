@@ -265,7 +265,7 @@ playlist_free(playlist_t **pl)
 	if (tmp->prog_track != NULL)
 		xfree(tmp->prog_track);
 
-	xfree(pl);
+	xfree(*pl);
 }
 
 const char *
