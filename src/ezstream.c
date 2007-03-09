@@ -92,7 +92,7 @@ const int		 ezstream_signals[] = { SIGHUP, SIGUSR1, SIGUSR2 };
 volatile sig_atomic_t	 rereadPlaylist = 0;
 volatile sig_atomic_t	 rereadPlaylist_notify = 0;
 volatile sig_atomic_t	 skipTrack = 0;
-volatile sig_atomic_t    queryMetadata = 0;
+volatile sig_atomic_t	 queryMetadata = 0;
 #else
 int			 rereadPlaylist = 0;
 int			 rereadPlaylist_notify = 0;

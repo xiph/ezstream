@@ -7,7 +7,7 @@ dist_doc_DATA = COPYING NEWS README
 
 CLEANFILES =	core *.core *~ .*~
 
-.PHONY:		snapshot
+.PHONY:		regen-win32 snapshot
 
 regen-win32:
 	cd win32; ${MAKE} regen-win32

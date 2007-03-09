@@ -11,9 +11,7 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 +======================================================================+
 | \README.txt           | This file.                                   |
 +-----------------------+----------------------------------------------+
-| \ezstream.1.html      | The ezstream manual in HTML format. It is    |
-|                       | automatically generated and looks very bad,  |
-|                       | but should be readable enough to be useful.  |
+| \ezstream.1.pdf       | The ezstream manual in PDF format.           |
 +-----------------------+----------------------------------------------+
 | \ezstream.exe         | The ezstream executable file.                |
 +-----------------------+----------------------------------------------+
