@@ -75,22 +75,26 @@ int		metadata_program_update(metadata_t *, enum metadata_request);
 /*
  * Returns a pointer to a metadata string ``artist - title'', or just
  * ``artist'' or ``title'' if one of the two is not available. If neither
- * are present, it usually returns the filename without the extension.
- * This function never returns NULL.
+ * are present, it returns the filename without the extension. An empty string
+ * is returned for metadata_program() handles that didn't supply any generic
+ * information.
  */
 const char *	metadata_get_string(metadata_t *);
 
 /*
- * Returns a pointer to the artist string, or NULL if the file did not
- * contain any artist information.
+ * Returns a pointer to the artist string, which may be empty.
  */
 const char *	metadata_get_artist(metadata_t *);
 
 /*
- * Returns a pointer to the title string, or NULL if the file did not
- * contain any title information.
+ * Returns a pointer to the title string, which may be empty.
  */
 const char *	metadata_get_title(metadata_t *);
+
+/*
+ * Returns a pointer to the filename used in the metadata handle.
+ */
+const char *	metadata_get_filename(metadata_t *);
 
 /*
  * Allocates and returns a meaningful string based on a metadata handle's

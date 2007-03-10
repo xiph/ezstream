@@ -33,6 +33,7 @@
 #define METADATA_PLACEHOLDER	"@M@"
 #define ARTIST_PLACEHOLDER	"@a@"
 #define TITLE_PLACEHOLDER	"@t@"
+#define STRING_PLACEHOLDER	"@s@"
 
 typedef struct tag_FORMAT_ENCDEC {
 	char	*format;
@@ -47,6 +48,7 @@ typedef struct tag_EZCONFIG {
 	char		*format;
 	char		*fileName;
 	char		*metadataProgram;
+	char		*metadataFormat;
 	char		*serverName;
 	char		*serverURL;
 	char		*serverGenre;

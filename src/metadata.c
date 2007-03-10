@@ -43,8 +43,10 @@
 #include "strfctns.h"
 #include "util.h"
 
-extern char	*__progname;
-extern int	 vFlag;
+extern char		*__progname;
+extern int		 vFlag;
+
+static const char	*blankString = "";
 
 struct metadata {
 	char	*filename;
@@ -563,7 +565,10 @@ metadata_get_artist(metadata_t *md)
 		abort();
 	}
 
-	return (md->artist);
+	if (md->artist == NULL)
+		return (blankString);
+	else
+		return (md->artist);
 }
 
 const char *
@@ -575,7 +580,26 @@ metadata_get_title(metadata_t *md)
 		abort();
 	}
 
-	return (md->title);
+	if (md->title == NULL)
+		return (blankString);
+	else
+		return (md->title);
+}
+
+const char *
+metadata_get_filename(metadata_t *md)
+{
+	if (md == NULL) {
+		printf("%s: metadata_get_filename(): Internal error: Bad arguments\n",
+		       __progname);
+		abort();
+	}
+
+	if (md->filename == NULL)
+		/* Should never happen: */
+		return (blankString);
+	else
+		return (md->filename);
 }
 
 char *

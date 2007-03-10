@@ -39,6 +39,7 @@ static const char	*blankString = "";
 void	        freeConfig(EZCONFIG *);
 unsigned int	checkDecoderLine(const char *, const char *, long);
 unsigned int	checkEncoderLine(const char *, const char *, long);
+unsigned int	checkFormatLine(const char *, const char *, long);
 
 EZCONFIG *
 getEZConfig(void)
@@ -196,6 +197,27 @@ parseConfig(const char *fileName)
 				}
 				ezConfig.metadataProgram = xstrdup(ls_xmlContentPtr);
 				xmlFree(ls_xmlContentPtr);
+			}
+		}
+		if (!xmlStrcmp(cur->name, BAD_CAST "metadata_format")) {
+			if (ezConfig.metadataFormat != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <metadata_format> elements\n",
+				       fileName, xmlGetLineNo(cur));
+				config_error++;
+				continue;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				unsigned int	ret;
+
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.metadataFormat = xstrdup(ls_xmlContentPtr);
+				xmlFree(ls_xmlContentPtr);
+				if ((ret = checkFormatLine(ezConfig.metadataFormat,
+							   fileName, xmlGetLineNo(cur)))
+				    > 0) {
+					config_error += ret;
+					continue;
+				}
 			}
 		}
 		if (!xmlStrcmp(cur->name, BAD_CAST "playlist_program")) {
@@ -564,6 +586,8 @@ freeConfig(EZCONFIG *cfg)
 		xfree(cfg->fileName);
 	if (cfg->metadataProgram != NULL)
 		xfree(cfg->metadataProgram);
+	if (cfg->metadataFormat != NULL)
+		xfree(cfg->metadataFormat);
 	if (cfg->serverName != NULL)
 		xfree(cfg->serverName);
 	if (cfg->serverURL != NULL)
@@ -604,15 +628,22 @@ checkDecoderLine(const char *str, const char *file, long line)
 {
 	unsigned int	  errors;
 	char		 *p;
+	int		  have_track = 0;
 
 	errors = 0;
+	if ((p = strstr(str, STRING_PLACEHOLDER)) != NULL) {
+		printf("%s[%ld]: Error: `%s' placeholder not allowed in decoder command\n",
+		       file, line, STRING_PLACEHOLDER);
+		errors++;
+	}
 	if ((p = strstr(str, TRACK_PLACEHOLDER)) != NULL) {
 		p += strlen(TRACK_PLACEHOLDER);
 		if ((p = strstr(p, TRACK_PLACEHOLDER)) != NULL) {
 			printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
 			       file, line, TRACK_PLACEHOLDER);
 			errors++;
-		}
+		} else
+			have_track = 1;
 	}
 	if ((p = strstr(str, METADATA_PLACEHOLDER)) != NULL) {
 		p += strlen(METADATA_PLACEHOLDER);
@@ -639,6 +670,12 @@ checkDecoderLine(const char *str, const char *file, long line)
 		}
 	}
 
+	if (!have_track) {
+		printf("%s[%ld]: Error: The decoder command requires the '%s' track placeholder\n",
+		       file, line, TRACK_PLACEHOLDER);
+		errors++;
+	}
+
 	return (errors);
 }
 
@@ -652,6 +689,11 @@ checkEncoderLine(const char *str, const char *file, long line)
 	if ((p = strstr(str, TRACK_PLACEHOLDER)) != NULL) {
 		printf("%s[%ld]: Error: `%s' placeholder not allowed in encoder command\n",
 		       file, line, TRACK_PLACEHOLDER);
+		errors++;
+	}
+	if ((p = strstr(str, STRING_PLACEHOLDER)) != NULL) {
+		printf("%s[%ld]: Error: `%s' placeholder not allowed in encoder command\n",
+		       file, line, STRING_PLACEHOLDER);
 		errors++;
 	}
 	if ((p = strstr(str, METADATA_PLACEHOLDER)) != NULL) {
@@ -674,6 +716,54 @@ checkEncoderLine(const char *str, const char *file, long line)
 		p += strlen(TITLE_PLACEHOLDER);
 		if ((p = strstr(p, TITLE_PLACEHOLDER)) != NULL) {
 			printf("%s[%ld]: Error: Multiple `%s' placeholders in encoder command\n",
+			       file, line, TITLE_PLACEHOLDER);
+			errors++;
+		}
+	}
+
+	return (errors);
+}
+
+unsigned int
+checkFormatLine(const char *str, const char *file, long line)
+{
+	unsigned int	   errors;
+	char		  *p;
+
+	errors = 0;
+	if ((p = strstr(str, METADATA_PLACEHOLDER)) != NULL) {
+		printf("%s[%ld]: Error: `%s' placeholder not allowed in <metadata_format>\n",
+		       file, line, METADATA_PLACEHOLDER);
+		errors++;
+	}
+	if ((p = strstr(str, TRACK_PLACEHOLDER)) != NULL) {
+		p += strlen(TRACK_PLACEHOLDER);
+		if ((p = strstr(p, TRACK_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in <metadata_format>\n",
+			       file, line, TRACK_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, STRING_PLACEHOLDER)) != NULL) {
+		p += strlen(STRING_PLACEHOLDER);
+		if ((p = strstr(p, STRING_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in <metadata_format>\n",
+			       file, line, STRING_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, ARTIST_PLACEHOLDER)) != NULL) {
+		p += strlen(ARTIST_PLACEHOLDER);
+		if ((p = strstr(p, ARTIST_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in <metadata_format>\n",
+			       file, line, ARTIST_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, TITLE_PLACEHOLDER)) != NULL) {
+		p += strlen(TITLE_PLACEHOLDER);
+		if ((p = strstr(p, TITLE_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in <metadata_format>\n",
 			       file, line, TITLE_PLACEHOLDER);
 			errors++;
 		}

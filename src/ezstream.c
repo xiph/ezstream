@@ -112,6 +112,7 @@ typedef struct tag_ID3Tag {
 int		urlParse(const char *, char **, int *, char **);
 void		replaceString(const char *, char *, size_t, const char *, const char *);
 char *		buildCommandString(const char *, const char *, metadata_t *);
+char *		getMetadataString(const char *, metadata_t *);
 metadata_t *	getMetadata(const char *);
 int		setMetadata(shout_t *, metadata_t *, char **);
 FILE *		openResource(shout_t *, const char *, int *, char **, int *);
@@ -247,13 +248,60 @@ buildCommandString(const char *extension, const char *fileName,
 	newDecoder = xcalloc(1, newDecoderLen);
 	replaceString(decoder, newDecoder, newDecoderLen, TRACK_PLACEHOLDER,
 		      fileName);
-	if (strstr(decoder, METADATA_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_string(mdata)) + 1;
+	if (strstr(decoder, ARTIST_PLACEHOLDER) != NULL) {
+		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_artist(mdata)) + 1;
 		char *tmpStr = xcalloc(1, tmpLen);
-		replaceString(newDecoder, tmpStr, tmpLen, METADATA_PLACEHOLDER,
-			      metadata_get_string(mdata));
+		replaceString(newDecoder, tmpStr, tmpLen, ARTIST_PLACEHOLDER,
+			      metadata_get_artist(mdata));
 		xfree(newDecoder);
 		newDecoder = tmpStr;
+	}
+	if (strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
+		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_title(mdata)) + 1;
+		char *tmpStr = xcalloc(1, tmpLen);
+		replaceString(newDecoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
+			      metadata_get_title(mdata));
+		xfree(newDecoder);
+		newDecoder = tmpStr;
+	}
+	/*
+	 * if meta
+	 *   if (prog && format)
+	 *      metatoformat
+	 *   else
+	 *     if (!prog && title)
+	 *       emptymeta
+	 *     else
+	 *       replacemeta
+	 */
+	if (strstr(decoder, METADATA_PLACEHOLDER) != NULL) {
+		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
+			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
+			size_t tmpLen = strlen(newDecoder) + strlen(mdataString) + 1;
+			char *tmpStr = xcalloc(1, tmpLen);
+			replaceString(newDecoder, tmpStr, tmpLen,
+				      METADATA_PLACEHOLDER, mdataString);
+			xfree(newDecoder);
+			xfree(mdataString);
+			newDecoder = tmpStr;
+		} else {
+			if (!metadataFromProgram && strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
+				size_t tmpLen = strlen(newDecoder) + 1;
+				char *tmpStr = xcalloc(1, tmpLen);
+				replaceString(newDecoder, tmpStr, tmpLen,
+					      METADATA_PLACEHOLDER, "");
+				xfree(newDecoder);
+				newDecoder = tmpStr;
+			} else {
+				size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_string(mdata)) + 1;
+				char *tmpStr = xcalloc(1, tmpLen);
+				replaceString(newDecoder, tmpStr, tmpLen,
+					      METADATA_PLACEHOLDER,
+					      metadata_get_string(mdata));
+				xfree(newDecoder);
+				newDecoder = tmpStr;
+			}
+		}
 	}
 
 	encoder = xstrdup(getFormatEncoder(pezConfig->format));
@@ -272,10 +320,47 @@ buildCommandString(const char *extension, const char *fileName,
 		return (commandString);
 	}
 
-	newEncoderLen = strlen(encoder) + strlen(metadata_get_string(mdata)) + 1;
+	newEncoderLen = strlen(encoder) + strlen(metadata_get_artist(mdata)) + 1;
 	newEncoder = xcalloc(1, newEncoderLen);
-	replaceString(encoder, newEncoder, newEncoderLen, METADATA_PLACEHOLDER,
-		      metadata_get_string(mdata));
+	replaceString(encoder, newEncoder, newEncoderLen, ARTIST_PLACEHOLDER,
+		      metadata_get_artist(mdata));
+	if (strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
+		size_t tmpLen = strlen(newEncoder) + strlen(metadata_get_title(mdata)) + 1;
+		char *tmpStr = xcalloc(1, tmpLen);
+		replaceString(newEncoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
+			      metadata_get_title(mdata));
+		xfree(newEncoder);
+		newEncoder = tmpStr;
+	}
+	if (strstr(encoder, METADATA_PLACEHOLDER) != NULL) {
+		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
+			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
+			size_t tmpLen = strlen(newEncoder) + strlen(mdataString) + 1;
+			char *tmpStr = xcalloc(1, tmpLen);
+			replaceString(newEncoder, tmpStr, tmpLen,
+				      METADATA_PLACEHOLDER, mdataString);
+			xfree(newEncoder);
+			xfree(mdataString);
+			newEncoder = tmpStr;
+		} else {
+			if (!metadataFromProgram && strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
+				size_t tmpLen = strlen(newEncoder) + 1;
+				char *tmpStr = xcalloc(1, tmpLen);
+				replaceString(newEncoder, tmpStr, tmpLen,
+					      METADATA_PLACEHOLDER, "");
+				xfree(newEncoder);
+				newEncoder = tmpStr;
+			} else {
+				size_t tmpLen = strlen(newEncoder) + strlen(metadata_get_string(mdata)) + 1;
+				char *tmpStr = xcalloc(1, tmpLen);
+				replaceString(newEncoder, tmpStr, tmpLen,
+					      METADATA_PLACEHOLDER,
+					      metadata_get_string(mdata));
+				xfree(newEncoder);
+				newEncoder = tmpStr;
+			}
+		}
+	}
 
 	commandStringLen = strlen(newDecoder) + strlen(" | ") +
 		strlen(newEncoder) + 1;
@@ -289,6 +374,59 @@ buildCommandString(const char *extension, const char *fileName,
 	xfree(newEncoder);
 
 	return (commandString);
+}
+
+char *
+getMetadataString(const char *format, metadata_t *mdata)
+{
+	char	*tmp, *str;
+	size_t	 siz;
+
+	if (mdata == NULL) {
+		printf("%s: getMetadataString(): Internal error: NULL metadata_t\n",
+		       __progname);
+		abort();
+	}
+
+	if (format == NULL)
+		return (NULL);
+
+	str = xstrdup(format);
+
+	if (strstr(format, ARTIST_PLACEHOLDER) != NULL) {
+		siz = strlen(str) + strlen(metadata_get_artist(mdata)) + 1;
+		tmp = xcalloc(1, siz);
+		replaceString(str, tmp, siz, ARTIST_PLACEHOLDER,
+			      metadata_get_artist(mdata));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, TITLE_PLACEHOLDER) != NULL) {
+		siz = strlen(str) + strlen(metadata_get_title(mdata)) + 1;
+		tmp = xcalloc(1, siz);
+		replaceString(str, tmp, siz, TITLE_PLACEHOLDER,
+			      metadata_get_title(mdata));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, STRING_PLACEHOLDER) != NULL) {
+		siz = strlen(str) + strlen(metadata_get_string(mdata)) + 1;
+		tmp = xcalloc(1, siz);
+		replaceString(str, tmp, siz, STRING_PLACEHOLDER,
+			      metadata_get_string(mdata));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, TRACK_PLACEHOLDER) != NULL) {
+		siz = strlen(str) + strlen(metadata_get_filename(mdata)) + 1;
+		tmp = xcalloc(1, siz);
+		replaceString(str, tmp, siz, TRACK_PLACEHOLDER,
+			      metadata_get_filename(mdata));
+		xfree(str);
+		str = tmp;
+	}
+
+	return (str);
 }
 
 metadata_t *
@@ -339,10 +477,13 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 		exit(1);
 	}
 
-	if (metadata_get_artist(mdata) == NULL && metadata_get_title(mdata) == NULL)
-		songInfo = xstrdup(metadata_get_string(mdata));
-	else
-		songInfo = metadata_assemble_string(mdata);
+	if ((songInfo = getMetadataString(pezConfig->metadataFormat, mdata)) == NULL) {
+		if (strlen(metadata_get_artist(mdata)) == 0 &&
+		    strlen(metadata_get_title(mdata)) == 0)
+			songInfo = xstrdup(metadata_get_string(mdata));
+		else
+			songInfo = metadata_assemble_string(mdata);
+	}
 
 	if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
 		/* Assume SHOUTERR_MALLOC */

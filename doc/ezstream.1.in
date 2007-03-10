@@ -215,6 +215,17 @@ configuration file.
 See the
 .Sy SCRIPTING
 section for details on how the metadata program must behave.
+.It Sy \&<metadata_format\ /\&>
+.Pq Optional.
+Set the format of the string that should be used for the
+.Sq @M@
+placeholder when setting metadata with an external program or script via
+\&<metadata_progname/\&>.
+.Pp
+See the
+.Sy METADATA
+section for details on how metadata is handled by
+.Nm .
 .It Sy \&<stream_once\ /\&>
 Set to
 .Sy 1
@@ -339,16 +350,17 @@ Set the command to decode the specified media file format to raw data and send
 it to standard output.
 During runtime, the placeholder
 .Sq Li @T@
-is replaced with the fully qualified name of the media file, as specified in
-the \&<filename/\&> element or a playlist file.
+is replaced with the name of the media file, as it is specified in the
+\&<filename/\&> element or contained in a playlist file.
 It should always be enclosed in quotes, to prevent problems with filenames that
 contain whitespaces.
 .Pp
-The metadata placeholder,
-.Sq @M@ ,
-is also available in the \&<decode/\&> element.
-That way it can be used for combined de-/encoder programs that produce readily
-streamable data.
+Metadata placeholders can be used in the \&<decode/\&> element as well, for
+combined de-/encoder programs that produce streamable data.
+See the
+.Sy METADATA
+section for details on how metadata is handled by
+.Nm .
 .Pp
 For example, to decode Ogg Vorbis files using the
 .Cm oggdec
@@ -358,15 +370,13 @@ utility:
 .It Sy \&<encode\ /\&>
 Set the command to encode raw data, received from standard input, to the
 specified stream format.
-During runtime, the placeholder
-.Sq Li @M@
-is replaced with the metadata
-.Po
-e.g.
-.Dq Artist - Title
-.Pc
-for the current track.
-It also should be enclosed in quotes at all times.
+.Pp
+Metadata placeholders can be used in the \&<encode/\&> element.
+For details about using metadata in
+.Nm ,
+see below in the
+.Sy METADATA
+section.
 .Pp
 For example, to encode an Ogg Vorbis stream using the quality setting 1.5 with
 the
@@ -423,11 +433,89 @@ When called with the command line parameter
 the program should return only the title information of the metadata.
 .Pq Optional.
 .El
+.Sh METADATA
+The main tool for handling metadata with
+.Nm
+is placeholders in decoder and encoder commands that are replaced with real
+content during runtime.
+The tricky part about is that one placeholders has to be handled differently
+depending on where the metadata comes from.
+This section will explain each possible scenario.
+.Ss Metadata Placeholders
+.Bl -tag -width -Ds
+.It Sy @T@
+Replaced with the media file name.
+Required in \&<decode/\&> and is available in \&<metadata_format/\&>.
+.It Sy @M@
+Replaced with a metadata string.
+See below for a detailed explanation.
+Available in \&<decode/\&> and \&<encode/\&>.
+.It Sy @a@
+Replaced with the artist information.
+Available in \&<decode/\&>, \&<encode/\&> and \&<metadata_format/\&>.
+.It Sy @t@
+Replaced with the title information.
+Available in \&<decode/\&>, \&<encode/\&> and \&<metadata_format/\&>.
+.It Sy @s@
+Replaced with the string returned by \&<metadata_progname/\&> when called
+without any command line parameters.
+Available only in \&<metadata_format/\&>.
+.El
+.Ss The @M@ Placeholder
+While all other placeholders are simply replaced with whatever data they are
+associated with,
+.Sq @M@
+is context-sensitive.
+The logic used by
+.Nm
+is the following:
+.Bd -literal -offset indent
+If ('@M@ is present')
+    If ('\&<metadata_progname/\&>' AND '\&<metadata_format/\&>')
+        Replace with format string result.
+    Else
+        If (NOT '\&<metadata_progname/\&>' AND '@t@ is present')
+            Replace with empty string.
+        else
+            Replace with generated metadata string.
+        Endif
+    Endif
+Endif
+.Ed
+.Pp
+The generated metadata string for
+.Sq @M@
+is of the format
+.Dq Artist - Title ,
+if both artist and title information is available.
+If one of the two is missing, the available one is displayed without a leading
+or trailing dash, e.g. just
+.Dq Artist .
+If neither artist nor title are available, the name of the media file, without
+its file extension, is used.
+.Ss Metadata Caveats
+It is possible to generate strange results with odd combinations of
+placeholders, external metadata programs and updates during runtime via
+.Sy SIGUSR2 .
+If things start to become just confusing, simplify.
+.Pp
+Metadata updates during runtime are done with a relatively broken feature of
+libshout.
+Additional metadata information that is already present in the stream sent via
+.Nm
+is usually destroyed and replaced with the new data.
+It is not possible to properly discern between artist and title information,
+which means that anything set with the
+.Sy SIGUSR2
+feature will continue to end up entirely in the
+.Qq Title
+field of a stream.
 .Sh FILES
 .Bl -tag -width "!!EXAMPLES_DIR!!" -compact
 .It Pa !!EXAMPLES_DIR!!
 Directory containing example configuration files for various uses of
-.Nm .
+.Nm ,
+as well as example playlist and metadata scripts.
 .El
 .Sh AUTHORS
 .Nm
