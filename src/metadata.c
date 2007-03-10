@@ -465,7 +465,6 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 			return (0);
 		else
 			return (1);
-		break;
 	case METADATA_STRING:
 		strlcpy(command, md->filename, sizeof(command));
 		if (md->string != NULL)
