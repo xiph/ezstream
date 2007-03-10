@@ -4,7 +4,7 @@ EXTRA_DIST =	README.win32 config.h ezstream.sln ezstream.vcproj
 
 CLEANFILES =	core *.core *~ .*~ ezstream.1.pdf
 
-do_subst =	sed -e 's,!!EXAMPLES_DIR!!,${PACKAGE_TARNAME}-${PACKAGE_VERSION}-win32/conf,g'
+do_subst =	sed -e 's,!!EXAMPLES_DIR!!,${PACKAGE_TARNAME}-${PACKAGE_VERSION}-win32/examples,g'
 
 .PHONY:		regen-win32
 
