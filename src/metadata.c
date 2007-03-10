@@ -91,10 +91,10 @@ void
 metadata_use_taglib(metadata_t *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
-	TagLib_File		*tf;
-	TagLib_Tag		*tt;
-	TagLib_AudioProperties	*ta;
-	char			*str;
+	TagLib_File			*tf;
+	TagLib_Tag			*tt;
+	const TagLib_AudioProperties	*ta;
+	char				*str;
 
 	if (md == NULL || md->filename == NULL) {
 		printf("%s: metadata_use_taglib(): Internal error: Bad arguments\n",
