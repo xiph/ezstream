@@ -44,6 +44,7 @@
 #include "util.h"
 
 extern char	*__progname;
+extern int	 vFlag;
 
 struct metadata {
 	char	*filename;
@@ -298,34 +299,14 @@ metadata_get_name(const char *file)
 void
 metadata_process_md(metadata_t *md)
 {
-	size_t	siz = 0;
-
 	if (md == NULL) {
 		printf("%s: metadata_process_md(): Internal error: Bad arguments\n",
 		       __progname);
 		abort();
 	}
 
-	if (md->string != NULL)
-		return;
-
-	if (md->artist != NULL)
-		siz += strlen(md->artist);
-	if (md->title != NULL) {
-		if (siz > 0)
-			siz += strlen(" - ");
-		siz += strlen(md->title);
-	}
-	siz++;
-	md->string = xcalloc(1, siz);
-
-	if (md->artist != NULL)
-		strlcpy(md->string, md->artist, siz);
-	if (md->title != NULL) {
-		if (md->artist != NULL)
-			strlcat(md->string, " - ", siz);
-		strlcat(md->string, md->title, siz);
-	}
+	if (md->string == NULL)
+		md->string = metadata_assemble_string(md);
 }
 
 metadata_t *
@@ -467,6 +448,8 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 		    !metadata_program_update(md, METADATA_ARTIST) ||
 		    !metadata_program_update(md, METADATA_TITLE))
 			return (0);
+		else
+			return (1);
 		break;
 	case METADATA_STRING:
 		strlcpy(command, md->filename, sizeof(command));
@@ -491,6 +474,9 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 
 	fflush(NULL);
 	errno = 0;
+	if (vFlag > 1)
+		printf("%s: Running command `%s`\n", __progname,
+		       command);
 	if ((filep = popen(command, "r")) == NULL) {
 		printf("%s: playlist_run_program(): Error while executing '%s'",
 		       __progname, command);
@@ -590,4 +576,41 @@ metadata_get_title(metadata_t *md)
 	}
 
 	return (md->title);
+}
+
+char *
+metadata_assemble_string(metadata_t *md)
+{
+	size_t	  siz;
+	char	 *str;
+
+	if (md == NULL) {
+		printf("%s: metadata_assemble_string(): Internal error: Bad arguments\n",
+		       __progname);
+		abort();
+	}
+
+	if (md->artist == NULL && md->title == NULL && md->program == 0)
+		return (metadata_get_name(md->filename));
+
+	siz = 0;
+	if (md->artist != NULL)
+		siz += strlen(md->artist);
+	if (md->title != NULL) {
+		if (siz > 0)
+			siz += strlen(" - ");
+		siz += strlen(md->title);
+	}
+	siz++;
+	str = xcalloc(1, siz);
+
+	if (md->artist != NULL)
+		strlcpy(str, md->artist, siz);
+	if (md->title != NULL) {
+		if (md->artist != NULL)
+			strlcat(str, " - ", siz);
+		strlcat(str, md->title, siz);
+	}
+
+	return (str);
 }

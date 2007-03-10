@@ -92,4 +92,11 @@ const char *	metadata_get_artist(metadata_t *);
  */
 const char *	metadata_get_title(metadata_t *);
 
+/*
+ * Allocates and returns a meaningful string based on a metadata handle's
+ * content. The result is what metadata_get_string() defaults to if an external
+ * program is not used.
+ */
+char *		metadata_assemble_string(metadata_t *);
+
 #endif /* __METADATA_H__ */

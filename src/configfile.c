@@ -36,7 +36,9 @@ extern char		*__progname;
 static EZCONFIG		 ezConfig;
 static const char	*blankString = "";
 
-void	freeConfig(EZCONFIG *);
+void	        freeConfig(EZCONFIG *);
+unsigned int	checkDecoderLine(const char *, const char *, long);
+unsigned int	checkEncoderLine(const char *, const char *, long);
 
 EZCONFIG *
 getEZConfig(void)
@@ -80,59 +82,6 @@ getFormatDecoder(const char *match)
 	}
 
 	return (blankString);
-}
-
-void
-freeConfig(EZCONFIG *cfg)
-{
-	unsigned int	i;
-
-	if (cfg == NULL)
-		return;
-
-	if (cfg->URL != NULL)
-		xfree(cfg->URL);
-	if (cfg->password != NULL)
-		xfree(cfg->password);
-	if (cfg->format != NULL)
-		xfree(cfg->format);
-	if (cfg->fileName != NULL)
-		xfree(cfg->fileName);
-	if (cfg->metadataProgram != NULL)
-		xfree(cfg->metadataProgram);
-	if (cfg->serverName != NULL)
-		xfree(cfg->serverName);
-	if (cfg->serverURL != NULL)
-		xfree(cfg->serverURL);
-	if (cfg->serverGenre != NULL)
-		xfree(cfg->serverGenre);
-	if (cfg->serverDescription != NULL)
-		xfree(cfg->serverDescription);
-	if (cfg->serverBitrate != NULL)
-		xfree(cfg->serverBitrate);
-	if (cfg->serverChannels != NULL)
-		xfree(cfg->serverChannels);
-	if (cfg->serverSamplerate != NULL)
-		xfree(cfg->serverSamplerate);
-	if (cfg->serverQuality != NULL)
-		xfree(cfg->serverQuality);
-	if (cfg->encoderDecoders != NULL) {
-		for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
-			if (cfg->encoderDecoders[i] != NULL) {
-				if (cfg->encoderDecoders[i]->format != NULL)
-					xfree(cfg->encoderDecoders[i]->format);
-				if (cfg->encoderDecoders[i]->match != NULL)
-					xfree(cfg->encoderDecoders[i]->match);
-				if (cfg->encoderDecoders[i]->encoder != NULL)
-					xfree(cfg->encoderDecoders[i]->encoder);
-				if (cfg->encoderDecoders[i]->decoder != NULL)
-					xfree(cfg->encoderDecoders[i]->decoder);
-				xfree(cfg->encoderDecoders[i]);
-			}
-		}
-	}
-
-	memset(cfg, 0, sizeof(EZCONFIG));
 }
 
 int
@@ -496,7 +445,6 @@ parseConfig(const char *fileName)
 				if (!xmlStrcmp(cur2->name, BAD_CAST "encdec")) {
 					xmlNodePtr	 cur3;
 					FORMAT_ENCDEC	*pformatEncDec;
-					char		*p;
 
 					pformatEncDec = xcalloc(1, sizeof(FORMAT_ENCDEC));
 
@@ -544,26 +492,16 @@ parseConfig(const char *fileName)
 								continue;
 							}
 							if (cur3->xmlChildrenNode != NULL) {
+								unsigned int	ret;
+
 								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
 								pformatEncDec->decoder = xstrdup(ls_xmlContentPtr);
 								xmlFree(ls_xmlContentPtr);
-								if ((p = strstr(pformatEncDec->decoder, TRACK_PLACEHOLDER)) != NULL) {
-									p += strlen(TRACK_PLACEHOLDER);
-									if ((p = strstr(p, TRACK_PLACEHOLDER)) != NULL) {
-										printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
-										       fileName, xmlGetLineNo(cur3), TRACK_PLACEHOLDER);
-										config_error++;
-										continue;
-									}
-								}
-								if ((p = strstr(pformatEncDec->decoder, METADATA_PLACEHOLDER)) != NULL) {
-									p += strlen(METADATA_PLACEHOLDER);
-									if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {
-										printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
-										       fileName, xmlGetLineNo(cur3), METADATA_PLACEHOLDER);
-										config_error++;
-										continue;
-									}
+								if ((ret = checkDecoderLine(pformatEncDec->decoder,
+											    fileName, xmlGetLineNo(cur3)))
+								    > 0) {
+									config_error += ret;
+									continue;
 								}
 							}
 						}
@@ -575,23 +513,16 @@ parseConfig(const char *fileName)
 								continue;
 							}
 							if (cur3->xmlChildrenNode != NULL) {
+								unsigned int	ret;
+
 								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
 								pformatEncDec->encoder = xstrdup(ls_xmlContentPtr);
 								xmlFree(ls_xmlContentPtr);
-								if ((p = strstr(pformatEncDec->encoder, TRACK_PLACEHOLDER)) != NULL) {
-									printf("%s[%ld]: Error: `%s' placeholder not allowed in encoder command\n",
-									       fileName, xmlGetLineNo(cur3), TRACK_PLACEHOLDER);
-									config_error++;
+								if ((ret = checkEncoderLine(pformatEncDec->encoder,
+											    fileName, xmlGetLineNo(cur3)))
+								    > 0) {
+									config_error += ret;
 									continue;
-								}
-								if ((p = strstr(pformatEncDec->encoder, METADATA_PLACEHOLDER)) != NULL) {
-									p += strlen(METADATA_PLACEHOLDER);
-									if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {
-										printf("%s[%ld]: Error: Multiple `%s' placeholders in encoder command\n",
-										       fileName, xmlGetLineNo(cur3), METADATA_PLACEHOLDER);
-										config_error++;
-										continue;
-									}
 								}
 							}
 						}
@@ -613,4 +544,140 @@ parseConfig(const char *fileName)
 	       config_error, fileName);
 
 	return (0);
+}
+
+void
+freeConfig(EZCONFIG *cfg)
+{
+	unsigned int	i;
+
+	if (cfg == NULL)
+		return;
+
+	if (cfg->URL != NULL)
+		xfree(cfg->URL);
+	if (cfg->password != NULL)
+		xfree(cfg->password);
+	if (cfg->format != NULL)
+		xfree(cfg->format);
+	if (cfg->fileName != NULL)
+		xfree(cfg->fileName);
+	if (cfg->metadataProgram != NULL)
+		xfree(cfg->metadataProgram);
+	if (cfg->serverName != NULL)
+		xfree(cfg->serverName);
+	if (cfg->serverURL != NULL)
+		xfree(cfg->serverURL);
+	if (cfg->serverGenre != NULL)
+		xfree(cfg->serverGenre);
+	if (cfg->serverDescription != NULL)
+		xfree(cfg->serverDescription);
+	if (cfg->serverBitrate != NULL)
+		xfree(cfg->serverBitrate);
+	if (cfg->serverChannels != NULL)
+		xfree(cfg->serverChannels);
+	if (cfg->serverSamplerate != NULL)
+		xfree(cfg->serverSamplerate);
+	if (cfg->serverQuality != NULL)
+		xfree(cfg->serverQuality);
+	if (cfg->encoderDecoders != NULL) {
+		for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
+			if (cfg->encoderDecoders[i] != NULL) {
+				if (cfg->encoderDecoders[i]->format != NULL)
+					xfree(cfg->encoderDecoders[i]->format);
+				if (cfg->encoderDecoders[i]->match != NULL)
+					xfree(cfg->encoderDecoders[i]->match);
+				if (cfg->encoderDecoders[i]->encoder != NULL)
+					xfree(cfg->encoderDecoders[i]->encoder);
+				if (cfg->encoderDecoders[i]->decoder != NULL)
+					xfree(cfg->encoderDecoders[i]->decoder);
+				xfree(cfg->encoderDecoders[i]);
+			}
+		}
+	}
+
+	memset(cfg, 0, sizeof(EZCONFIG));
+}
+
+unsigned int
+checkDecoderLine(const char *str, const char *file, long line)
+{
+	unsigned int	  errors;
+	char		 *p;
+
+	errors = 0;
+	if ((p = strstr(str, TRACK_PLACEHOLDER)) != NULL) {
+		p += strlen(TRACK_PLACEHOLDER);
+		if ((p = strstr(p, TRACK_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
+			       file, line, TRACK_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, METADATA_PLACEHOLDER)) != NULL) {
+		p += strlen(METADATA_PLACEHOLDER);
+		if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
+			       file, line, METADATA_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, ARTIST_PLACEHOLDER)) != NULL) {
+		p += strlen(ARTIST_PLACEHOLDER);
+		if ((p = strstr(p, ARTIST_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
+			       file, line, ARTIST_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, TITLE_PLACEHOLDER)) != NULL) {
+		p += strlen(TITLE_PLACEHOLDER);
+		if ((p = strstr(p, TITLE_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",
+			       file, line, TITLE_PLACEHOLDER);
+			errors++;
+		}
+	}
+
+	return (errors);
+}
+
+unsigned int
+checkEncoderLine(const char *str, const char *file, long line)
+{
+	unsigned int	   errors;
+	char		  *p;
+
+	errors = 0;
+	if ((p = strstr(str, TRACK_PLACEHOLDER)) != NULL) {
+		printf("%s[%ld]: Error: `%s' placeholder not allowed in encoder command\n",
+		       file, line, TRACK_PLACEHOLDER);
+		errors++;
+	}
+	if ((p = strstr(str, METADATA_PLACEHOLDER)) != NULL) {
+		p += strlen(METADATA_PLACEHOLDER);
+		if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in encoder command\n",
+			       file, line, METADATA_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, ARTIST_PLACEHOLDER)) != NULL) {
+		p += strlen(ARTIST_PLACEHOLDER);
+		if ((p = strstr(p, ARTIST_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in encoder command\n",
+			       file, line, ARTIST_PLACEHOLDER);
+			errors++;
+		}
+	}
+	if ((p = strstr(str, TITLE_PLACEHOLDER)) != NULL) {
+		p += strlen(TITLE_PLACEHOLDER);
+		if ((p = strstr(p, TITLE_PLACEHOLDER)) != NULL) {
+			printf("%s[%ld]: Error: Multiple `%s' placeholders in encoder command\n",
+			       file, line, TITLE_PLACEHOLDER);
+			errors++;
+		}
+	}
+
+	return (errors);
 }

@@ -31,6 +31,8 @@
 
 #define TRACK_PLACEHOLDER	"@T@"
 #define METADATA_PLACEHOLDER	"@M@"
+#define ARTIST_PLACEHOLDER	"@a@"
+#define TITLE_PLACEHOLDER	"@t@"
 
 typedef struct tag_FORMAT_ENCDEC {
 	char	*format;
