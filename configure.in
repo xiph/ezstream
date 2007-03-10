@@ -201,8 +201,8 @@ XIPH_VAR_PREPEND([XIPH_LIBS], [$XML_LIBS])
 dnl OUTPUT
 
 AC_CONFIG_FILES(Makefile \
-		conf/Makefile \
 		doc/Makefile \
+		examples/Makefile \
 		m4/Makefile \
 		src/Makefile \
 		win32/Makefile)

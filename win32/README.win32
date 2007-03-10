@@ -15,9 +15,14 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 +-----------------------+----------------------------------------------+
 | \ezstream.exe         | The ezstream executable file.                |
 +-----------------------+----------------------------------------------+
-| \ezstream-X.Y.Z.zip   | The ezstream source distribution.            |
+| \ezstream-X.Y.Z.zip   | The ezstream source distribution, from which |
+|                       | ezstream.exe was built.                      |
 +-----------------------+----------------------------------------------+
-| \conf\*.xml           | Ezstream example configuration files.        |
+| \examples\*.xml       | Ezstream example configuration files.        |
++-----------------------+----------------------------------------------+
+| \examples\*.sh        | Example playlist and metadata scripts, for   |
+|                       | demonstrational purposes (these are shell    |
+|                       | scripts.)                                    |
 +-----------------------+----------------------------------------------+
 
 

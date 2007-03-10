@@ -1,0 +1,38 @@
+<!--
+   EXAMPLE: Ogg Vorbis stream WITHOUT reencoding, using an external playlist
+            program and an external metadata program, with a custom format
+            string.
+
+   This example streams (only) Ogg Vorbis files that are provided by an
+   external playlist script. The script must not return filenames of non-.ogg
+   files. Metadata for this stream is not acquired from the media file itself
+   but from another external program 'meta.sh'.
+ -->
+<ezstream>
+    <url>http://localhost:8000/vorbis.ogg</url>
+    <sourcepassword>hackme</sourcepassword>
+    <format>VORBIS</format>
+    <!-- The playlist program name is provided here: -->
+    <filename>play.sh</filename>
+    <!-- Tell ezstream that <filename/> is a playlist program: -->
+    <playlist_program>1</playlist_program>
+    <!-- Use the meta.sh script to get metadata -->
+    <metadata_progname>meta.sh</metadata_progname>
+    <!-- Set the metadata string according to this format: -->
+    <metadata_format>@s@: @a@ - @t@</metadata_format>
+    <!--
+      The following settings are used to describe your stream to the server.
+      It's up to you to make sure that the bitrate/quality/samplerate/channels
+      information matches up with your input stream files.
+     -->
+    <svrinfoname>My Stream</svrinfoname>
+    <svrinfourl>http://www.oddsock.org</svrinfourl>
+    <svrinfogenre>RockNRoll</svrinfogenre>
+    <svrinfodescription>This is a stream description</svrinfodescription>
+    <svrinfobitrate>96</svrinfobitrate>
+    <svrinfoquality>2.0</svrinfoquality>
+    <svrinfochannels>2</svrinfochannels>
+    <svrinfosamplerate>44100</svrinfosamplerate>
+    <!-- Allow the server to advertise the stream on a public YP directory: -->
+    <svrinfopublic>1</svrinfopublic>
+</ezstream>
