@@ -218,6 +218,12 @@ playlist_program(const char *filename)
 		playlist_free(&pl);
 		return (NULL);
 	}
+	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
+		printf("%s: Error: %s is group and/or world writeable\n",
+		       __progname, filename);
+		playlist_free(&pl);
+		return (NULL);
+	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		printf("%s: %s: Not an executable program\n", __progname, filename);
 		playlist_free(&pl);

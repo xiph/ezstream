@@ -364,6 +364,12 @@ metadata_program(const char *program)
 		metadata_free(&md);
 		return (NULL);
 	}
+	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
+		printf("%s: Error: %s is group and/or world writeable\n",
+		       __progname, program);
+		metadata_free(&md);
+		return (NULL);
+	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		printf("%s: %s: Not an executable program\n", __progname, program);
 		metadata_free(&md);
