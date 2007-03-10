@@ -97,6 +97,12 @@ const char *	metadata_get_title(metadata_t *);
 const char *	metadata_get_filename(metadata_t *);
 
 /*
+ * Returns the length of the song, in seconds, or -1 if the information is not
+ * available.
+ */
+int		metadata_get_length(metadata_t *);
+
+/*
  * Allocates and returns a meaningful string based on a metadata handle's
  * content. The result is what metadata_get_string() defaults to if an external
  * program is not used.

@@ -19,6 +19,8 @@ Changes in 0.4.0, (SVN trunk):
  * various:
    - [ADD]   Allow ezstream to use TagLib for reading metadata from media
              files. TagLib (libtag_c) is now an optional dependency.
+   - [ADD]   When built with TagLib support, include the song length in the
+             "real-time" information line, if available.
    - [ADD]   New <metadata_progname> configuration option, which causes
              metadata to be read from the output of an external program or
              script.

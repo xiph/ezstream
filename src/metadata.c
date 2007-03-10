@@ -53,6 +53,7 @@ struct metadata {
 	char	*string;
 	char	*artist;
 	char	*title;
+	int	 songLen;
 	int	 program;
 };
 
@@ -81,6 +82,7 @@ metadata_create(const char *filename)
 
 	md = xcalloc(1, sizeof(metadata_t));
 	md->filename = xstrdup(filename);
+	md->songLen = -1;
 
 	return (md);
 }
@@ -89,9 +91,10 @@ void
 metadata_use_taglib(metadata_t *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
-	TagLib_File	*tf;
-	TagLib_Tag	*tt;
-	char		*str;
+	TagLib_File		*tf;
+	TagLib_Tag		*tt;
+	TagLib_AudioProperties	*ta;
+	char			*str;
 
 	if (md == NULL || md->filename == NULL) {
 		printf("%s: metadata_use_taglib(): Internal error: Bad arguments\n",
@@ -113,7 +116,9 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 		md->string = metadata_get_name(md->filename);
 		return;
 	}
+
 	tt = taglib_file_tag(tf);
+	ta = taglib_file_audioproperties(tf);
 
 	str = taglib_tag_artist(tt);
 	if (str != NULL) {
@@ -128,6 +133,8 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 			md->title = xstrdup(str);
 		xfree(str);
 	}
+
+	md->songLen = taglib_audioproperties_length(ta);
 
 	taglib_file_free(tf);
 }
@@ -600,6 +607,18 @@ metadata_get_filename(metadata_t *md)
 		return (blankString);
 	else
 		return (md->filename);
+}
+
+int
+metadata_get_length(metadata_t *md)
+{
+	if (md == NULL) {
+		printf("%s: metadata_get_length(): Internal error: Bad arguments\n",
+		       __progname);
+		abort();
+	}
+
+	return (md->songLen);
 }
 
 char *

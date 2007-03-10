@@ -110,14 +110,18 @@ typedef struct tag_ID3Tag {
 } ID3Tag;
 
 int		urlParse(const char *, char **, int *, char **);
-void		replaceString(const char *, char *, size_t, const char *, const char *);
+void		replaceString(const char *, char *, size_t, const char *,
+			      const char *);
 char *		buildCommandString(const char *, const char *, metadata_t *);
 char *		getMetadataString(const char *, metadata_t *);
 metadata_t *	getMetadata(const char *);
 int		setMetadata(shout_t *, metadata_t *, char **);
-FILE *		openResource(shout_t *, const char *, int *, char **, int *);
+FILE *		openResource(shout_t *, const char *, int *, char **, int *,
+			     int *);
 int		reconnectServer(shout_t *, int);
-int		sendStream(shout_t *, FILE *, const char *, int, void *);
+const char *	getTimeString(int);
+int		sendStream(shout_t *, FILE *, const char *, int, const char *,
+			   void *);
 int		streamFile(shout_t *, const char *);
 int		streamPlaylist(shout_t *, const char *);
 char *		getProgname(const char *);
@@ -505,7 +509,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 
 FILE *
 openResource(shout_t *shout, const char *fileName, int *popenFlag,
-	     char **metaCopy, int *isStdin)
+	     char **metaCopy, int *isStdin, int *songLen)
 {
 	FILE		*filep = NULL;
 	char		 extension[25];
@@ -561,6 +565,8 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 	}
 	if (metaCopy != NULL)
 		*metaCopy = metadata_assemble_string(mdata);
+	if (songLen != NULL)
+		*songLen = metadata_get_length(mdata);
 
 	*popenFlag = 0;
 	if (pezConfig->reencode) {
@@ -661,9 +667,28 @@ reconnectServer(shout_t *shout, int closeConn)
 	return (0);
 }
 
+const char *
+getTimeString(int seconds)
+{
+	static char	str[20];
+	int		secs, mins, hours;
+
+	if (seconds < 0)
+		return (NULL);
+
+	secs = seconds;
+	hours = secs / 3600;
+	secs %= 3600;
+	mins = secs / 60;
+	secs %= 60;
+
+	snprintf(str, sizeof(str), "%uh%02um%02us", hours, mins, secs);
+	return ((const char *)str);
+}
+
 int
 sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
-	   int isStdin, void *tv)
+	   int isStdin, const char *songLenStr, void *tv)
 {
 	unsigned char	 buff[4096];
 	size_t		 read, total, oldTotal;
@@ -728,7 +753,6 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 #ifdef HAVE_GETTIMEOFDAY
 			struct timeval	tv;
 			double		oldTime, newTime;
-			unsigned int	hrs, mins, secs;
 #endif /* HAVE_GETTIMEOFDAY */
 
 			if (!isStdin && playlistMode) {
@@ -749,18 +773,19 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			gettimeofday(&tv, NULL);
 			newTime = (double)tv.tv_sec
 				+ (double)tv.tv_usec / 1000000.0;
-			secs = tv.tv_sec - startTime->tv_sec;
-			hrs = secs / 3600;
-			secs %= 3600;
-			mins = secs / 60;
-			secs %= 60;
+			if (songLenStr == NULL)
+				printf("  [ %s]",
+				       getTimeString(tv.tv_sec - startTime->tv_sec));
+			else
+				printf("  [ %s/%s]",
+				       getTimeString(tv.tv_sec - startTime->tv_sec),
+				       songLenStr);
 			if (newTime - oldTime >= 1.0) {
 				kbps = (((double)(total - oldTotal) / (newTime - oldTime)) * 8.0) / 1000.0;
 				timeStamp.tv_sec = tv.tv_sec;
 				timeStamp.tv_usec = tv.tv_usec;
 				oldTotal = total;
 			}
-			printf("  [ %uh%02um%02us]", hrs, mins, secs);
 			if (kbps < 0)
 				printf("                 ");
 			else
@@ -788,15 +813,15 @@ streamFile(shout_t *shout, const char *fileName)
 {
 	FILE		*filepstream = NULL;
 	int		 popenFlag = 0;
-	char		*metaData = NULL;
+	char		*metaData = NULL, *songLenStr = NULL;
 	int		 isStdin = 0;
-	int              ret, retval = 0;
+	int		 ret, retval = 0, songLen;
 #ifdef HAVE_GETTIMEOFDAY
 	struct timeval	 startTime;
 #endif
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag,
-					&metaData, &isStdin))
+					&metaData, &isStdin, &songLen))
 	    == NULL) {
 		return (retval);
 	}
@@ -811,13 +836,15 @@ streamFile(shout_t *shout, const char *fileName)
 	}
 
 #ifdef HAVE_GETTIMEOFDAY
+	if (songLen >= 0)
+		songLenStr = xstrdup(getTimeString(songLen));
 	gettimeofday(&startTime, NULL);
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin,
-				 (void *)&startTime);
+				 songLenStr, (void *)&startTime);
 #else
 	do {
-		ret = sendStream(shout, filepstream, fileName, isStdin, NULL);
+		ret = sendStream(shout, filepstream, fileName, isStdin, NULL, NULL);
 #endif
 		if (ret != STREAM_DONE) {
 			if ((skipTrack && rereadPlaylist) ||
@@ -874,6 +901,9 @@ streamFile(shout_t *shout, const char *fileName)
 		pclose(filepstream);
 	else
 		fclose(filepstream);
+
+	if (songLenStr != NULL)
+		xfree(songLenStr);
 
 	return (retval);
 }
