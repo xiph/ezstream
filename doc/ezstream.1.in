@@ -75,7 +75,8 @@ Skips the currently playing track and moves on to the next in playlist mode, or
 restarts the current track when streaming a single file.
 .It Cd SIGUSR2
 Triggers rereading of metadata for the stream by running the program or script
-specified in \&<metadata_progname/\&>
+specified in
+.Li \&<metadata_progname/\&>
 .Pq see below.
 This is the only meaningful signal when streaming from standard input.
 .El
@@ -92,9 +93,9 @@ other elements, and comments, appear in an
 configuration file.
 .Pp
 Each element in the configuration file consists of a
-.Li start tag ,
+.Em start tag ,
 its content and an
-.Li end tag .
+.Em end tag .
 For example:
 .Pp
 .Dl \&<filename\&>playlist.m3u<\&/filename\&>
@@ -114,8 +115,9 @@ The configuration file's root element.
 It contains all other configuration elements.
 .El
 .Ss Global configuration elements
-Each of the global configuration elements have the \&<ezstream/\&> element as
-their parent.
+Each of the global configuration elements have the
+.Li \&<ezstream/\&>
+element as their parent.
 .Bl -tag -width -Ds
 .It Sy \&<url\ /\&>
 .Pq Mandatory.
@@ -172,13 +174,14 @@ sign at the beginning of a line and ignored by
 Set to
 .Sy 1
 .Pq one
-to indicate that the file in \&<filename/\&> is actually an executable program
-or script.
+to indicate that the file in
+.Li \&<filename/\&>
+is actually an executable program or script.
 If set to
 .Sy 0
 .Pq zero ,
-\&<filename/\&> content is assumed to be a media file, playlist file or the
-keyword
+.Li \&<filename/\&>
+content is assumed to be a media file, playlist file or the keyword
 .Pa stdin
 .Pq the default .
 .Pp
@@ -190,12 +193,17 @@ section for details on how the playlist program must behave.
 Set to
 .Sy 1
 .Pq one
-to randomly shuffle the entries of the playlist specified in \&<filename/\&>.
+to randomly shuffle the entries of the playlist specified in
+.Li \&<filename/\&> .
 Files are played sequentially if set to
 .Sy 0
 .Pq zero
-or when the \&<shuffle/\&> element is absent.
-This option will be ignored if \&<playlist_program/\&> is set to 1
+or when the
+.Li \&<shuffle/\&>
+element is absent.
+This option will be ignored if
+.Li \&<playlist_program/\&>
+is set to 1
 .Pq one.
 .It Sy \&<metadata_progname\ /\&>
 .Pq Optional.
@@ -207,8 +215,10 @@ the
 .Sy SIGUSR2
 signal is received.
 .Pp
-If the \&<metadata_progname/\&> element is present in the configuration, no
-attempts will be made to read metadata from files that are being streamed.
+If the
+.Li \&<metadata_progname/\&>
+element is present in the configuration, no attempts will be made to read
+metadata from files that are being streamed.
 If this behavior is not desired, it should be removed or commented out in the
 configuration file.
 .Pp
@@ -218,9 +228,9 @@ section for details on how the metadata program must behave.
 .It Sy \&<metadata_format\ /\&>
 .Pq Optional.
 Set the format of the string that should be used for the
-.Sq @M@
+.Sq Li @M@
 placeholder when setting metadata with an external program or script via
-\&<metadata_progname/\&>.
+.Li \&<metadata_progname/\&> .
 .Pp
 See the
 .Sy METADATA
@@ -230,7 +240,9 @@ section for details on how metadata is handled by
 Set to
 .Sy 1
 .Pq one
-in order to stream the content of \&<filename/\&> only once, and to
+in order to stream the content of
+.Li \&<filename/\&>
+only once, and to
 .Sy 0
 .Pq zero
 for continuous streaming
@@ -292,14 +304,17 @@ If set to
 .Sy 0
 .Pq zero ,
 the Icecast server will not submit this stream to a YP directory, which is also
-the default if the \&<svrinfopublic/\&> element is absent.
+the default if the
+.Li \&<svrinfopublic/\&>
+element is absent.
 .It Sy \&<reencode\ /\&>
 .Pq Optional.
 Element that contains child elements, which specify if and how reencoding
 should be done.
 .El
 .Ss Reencoding settings
-Each of the reencoding configuration elements have the \&<reencode/\&>
+Each of the reencoding configuration elements have the
+.Li \&<reencode/\&>
 element as their parent.
 .Bl -tag -width -Ds
 .It Sy \&<enable\ /\&>
@@ -310,22 +325,27 @@ to enable reencoding.
 If set to
 .Sy 0
 .Pq zero ,
-no reencoding will be done, which is also the default if the \&<enable/\&>
+no reencoding will be done, which is also the default if the
+.Li \&<enable/\&>
 element is absent.
 .It Sy \&<encdec\ /\&>
 Element that contains child elements, which specify how to decode and encode
 a certain media file format for streaming.
-Each format is described by a separate \&<encdec/\&> element.
+Each format is described by a separate
+.Li \&<encdec/\&>
+element.
 .El
 .Ss Decoder/Encoder settings
-Each of the decoder/encoder configuration elements have the \&<encdec/\&>
+Each of the decoder/encoder configuration elements have the
+.Li \&<encdec/\&>
 element as their parent.
 .Bl -tag -width -Ds
 .It Sy \&<format\ /\&>
 This element is used by
 .Nm
 to find the appropriate encoder for the output stream format specified in the
-\&<format/\&> element inside the global configuration.
+.Li \&<format/\&>
+element inside the global configuration.
 For consistency reasons, it is recommended that this element is always
 supplied, even for currently unsupported output formats, with content such as
 .Sy VORBIS ,
@@ -351,12 +371,15 @@ it to standard output.
 During runtime, the placeholder
 .Sq Li @T@
 is replaced with the name of the media file, as it is specified in the
-\&<filename/\&> element or contained in a playlist file.
+.Li \&<filename/\&>
+element or contained in a playlist file.
 It should always be enclosed in quotes, to prevent problems with filenames that
 contain whitespaces.
 .Pp
-Metadata placeholders can be used in the \&<decode/\&> element as well, for
-combined de-/encoder programs that produce streamable data.
+Metadata placeholders can be used in the
+.Li \&<decode/\&>
+element as well, for combined de-/encoder programs that produce streamable
+data.
 See the
 .Sy METADATA
 section for details on how metadata is handled by
@@ -371,7 +394,9 @@ utility:
 Set the command to encode raw data, received from standard input, to the
 specified stream format.
 .Pp
-Metadata placeholders can be used in the \&<encode/\&> element.
+Metadata placeholders can be used in the
+.Li \&<encode/\&>
+element.
 For details about using metadata in
 .Nm ,
 see below in the
@@ -410,7 +435,9 @@ The program must return only filenames, with one filename per execution.
 The program should not return an empty line unless
 .Nm
 is supposed to know that the end of the playlist has been reached.
-This is significant when the \&<stream_once/\&> option is enabled.
+This is significant when the
+.Li \&<stream_once/\&>
+option is enabled.
 .El
 .Ss Metadata Programs
 .Bl -dash -compact
@@ -424,12 +451,12 @@ When called without command line parameters, the program should return a
 complete string that should be used for metadata.
 .It
 When called with the command line parameter
-.Qq artist ,
+.Qq Li artist ,
 the program should return only the artist information of the metadata.
 .Pq Optional.
 .It
 When called with the command line parameter
-.Qq title ,
+.Qq Li title ,
 the program should return only the title information of the metadata.
 .Pq Optional.
 .El
@@ -445,26 +472,42 @@ This section will explain each possible scenario.
 .Bl -tag -width -Ds
 .It Sy @T@
 Replaced with the media file name.
-Required in \&<decode/\&> and is available in \&<metadata_format/\&>.
+Required in
+.Li \&<decode/\&>
+and is available in
+.Li \&<metadata_format/\&> .
 .It Sy @M@
 Replaced with a metadata string.
 See below for a detailed explanation.
-Available in \&<decode/\&> and \&<encode/\&>.
+Available in
+.Li \&<decode/\&>
+and
+.Li \&<encode/\&> .
 .It Sy @a@
 Replaced with the artist information.
-Available in \&<decode/\&>, \&<encode/\&> and \&<metadata_format/\&>.
+Available in
+.Li \&<decode/\&> ,
+.Li \&<encode/\&>
+and
+.Li \&<metadata_format/\&> .
 .It Sy @t@
 Replaced with the title information.
-Available in \&<decode/\&>, \&<encode/\&> and \&<metadata_format/\&>.
+Available in
+.Li \&<decode/\&> ,
+.Li \&<encode/\&>
+and
+.Li \&<metadata_format/\&> .
 .It Sy @s@
-Replaced with the string returned by \&<metadata_progname/\&> when called
-without any command line parameters.
-Available only in \&<metadata_format/\&>.
+Replaced with the string returned by
+.Li \&<metadata_progname/\&>
+when called without any command line parameters.
+Available only in
+.Li \&<metadata_format/\&> .
 .El
 .Ss The @M@ Placeholder
 While all other placeholders are simply replaced with whatever data they are
 associated with,
-.Sq @M@
+.Sq Li @M@
 is context-sensitive.
 The logic used by
 .Nm
@@ -484,15 +527,15 @@ Endif
 .Ed
 .Pp
 The generated metadata string for
-.Sq @M@
+.Sq Li @M@
 is of the format
-.Dq Artist - Title ,
+.Dq Em Artist - Title ,
 if both artist and title information is available.
 If one of the two is missing, the available one is displayed without a leading
 or trailing dash, e.g. just
-.Dq Artist .
-If neither artist nor title are available, the name of the media file, without
-its file extension, is used.
+.Dq Em Artist .
+If neither artist nor title are available, the name of the media file \(em
+without its file extension \(em is used.
 .Ss Metadata Caveats
 It is possible to generate strange results with odd combinations of
 placeholders, external metadata programs and updates during runtime via
@@ -508,7 +551,7 @@ It is not possible to properly discern between artist and title information,
 which means that anything set with the
 .Sy SIGUSR2
 feature will continue to end up entirely in the
-.Qq Title
+.Qq Em Title
 field of a stream.
 .Sh FILES
 .Bl -tag -width "!!EXAMPLES_DIR!!" -compact
