@@ -1,3 +1,212 @@
+2007-03-11 04:39  moritz
+
+	* [r12719] NEWS:
+	  Release coming up today.
+
+2007-03-11 03:49  moritz
+
+	* [r12718] NEWS:
+	  fixes
+
+2007-03-11 00:28  moritz
+
+	* [r12717] src/metadata.c:
+	  Make this build on Windows and not segfault the MIPSpro C
+	  compiler version <7.2.
+
+2007-03-11 00:02  moritz
+
+	* [r12716] doc/ezstream.1.in:
+	  Formatting improvements, and some minor rewording.
+
+2007-03-10 23:36  moritz
+
+	* [r12715] win32/Makefile.am:
+	  Missed a conf -> examples change here.
+
+2007-03-10 23:28  moritz
+
+	* [r12714] src/metadata.c:
+	  taglib_file_audioproperties returns const
+
+2007-03-10 22:44  moritz
+
+	* [r12713] src/metadata.c:
+	  Remove unreachable statement.
+
+2007-03-10 21:23  moritz
+
+	* [r12712] NEWS, src/metadata.c, src/playlist.c:
+	  Do not execute group-/world-writeable playlist and metadata
+	  scripts.
+
+2007-03-10 21:18  moritz
+
+	* [r12711] NEWS, src/ezstream.c, src/metadata.c, src/metadata.h:
+	  Include the total playing time of a song in the "real-time"
+	  output, if TagLib supplies it.
+
+2007-03-10 20:13  moritz
+
+	* [r12710] Makefile.am, conf, configure.in, examples,
+	  examples/Makefile.am, examples/ezstream_metadata.xml,
+	  examples/ezstream_mp3.xml,
+	  examples/ezstream_reencoding_example_mp3.xml,
+	  examples/ezstream_reencoding_example_theora.xml,
+	  examples/ezstream_reencoding_example_vorbis.xml,
+	  examples/ezstream_vorbis.xml, examples/meta.sh, examples/play.sh,
+	  win32/README.win32:
+	  Move conf/ to examples/. Add ezstream_metadata.xml and two
+	  minimalistic example scripts.
+
+2007-03-10 19:03  moritz
+
+	* [r12707] NEWS, doc/ezstream.1.in, src/configfile.c,
+	  src/configfile.h, src/ezstream.c, src/metadata.c, src/metadata.h:
+	  More metadata featuritis, add <metadata_format/> and implement
+	  support for '@a@', '@t@' and '@s@'.
+
+2007-03-10 02:27  moritz
+
+	* [r12701] src/configfile.c, src/configfile.h, src/ezstream.c,
+	  src/metadata.c, src/metadata.h:
+	  Commit work-in-progress towards more fine-grained control over
+	  metadata. This has not been checked for changes to previous
+	  behavior and isn't complete, yet. More to come.
+
+2007-03-09 13:43  moritz
+
+	* [r12698] Makefile.am, src/ezstream.c, win32/Makefile.am,
+	  win32/README.win32:
+	  Various tweakings, and sync Win32 README with new reality.
+
+2007-03-09 02:30  moritz
+
+	* [r12693] NEWS, doc/ezstream.1.in, src/configfile.c,
+	  src/configfile.h, src/ezstream.c, src/metadata.c, src/metadata.h:
+	  Add new <metadata_progname> configuration option, which specifies
+	  an external program/script to get metadata from. Also include
+	  SIGUSR2 handling that triggers metadata updates from the external
+	  program mid-stream.
+
+2007-03-09 02:24  moritz
+
+	* [r12692] src/playlist.c:
+	  Squash a bug that I introduced a few hours ago ...
+
+2007-03-09 01:52  moritz
+
+	* [r12691] Makefile.am:
+	  Commit forgotten /Makefile.am change (new regen-win32: target).
+
+2007-03-09 01:49  moritz
+
+	* [r12690] NEWS:
+	  sync
+
+2007-03-09 01:49  moritz
+
+	* [r12689] win32/Makefile.am, win32/ezstream.1.html:
+	  Kill off the ugly HTML page. Replace with a regen-win32: target
+	  in Makefile.am that automatically generates a PDF version of the
+	  current man page (PDF not included in the source tarball.)
+
+2007-03-09 01:44  moritz
+
+	* [r12688] win32/README.win32:
+	  Update with blurp about limited functionality.
+
+2007-03-08 21:38  moritz
+
+	* [r12686] src/ezstream.c, src/playlist.c:
+	  Shrink buffers to PATH_MAX.
+
+2007-03-08 20:59  moritz
+
+	* [r12685] src/ezstream.c, src/playlist.c, src/playlist.h:
+	  Fix playlist_free() as well ...
+
+2007-03-08 20:24  moritz
+
+	* [r12684] NEWS, README, configure.in, src/Makefile.am,
+	  src/metadata.c:
+	  Working TagLib support (optional.)
+
+2007-03-08 19:46  moritz
+
+	* [r12683] src/compat.h:
+	  Define SIZE_T_MAX to the real maximum of size_t.
+
+2007-03-08 19:45  moritz
+
+	* [r12682] win32/ezstream.vcproj:
+	  sync
+
+2007-03-08 15:25  moritz
+
+	* [r12681] src/ezstream.c, src/metadata.c, src/metadata.h:
+	  Hmph. I've been stepping into the copy-of-pointer trap twice now.
+	  Fix it again.
+
+2007-03-08 14:39  moritz
+
+	* [r12680] configure.in, src/Makefile.am, src/ezstream.c,
+	  src/metadata.c, src/metadata.h:
+	  Iterate towards optional TagLib support, as well as scripted
+	  metadata support. This is just the first step and equivalent to
+	  current functionality.
+
+2007-03-08 14:36  moritz
+
+	* [r12679] configure.in, win32/config.h:
+	  New features coming up, bump version to 0.4.0
+
+2007-03-08 14:34  moritz
+
+	* [r12678] NEWS:
+	  sync
+
+2007-03-08 01:12  moritz
+
+	* [r12677] src/util.c, src/util.h:
+	  Replace the very broken xfree() function with an xfree() macro -
+	  the main point was to set ptr to NULL, but the function only set
+	  the copy of ptr to NULL. Spotted by Karl Heyes, thanks a lot!
+
+2007-03-07 23:39  moritz
+
+	* [r12676] src/playlist.c:
+	  Remove redundant code since the switch to xfree().
+
+2007-03-07 21:01  moritz
+
+	* [r12673] src/Makefile.am, src/compat.c, src/compat.h,
+	  src/configfile.c, src/ezstream.c, src/playlist.c, src/util.c,
+	  src/util.h, win32/ezstream.vcproj:
+	  More code reorganization, move compatibility and utility
+	  functions out of ezstream.c. Use a basename() function for
+	  Windows that behaves identical to a modern Unix' basename().
+
+2007-03-07 12:53  moritz
+
+	* [r12672] src/configfile.c:
+	  cosmetics
+
+2007-03-06 14:11  moritz
+
+	* [r12666] ., conf, doc, m4, src, win32:
+	  Ignore generated files.
+
+2007-03-06 14:02  moritz
+
+	* [r12665] configure.in, win32/config.h:
+	  Bump version number after the 0.3.0 release.
+
+2007-03-05 02:03  moritz
+
+	* [r12639] ChangeLog:
+	  regen
+
 2007-03-05 01:01  moritz
 
 	* [r12637] win32/ezstream.1.html:
