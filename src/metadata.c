@@ -442,7 +442,7 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 {
 	FILE	*filep;
 	char	 buf[METADATA_MAX + 1];
-	char	 command[PATH_MAX + strlen(" artist") + 1];
+	char	 command[PATH_MAX + sizeof(" artist")];
 
 	if (md == NULL) {
 		printf("%s: metadata_program_update(): Internal error: NULL argument\n",
