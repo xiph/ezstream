@@ -1,4 +1,4 @@
-Changes in 0.4.0, (SVN trunk):
+Changes in 0.4.0, released on 2007-03-11:
 
  * src/util.*:
    - [FIX]   The xfree() function did not work as intended due to a programming
