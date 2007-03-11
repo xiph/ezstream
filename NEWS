@@ -7,11 +7,12 @@ Changes in 0.4.0, (SVN trunk):
  * src/playlist.*:
    - [FIX]   An error compareable to the one about xfree() in src/util.* has
              been fixed.
-   - [MISC]  Refuse to execute a group- or world-writeable playlist script.
+   - [MISC]  Refuse to execute a group- or world-writeable playlist script or
+             program.
 
  * src/compat.c:
    - [ADD]   Implement a basename() function for Windows that behaves like the
-             ones used on Windows.
+             ones used on Unix systems.
 
  * win32/:
    - [MISC]  Remove the rather ugly HTML version of the man page from the
