@@ -12,14 +12,14 @@ It began as the successor of the old "shout" utility, and has since gained a
 lot of useful features.
 
 In its basic mode of operation, it streams media files or data from standard
-input without reencoding and thus requires only very little CPU resources. It
-can also use various external decoders and encoders to reencode from one
-format to another, and stream the result to an Icecast server. With reencoding
-enabled, ezstream is a very flexible source client.
+input without re-encoding and thus requires only very little CPU resources. It
+can also use various external decoders and encoders to re-encode from one
+format to another, and stream the result to an Icecast server. With re-
+encoding enabled, ezstream is a very flexible source client.
 
 Supported media formats for streaming are MP3, Ogg Vorbis and Ogg Theora.
-Ezstream natively supports metadata in MP3 (ID3v1 only) and Ogg Vorbis, or many
-more formats when it is built with the TagLib option.
+Ezstream natively supports metadata in MP3 (ID3v1 only) and Ogg Vorbis, or
+many more formats when it is built with the TagLib option.
 
 Ezstream is free software and licensed under the GNU General Public License.
 See the COPYING file for details.
@@ -37,7 +37,8 @@ Ezstream depends on:
  * libxml 2.x (http://xmlsoft.org/)
 
 Ezstream optionally uses:
- * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c wrapper)
+ * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
+   wrapper)
    (http://developer.kde.org/~wheeler/taglib.html)
 
 
@@ -76,8 +77,8 @@ USAGE
 
 Once ezstream is successfully installed, type "man ezstream" (without quotes)
 on the command line for a comprehensive manual. This distribution package also
-comes with example configuration files that can be used as a guide to configure
-ezstream.
+comes with example configuration files that can be used as a guide to
+configure ezstream.
 
 Note that all by itself, ezstream is not particularly useful. It requires a
 running Icecast server to stream to, which then relays the stream to many
@@ -97,12 +98,12 @@ fulfills the following requirements:
     display to function.
  2.1. A decoder needs to be capable of sending RAW data to standard output.
  2.2. An encoder needs to be capable of reading RAW data from standard input.
- 2.3. A combined de-/encoder needs to be capable of sending streamable media
-      to standard output.
+ 2.3. A combined de-/encoder needs to be capable of sending media data that
+      can be streamed to standard output.
 
 Media formats that ezstream does not support directly are passed through
-unaltered. Whether they work or not depends on the level of support offered
-by the version of libshout ezstream is linked with.
+unaltered. Whether they work or not depends on the level of support offered by
+the version of libshout ezstream is linked with.
 
 The following incomplete list of programs shows a few that are known to work.
 These are also used in the example configuration files:
@@ -133,8 +134,8 @@ OPERATING SYSTEM SPECIFIC NOTES
  * Ezstream and SunPRO cc/c99 on Solaris:
 
    Ezstream may not build with SunPRO cc/c99 "out of the box" if a threaded
-   libshout was built with gcc. This known issue results in the following error
-   message from the linker:
+   libshout was built with gcc. This known issue results in the following
+   error message from the linker:
 
      ld: fatal: option -h and building a dynamic executable are incompatible
 
@@ -143,4 +144,5 @@ OPERATING SYSTEM SPECIFIC NOTES
    on to ezstream, where cc or c99 ultimately chokes on them.
 
    Ezstream compiles with both cc/c99 and gcc if libshout was built with Sun's
-   compiler. If libshout was built with gcc, compile ezstream with gcc as well.
+   compiler. If libshout was built with gcc, compile ezstream with gcc as
+   well.
