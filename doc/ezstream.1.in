@@ -23,7 +23,7 @@ In its basic mode of operation, it streams media files and data from standard
 input
 .Qq as-is
 \(em such as Ogg Vorbis, Ogg Theora and MP3 \(em to a server.
-It can also use various external decoders and encoders to reencode from one
+It can also use various external decoders and encoders to re-encode from one
 format to another, and stream the result.
 The only requirement is that the external programs support writing to or
 reading from standard input, and can be used from the command line.
@@ -55,7 +55,7 @@ and
 .Fl v
 parameters are provided simultaneously, an additional line of information about
 the currently streamed file \(em playlist position, approximate playing time
-and bitrate \(em is displayed.
+and bit rate \(em is displayed.
 .Ss Runtime control
 On POSIX systems,
 .Nm
@@ -121,7 +121,7 @@ element as their parent.
 .Bl -tag -width -Ds
 .It Sy \&<url\ /\&>
 .Pq Mandatory.
-Specifies the location and mountpoint of the Icecast server, to which the
+Specifies the location and mount point of the Icecast server, to which the
 stream will be sent.
 The content must be of the form
 .Pa http://server:port/mountpoint
@@ -133,11 +133,11 @@ For example:
 Sets the source password for authentication with the Icecast server.
 .It Sy \&<format\ /\&>
 .Pq Mandatory.
-This element has two different meanings, depending on whether reencoding is
+This element has two different meanings, depending on whether re-encoding is
 enabled or not.
 It specifies the
 .Em output format
-of the stream if reencoding is enabled.
+of the stream if re-encoding is enabled.
 Otherwise, it specifies the
 .Em input format
 of
@@ -272,11 +272,11 @@ Set the description of the broadcast.
 Informational only, used for YP.
 .It Sy \&<svrinfobitrate\ /\&>
 .Pq Optional.
-Set the bitrate of the broadcast.
+Set the bit rate of the broadcast.
 This setting is also purely informational and only used for YP.
 The value is set by the user and not
 .Nm ,
-and should match the bitrate of the stream.
+and should match the bit rate of the stream.
 .It Sy \&<svrinfoquality\ /\&>
 .Pq Optional.
 Set the quality setting of an Ogg Vorbis broadcast.
@@ -309,11 +309,11 @@ the default if the
 element is absent.
 .It Sy \&<reencode\ /\&>
 .Pq Optional.
-Element that contains child elements, which specify if and how reencoding
+Element that contains child elements, which specify if and how re-encoding
 should be done.
 .El
-.Ss Reencoding settings
-Each of the reencoding configuration elements have the
+.Ss Re-encoding settings
+Each of the re-encoding configuration elements have the
 .Li \&<reencode/\&>
 element as their parent.
 .Bl -tag -width -Ds
@@ -321,11 +321,11 @@ element as their parent.
 Set to
 .Sy 1
 .Pq one
-to enable reencoding.
+to enable re-encoding.
 If set to
 .Sy 0
 .Pq zero ,
-no reencoding will be done, which is also the default if the
+no re-encoding will be done, which is also the default if the
 .Li \&<enable/\&>
 element is absent.
 .It Sy \&<encdec\ /\&>
@@ -378,8 +378,8 @@ contain whitespaces.
 .Pp
 Metadata placeholders can be used in the
 .Li \&<decode/\&>
-element as well, for combined de-/encoder programs that produce streamable
-data.
+element as well, for combined de-/encoder programs that produce data that can
+be streamed.
 See the
 .Sy METADATA
 section for details on how metadata is handled by
@@ -424,7 +424,7 @@ The program must be an executable file.
 .It
 The program must write one line to standard output and exit.
 .It
-The program must not require arbitary command line options to function.
+The program must not require arbitrary command line options to function.
 A wrapper script must be used if there is no other way.
 .El
 .Ss Playlist Programs
