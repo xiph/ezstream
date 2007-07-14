@@ -610,8 +610,11 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		}
 		xfree(pCommandString);
 
-		if (qFlag)
+		if (qFlag) {
 			dup2(stderr_fd, fileno(stderr));
+			if (stderr_fd > 2)
+				close(stderr_fd);
+		}
 
 		return (filep);
 	}
