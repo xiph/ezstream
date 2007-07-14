@@ -1,4 +1,4 @@
-.\" Copyright (C) 2007 Moritz Grimm <gtgbr@gmx.net>
+.\" Copyright (C) 2007 Moritz Grimm <mdgrimm@gmx.net>
 .\"
 .\" This document may be be used and/or modified under the licensing terms
 .\" of the Ezstream software.
@@ -565,6 +565,6 @@ as well as example playlist and metadata scripts.
 was written by:
 .Pp
 .An Ed Zaleski Aq oddsock@oddsock.org
-.An Moritz Grimm Aq gtgbr@gmx.net
+.An Moritz Grimm Aq mdgrimm@gmx.net
 .Pp
 This manual was written by Moritz Grimm.
