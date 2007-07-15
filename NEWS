@@ -1,4 +1,4 @@
-Changes in 0.4.1 (SVN)
+Changes in 0.4.1, released on 2007-07-15:
 
  * src/ezstream.c:
    - [FIX]   Plug a file descriptor leak when using the -q parameter.
