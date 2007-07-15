@@ -1,3 +1,46 @@
+2007-07-15 16:37  moritz
+
+	* [r13264] NEWS:
+	  This will be released today.
+
+2007-07-14 01:32  moritz
+
+	* [r13259] COPYING, doc/ezstream.1.in, src/compat.c, src/compat.h,
+	  src/configfile.c, src/configfile.h, src/ezstream.c,
+	  src/metadata.c, src/metadata.h, src/playlist.c, src/playlist.h,
+	  src/util.c, src/util.h:
+	  Change my email address to the new one.
+
+2007-07-14 01:27  moritz
+
+	* [r13258] NEWS:
+	  Update.
+
+2007-07-14 01:20  moritz
+
+	* [r13257] src/ezstream.c:
+	  Plug an fd leak, triggered by using -q.
+
+2007-07-13 10:45  moritz
+
+	* [r13253] README:
+	  Spelingk, and fmt -78.
+
+2007-07-13 10:30  moritz
+
+	* [r13252] doc/ezstream.1.in:
+	  Spelink.
+
+2007-03-11 05:17  moritz
+
+	* [r12724] configure.in, win32/config.h:
+	  Bump version number after the 0.4.0 release.
+
+2007-03-11 05:04  moritz
+
+	* [r12720] ChangeLog:
+	  sync
+
 2007-03-11 04:39  moritz
 
 	* [r12719] NEWS:
