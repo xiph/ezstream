@@ -1,3 +1,11 @@
+Changes in 0.4.2 (SVN):
+
+ * src/ezstream.c:
+   - [FIX]   Make <stream_once/> work with playlists, too. Problem found by
+             Geoff Shang <geoff at quitelikely dot com>.
+
+
+
 Changes in 0.4.1, released on 2007-07-15:
 
  * src/ezstream.c:

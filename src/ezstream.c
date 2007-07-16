@@ -1291,14 +1291,14 @@ main(int argc, char *argv[])
 
 		ret = 1;
 		do {
-			if (playlistMode)
+			if (playlistMode) {
 				ret = streamPlaylist(shout,
 						     pezConfig->fileName);
-			else {
+			} else {
 				ret = streamFile(shout, pezConfig->fileName);
-				if (pezConfig->streamOnce)
-					break;
 			}
+			if (pezConfig->streamOnce)
+				break;
 		} while (ret);
 	} else
 		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,
