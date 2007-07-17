@@ -1,3 +1,31 @@
+2007-07-17 14:45  moritz
+
+	* [r13274] NEWS:
+	  Get this out the door today, no need to hold back.
+
+2007-07-16 00:32  moritz
+
+	* [r13272] NEWS, src/ezstream.c:
+	  D'oh! Make <stream_once/> work with playlists as well. Problem
+	  description found in the Icecast mailing list archive, in a mail
+	  by Geoff Shang, via Google. Let's hope that the bug tracker
+	  prevents this kind of bug hunting in the future ...
+
+2007-07-15 19:16  moritz
+
+	* [r13270] win32/README.win32:
+	  Provide a pointer to the home page to Windows users.
+
+2007-07-15 19:11  moritz
+
+	* [r13269] configure.in:
+	  Bump version number after the 0.4.1 release.
+
+2007-07-15 16:38  moritz
+
+	* [r13265] ChangeLog:
+	  Update.
+
 2007-07-15 16:37  moritz
 
 	* [r13264] NEWS:
