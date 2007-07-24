@@ -1,3 +1,11 @@
+Changes in 0.4.3, released on 2007-07-24:
+
+ * src/ezstream.c:
+   - [FIX]   Plug the file descriptor leak, partially fixed in version 0.4.1,
+             for good - it affected more than just the -q use case.
+
+
+
 Changes in 0.4.2, released on 2007-07-17:
 
  * src/ezstream.c:
