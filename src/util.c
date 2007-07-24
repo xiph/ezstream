@@ -30,7 +30,7 @@
 #include "util.h"
 
 #ifndef SIZE_T_MAX
-# define SIZE_T_MAX	UINT_MAX
+# define SIZE_T_MAX	((size_t)-1)
 #endif
 
 extern char	*__progname;
@@ -38,7 +38,7 @@ extern char	*__progname;
 void *
 xmalloc(size_t size)
 {
-	void   *ret;
+	void	*ret;
 
 	if (size == 0) {
 		printf("%s: xmalloc(): Internal error: zero size\n",
@@ -58,7 +58,7 @@ xmalloc(size_t size)
 void *
 xcalloc(size_t nmemb, size_t size)
 {
-	void   *ret;
+	void	*ret;
 
 	if (nmemb == 0 || size == 0) {
 		printf("%s: xcalloc(): Internal error: zero size\n",
@@ -67,7 +67,7 @@ xcalloc(size_t nmemb, size_t size)
 	}
 
 	if (SIZE_T_MAX / nmemb < size) {
-		printf("%s: xcalloc(): Integer overflow, nmemb * size > SIZE_T_MAX\n",
+		printf("%s: xcalloc(): Integer overflow: nmemb * size > SIZE_T_MAX\n",
 		       __progname);
 		exit(1);
 	}
@@ -84,8 +84,8 @@ xcalloc(size_t nmemb, size_t size)
 void *
 xrealloc(void *ptr, size_t nmemb, size_t size)
 {
-	void   *ret;
-	size_t	nsiz = nmemb * size;
+	void	*ret;
+	size_t	 nsiz = nmemb * size;
 
 	if (nmemb == 0 || size == 0) {
 		printf("%s: xrealloc(): Internal error: zero size\n",
@@ -94,7 +94,7 @@ xrealloc(void *ptr, size_t nmemb, size_t size)
 	}
 
 	if (SIZE_T_MAX / nmemb < size) {
-		printf("%s: xrealloc(): Integer overflow, nmemb * size > SIZE_T_MAX\n",
+		printf("%s: xrealloc(): Integer overflow: nmemb * size > SIZE_T_MAX\n",
 		       __progname);
 		exit(1);
 	}
@@ -116,11 +116,11 @@ xrealloc(void *ptr, size_t nmemb, size_t size)
 char *
 xstrdup(const char *str)
 {
-	size_t	len;
-	char   *nstr;
+	size_t	 len;
+	char	*nstr;
 
 	len = strlen(str) + 1;
-	nstr = xcalloc(1, len);
+	nstr = xcalloc(len, sizeof(char));
 	memcpy(nstr, str, len);
 	return (nstr);
 }
