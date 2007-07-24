@@ -570,7 +570,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 	*popenFlag = 0;
 	if (pezConfig->reencode) {
-		int	stderr_fd = dup(fileno(stderr));
+		int	stderr_fd = -1;
 
 		pCommandString = buildCommandString(extension, fileName, mdata);
 		metadata_free(&mdata);
@@ -581,6 +581,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		if (qFlag) {
 			int fd;
 
+			stderr_fd = dup(fileno(stderr));
 			if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
 				printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
 				       __progname, _PATH_DEVNULL, strerror(errno));
@@ -610,11 +611,11 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		}
 		xfree(pCommandString);
 
-		if (qFlag) {
+		if (qFlag)
 			dup2(stderr_fd, fileno(stderr));
-			if (stderr_fd > 2)
-				close(stderr_fd);
-		}
+
+		if (stderr_fd > 2)
+			close(stderr_fd);
 
 		return (filep);
 	}
