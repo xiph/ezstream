@@ -1,3 +1,25 @@
+2007-07-24 13:20  moritz
+
+	* [r13297] NEWS:
+	  Another bugfix, another 0.4.x release.
+
+2007-07-24 13:04  moritz
+
+	* [r13296] src/ezstream.c:
+	  Fix the dang file descriptor leak of < 0.4.1 for good; the old
+	  fix only took care of it partially. Diagnosed with the help from
+	  someone, who wishes to stay anonymous. Thanks!
+
+2007-07-17 15:16  moritz
+
+	* [r13279] configure.in:
+	  Bump the version number after the 0.4.2 release.
+
+2007-07-17 14:47  moritz
+
+	* [r13275] ChangeLog:
+	  Sync
+
 2007-07-17 14:45  moritz
 
 	* [r13274] NEWS:
