@@ -629,7 +629,7 @@ metadata_get_length(metadata_t *md)
 char *
 metadata_assemble_string(metadata_t *md)
 {
-	size_t	  siz;
+	size_t	  len;
 	char	 *str;
 
 	if (md == NULL) {
@@ -641,23 +641,23 @@ metadata_assemble_string(metadata_t *md)
 	if (md->artist == NULL && md->title == NULL && md->program == 0)
 		return (metadata_get_name(md->filename));
 
-	siz = 0;
+	len = 0;
 	if (md->artist != NULL)
-		siz += strlen(md->artist);
+		len += strlen(md->artist);
 	if (md->title != NULL) {
-		if (siz > 0)
-			siz += strlen(" - ");
-		siz += strlen(md->title);
+		if (len > 0)
+			len += strlen(" - ");
+		len += strlen(md->title);
 	}
-	siz++;
-	str = xcalloc(1, siz);
+	len++;
+	str = xcalloc(len, sizeof(char));
 
 	if (md->artist != NULL)
-		strlcpy(str, md->artist, siz);
+		strlcpy(str, md->artist, len);
 	if (md->title != NULL) {
 		if (md->artist != NULL)
-			strlcat(str, " - ", siz);
-		strlcat(str, md->title, siz);
+			strlcat(str, " - ", len);
+		strlcat(str, md->title, len);
 	}
 
 	return (str);

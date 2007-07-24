@@ -249,12 +249,12 @@ buildCommandString(const char *extension, const char *fileName,
 		return (NULL);
 	}
 	newDecoderLen = strlen(decoder) + strlen(fileName) + 1;
-	newDecoder = xcalloc(1, newDecoderLen);
+	newDecoder = xcalloc(newDecoderLen, sizeof(char));
 	replaceString(decoder, newDecoder, newDecoderLen, TRACK_PLACEHOLDER,
 		      fileName);
 	if (strstr(decoder, ARTIST_PLACEHOLDER) != NULL) {
 		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_artist(mdata)) + 1;
-		char *tmpStr = xcalloc(1, tmpLen);
+		char *tmpStr = xcalloc(tmpLen, sizeof(char));
 		replaceString(newDecoder, tmpStr, tmpLen, ARTIST_PLACEHOLDER,
 			      metadata_get_artist(mdata));
 		xfree(newDecoder);
@@ -262,7 +262,7 @@ buildCommandString(const char *extension, const char *fileName,
 	}
 	if (strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
 		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_title(mdata)) + 1;
-		char *tmpStr = xcalloc(1, tmpLen);
+		char *tmpStr = xcalloc(tmpLen, sizeof(char));
 		replaceString(newDecoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
 			      metadata_get_title(mdata));
 		xfree(newDecoder);
@@ -282,7 +282,7 @@ buildCommandString(const char *extension, const char *fileName,
 		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
 			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
 			size_t tmpLen = strlen(newDecoder) + strlen(mdataString) + 1;
-			char *tmpStr = xcalloc(1, tmpLen);
+			char *tmpStr = xcalloc(tmpLen, sizeof(char));
 			replaceString(newDecoder, tmpStr, tmpLen,
 				      METADATA_PLACEHOLDER, mdataString);
 			xfree(newDecoder);
@@ -291,14 +291,14 @@ buildCommandString(const char *extension, const char *fileName,
 		} else {
 			if (!metadataFromProgram && strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
 				size_t tmpLen = strlen(newDecoder) + 1;
-				char *tmpStr = xcalloc(1, tmpLen);
+				char *tmpStr = xcalloc(tmpLen, sizeof(char));
 				replaceString(newDecoder, tmpStr, tmpLen,
 					      METADATA_PLACEHOLDER, "");
 				xfree(newDecoder);
 				newDecoder = tmpStr;
 			} else {
 				size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_string(mdata)) + 1;
-				char *tmpStr = xcalloc(1, tmpLen);
+				char *tmpStr = xcalloc(tmpLen, sizeof(char));
 				replaceString(newDecoder, tmpStr, tmpLen,
 					      METADATA_PLACEHOLDER,
 					      metadata_get_string(mdata));
@@ -316,7 +316,7 @@ buildCommandString(const char *extension, const char *fileName,
 			       (strcmp(pezConfig->format, THEORA_FORMAT) != 0) ? " (unsupported) " : " ",
 			       pezConfig->format);
 		commandStringLen = strlen(newDecoder) + 1;
-		commandString = xcalloc(1, commandStringLen);
+		commandString = xcalloc(commandStringLen, sizeof(char));
 		strlcpy(commandString, newDecoder, commandStringLen);
 		xfree(decoder);
 		xfree(encoder);
@@ -325,12 +325,12 @@ buildCommandString(const char *extension, const char *fileName,
 	}
 
 	newEncoderLen = strlen(encoder) + strlen(metadata_get_artist(mdata)) + 1;
-	newEncoder = xcalloc(1, newEncoderLen);
+	newEncoder = xcalloc(newEncoderLen, sizeof(char));
 	replaceString(encoder, newEncoder, newEncoderLen, ARTIST_PLACEHOLDER,
 		      metadata_get_artist(mdata));
 	if (strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
 		size_t tmpLen = strlen(newEncoder) + strlen(metadata_get_title(mdata)) + 1;
-		char *tmpStr = xcalloc(1, tmpLen);
+		char *tmpStr = xcalloc(tmpLen, sizeof(char));
 		replaceString(newEncoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
 			      metadata_get_title(mdata));
 		xfree(newEncoder);
@@ -340,7 +340,7 @@ buildCommandString(const char *extension, const char *fileName,
 		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
 			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
 			size_t tmpLen = strlen(newEncoder) + strlen(mdataString) + 1;
-			char *tmpStr = xcalloc(1, tmpLen);
+			char *tmpStr = xcalloc(tmpLen, sizeof(char));
 			replaceString(newEncoder, tmpStr, tmpLen,
 				      METADATA_PLACEHOLDER, mdataString);
 			xfree(newEncoder);
@@ -349,14 +349,14 @@ buildCommandString(const char *extension, const char *fileName,
 		} else {
 			if (!metadataFromProgram && strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
 				size_t tmpLen = strlen(newEncoder) + 1;
-				char *tmpStr = xcalloc(1, tmpLen);
+				char *tmpStr = xcalloc(tmpLen, sizeof(char));
 				replaceString(newEncoder, tmpStr, tmpLen,
 					      METADATA_PLACEHOLDER, "");
 				xfree(newEncoder);
 				newEncoder = tmpStr;
 			} else {
 				size_t tmpLen = strlen(newEncoder) + strlen(metadata_get_string(mdata)) + 1;
-				char *tmpStr = xcalloc(1, tmpLen);
+				char *tmpStr = xcalloc(tmpLen, sizeof(char));
 				replaceString(newEncoder, tmpStr, tmpLen,
 					      METADATA_PLACEHOLDER,
 					      metadata_get_string(mdata));
@@ -368,7 +368,7 @@ buildCommandString(const char *extension, const char *fileName,
 
 	commandStringLen = strlen(newDecoder) + strlen(" | ") +
 		strlen(newEncoder) + 1;
-	commandString = xcalloc(1, commandStringLen);
+	commandString = xcalloc(commandStringLen, sizeof(char));
 	snprintf(commandString, commandStringLen, "%s | %s", newDecoder,
 		 newEncoder);
 
@@ -384,7 +384,7 @@ char *
 getMetadataString(const char *format, metadata_t *mdata)
 {
 	char	*tmp, *str;
-	size_t	 siz;
+	size_t	 len;
 
 	if (mdata == NULL) {
 		printf("%s: getMetadataString(): Internal error: NULL metadata_t\n",
@@ -398,33 +398,33 @@ getMetadataString(const char *format, metadata_t *mdata)
 	str = xstrdup(format);
 
 	if (strstr(format, ARTIST_PLACEHOLDER) != NULL) {
-		siz = strlen(str) + strlen(metadata_get_artist(mdata)) + 1;
-		tmp = xcalloc(1, siz);
-		replaceString(str, tmp, siz, ARTIST_PLACEHOLDER,
+		len = strlen(str) + strlen(metadata_get_artist(mdata)) + 1;
+		tmp = xcalloc(len, sizeof(char));
+		replaceString(str, tmp, len, ARTIST_PLACEHOLDER,
 			      metadata_get_artist(mdata));
 		xfree(str);
 		str = tmp;
 	}
 	if (strstr(format, TITLE_PLACEHOLDER) != NULL) {
-		siz = strlen(str) + strlen(metadata_get_title(mdata)) + 1;
-		tmp = xcalloc(1, siz);
-		replaceString(str, tmp, siz, TITLE_PLACEHOLDER,
+		len = strlen(str) + strlen(metadata_get_title(mdata)) + 1;
+		tmp = xcalloc(len, sizeof(char));
+		replaceString(str, tmp, len, TITLE_PLACEHOLDER,
 			      metadata_get_title(mdata));
 		xfree(str);
 		str = tmp;
 	}
 	if (strstr(format, STRING_PLACEHOLDER) != NULL) {
-		siz = strlen(str) + strlen(metadata_get_string(mdata)) + 1;
-		tmp = xcalloc(1, siz);
-		replaceString(str, tmp, siz, STRING_PLACEHOLDER,
+		len = strlen(str) + strlen(metadata_get_string(mdata)) + 1;
+		tmp = xcalloc(len, sizeof(char));
+		replaceString(str, tmp, len, STRING_PLACEHOLDER,
 			      metadata_get_string(mdata));
 		xfree(str);
 		str = tmp;
 	}
 	if (strstr(format, TRACK_PLACEHOLDER) != NULL) {
-		siz = strlen(str) + strlen(metadata_get_filename(mdata)) + 1;
-		tmp = xcalloc(1, siz);
-		replaceString(str, tmp, siz, TRACK_PLACEHOLDER,
+		len = strlen(str) + strlen(metadata_get_filename(mdata)) + 1;
+		tmp = xcalloc(len, sizeof(char));
+		replaceString(str, tmp, len, TRACK_PLACEHOLDER,
 			      metadata_get_filename(mdata));
 		xfree(str);
 		str = tmp;
