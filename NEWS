@@ -1,3 +1,12 @@
+Changes in 0.4.4 (SVN):
+
+ * various:
+   - [MISC]  Add new --enable-debug configuration option to the configure
+             script, which enables newly added memory debugging features.
+             (Not interesting for non-developers.)
+
+
+
 Changes in 0.4.3, released on 2007-07-24:
 
  * src/ezstream.c:

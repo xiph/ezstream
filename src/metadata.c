@@ -41,7 +41,7 @@
 #include "compat.h"
 #include "metadata.h"
 #include "strfctns.h"
-#include "util.h"
+#include "xalloc.h"
 
 extern char		*__progname;
 extern int		 vFlag;

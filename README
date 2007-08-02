@@ -51,8 +51,10 @@ The ezstream software uses the GNU auto-tools to configure, build and install
 on a variety of systems. Aside from the standard autoconf options of the
 configure script, a couple of additional options are available:
 
-  --enable-examplesdir=DIR  example configuration files installation directory
+  --enable-examplesdir=DIR
+                          example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
+  --enable-debug          enable memory debugging (default: no)
   --with-taglib=PREFIX    Prefix where TagLib is installed (default:
                           autodetect)
   --with-ogg=PREFIX       Prefix where libogg is installed (optional)

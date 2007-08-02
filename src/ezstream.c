@@ -64,6 +64,7 @@
 #include "playlist.h"
 #include "strfctns.h"
 #include "util.h"
+#include "xalloc.h"
 
 #define STREAM_DONE	0
 #define STREAM_CONT	1
@@ -127,6 +128,7 @@ int		streamPlaylist(shout_t *, const char *);
 char *		getProgname(const char *);
 void		usage(void);
 void		usageHelp(void);
+int		shutdown(int);
 
 #ifdef HAVE_SIGNALS
 void	sig_handler(int);
@@ -961,12 +963,16 @@ streamPlaylist(shout_t *shout, const char *fileName)
 	return (1);
 }
 
-/* Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c */
+/*
+ * Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c.
+ * Does not use xalloc on purpose, as the 9 bytes of memory that don't get
+ * cleaned up in the end really don't matter.
+ */
 char *
 getProgname(const char *argv0)
 {
 #ifdef HAVE___PROGNAME
-	return (xstrdup(__progname));
+	return (strdup(__progname));
 #else
 	char	*p;
 
@@ -978,8 +984,18 @@ getProgname(const char *argv0)
 	else
 		p++;
 
-	return (xstrdup(p));
+	return (strdup(p));
 #endif /* HAVE___PROGNAME */
+}
+
+int
+shutdown(int exitval)
+{
+	shout_shutdown();
+	playlist_shutdown();
+	xalloc_shutdown();
+
+	return (exitval);
 }
 
 void
@@ -1017,6 +1033,14 @@ main(int argc, char *argv[])
 	unsigned int	 i;
 #endif
 
+#ifdef XALLOC_DEBUG
+	xalloc_initialize_debug(2, NULL);
+#else
+	xalloc_initialize();
+#endif /* XALLOC_DEBUG */
+	playlist_init();
+	shout_init();
+
 	__progname = getProgname(argv[0]);
 	pezConfig = getEZConfig();
 
@@ -1029,26 +1053,26 @@ main(int argc, char *argv[])
 			if (configFile != NULL) {
 				printf("Error: multiple -c arguments given\n");
 				usage();
-				return (2);
+				return (shutdown(2));
 			}
 			configFile = xstrdup(optarg);
 			break;
 		case 'h':
 			usage();
 			usageHelp();
-			return (0);
+			return (shutdown(0));
 		case 'q':
 			qFlag = 1;
 			break;
 		case 'V':
 			printf("%s\n", PACKAGE_STRING);
-			return (0);
+			return (shutdown(0));
 		case 'v':
 			vFlag++;
 			break;
 		case '?':
 			usage();
-			return (2);
+			return (shutdown(2));
 		default:
 			break;
 		}
@@ -1059,7 +1083,7 @@ main(int argc, char *argv[])
 	if (configFile == NULL) {
 		printf("You must supply a config file with the -c argument.\n");
 		usage();
-		return (2);
+		return (shutdown(2));
 	} else {
 		/*
 		 * Attempt to open configFile here for a more meaningful error
@@ -1072,7 +1096,7 @@ main(int argc, char *argv[])
 		if (stat(configFile, &st) == -1) {
 			printf("%s: %s\n", configFile, strerror(errno));
 			usage();
-			return (2);
+			return (shutdown(2));
 		}
 		if (vFlag && (st.st_mode & (S_IRGRP | S_IROTH)))
 			printf("%s: Warning: %s is group and/or world readable\n",
@@ -1080,7 +1104,7 @@ main(int argc, char *argv[])
 		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
 			printf("%s: Error: %s is group and/or world writeable\n",
 			       __progname, configFile);
-			return (2);
+			return (shutdown(2));
 		}
 #else
 		FILE		 *tmp;
@@ -1088,43 +1112,40 @@ main(int argc, char *argv[])
 		if ((tmp = fopen(configFile, "r")) == NULL) {
 			printf("%s: %s\n", configFile, strerror(errno));
 			usage();
-			return (2);
+			return (shutdown(2));
 		}
 		fclose(tmp);
 #endif /* HAVE_STAT */
 	}
 
 	if (!parseConfig(configFile))
-		return (2);
-
-	shout_init();
-	playlist_init();
+		return (shutdown(2));
 
 	if (pezConfig->URL == NULL) {
 		printf("%s: Error: Missing <url>\n", configFile);
-		return (2);
+		return (shutdown(2));
 	}
 	if (!urlParse(pezConfig->URL, &host, &port, &mount)) {
 		printf("Must be of the form ``http://server:port/mountpoint''\n");
-		return (2);
+		return (shutdown(2));
 	}
 	if (strlen(host) == 0) {
 		printf("%s: Error: Invalid <url>: Missing server:\n", configFile);
 		printf("Must be of the form ``http://server:port/mountpoint''\n");
-		return (2);
+		return (shutdown(2));
 	}
 	if (strlen(mount) == 0) {
 		printf("%s: Error: Invalid <url>: Missing mountpoint:\n", configFile);
 		printf("Must be of the form ``http://server:port/mountpoint''\n");
-		return (2);
+		return (shutdown(2));
 	}
 	if (pezConfig->password == NULL) {
 		printf("%s: Error: Missing <sourcepassword>\n", configFile);
-		return (2);
+		return (shutdown(2));
 	}
 	if (pezConfig->fileName == NULL) {
 		printf("%s: Error: Missing <filename>\n", configFile);
-		return (2);
+		return (shutdown(2));
 	}
 	if (pezConfig->format == NULL) {
 		printf("%s: Warning: Missing <format>:\n", configFile);
@@ -1135,45 +1156,45 @@ main(int argc, char *argv[])
 
 	if ((shout = shout_new()) == NULL) {
 		printf("%s: shout_new(): %s", __progname, strerror(ENOMEM));
-		return (1);
+		return (shutdown(1));
 	}
 
 	if (shout_set_host(shout, host) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_host(): %s\n", __progname,
 			shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 	if (shout_set_protocol(shout, SHOUT_PROTOCOL_HTTP) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_protocol(): %s\n", __progname,
 			shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 	if (shout_set_port(shout, port) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_port: %s\n", __progname,
 			shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 	if (shout_set_password(shout, pezConfig->password) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_password(): %s\n", __progname,
 			shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 	if (shout_set_mount(shout, mount) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_mount(): %s\n", __progname,
 			shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 	if (shout_set_user(shout, "source") != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_user(): %s\n", __progname,
 			shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 
 	if (!strcmp(pezConfig->format, MP3_FORMAT)) {
 		if (shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_format(MP3): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (!strcmp(pezConfig->format, VORBIS_FORMAT) ||
@@ -1181,7 +1202,7 @@ main(int argc, char *argv[])
 		if (shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_format(OGG): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 
@@ -1189,63 +1210,63 @@ main(int argc, char *argv[])
 		if (shout_set_name(shout, pezConfig->serverName) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_name(): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverURL) {
 		if (shout_set_url(shout, pezConfig->serverURL) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_url(): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverGenre) {
 		if (shout_set_genre(shout, pezConfig->serverGenre) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_genre(): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverDescription) {
 		if (shout_set_description(shout, pezConfig->serverDescription) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_description(): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverBitrate) {
 		if (shout_set_audio_info(shout, SHOUT_AI_BITRATE, pezConfig->serverBitrate) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_audio_info(AI_BITRATE): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverChannels) {
 		if (shout_set_audio_info(shout, SHOUT_AI_CHANNELS, pezConfig->serverChannels) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_audio_info(AI_CHANNELS): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverSamplerate) {
 		if (shout_set_audio_info(shout, SHOUT_AI_SAMPLERATE, pezConfig->serverSamplerate) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_audio_info(AI_SAMPLERATE): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 	if (pezConfig->serverQuality) {
 		if (shout_set_audio_info(shout, SHOUT_AI_QUALITY, pezConfig->serverQuality) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_set_audio_info(AI_QUALITY): %s\n",
 			       __progname, shout_get_error(shout));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 
 	if (shout_set_public(shout, pezConfig->serverPublic) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_public(): %s\n",
 		       __progname, shout_get_error(shout));
-		return (1);
+		return (shutdown(1));
 	}
 
 	if (pezConfig->metadataProgram != NULL)
@@ -1263,7 +1284,7 @@ main(int argc, char *argv[])
 		if (sigaction(ezstream_signals[i], &act, NULL) == -1) {
 			printf("%s: sigaction(): %s\n",
 			       __progname, strerror(errno));
-			return (1);
+			return (shutdown(1));
 		}
 	}
 #endif /* HAVE_SIGNALS */
@@ -1301,6 +1322,8 @@ main(int argc, char *argv[])
 			if (pezConfig->streamOnce)
 				break;
 		} while (ret);
+
+		shout_close(shout);
 	} else
 		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,
 		       host, port, mount, shout_get_error(shout));
@@ -1308,15 +1331,9 @@ main(int argc, char *argv[])
 	if (vFlag)
 		printf("%s: Exiting ...\n", __progname);
 
-	shout_close(shout);
-
-	playlist_free(&playlist);
-	playlist_shutdown();
-
-	shout_shutdown();
-
 	xfree(host);
 	xfree(mount);
+	playlist_free(&playlist);
 
-	return 0;
+	return (shutdown(0));
 }

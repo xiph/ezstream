@@ -40,6 +40,20 @@ else
 	XIPH_CPPFLAGS="-Wall -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
 fi
 
+ez_enable_debug=no
+AC_ARG_ENABLE(debug,
+	AS_HELP_STRING([--enable-debug],
+		[enable memory debugging (default: no)]),
+[case "$enableval" in
+	no) ;;
+	*) ez_enable_debug=yes ;;
+esac], [])
+AC_MSG_CHECKING([whether to enable debugging])
+if test x"$ez_enable_debug" = "xyes"; then
+	AC_DEFINE(XALLOC_DEBUG, 1, [Define whether to build with XALLOC debugging])
+fi
+AC_MSG_RESULT([$ez_enable_debug])
+
 
 dnl MISC SYSTEM CHARACTERISTICS
 
@@ -65,6 +79,30 @@ AC_TYPE_SIZE_T
 dnl USEFUL HEADERS
 
 AC_CHECK_HEADERS(sys/time.h paths.h signal.h libgen.h)
+
+COMPAT_INCLUDES=""
+if test x"$ez_enable_debug" = "xyes"; then
+	AC_CHECK_HEADERS(sys/tree.h)
+	if test x"$ac_cv_header_sys_tree_h" = "xyes"; then
+		AC_MSG_CHECKING([for RB_FOREACH and RB_INSERT in sys/tree.h])
+		AC_EGREP_CPP([yes], [
+#include <sys/tree.h>
+#if defined(RB_FOREACH) && defined(RB_INSERT)
+ yes
+#endif
+		], [
+			AC_MSG_RESULT([yes])
+			AC_DEFINE(HAVE_WORKING_SYS_TREE_H, 1,
+				[Define whether RB_FOREACH is defined in <sys/tree.h>])
+		], [
+			AC_MSG_RESULT([no])
+			COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
+		])
+	else
+		COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
+	fi
+fi
+AC_SUBST(COMPAT_INCLUDES)
 
 
 dnl LIBRARY FUNCTIONS
@@ -201,6 +239,8 @@ XIPH_VAR_PREPEND([XIPH_LIBS], [$XML_LIBS])
 dnl OUTPUT
 
 AC_CONFIG_FILES(Makefile \
+		compat/Makefile \
+		compat/sys/Makefile \
 		doc/Makefile \
 		examples/Makefile \
 		m4/Makefile \

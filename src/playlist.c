@@ -33,7 +33,7 @@
 
 #include "compat.h"
 #include "playlist.h"
-#include "util.h"
+#include "xalloc.h"
 
 extern char	*__progname;
 
