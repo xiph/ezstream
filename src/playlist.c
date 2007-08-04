@@ -244,7 +244,7 @@ playlist_program(const char *filename)
 void
 playlist_free(playlist_t **pl)
 {
-	size_t		i;
+	size_t		 i;
 	playlist_t	*tmp;
 
 	if (pl == NULL || *pl == NULL)
@@ -252,15 +252,18 @@ playlist_free(playlist_t **pl)
 
 	tmp = *pl;
 
-	if (tmp->filename != NULL)
+	if (tmp->filename != NULL) {
 		xfree(tmp->filename);
+		tmp->filename = NULL;
+	}
 
 	if (tmp->list != NULL) {
 		if (tmp->size > 0) {
 			for (i = 0; i < tmp->size / sizeof(char *); i++) {
-				if (tmp->list[i] != NULL)
+				if (tmp->list[i] != NULL) {
 					xfree(tmp->list[i]);
-				else
+					tmp->list[i] = NULL;
+				} else
 					break;
 			}
 		}
@@ -268,8 +271,10 @@ playlist_free(playlist_t **pl)
 		xfree(tmp->list);
 	}
 
-	if (tmp->prog_track != NULL)
+	if (tmp->prog_track != NULL) {
 		xfree(tmp->prog_track);
+		tmp->prog_track = NULL;
+	}
 
 	xfree(*pl);
 }

@@ -839,6 +839,7 @@ streamFile(shout_t *shout, const char *fileName)
 		else
 			printf("\n");
 		xfree(metaData);
+		metaData = NULL;
 	}
 
 #ifdef HAVE_GETTIMEOFDAY

@@ -109,8 +109,10 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 	taglib_set_string_management_enabled(0);
 	taglib_set_strings_unicode(0);
 
-	if (md->string != NULL)
+	if (md->string != NULL) {
 		xfree(md->string);
+		md->string = NULL;
+	}
 
 	if ((tf = taglib_file_new(md->filename)) == NULL) {
 		md->string = metadata_get_name(md->filename);
@@ -248,12 +250,18 @@ metadata_clean_md(metadata_t *md)
 		abort();
 	}
 
-	if (md->string != NULL)
+	if (md->string != NULL) {
 		xfree(md->string);
-	if (md->artist != NULL)
+		md->string = NULL;
+	}
+	if (md->artist != NULL) {
 		xfree(md->artist);
-	if (md->title != NULL)
+		md->artist = NULL;
+	}
+	if (md->title != NULL) {
 		xfree(md->title);
+		md->title = NULL;
+	}
 }
 
 void
@@ -388,19 +396,20 @@ metadata_program(const char *program)
 }
 
 void
-metadata_free(metadata_t **md)
+metadata_free(metadata_t **md_p)
 {
-	metadata_t	*tmp;
+	metadata_t	*md;
 
-	if (md == NULL || *md == NULL)
+	if (md_p == NULL || (md = *md_p) == NULL)
 		return;
 
-	tmp = *md;
-
-	if (tmp->filename != NULL)
-		xfree(tmp->filename);
-	metadata_clean_md(tmp);
-	xfree(*md);
+	if (md->filename != NULL) {
+		xfree(md->filename);
+		md->filename = NULL;
+	}
+	metadata_clean_md(md);
+	xfree(*md_p);
+	*md_p = NULL;
 }
 
 
@@ -467,18 +476,24 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 			return (1);
 	case METADATA_STRING:
 		strlcpy(command, md->filename, sizeof(command));
-		if (md->string != NULL)
+		if (md->string != NULL) {
 			xfree(md->string);
+			md->string = NULL;
+		}
 		break;
 	case METADATA_ARTIST:
 		snprintf(command, sizeof(command), "%s artist", md->filename);
-		if (md->artist != NULL)
+		if (md->artist != NULL) {
 			xfree(md->artist);
+			md->artist = NULL;
+		}
 		break;
 	case METADATA_TITLE:
 		snprintf(command, sizeof(command), "%s title", md->filename);
-		if (md->title != NULL)
+		if (md->title != NULL) {
 			xfree(md->title);
+			md->title = NULL;
+		}
 		break;
 	default:
 		printf("%s: metadata_program_update(): Internal error: Unknown md_req\n",
