@@ -242,41 +242,39 @@ playlist_program(const char *filename)
 }
 
 void
-playlist_free(playlist_t **pl)
+playlist_free(playlist_t **pl_p)
 {
 	size_t		 i;
-	playlist_t	*tmp;
+	playlist_t	*pl;
 
-	if (pl == NULL || *pl == NULL)
+	if (pl_p == NULL || (pl = *pl_p) == NULL)
 		return;
 
-	tmp = *pl;
-
-	if (tmp->filename != NULL) {
-		xfree(tmp->filename);
-		tmp->filename = NULL;
+	if (pl->filename != NULL) {
+		xfree(pl->filename);
+		pl->filename = NULL;
 	}
 
-	if (tmp->list != NULL) {
-		if (tmp->size > 0) {
-			for (i = 0; i < tmp->size / sizeof(char *); i++) {
-				if (tmp->list[i] != NULL) {
-					xfree(tmp->list[i]);
-					tmp->list[i] = NULL;
+	if (pl->list != NULL) {
+		if (pl->size > 0) {
+			for (i = 0; i < pl->size / sizeof(char *); i++) {
+				if (pl->list[i] != NULL) {
+					xfree(pl->list[i]);
+					pl->list[i] = NULL;
 				} else
 					break;
 			}
 		}
 
-		xfree(tmp->list);
+		xfree(pl->list);
 	}
 
-	if (tmp->prog_track != NULL) {
-		xfree(tmp->prog_track);
-		tmp->prog_track = NULL;
+	if (pl->prog_track != NULL) {
+		xfree(pl->prog_track);
+		pl->prog_track = NULL;
 	}
 
-	xfree(*pl);
+	xfree(*pl_p);
 }
 
 const char *
