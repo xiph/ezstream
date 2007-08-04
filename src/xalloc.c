@@ -96,7 +96,9 @@ int	_xalloc_vasprintf(char **, const char *, va_list, size_t *);
 
 static unsigned int	  debug_level = 0;
 static FILE		 *debug_output = NULL;
+#ifdef XALLOC_DEBUG
 static unsigned int	  xalloc_next_id = 0;
+#endif
 static int		  xalloc_initialized = 0;
 static size_t		  xalloc_allocated;
 static size_t		  xalloc_total;
