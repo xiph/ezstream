@@ -36,7 +36,6 @@ extern char		*__progname;
 static EZCONFIG		 ezConfig;
 static const char	*blankString = "";
 
-void	        freeConfig(EZCONFIG *);
 unsigned int	checkDecoderLine(const char *, const char *, long);
 unsigned int	checkEncoderLine(const char *, const char *, long);
 unsigned int	checkFormatLine(const char *, const char *, long);

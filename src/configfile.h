@@ -71,5 +71,6 @@ EZCONFIG *	getEZConfig(void);
 const char *	getFormatEncoder(const char *format);
 const char *	getFormatDecoder(const char *match);
 int		parseConfig(const char *fileName);
+void		freeConfig(EZCONFIG *);
 
 #endif /* __CONFIGFILE_H__ */

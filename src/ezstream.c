@@ -87,17 +87,21 @@ playlist_t		*playlist = NULL;
 int			 playlistMode = 0;
 
 #ifdef HAVE_SIGNALS
-const int		 ezstream_signals[] = { SIGHUP, SIGUSR1, SIGUSR2 };
+const int		 ezstream_signals[] = {
+	SIGTERM, SIGINT, SIGHUP, SIGUSR1, SIGUSR2
+};
 
 volatile sig_atomic_t	 rereadPlaylist = 0;
 volatile sig_atomic_t	 rereadPlaylist_notify = 0;
 volatile sig_atomic_t	 skipTrack = 0;
 volatile sig_atomic_t	 queryMetadata = 0;
+volatile sig_atomic_t	 quit = 0;
 #else
 int			 rereadPlaylist = 0;
 int			 rereadPlaylist_notify = 0;
 int			 skipTrack = 0;
 int			 queryMetadata = 0;
+int			 quit = 0;
 #endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
@@ -137,6 +141,10 @@ void
 sig_handler(int sig)
 {
 	switch (sig) {
+	case SIGTERM:
+	case SIGINT:
+		quit = 1;
+		break;
 	case SIGHUP:
 		rereadPlaylist = 1;
 		rereadPlaylist_notify = 1;
@@ -666,7 +674,10 @@ reconnectServer(shout_t *shout, int closeConn)
 
 		printf("%s: Waiting 5s for %s to come back ...\n",
 		       __progname, pezConfig->URL);
-		sleep(5);
+		if (quit)
+			return (0);
+		else
+			sleep(5);
 	};
 
 	printf("%s: Giving up\n", __progname);
@@ -735,6 +746,8 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			}
 		}
 
+		if (quit)
+			break;
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
 			if (!pezConfig->fileNameIsProgram)
@@ -853,6 +866,8 @@ streamFile(shout_t *shout, const char *fileName)
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin, NULL, NULL);
 #endif
+		if (quit)
+			break;
 		if (ret != STREAM_DONE) {
 			if ((skipTrack && rereadPlaylist) ||
 			    (skipTrack && queryMetadata)) {
@@ -944,6 +959,8 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		strlcpy(lastSong, song, sizeof(lastSong));
 		if (!streamFile(shout, song))
 			return (0);
+		if (quit)
+			break;
 		if (rereadPlaylist) {
 			rereadPlaylist = rereadPlaylist_notify = 0;
 			if (pezConfig->fileNameIsProgram)
@@ -994,6 +1011,7 @@ shutdown(int exitval)
 {
 	shout_shutdown();
 	playlist_shutdown();
+	freeConfig(pezConfig);
 	xalloc_shutdown();
 
 	return (exitval);
@@ -1320,6 +1338,8 @@ main(int argc, char *argv[])
 			} else {
 				ret = streamFile(shout, pezConfig->fileName);
 			}
+			if (quit)
+				break;
 			if (pezConfig->streamOnce)
 				break;
 		} while (ret);
@@ -1328,6 +1348,9 @@ main(int argc, char *argv[])
 	} else
 		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,
 		       host, port, mount, shout_get_error(shout));
+
+	if (quit)
+		printf("\r%s: SIGINT or SIGTERM received\n", __progname);
 
 	if (vFlag)
 		printf("%s: Exiting ...\n", __progname);
