@@ -70,7 +70,8 @@ void	xalloc_initialize_debug(unsigned int /* level */,
 
 void	xalloc_set_functions(void *(*)(size_t) /* malloc function */,
 			     void *(*)(size_t, size_t) /* calloc function */,
-			     void *(*)(void *, size_t) /* realloc function */);
+			     void *(*)(void *, size_t) /* realloc function */,
+			     void (*)(void *) /* free function */);
 
 /* Memory leak checks happen during shutdown! */
 void	xalloc_shutdown(void);
