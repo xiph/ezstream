@@ -124,14 +124,14 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 	if (str != NULL) {
 		if (strlen(str) > 0)
 			md->artist = xstrdup(str);
-		xfree(str);
+		free(str);
 	}
 
 	str = taglib_tag_title(tt);
 	if (str != NULL) {
 		if (strlen(str) > 0)
 			md->title = xstrdup(str);
-		xfree(str);
+		free(str);
 	}
 
 	md->songLen = taglib_audioproperties_length(ta);
