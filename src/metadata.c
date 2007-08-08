@@ -533,10 +533,8 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 		printf("%s: Warning: Metadata string received via '%s' is too long and has been truncated\n",
 		       __progname, command);
 
-	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\n')
-		buf[strlen(buf) - 1] = '\0';
-	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\r')
-		buf[strlen(buf) - 1] = '\0';
+	buf[strcspn(buf, "\n")] = '\0';
+	buf[strcspn(buf, "\r")] = '\0';
 
 	switch (md_req) {
 	case METADATA_STRING:

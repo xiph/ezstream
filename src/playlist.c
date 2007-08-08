@@ -171,10 +171,8 @@ playlist_read(const char *filename)
 			continue;
 
 		/* Trim any trailing newlines and carriage returns. */
-		if (buf[strlen(buf) - 1] == '\n')
-			buf[strlen(buf) - 1] = '\0';
-		if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\r')
-			buf[strlen(buf) - 1] = '\0';
+		buf[strcspn(buf, "\n")] = '\0';
+		buf[strcspn(buf, "\r")] = '\0';
 
 		/* Skip lines that are empty after the trimming. */
 		if (buf[0] == '\0')
@@ -521,10 +519,8 @@ playlist_run_program(playlist_t *pl)
 		return (NULL);
 	}
 
-	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\n')
-		buf[strlen(buf) - 1] = '\0';
-	if (buf[0] != '\0' && buf[strlen(buf) - 1] == '\r')
-		buf[strlen(buf) - 1] = '\0';
+	buf[strcspn(buf, "\n")] = '\0';
+	buf[strcspn(buf, "\r")] = '\0';
 	if (buf[0] == '\0') {
 		printf("%s: Empty line received from program '%s'\n",
 		       __progname, pl->filename);
