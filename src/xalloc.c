@@ -594,7 +594,7 @@ xrealloc_c(void *ptr, size_t nmemb, size_t size,
 #ifdef XALLOC_DEBUG
 	if (debug_level > 0) {
 		struct memory	*mem_exists;
-		ssize_t 	 diff = nsiz - mem->size;
+		ssize_t 	 diff = (ssize_t)(nsiz - mem->size);
 
 		XALLOC_LOCK(xalloc_mutex);
 		xalloc_allocated += diff;
