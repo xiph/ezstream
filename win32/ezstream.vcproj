@@ -92,7 +92,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="../../ogg/include,../../vorbis/include,../../shout/include,../src,../../libxml2/include"
-				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;HAVE_CONFIG_H"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;HAVE_CONFIG_H;XALLOC_DEBUG"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
 				RuntimeLibrary="4"
@@ -234,6 +234,9 @@
 			<File
 				RelativePath="..\src\util.c">
 			</File>
+			<File
+				RelativePath="..\src\xalloc.c">
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -261,6 +264,9 @@
 			</File>
 			<File
 				RelativePath="..\src\util.h">
+			</File>
+			<File
+				RelativePath="..\src\xalloc.h">
 			</File>
 		</Filter>
 		<Filter

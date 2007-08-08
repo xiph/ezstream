@@ -1,23 +1,9 @@
 Microsoft Visual Studio Solution File, Format Version 8.00
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg_static", "..\..\ogg\win32\ogg_static.vcproj", "{A0144DD0-0064-46CF-93D3-78DB712034D4}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis_static", "..\..\vorbis\win32\vorbis_static.vcproj", "{FB2ECA7B-D98C-4341-84B7-005E037E25A7}"
-	ProjectSection(ProjectDependencies) = postProject
-		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbisfile_static", "..\..\vorbis\win32\vorbisfile_static.vcproj", "{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}"
-	ProjectSection(ProjectDependencies) = postProject
-		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "theora_static", "..\..\theora\win32\theora_static.vcproj", "{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ezstream", "ezstream.vcproj", "{4C27B249-0C17-4007-9D51-2ED145DF06C2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9} = {5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}
-		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
-		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
+		{376BDB5E-7092-44EC-AF16-C087D2D80FC6} = {376BDB5E-7092-44EC-AF16-C087D2D80FC6}
+		{3E590C94-A4E0-4E79-839E-A7263F3CA6B1} = {3E590C94-A4E0-4E79-839E-A7263F3CA6B1}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libshout", "..\..\shout\win32\libshout.vcproj", "{376BDB5E-7092-44EC-AF16-C087D2D80FC6}"
@@ -28,11 +14,25 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libshout", "..\..\shout\win
 		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ezstream", "ezstream.vcproj", "{4C27B249-0C17-4007-9D51-2ED145DF06C2}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "theora_static", "..\..\theora\win32\theora_static.vcproj", "{63A539B9-C6CD-4DC9-80B2-B28DB92C151E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9} = {5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}
-		{376BDB5E-7092-44EC-AF16-C087D2D80FC6} = {376BDB5E-7092-44EC-AF16-C087D2D80FC6}
-		{3E590C94-A4E0-4E79-839E-A7263F3CA6B1} = {3E590C94-A4E0-4E79-839E-A7263F3CA6B1}
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
+		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbisfile_static", "..\..\vorbis\win32\vorbisfile_static.vcproj", "{5E55AD4D-483E-466D-B3B7-EAD8B6128DC9}"
+	ProjectSection(ProjectDependencies) = postProject
+		{FB2ECA7B-D98C-4341-84B7-005E037E25A7} = {FB2ECA7B-D98C-4341-84B7-005E037E25A7}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "vorbis_static", "..\..\vorbis\win32\vorbis_static.vcproj", "{FB2ECA7B-D98C-4341-84B7-005E037E25A7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{A0144DD0-0064-46CF-93D3-78DB712034D4} = {A0144DD0-0064-46CF-93D3-78DB712034D4}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ogg_static", "..\..\ogg\win32\ogg_static.vcproj", "{A0144DD0-0064-46CF-93D3-78DB712034D4}"
+	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libxml2", "..\..\libxml2\win32\VC7\libxml2.vcproj", "{3E590C94-A4E0-4E79-839E-A7263F3CA6B1}"
