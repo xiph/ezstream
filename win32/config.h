@@ -1,5 +1,6 @@
-#include <windows.h>
 #include <sys/types.h>
+#include <windows.h>
+#include <io.h>
 
 #define HAVE_INTTYPES_H 1
 #define HAVE_STAT 1
@@ -29,3 +30,7 @@
 
 /* Version number of package */
 #define VERSION "0.4.4"
+
+#ifdef XALLOC_DEBUG
+typedef long ssize_t;
+#endif
