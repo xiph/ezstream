@@ -46,10 +46,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifdef WIN32
-# include <io.h>
-# include <windows.h>
-#endif /* WIN32 */
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
 #endif
