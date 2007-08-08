@@ -82,7 +82,7 @@ playlist_add(playlist_t *pl, const char *entry)
 	}
 
 	if (pl->size / sizeof(char *) <= num) {
-		unsigned long	i;
+		size_t	i;
 
 		pl->list = xrealloc(pl->list, 2, pl->size);
 		pl->size = 2 * pl->size;
@@ -438,8 +438,8 @@ playlist_reread(playlist_t **plist)
 void
 playlist_shuffle(playlist_t *pl)
 {
-	unsigned long	 d, i, range;
-	char		*temp;
+	size_t	 d, i, range;
+	char	*temp;
 
 	if (pl == NULL) {
 		printf("%s: playlist_shuffle(): Internal error: NULL argument\n",
