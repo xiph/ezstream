@@ -8,6 +8,7 @@ AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_LIBOBJ_DIR(src)
 AM_MAINTAINER_MODE
 AC_USE_SYSTEM_EXTENSIONS
+AC_PROG_CC_STDC
 
 
 dnl SETUP
@@ -37,7 +38,7 @@ if test -z "$GCC"; then
 		;;
 	esac
 else
-	XIPH_CPPFLAGS="-Wall -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
+	XIPH_CPPFLAGS="-fstrict-aliasing -Wall -W -Wno-unused-parameter -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
 fi
 
 ez_enable_debug=no
@@ -73,7 +74,16 @@ else
 fi
 
 AC_C_CONST
+AC_C_VOLATILE
 AC_TYPE_SIZE_T
+AC_CHECK_TYPES(ssize_t, ,
+	[AC_DEFINE_UNQUOTED(ssize_t, long, [Define to `long' if <sys/types.h> does not define.])], 
+[
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+])
+
 
 
 dnl USEFUL HEADERS
