@@ -1,6 +1,6 @@
 dnl INITIALIZATION
 
-AC_INIT([ezstream], [0.4.4], [https://trac.xiph.org/newticket?component=ezstream])
+AC_INIT([ezstream], [0.5.0], [https://trac.xiph.org/newticket?component=ezstream])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR(src/ezstream.c)
 AM_INIT_AUTOMAKE
