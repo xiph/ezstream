@@ -17,19 +17,19 @@
 #define PACKAGE_NAME "ezstream"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "ezstream 0.4.4"
+#define PACKAGE_STRING "ezstream 0.5.0"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "ezstream"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.4.4"
+#define PACKAGE_VERSION "0.5.0"
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "0.4.4"
+#define VERSION "0.5.0"
 
 #ifdef XALLOC_DEBUG
 typedef long ssize_t;
