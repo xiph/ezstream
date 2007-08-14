@@ -21,5 +21,6 @@
 #define __UTIL_H__
 
 int	strrcmp(const char *, const char *);
+int	strrcasecmp(const char *, const char *);
 
 #endif /* __UTIL_H__ */

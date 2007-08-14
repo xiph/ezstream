@@ -21,9 +21,12 @@
 # include "config.h"
 #endif
 
+#include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
 #include "util.h"
+#include "xalloc.h"
 
 int
 strrcmp(const char *s, const char *sub)
@@ -35,4 +38,26 @@ strrcmp(const char *s, const char *sub)
 		return (1);
 
 	return (memcmp(s + slen - sublen, sub, sublen));
+}
+
+int
+strrcasecmp(const char *s, const char *sub)
+{
+	char		*s_cpy = xstrdup(s);
+	char		*sub_cpy = xstrdup(sub);
+	char		*p;
+	int		 ret;
+
+	for (p = s_cpy; *p != '\0'; p++)
+		*p = tolower((int)*p);
+
+	for (p = sub_cpy; *p != '\0'; p++)
+		*p = tolower((int)*p);
+
+	ret = strrcmp(s_cpy, sub_cpy);
+
+	xfree(s_cpy);
+	xfree(sub_cpy);
+
+	return (ret);
 }

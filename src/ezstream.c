@@ -624,7 +624,9 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 			close(stderr_fd);
 
 		return (filep);
-	}
+	} else if (strrcasecmp(fileName, ".mp3") == 0)
+		/* MP3 streams are special: */
+		setMetadata(shout, mdata, NULL);
 
 	metadata_free(&mdata);
 
@@ -816,7 +818,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			clearerr(filepstream);
 			ret = STREAM_CONT;
 		} else
-			printf("%s: streamFile(): Error while reading '%s': %s\n",
+			printf("%s: sendStream(): Error while reading '%s': %s\n",
 			       __progname, fileName, strerror(errno));
 	}
 
@@ -1306,21 +1308,16 @@ main(int argc, char *argv[])
 
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
 		int	ret;
-		char	*tmpFileName, *p;
 
 		printf("%s: Connected to http://%s:%d%s\n", __progname,
 		       host, port, mount);
 
-		tmpFileName = xstrdup(pezConfig->fileName);
-		for (p = tmpFileName; *p != '\0'; p++)
-			*p = tolower((int)*p);
 		if (pezConfig->fileNameIsProgram ||
-		    strrcmp(tmpFileName, ".m3u") == 0 ||
-		    strrcmp(tmpFileName, ".txt") == 0)
+		    strrcasecmp(pezConfig->fileName, ".m3u") == 0 ||
+		    strrcasecmp(pezConfig->fileName, ".txt") == 0)
 			playlistMode = 1;
 		else
 			playlistMode = 0;
-		xfree(tmpFileName);
 
 		if (vFlag && pezConfig->fileNameIsProgram)
 			printf("%s: Using program '%s' to get filenames for streaming\n",
