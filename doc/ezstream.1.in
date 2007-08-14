@@ -12,7 +12,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hqVv
+.Op Fl hnqVv
 .Op Fl c Ar configfile
 .Ek
 .Sh DESCRIPTION
@@ -36,6 +36,8 @@ Use the XML configuration in
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
+.It Fl n
+Normalize metadata strings by removing excess whitespaces.
 .It Fl q
 Be more quiet.
 Suppress the output that external programs send to standard error.

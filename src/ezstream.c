@@ -74,6 +74,7 @@ extern char		*__progname;
 char			*__progname;
 #endif /* HAVE___PROGNAME */
 
+int			 nFlag;
 int			 qFlag;
 int			 vFlag;
 int			 metadataFromProgram;
@@ -445,7 +446,7 @@ getMetadata(const char *fileName)
 	metadata_t	*mdata;
 
 	if (metadataFromProgram) {
-		if ((mdata = metadata_program(fileName)) == NULL)
+		if ((mdata = metadata_program(fileName, nFlag)) == NULL)
 			return (NULL);
 
 		if (!metadata_program_update(mdata, METADATA_ALL)) {
@@ -453,7 +454,7 @@ getMetadata(const char *fileName)
 			return (NULL);
 		}
 	} else {
-		if ((mdata = metadata_file(fileName)) == NULL)
+		if ((mdata = metadata_file(fileName, nFlag)) == NULL)
 			return (NULL);
 
 		if (!metadata_file_update(mdata)) {
@@ -1018,7 +1019,7 @@ ez_shutdown(int exitval)
 void
 usage(void)
 {
-	printf("usage: %s [-hqVv] [-c configfile]\n", __progname);
+	printf("usage: %s [-hnqVv] [-c configfile]\n", __progname);
 }
 
 void
@@ -1027,6 +1028,7 @@ usageHelp(void)
 	printf("\n");
 	printf("  -c configfile  use XML configuration in configfile\n");
 	printf("  -h             display this additional help and exit\n");
+	printf("  -n             normalize metadata strings\n");
 	printf("  -q             suppress STDERR output from external en-/decoders\n");
 	printf("  -V             print the version number and exit\n");
 	printf("  -v             verbose output (use twice for more effect)\n");
@@ -1061,10 +1063,11 @@ main(int argc, char *argv[])
 	__progname = getProgname(argv[0]);
 	pezConfig = getEZConfig();
 
+	nFlag = 0;
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = getopt(argc, argv, "c:hqVv")) != -1) {
+	while ((c = getopt(argc, argv, "c:hnqVv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {
@@ -1078,6 +1081,9 @@ main(int argc, char *argv[])
 			usage();
 			usageHelp();
 			return (ez_shutdown(0));
+		case 'n':
+			nFlag = 1;
+			break;
 		case 'q':
 			qFlag = 1;
 			break;

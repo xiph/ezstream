@@ -54,6 +54,7 @@ struct metadata {
 	char	*artist;
 	char	*title;
 	int	 songLen;
+	int	 normalize;
 	int	 program;
 };
 
@@ -74,6 +75,7 @@ void    	metadata_clean_md(metadata_t *);
 void		metadata_get_extension(char *, size_t, const char *);
 char *		metadata_get_name(const char *);
 void		metadata_process_md(metadata_t *);
+void		metadata_normalize_string(char **);
 
 metadata_t *
 metadata_create(const char *filename)
@@ -324,10 +326,47 @@ metadata_process_md(metadata_t *md)
 
 	if (md->string == NULL)
 		md->string = metadata_assemble_string(md);
+
+	if (md->normalize) {
+		metadata_normalize_string(&md->string);
+		metadata_normalize_string(&md->artist);
+		metadata_normalize_string(&md->title);
+	}
+}
+
+void
+metadata_normalize_string(char **s)
+{
+	char	*str, *cp, *tmpstr, *tp;
+	int	 is_space;
+
+	if (s == NULL || (str = *s) == NULL || strlen(str) == 0)
+		return;
+
+	tmpstr = xcalloc(strlen(str) + 1, sizeof(char));
+
+	tp = tmpstr;
+	is_space = 1;
+	for (cp = str; *cp != '\0'; cp++) {
+		if (*cp == ' ') {
+			if (!is_space && strlen(tmpstr) > 0 &&
+			    tmpstr[strlen(tmpstr) - 1] != ' ')
+				*tp++ = ' ';
+			is_space = 1;
+		} else {
+			*tp++ = *cp;
+			is_space = 0;
+		}
+	}
+	if (strlen(tmpstr) > 0 && tmpstr[strlen(tmpstr) - 1] == ' ')
+		tmpstr[strlen(tmpstr) - 1] = '\0';
+
+	xfree(str);
+	*s = xrealloc(tmpstr, strlen(tmpstr) + 1, sizeof (char));
 }
 
 metadata_t *
-metadata_file(const char *filename)
+metadata_file(const char *filename, int normalize)
 {
 	metadata_t	*md;
 
@@ -343,11 +382,13 @@ metadata_file(const char *filename)
 		return (NULL);
 	}
 
+	md->normalize = normalize;
+
 	return (md);
 }
 
 metadata_t *
-metadata_program(const char *program)
+metadata_program(const char *program, int normalize)
 {
 	metadata_t	*md;
 #ifdef HAVE_STAT
@@ -391,6 +432,8 @@ metadata_program(const char *program)
 	}
 	fclose(filep);
 #endif /* HAVE_STAT */
+
+	md->normalize = normalize;
 
 	return (md);
 }
@@ -558,6 +601,12 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 		printf("%s: metadata_program_update(): Internal error: METADATA_ALL in code unreachable by METADATA_ALL\n",
 		       __progname);
 		abort();
+	}
+
+	if (md->normalize) {
+		metadata_normalize_string(&md->string);
+		metadata_normalize_string(&md->artist);
+		metadata_normalize_string(&md->title);
 	}
 
 	return (1);

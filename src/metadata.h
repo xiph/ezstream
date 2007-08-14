@@ -33,7 +33,8 @@ typedef struct metadata metadata_t;
  * success, or NULL on failure. The returned handle is "branded" for reading
  * metadata from media files.
  */
-metadata_t *	metadata_file(const char * /* filename */);
+metadata_t *	metadata_file(const char * /* filename */,
+			      int /* normalize strings */);
 
 /*
  * Create a metadata handle that is "branded" for acquiring metadata from an
@@ -52,7 +53,8 @@ metadata_t *	metadata_file(const char * /* filename */);
  *     metadata, or an empty string if no artist information is available.
  *   - Return at most METADATA_MAX characters, or the result will be truncated.
  */
-metadata_t *	metadata_program(const char * /* program name */);
+metadata_t *	metadata_program(const char * /* program name */,
+				 int /* normalize strings */);
 
 /*
  * Free all memory used by a metadata handle that has been created with
