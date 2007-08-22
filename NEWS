@@ -1,6 +1,6 @@
 Changes in 0.5.0 (SVN):
 
- * ezstream.c:
+ * src/ezstream.c:
    - [FIX]   The special case of streaming MP3 files without reencoding had
              been lost, causing such streams to have no metadata. This has
              been fixed.
@@ -8,7 +8,7 @@ Changes in 0.5.0 (SVN):
  * various:
    - [NEW]   A new convenience feature has been added, to allow automatic
              normalization of metadata strings. Useful if the majority of
-             files comes from a broken encoder/tagging program. Disabled
+             files come from a broken encoder/tagging program. Disabled
              by default, this feature can be enabled with the new `-n'
              command line parameter.
    - [MISC]  Add new --enable-debug configuration option to the configure
