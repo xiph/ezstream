@@ -1019,14 +1019,14 @@ ez_shutdown(int exitval)
 void
 usage(void)
 {
-	printf("usage: %s [-hnqVv] [-c configfile]\n", __progname);
+	printf("usage: %s [-hnqVv] -c configfile\n", __progname);
 }
 
 void
 usageHelp(void)
 {
 	printf("\n");
-	printf("  -c configfile  use XML configuration in configfile\n");
+	printf("  -c configfile  use XML configuration in configfile (mandatory)\n");
 	printf("  -h             display this additional help and exit\n");
 	printf("  -n             normalize metadata strings\n");
 	printf("  -q             suppress STDERR output from external en-/decoders\n");

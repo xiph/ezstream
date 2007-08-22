@@ -13,7 +13,7 @@
 .Nm
 .Bk -words
 .Op Fl hnqVv
-.Op Fl c Ar configfile
+.Fl c Ar configfile
 .Ek
 .Sh DESCRIPTION
 The
