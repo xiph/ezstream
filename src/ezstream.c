@@ -118,8 +118,8 @@ char *		buildCommandString(const char *, const char *, metadata_t *);
 char *		getMetadataString(const char *, metadata_t *);
 metadata_t *	getMetadata(const char *);
 int		setMetadata(shout_t *, metadata_t *, char **);
-FILE *		openResource(shout_t *, const char *, int *, char **, int *,
-			     int *);
+FILE *		openResource(shout_t *, const char *, int *, metadata_t **,
+			     int *, int *);
 int		reconnectServer(shout_t *, int);
 const char *	getTimeString(int);
 int		sendStream(shout_t *, FILE *, const char *, int, const char *,
@@ -516,7 +516,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 
 FILE *
 openResource(shout_t *shout, const char *fileName, int *popenFlag,
-	     char **metaCopy, int *isStdin, int *songLen)
+	     metadata_t **mdata_p, int *isStdin, int *songLen)
 {
 	FILE		*filep = NULL;
 	char		 extension[25];
@@ -528,11 +528,14 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		if (metadataFromProgram) {
 			if ((mdata = getMetadata(pezConfig->metadataProgram)) == NULL)
 				return (NULL);
-			if (setMetadata(shout, mdata, metaCopy) != SHOUTERR_SUCCESS) {
+			if (setMetadata(shout, mdata, NULL) != SHOUTERR_SUCCESS) {
 				metadata_free(&mdata);
 				return (NULL);
 			}
-			metadata_free(&mdata);
+			if (mdata_p != NULL)
+				*mdata_p = mdata;
+			else
+				metadata_free(&mdata);
 		}
 
 		if (vFlag)
@@ -570,8 +573,6 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		if ((mdata = getMetadata(fileName)) == NULL)
 			return (NULL);
 	}
-	if (metaCopy != NULL)
-		*metaCopy = metadata_assemble_string(mdata);
 	if (songLen != NULL)
 		*songLen = metadata_get_length(mdata);
 
@@ -580,7 +581,10 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		int	stderr_fd = -1;
 
 		pCommandString = buildCommandString(extension, fileName, mdata);
-		metadata_free(&mdata);
+		if (mdata_p != NULL)
+			*mdata_p = mdata;
+		else
+			metadata_free(&mdata);
 		if (vFlag > 1)
 			printf("%s: Running command `%s`\n", __progname,
 			       pCommandString);
@@ -625,11 +629,12 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 			close(stderr_fd);
 
 		return (filep);
-	} else if (strrcasecmp(fileName, ".mp3") == 0)
-		/* MP3 streams are special: */
-		setMetadata(shout, mdata, NULL);
+	}
 
-	metadata_free(&mdata);
+	if (mdata_p != NULL)
+		*mdata_p = mdata;
+	else
+		metadata_free(&mdata);
 
 	if ((filep = fopen(fileName, "rb")) == NULL)
 		printf("%s: %s: %s\n", __progname, fileName,
@@ -831,27 +836,35 @@ streamFile(shout_t *shout, const char *fileName)
 {
 	FILE		*filepstream = NULL;
 	int		 popenFlag = 0;
-	char		*metaData = NULL, *songLenStr = NULL;
+	char		*songLenStr = NULL;
 	int		 isStdin = 0;
 	int		 ret, retval = 0, songLen;
+	metadata_t	*mdata;
 #ifdef HAVE_GETTIMEOFDAY
 	struct timeval	 startTime;
 #endif
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag,
-					&metaData, &isStdin, &songLen))
+					&mdata, &isStdin, &songLen))
 	    == NULL) {
 		return (retval);
 	}
 
-	if (metaData != NULL) {
+	if (mdata != NULL) {
+		char	*metaData = metadata_assemble_string(mdata);
+
 		printf("%s: Streaming ``%s''", __progname, metaData);
 		if (vFlag)
 			printf(" (file: %s)\n", fileName);
 		else
 			printf("\n");
 		xfree(metaData);
-		metaData = NULL;
+
+		/* MP3 streams are special, so set the metadata explicitly: */
+		if (strcmp(pezConfig->format, MP3_FORMAT) == 0)
+			setMetadata(shout, mdata, NULL);
+
+		metadata_free(&mdata);
 	}
 
 #ifdef HAVE_GETTIMEOFDAY
@@ -889,22 +902,22 @@ streamFile(shout_t *shout, const char *fileName)
 				queryMetadata = 0;
 				if (metadataFromProgram) {
 					char		*mdataStr = NULL;
-					metadata_t	*mdata;
+					metadata_t	*prog_mdata;
 
 					if (vFlag > 1)
 						printf("%s: Querying '%s' for fresh metadata\n",
 						       __progname, pezConfig->metadataProgram);
-					if ((mdata = getMetadata(pezConfig->metadataProgram)) == NULL) {
+					if ((prog_mdata = getMetadata(pezConfig->metadataProgram)) == NULL) {
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
 					}
-					if (setMetadata(shout, mdata, &mdataStr) != SHOUTERR_SUCCESS) {
+					if (setMetadata(shout, prog_mdata, &mdataStr) != SHOUTERR_SUCCESS) {
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
 					}
-					metadata_free(&mdata);
+					metadata_free(&prog_mdata);
 					printf("%s: New metadata: ``%s''\n",
 					       __progname, mdataStr);
 					xfree(mdataStr);
