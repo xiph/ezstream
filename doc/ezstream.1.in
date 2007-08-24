@@ -461,6 +461,8 @@ When called with the command line parameter
 .Qq Li title ,
 the program should return only the title information of the metadata.
 .Pq Optional.
+.It
+The supplied metadata should be encoded in UTF-8.
 .El
 .Sh METADATA
 The main tool for handling metadata with

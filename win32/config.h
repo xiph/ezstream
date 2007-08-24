@@ -2,10 +2,13 @@
 #include <windows.h>
 #include <io.h>
 
-#define HAVE_INTTYPES_H 1
-#define HAVE_STAT 1
-#define HAVE_STDINT_H 1
-#define HAVE_SYS_STAT_H 1
+#define HAVE_INTTYPES_H 	1
+#define HAVE_LOCALE_H		1
+#define HAVE_STAT		1
+#define HAVE_STDINT_H		1
+#define HAVE_SYS_STAT_H 	1
+
+#define ICONV_CONST		const
 
 /* Name of package */
 #define PACKAGE "ezstream"

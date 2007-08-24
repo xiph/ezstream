@@ -37,10 +37,12 @@
 # include <taglib/tag_c.h>
 #endif
 #include <vorbis/vorbisfile.h>
+#include <shout/shout.h>
 
 #include "compat.h"
 #include "metadata.h"
 #include "strfctns.h"
+#include "util.h"
 #include "xalloc.h"
 
 extern char		*__progname;
@@ -109,7 +111,11 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 
 	metadata_clean_md(md);
 	taglib_set_string_management_enabled(0);
+#ifdef HAVE_ICONV
+	taglib_set_strings_unicode(1);
+#else
 	taglib_set_strings_unicode(0);
+#endif /* HAVE_ICONV */
 
 	if (md->string != NULL) {
 		xfree(md->string);
@@ -179,9 +185,9 @@ metadata_use_self(metadata_t *md, FILE **filep)
 		fread(&id3tag, 1, sizeof(struct ID3Tag), *filep);
 		if (memcmp(id3tag.tag, "TAG", 3) == 0) {
 			if (strlen(id3tag.artistName) > 0)
-				md->artist = xstrdup(id3tag.artistName);
+				md->artist = char2utf8(id3tag.artistName);
 			if (strlen(id3tag.trackName) > 0)
-				md->title = xstrdup(id3tag.trackName);
+				md->title = char2utf8(id3tag.trackName);
 		}
 	} else if (strcmp(extension, ".ogg") == 0) {
 		OggVorbis_File	vf;

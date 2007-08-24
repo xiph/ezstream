@@ -851,8 +851,11 @@ streamFile(shout_t *shout, const char *fileName)
 	}
 
 	if (mdata != NULL) {
-		char	*metaData = metadata_assemble_string(mdata);
+		char	*tmp, *metaData;
 
+		tmp = metadata_assemble_string(mdata);
+		metaData = utf82char(tmp);
+		xfree(tmp);
 		printf("%s: Streaming ``%s''", __progname, metaData);
 		if (vFlag)
 			printf(" (file: %s)\n", fileName);

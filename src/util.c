@@ -46,6 +46,7 @@
 #endif
 #include <shout/shout.h>
 
+#include "compat.h"
 #include "util.h"
 #include "configfile.h"
 #include "xalloc.h"
@@ -230,21 +231,28 @@ char2utf8(const char *in_str)
 	size_t			 input_len;
 	char			*output;
 	size_t			 output_size;
-	char			 buf[4], *bp;
+	char			 buf[BUFSIZ], *bp;
 	size_t			 bufavail;
 	size_t			 out_pos;
+
+# ifndef WIN32
 	char			*codeset;
 
-	if (in_str == NULL || strlen(in_str) == 0)
-		return (NULL);
-
-# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
+#  if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo(CODESET);
 	setlocale(LC_CTYPE, "C");
-# else
+#  else
 	codeset = (char *)"";
-# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+#  endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+# else
+	char			 codeset[24];
+
+	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
+# endif /* !WIN32 */
+
+	if (in_str == NULL || strlen(in_str) == 0)
+		return (NULL);
 
 	if ((cd = iconv_open("UTF-8", codeset)) == (iconv_t)-1 &&
 	    (cd = iconv_open("UTF-8", "")) == (iconv_t)-1) {
@@ -264,7 +272,7 @@ char2utf8(const char *in_str)
 
 		buf[0] = '\0';
 		bp = buf;
-		bufavail = sizeof(buf);
+		bufavail = sizeof(buf) - 1;
 
 		if (iconv(cd, &ip, &input_len, &bp, &bufavail) == (size_t)-1 &&
 		    errno != E2BIG) {
@@ -275,7 +283,7 @@ char2utf8(const char *in_str)
 		}
 		*bp = '\0';
 
-		count = sizeof(buf) - bufavail;
+		count = sizeof(buf) - bufavail - 1;
 
 		output_size += count;
 		op = output = xrealloc(output, output_size, sizeof(char));
@@ -308,21 +316,28 @@ utf82char(const char *in_str)
 	size_t			 input_len;
 	char			*output;
 	size_t			 output_size;
-	char			 buf[4], *bp;
+	char			 buf[BUFSIZ], *bp;
 	size_t			 bufavail;
 	size_t			 out_pos;
+
+# ifndef WIN32
 	char			*codeset;
 
-	if (in_str == NULL || strlen(in_str) == 0)
-		return (NULL);
-
-# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
+#  if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo(CODESET);
 	setlocale(LC_CTYPE, "C");
-# else
+#  else
 	codeset = (char *)"";
-# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+#  endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+# else
+	char			 codeset[24];
+
+	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
+# endif /* !WIN32 */
+
+	if (in_str == NULL || strlen(in_str) == 0)
+		return (NULL);
 
 	if ((cd = iconv_open(codeset, "UTF-8")) == (iconv_t)-1 &&
 	    (cd = iconv_open("", "UTF-8")) == (iconv_t)-1) {
@@ -342,7 +357,7 @@ utf82char(const char *in_str)
 
 		buf[0] = '\0';
 		bp = buf;
-		bufavail = sizeof(buf);
+		bufavail = sizeof(buf) - 1;
 
 		if (iconv(cd, &ip, &input_len, &bp, &bufavail) == (size_t)-1 &&
 		    errno != E2BIG) {
@@ -353,7 +368,7 @@ utf82char(const char *in_str)
 		}
 		*bp = '\0';
 
-		count = sizeof(buf) - bufavail;
+		count = sizeof(buf) - bufavail - 1;
 
 		output_size += count;
 		op = output = xrealloc(output, output_size, sizeof(char));

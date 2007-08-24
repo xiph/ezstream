@@ -11,6 +11,11 @@ Changes in 0.5.0 (SVN):
              files come from a broken encoder/tagging program. Disabled
              by default, this feature can be enabled with the new `-n'
              command line parameter.
+   - [NEW]   Enable Unicode support in TagLib and convert metadata strings
+             to the current locale (LC_CTYPE) before displaying them on the
+             console. Unsupported characters are displayed as '?', which
+             does not affect the actual metadata. This feature requires
+             iconv() via libc, if available, or libiconv.
    - [MISC]  Add new --enable-debug configuration option to the configure
              script, which enables (also new) memory debugging features.
              (Not interesting for non-developers.)

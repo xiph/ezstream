@@ -39,7 +39,7 @@ if test -z "$GCC"; then
 		;;
 	esac
 else
-	XIPH_CPPFLAGS="-fstrict-aliasing -Wall -W -Wno-unused-parameter -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
+	XIPH_CPPFLAGS="-fstrict-aliasing -Wall -Wno-unused-parameter -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
 fi
 
 ez_enable_debug=no
@@ -89,7 +89,7 @@ AC_CHECK_TYPES(ssize_t, ,
 
 dnl USEFUL HEADERS
 
-AC_CHECK_HEADERS(sys/time.h paths.h signal.h libgen.h)
+AC_CHECK_HEADERS(sys/time.h paths.h signal.h langinfo.h libgen.h locale.h)
 
 COMPAT_INCLUDES=""
 if test x"$ez_enable_debug" = "xyes"; then
@@ -119,13 +119,14 @@ AC_SUBST(COMPAT_INCLUDES)
 dnl LIBRARY FUNCTIONS
 
 AC_CHECK_LIB(gen, basename)
-AC_CHECK_FUNCS(arc4random gettimeofday random srandomdev stat)
+AC_CHECK_FUNCS(arc4random gettimeofday nl_langinfo random setlocale srandomdev stat)
 AC_REPLACE_FUNCS(getopt strlcat strlcpy strtonum)
 if test x"$ac_cv_header_signal_h" = "xyes"; then
 	AC_CHECK_FUNCS([sigaction], [
 		AC_DEFINE(HAVE_SIGNALS, 1, [Define whether we have BSD signals])
 		], [], [#include <signal.h>])
 fi
+AM_ICONV
 
 
 dnl CONFIGURE OPTIONS
@@ -208,10 +209,6 @@ if test x"$use_taglib" != "xno"; then
 	CFLAGS="$ac_taglib_save_CFLAGS"
 	CPPFLAGS="$ac_taglib_save_CPPFLAGS"
 	LIBS="$ac_taglib_save_LIBS"
-
-	AM_ICONV
-	AC_CHECK_HEADERS(langinfo.h locale.h)
-	AC_CHECK_FUNCS(setlocale nl_langinfo)
 else
 	AC_MSG_RESULT([disabled])
 fi
