@@ -63,7 +63,7 @@ struct ID3Tag {
 	char trackName[30];
 	char artistName[30];
 	char albumName[30];
-	char year[3];
+	char year[4];
 	char comment[30];
 	char genre;
 };
@@ -176,8 +176,8 @@ metadata_use_self(metadata_t *md, FILE **filep)
 	if (strcmp(extension, ".mp3") == 0) {
 		memset(&id3tag, 0, sizeof(id3tag));
 		fseek(*filep, -128L, SEEK_END);
-		fread(&id3tag, 1, 127, *filep);
-		if (strncmp(id3tag.tag, "TAG", strlen("TAG")) == 0) {
+		fread(&id3tag, 1, sizeof(struct ID3Tag), *filep);
+		if (memcmp(id3tag.tag, "TAG", 3) == 0) {
 			if (strlen(id3tag.artistName) > 0)
 				md->artist = xstrdup(id3tag.artistName);
 			if (strlen(id3tag.trackName) > 0)
