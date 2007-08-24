@@ -40,6 +40,8 @@ Ezstream optionally uses:
  * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
    wrapper)
    (http://developer.kde.org/~wheeler/taglib.html)
+ * Libiconv, if iconv() is not available in the system libc.
+   (http://www.gnu.org/software/libiconv/)
 
 
 
@@ -55,6 +57,10 @@ configure script, a couple of additional options are available:
                           example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
   --enable-debug          enable memory debugging (default: no)
+  --with-libiconv-prefix[=DIR]
+                          search for libiconv in DIR/include and DIR/lib
+  --without-libiconv-prefix
+                          don't search for libiconv in includedir and libdir
   --with-taglib=PREFIX    Prefix where TagLib is installed (default:
                           autodetect)
   --with-ogg=PREFIX       Prefix where libogg is installed (optional)
