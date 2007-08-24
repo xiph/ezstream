@@ -58,6 +58,10 @@
 extern EZCONFIG *pezConfig;
 extern char	*__progname;
 
+#ifdef HAVE_ICONV
+char *	iconvert(const char *, const char *, const char *);
+#endif /* HAVE_ICONV */
+
 int
 strrcmp(const char *s, const char *sub)
 {
@@ -226,17 +230,8 @@ char *
 char2utf8(const char *in_str)
 {
 #ifdef HAVE_ICONV
-	iconv_t 		 cd;
-	ICONV_CONST char	*input, *ip;
-	size_t			 input_len;
-	char			*output;
-	size_t			 output_size;
-	char			 buf[BUFSIZ], *bp;
-	size_t			 bufavail;
-	size_t			 out_pos;
-
 # ifndef WIN32
-	char			*codeset;
+	char	*codeset;
 
 #  if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
@@ -246,7 +241,7 @@ char2utf8(const char *in_str)
 	codeset = (char *)"";
 #  endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
 # else
-	char			 codeset[24];
+	char	 codeset[24];
 
 	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
 # endif /* !WIN32 */
@@ -254,56 +249,9 @@ char2utf8(const char *in_str)
 	if (in_str == NULL || strlen(in_str) == 0)
 		return (NULL);
 
-	if ((cd = iconv_open("UTF-8", codeset)) == (iconv_t)-1 &&
-	    (cd = iconv_open("UTF-8", "")) == (iconv_t)-1) {
-		printf("iconv_open: %s\n", strerror(errno));
-		return (NULL);
-	}
-
-	ip = input = (ICONV_CONST char *)in_str;
-	input_len = strlen(input);
-	output_size = 1;
-	output = xcalloc(output_size, sizeof(char));
-	out_pos = 0;
-	output[out_pos] = '\0';
-	while (input_len > 0) {
-		char	*op;
-		size_t	 count;
-
-		buf[0] = '\0';
-		bp = buf;
-		bufavail = sizeof(buf) - 1;
-
-		if (iconv(cd, &ip, &input_len, &bp, &bufavail) == (size_t)-1 &&
-		    errno != E2BIG) {
-			*bp++ = '?';
-			ip++;
-			input_len--;
-			bufavail--;
-		}
-		*bp = '\0';
-
-		count = sizeof(buf) - bufavail - 1;
-
-		output_size += count;
-		op = output = xrealloc(output, output_size, sizeof(char));
-		op += out_pos;
-		memcpy(op, buf, count);
-		out_pos += count;
-		op += count;
-		*op = '\0';
-	}
-
-	if (iconv_close(cd) == -1) {
-		printf("iconv_close: %s\n", strerror(errno));
-		xfree(output);
-		return (NULL);
-	}
-
-	return (output);
+	return (iconvert(in_str, codeset, "UTF-8"));
 #else
-	char *ret = xstrdup(in_str);
-	return (ret);
+	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
 }
 
@@ -311,17 +259,8 @@ char *
 utf82char(const char *in_str)
 {
 #ifdef HAVE_ICONV
-	iconv_t 		 cd;
-	ICONV_CONST char	*input, *ip;
-	size_t			 input_len;
-	char			*output;
-	size_t			 output_size;
-	char			 buf[BUFSIZ], *bp;
-	size_t			 bufavail;
-	size_t			 out_pos;
-
 # ifndef WIN32
-	char			*codeset;
+	char	*codeset;
 
 #  if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
@@ -331,7 +270,7 @@ utf82char(const char *in_str)
 	codeset = (char *)"";
 #  endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
 # else
-	char			 codeset[24];
+	char	 codeset[24];
 
 	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
 # endif /* !WIN32 */
@@ -339,9 +278,28 @@ utf82char(const char *in_str)
 	if (in_str == NULL || strlen(in_str) == 0)
 		return (NULL);
 
-	if ((cd = iconv_open(codeset, "UTF-8")) == (iconv_t)-1 &&
-	    (cd = iconv_open("", "UTF-8")) == (iconv_t)-1) {
-		printf("iconv_open: %s\n", strerror(errno));
+	return (iconvert(in_str, "UTF-8", codeset));
+#else
+	return (xstrdup(in_str));
+#endif /* HAVE_ICONV */
+}
+
+#ifdef HAVE_ICONV
+char *
+iconvert(const char *in_str, const char *from, const char *to)
+{
+	iconv_t 		 cd;
+	ICONV_CONST char	*input, *ip;
+	size_t			 input_len;
+	char			*output;
+	size_t			 output_size;
+	char			 buf[BUFSIZ], *bp;
+	size_t			 bufavail;
+	size_t			 out_pos;
+
+	if ((cd = iconv_open(to, from)) == (iconv_t)-1 &&
+	    (cd = iconv_open("", from)) == (iconv_t)-1) {
+		printf("%s: iconv_open(): %s\n", strerror(errno), __progname);
 		return (NULL);
 	}
 
@@ -380,14 +338,11 @@ utf82char(const char *in_str)
 	}
 
 	if (iconv_close(cd) == -1) {
-		printf("iconv_close: %s\n", strerror(errno));
+		printf("%s: iconv_close(): %s\n", strerror(errno), __progname);
 		xfree(output);
 		return (NULL);
 	}
 
 	return (output);
-#else
-	char *ret = xstrdup(in_str);
-	return (ret);
-#endif /* HAVE_ICONV */
 }
+#endif /* HAVE_ICONV */
