@@ -26,15 +26,33 @@
 # include "config.h"
 #endif
 
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+
 #include <ctype.h>
+#include <errno.h>
+#ifdef HAVE_LANGINFO_H
+# include <langinfo.h>
+#endif
+#ifdef HAVE_LOCALE_H
+# include <locale.h>
+#endif
 #include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_ICONV
+# include <iconv.h>
+#endif
 #include <shout/shout.h>
 
 #include "util.h"
 #include "configfile.h"
 #include "xalloc.h"
+
+#ifndef BUFSIZ
+# define BUFSIZ 1024
+#endif
 
 extern EZCONFIG *pezConfig;
 extern char	*__progname;
@@ -201,4 +219,160 @@ stream_setup(const char *host, const int port, const char *mount)
 	}
 
 	return (shout);
+}
+
+char *
+char2utf8(const char *in_str)
+{
+#ifdef HAVE_ICONV
+	iconv_t 		 cd;
+	ICONV_CONST char	*input, *ip;
+	size_t			 input_len;
+	char			*output;
+	size_t			 output_size;
+	char			 buf[4], *bp;
+	size_t			 bufavail;
+	size_t			 out_pos;
+	char			*codeset;
+
+	if (in_str == NULL || strlen(in_str) == 0)
+		return (NULL);
+
+# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
+	setlocale(LC_CTYPE, "");
+	codeset = nl_langinfo(CODESET);
+	setlocale(LC_CTYPE, "C");
+# else
+	codeset = (char *)"";
+# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+
+	if ((cd = iconv_open("UTF-8", codeset)) == (iconv_t)-1 &&
+	    (cd = iconv_open("UTF-8", "")) == (iconv_t)-1) {
+		printf("iconv_open: %s\n", strerror(errno));
+		return (NULL);
+	}
+
+	ip = input = (ICONV_CONST char *)in_str;
+	input_len = strlen(input);
+	output_size = 1;
+	output = xcalloc(output_size, sizeof(char));
+	out_pos = 0;
+	output[out_pos] = '\0';
+	while (input_len > 0) {
+		char	*op;
+		size_t	 count;
+
+		buf[0] = '\0';
+		bp = buf;
+		bufavail = sizeof(buf);
+
+		if (iconv(cd, &ip, &input_len, &bp, &bufavail) == (size_t)-1 &&
+		    errno != E2BIG) {
+			*bp++ = '?';
+			ip++;
+			input_len--;
+			bufavail--;
+		}
+		*bp = '\0';
+
+		count = sizeof(buf) - bufavail;
+
+		output_size += count;
+		op = output = xrealloc(output, output_size, sizeof(char));
+		op += out_pos;
+		memcpy(op, buf, count);
+		out_pos += count;
+		op += count;
+		*op = '\0';
+	}
+
+	if (iconv_close(cd) == -1) {
+		printf("iconv_close: %s\n", strerror(errno));
+		xfree(output);
+		return (NULL);
+	}
+
+	return (output);
+#else
+	char *ret = xstrdup(in_str);
+	return (ret);
+#endif /* HAVE_ICONV */
+}
+
+char *
+utf82char(const char *in_str)
+{
+#ifdef HAVE_ICONV
+	iconv_t 		 cd;
+	ICONV_CONST char	*input, *ip;
+	size_t			 input_len;
+	char			*output;
+	size_t			 output_size;
+	char			 buf[4], *bp;
+	size_t			 bufavail;
+	size_t			 out_pos;
+	char			*codeset;
+
+	if (in_str == NULL || strlen(in_str) == 0)
+		return (NULL);
+
+# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
+	setlocale(LC_CTYPE, "");
+	codeset = nl_langinfo(CODESET);
+	setlocale(LC_CTYPE, "C");
+# else
+	codeset = (char *)"";
+# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+
+	if ((cd = iconv_open(codeset, "UTF-8")) == (iconv_t)-1 &&
+	    (cd = iconv_open("", "UTF-8")) == (iconv_t)-1) {
+		printf("iconv_open: %s\n", strerror(errno));
+		return (NULL);
+	}
+
+	ip = input = (ICONV_CONST char *)in_str;
+	input_len = strlen(input);
+	output_size = 1;
+	output = xcalloc(output_size, sizeof(char));
+	out_pos = 0;
+	output[out_pos] = '\0';
+	while (input_len > 0) {
+		char	*op;
+		size_t	 count;
+
+		buf[0] = '\0';
+		bp = buf;
+		bufavail = sizeof(buf);
+
+		if (iconv(cd, &ip, &input_len, &bp, &bufavail) == (size_t)-1 &&
+		    errno != E2BIG) {
+			*bp++ = '?';
+			ip++;
+			input_len--;
+			bufavail--;
+		}
+		*bp = '\0';
+
+		count = sizeof(buf) - bufavail;
+
+		output_size += count;
+		op = output = xrealloc(output, output_size, sizeof(char));
+		op += out_pos;
+		memcpy(op, buf, count);
+		out_pos += count;
+		op += count;
+		*op = '\0';
+	}
+
+	if (iconv_close(cd) == -1) {
+		printf("iconv_close: %s\n", strerror(errno));
+		xfree(output);
+		return (NULL);
+	}
+
+	return (output);
+#else
+	char *ret = xstrdup(in_str);
+	return (ret);
+#endif /* HAVE_ICONV */
 }

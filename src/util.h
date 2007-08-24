@@ -20,8 +20,10 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-int	        strrcmp(const char *, const char *);
-int	        strrcasecmp(const char *, const char *);
+int		strrcmp(const char *, const char *);
+int		strrcasecmp(const char *, const char *);
 shout_t *	stream_setup(const char *, const int, const char *);
+char *		char2utf8(const char *);
+char *		utf82char(const char *);
 
 #endif /* __UTIL_H__ */

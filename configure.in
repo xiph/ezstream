@@ -3,6 +3,7 @@ dnl INITIALIZATION
 AC_INIT([ezstream], [0.5.0], [https://trac.xiph.org/newticket?component=ezstream])
 AC_PREREQ(2.61)
 AC_CONFIG_SRCDIR(src/ezstream.c)
+AC_CONFIG_AUX_DIR(build-aux)
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS(src/config.h)
 AC_CONFIG_LIBOBJ_DIR(src)
@@ -207,6 +208,10 @@ if test x"$use_taglib" != "xno"; then
 	CFLAGS="$ac_taglib_save_CFLAGS"
 	CPPFLAGS="$ac_taglib_save_CPPFLAGS"
 	LIBS="$ac_taglib_save_LIBS"
+
+	AM_ICONV
+	AC_CHECK_HEADERS(langinfo.h locale.h)
+	AC_CHECK_FUNCS(setlocale nl_langinfo)
 else
 	AC_MSG_RESULT([disabled])
 fi
@@ -249,6 +254,7 @@ XIPH_VAR_PREPEND([XIPH_LIBS], [$XML_LIBS])
 dnl OUTPUT
 
 AC_CONFIG_FILES(Makefile \
+		build-aux/Makefile \
 		compat/Makefile \
 		compat/sys/Makefile \
 		doc/Makefile \
