@@ -3,7 +3,7 @@ Changes in 0.5.0 (SVN):
  * src/ezstream.c:
    - [FIX]   The special case of streaming MP3 files without reencoding had
              been lost, causing such streams to have no metadata. This has
-             been fixed.
+             been fixed. (Ticket #1225)
 
  * various:
    - [NEW]   A new convenience feature has been added, to allow automatic
