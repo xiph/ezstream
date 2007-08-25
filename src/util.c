@@ -318,7 +318,8 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	}
 
 	if ((cd = iconv_open(tocode, from)) == (iconv_t)-1 &&
-	    (cd = iconv_open("", from)) == (iconv_t)-1) {
+	    (cd = iconv_open("", from)) == (iconv_t)-1 &&
+	    (cd = iconv_open(tocode, "")) == (iconv_t)-1) {
 		xfree(tocode);
 		printf("%s: iconv_open(): %s\n", __progname, strerror(errno));
 		return (NULL);
