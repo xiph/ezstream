@@ -557,6 +557,26 @@ which means that anything set with the
 feature will continue to end up entirely in the
 .Qq Em Title
 field of a stream.
+.Pp
+Of all possible Ogg-based streams, only Ogg Vorbis can have its metadata
+manipulated by Icecast.
+Any attempt of
+.Nm
+to update other Ogg metadata is actually a no-op.
+.Pp
+While
+.Nm
+tries to do its best with relaying metadata accurately to Icecast, and
+subsequently the listeners, different codesets and locales can pose a problem.
+Especially when streaming MP3 files, it may help to explicitly set a codeset
+to work with via the
+.Ev LC_CTYPE
+environment variable.
+Note that non-Ogg streams are restricted to the ISO-8859-1 character set.
+Ogg-based streams use UTF-8.
+.Pp
+External encoders may put additional, and possibly artificial, restrictions on
+valid characters in metadata.
 .Sh FILES
 .Bl -tag -width "!!EXAMPLES_DIR!!" -compact
 .It Pa !!EXAMPLES_DIR!!
