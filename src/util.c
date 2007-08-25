@@ -320,7 +320,7 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	if ((cd = iconv_open(tocode, from)) == (iconv_t)-1 &&
 	    (cd = iconv_open("", from)) == (iconv_t)-1) {
 		xfree(tocode);
-		printf("%s: iconv_open(): %s\n", strerror(errno), __progname);
+		printf("%s: iconv_open(): %s\n", __progname, strerror(errno));
 		return (NULL);
 	}
 
@@ -359,7 +359,7 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	}
 
 	if (iconv_close(cd) == -1) {
-		printf("%s: iconv_close(): %s\n", strerror(errno), __progname);
+		printf("%s: iconv_close(): %s\n", __progname, strerror(errno));
 		xfree(output);
 		xfree(tocode);
 		return (NULL);
