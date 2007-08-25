@@ -185,9 +185,9 @@ metadata_use_self(metadata_t *md, FILE **filep)
 		fread(&id3tag, 1, sizeof(struct ID3Tag), *filep);
 		if (memcmp(id3tag.tag, "TAG", 3) == 0) {
 			if (strlen(id3tag.artistName) > 0)
-				md->artist = char2utf8(id3tag.artistName);
+				md->artist = CHARtoUTF8(id3tag.artistName, ICONV_REPLACE);
 			if (strlen(id3tag.trackName) > 0)
-				md->title = char2utf8(id3tag.trackName);
+				md->title = CHARtoUTF8(id3tag.trackName, ICONV_REPLACE);
 		}
 	} else if (strcmp(extension, ".ogg") == 0) {
 		OggVorbis_File	vf;

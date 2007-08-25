@@ -58,9 +58,7 @@
 extern EZCONFIG *pezConfig;
 extern char	*__progname;
 
-#ifdef HAVE_ICONV
-char *	iconvert(const char *, const char *, const char *);
-#endif /* HAVE_ICONV */
+char *	iconvert(const char *, const char *, const char *, int);
 
 int
 strrcmp(const char *s, const char *sub)
@@ -227,67 +225,68 @@ stream_setup(const char *host, const int port, const char *mount)
 }
 
 char *
-char2utf8(const char *in_str)
+CHARtoUTF8(const char *in_str, int mode)
 {
-#ifdef HAVE_ICONV
-# ifndef WIN32
+#ifndef WIN32
 	char	*codeset;
 
-#  if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
+# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo(CODESET);
 	setlocale(LC_CTYPE, "C");
-#  else
-	codeset = (char *)"";
-#  endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
 # else
+	codeset = (char *)"";
+# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+#else
 	char	 codeset[24];
 
 	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
-# endif /* !WIN32 */
+#endif /* !WIN32 */
 
 	if (in_str == NULL || strlen(in_str) == 0)
 		return (NULL);
 
-	return (iconvert(in_str, codeset, "UTF-8"));
-#else
-	return (xstrdup(in_str));
-#endif /* HAVE_ICONV */
+	return (iconvert(in_str, codeset, "UTF-8", mode));
 }
 
 char *
-utf82char(const char *in_str)
+UTF8toCHAR(const char *in_str, int mode)
 {
-#ifdef HAVE_ICONV
-# ifndef WIN32
+#ifndef WIN32
 	char	*codeset;
 
-#  if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
+# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo(CODESET);
 	setlocale(LC_CTYPE, "C");
-#  else
-	codeset = (char *)"";
-#  endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
 # else
+	codeset = (char *)"";
+# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+#else
 	char	 codeset[24];
 
 	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
-# endif /* !WIN32 */
+#endif /* !WIN32 */
 
 	if (in_str == NULL || strlen(in_str) == 0)
 		return (NULL);
 
-	return (iconvert(in_str, "UTF-8", codeset));
-#else
-	return (xstrdup(in_str));
-#endif /* HAVE_ICONV */
+	return (iconvert(in_str, "UTF-8", codeset, mode));
 }
 
-#ifdef HAVE_ICONV
 char *
-iconvert(const char *in_str, const char *from, const char *to)
+UTF8toISO8859_1(const char *in_str, int mode)
 {
+	if (in_str == NULL || strlen(in_str) == 0)
+		return (NULL);
+
+	return (iconvert(in_str, "UTF-8", "ISO-8859-1", mode));
+}
+
+char *
+iconvert(const char *in_str, const char *from, const char *to, int mode)
+{
+#ifdef HAVE_ICONV
 	iconv_t 		 cd;
 	ICONV_CONST char	*input, *ip;
 	size_t			 input_len;
@@ -296,9 +295,31 @@ iconvert(const char *in_str, const char *from, const char *to)
 	char			 buf[BUFSIZ], *bp;
 	size_t			 bufavail;
 	size_t			 out_pos;
+	char			*tocode;
 
-	if ((cd = iconv_open(to, from)) == (iconv_t)-1 &&
+	switch (mode) {
+		size_t	siz;
+
+	case ICONV_TRANSLIT:
+		siz = strlen(to) + strlen("//TRANSLIT") + 1;
+		tocode = xcalloc(siz, sizeof(char));
+		snprintf(tocode, siz, "%s//TRANSLIT", to);
+		break;
+	case ICONV_IGNORE:
+		siz = strlen(to) + strlen("//IGNORE") + 1;
+		tocode = xcalloc(siz, sizeof(char));
+		snprintf(tocode, siz, "%s//IGNORE", to);
+		break;
+	case ICONV_REPLACE:
+		/* FALLTHROUGH */
+	default:
+		tocode = xstrdup(to);
+		break;
+	}
+
+	if ((cd = iconv_open(tocode, from)) == (iconv_t)-1 &&
 	    (cd = iconv_open("", from)) == (iconv_t)-1) {
+		xfree(tocode);
 		printf("%s: iconv_open(): %s\n", strerror(errno), __progname);
 		return (NULL);
 	}
@@ -340,9 +361,13 @@ iconvert(const char *in_str, const char *from, const char *to)
 	if (iconv_close(cd) == -1) {
 		printf("%s: iconv_close(): %s\n", strerror(errno), __progname);
 		xfree(output);
+		xfree(tocode);
 		return (NULL);
 	}
 
+	xfree(tocode);
 	return (output);
-}
+#else
+	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
+}

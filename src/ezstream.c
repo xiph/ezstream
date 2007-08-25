@@ -470,7 +470,7 @@ int
 setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 {
 	shout_metadata_t	*shout_mdata = NULL;
-	char			*songInfo;
+	char			*songInfo, *encSongInfo;
 	int			 ret = SHOUTERR_SUCCESS;
 
 	if (shout == NULL) {
@@ -496,7 +496,14 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 			songInfo = metadata_assemble_string(mdata);
 	}
 
-	if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
+	if (strcmp(pezConfig->format, VORBIS_FORMAT) == 0 ||
+	    strcmp(pezConfig->format, THEORA_FORMAT) == 0)
+		encSongInfo = xstrdup(songInfo);
+	else
+		encSongInfo = UTF8toISO8859_1(songInfo, ICONV_TRANSLIT);
+
+	if (shout_metadata_add(shout_mdata, "song", (encSongInfo != NULL) ? encSongInfo : "")
+	    != SHOUTERR_SUCCESS) {
 		/* Assume SHOUTERR_MALLOC */
 		printf("%s: shout_metadata_add(): %s\n", __progname,
 		       strerror(ENOMEM));
@@ -511,6 +518,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 		*mdata_copy = xstrdup(songInfo);
 
 	xfree(songInfo);
+	xfree(encSongInfo);
 	return (ret);
 }
 
@@ -854,7 +862,7 @@ streamFile(shout_t *shout, const char *fileName)
 		char	*tmp, *metaData;
 
 		tmp = metadata_assemble_string(mdata);
-		metaData = utf82char(tmp);
+		metaData = UTF8toCHAR(tmp, ICONV_REPLACE);
 		xfree(tmp);
 		printf("%s: Streaming ``%s''", __progname, metaData);
 		if (vFlag)
