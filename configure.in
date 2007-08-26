@@ -126,7 +126,19 @@ if test x"$ac_cv_header_signal_h" = "xyes"; then
 		AC_DEFINE(HAVE_SIGNALS, 1, [Define whether we have BSD signals])
 		], [], [#include <signal.h>])
 fi
+
+LIBICONV=""
+LTLIBICONV=""
+INCICONV=""
 AM_ICONV
+EZ_LIBICONV=""
+if test -n "$LTLIBICONV"; then
+	EZ_LIBICONV="$LTLIBICONV"
+else
+	EZ_LIBICONV="$LIBICONV"
+fi
+XIPH_VAR_PREPEND([XIPH_LIBS], [$EZ_LIBICONV])
+XIPH_VAR_APPEND([XIPH_CPPFLAGS], [$INCICONV])
 
 
 dnl CONFIGURE OPTIONS
