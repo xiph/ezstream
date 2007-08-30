@@ -9,6 +9,9 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 
 |         File          |               Description                    |
 +======================================================================+
+| \COPYING.txt          | License for using, modifying and             |
+|                       | distributing Ezstream.                       |
++-----------------------+----------------------------------------------+
 | \README.txt           | This file.                                   |
 +-----------------------+----------------------------------------------+
 | \ezstream.1.pdf       | The ezstream manual in PDF format.           |
@@ -55,13 +58,19 @@ to MP3 (ID3v1) and Ogg Vorbis tags.
 --------------
 
 
-Ezstream uses libxml2 (http://xmlsoft.org/, BSD-like license), libogg and
-libvorbis (http://www.vorbis.com/, BSD-like license) and libshout
-(http://www.icecast.org/, LGPL licensed). These libraries are statically linked
-into the ezstream.exe file.
+Ezstream uses
+ * zlib (http://www.zlib.net/, BSD-like license)
+ * libiconv (http://www.gnu.org/software/libiconv/, LGPL)
+ * libxml2 (http://xmlsoft.org/, BSD-like license)
+ * libogg, libvorbis, libvorbisfile (http://www.vorbis.com/, BSD-like license)
+ * libtheora (http://www.theora.org/, BSD-like license)
+ * libshout (http://www.icecast.org, LGPL)
+ * TagLib (http://ktown.kde.org/~wheeler/taglib.html, LGPL)
 
-Ezstream itself is licensed under the GPL (see COPYING in the included source
-archive for details.)
+These libraries are statically linked into the ezstream.exe file.
+
+Ezstream itself is licensed under the GPL version 2 (see COPYING.txt for
+details.)
 
 
 
