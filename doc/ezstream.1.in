@@ -462,14 +462,14 @@ When called with the command line parameter
 the program should return only the title information of the metadata.
 .Pq Optional.
 .It
-The supplied metadata should be encoded in UTF-8.
+The supplied metadata must be encoded in UTF-8.
 .El
 .Sh METADATA
 The main tool for handling metadata with
 .Nm
 is placeholders in decoder and encoder commands that are replaced with real
 content during runtime.
-The tricky part about is that one placeholders has to be handled differently
+The tricky part is that one of the placeholders has to be handled differently,
 depending on where the metadata comes from.
 This section will explain each possible scenario.
 .Ss Metadata Placeholders
@@ -571,9 +571,14 @@ subsequently the listeners, different codesets and locales can pose a problem.
 Especially when streaming MP3 files, it may help to explicitly set a codeset
 to work with via the
 .Ev LC_CTYPE
-environment variable.
-Note that non-Ogg streams are restricted to the ISO-8859-1 character set.
-Ogg-based streams use UTF-8.
+environment variable, as
+.Nm
+assumes ID3v1 tags to be in the user's current locale.
+Note that, even though support for different locales is provided by
+.Nm ,
+Icecast itself and the listening clients also have a say in the matter.
+The only way to ensure consistent results with metadata in non-Ogg streams is
+to use the characters available in the ISO-8859-1 codeset.
 .Pp
 External encoders may put additional, and possibly artificial, restrictions on
 valid characters in metadata.
