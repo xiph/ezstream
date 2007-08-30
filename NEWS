@@ -4,6 +4,7 @@ Changes in 0.5.0 (SVN):
    - [FIX]   The special case of streaming MP3 files without reencoding had
              been lost, causing such streams to have no metadata. This has
              been fixed. (Ticket #1225)
+   - [MISC]  Handle SIGINT and SIGTERM to perform a clean shutdown.
 
  * various:
    - [NEW]   A new convenience feature has been added, to allow automatic
@@ -15,10 +16,11 @@ Changes in 0.5.0 (SVN):
              to the current locale (LC_CTYPE) before displaying them on the
              console. Unsupported characters are displayed as '?', which
              does not affect the actual metadata. This feature requires
-             iconv() via libc, if available, or libiconv.
+             iconv() via libc, if available, or GNU libiconv.
    - [MISC]  Add new --enable-debug configuration option to the configure
              script, which enables (also new) memory debugging features.
              (Not interesting for non-developers.)
+   - [MISC]  Various small code cleanups.
 
 
 
