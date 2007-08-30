@@ -29,6 +29,5 @@ int		strrcasecmp(const char *, const char *);
 shout_t *	stream_setup(const char *, const int, const char *);
 char *		CHARtoUTF8(const char *, int);
 char *		UTF8toCHAR(const char *, int);
-char *		UTF8toISO8859_1(const char *, int);
 
 #endif /* __UTIL_H__ */

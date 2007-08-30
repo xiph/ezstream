@@ -470,7 +470,8 @@ int
 setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 {
 	shout_metadata_t	*shout_mdata = NULL;
-	char			*songInfo, *encSongInfo;
+	char			*songInfo;
+	const char		*artist, *title;
 	int			 ret = SHOUTERR_SUCCESS;
 
 	if (shout == NULL) {
@@ -488,37 +489,63 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 		exit(1);
 	}
 
-	if ((songInfo = getMetadataString(pezConfig->metadataFormat, mdata)) == NULL) {
-		if (strlen(metadata_get_artist(mdata)) == 0 &&
-		    strlen(metadata_get_title(mdata)) == 0)
-			songInfo = xstrdup(metadata_get_string(mdata));
-		else
-			songInfo = metadata_assemble_string(mdata);
-	}
+	artist = metadata_get_artist(mdata);
+	title = metadata_get_title(mdata);
 
-	if (strcmp(pezConfig->format, VORBIS_FORMAT) == 0 ||
-	    strcmp(pezConfig->format, THEORA_FORMAT) == 0)
-		encSongInfo = xstrdup(songInfo);
-	else
-		encSongInfo = UTF8toISO8859_1(songInfo, ICONV_TRANSLIT);
-
-	if (shout_metadata_add(shout_mdata, "song", (encSongInfo != NULL) ? encSongInfo : "")
-	    != SHOUTERR_SUCCESS) {
+	/*
+	 * We can do this, because we know how libshout works. This adds
+	 * "charset=UTF-8" to the HTTP metadata update request and has the
+	 * desired effect of letting newer-than-2.3.1 versions of Icecast know
+	 * which encoding we're using.
+	 */
+	if (shout_metadata_add(shout_mdata, "charset", "UTF-8") != SHOUTERR_SUCCESS) {
 		/* Assume SHOUTERR_MALLOC */
 		printf("%s: shout_metadata_add(): %s\n", __progname,
 		       strerror(ENOMEM));
 		exit(1);
 	}
+
+	if ((songInfo = getMetadataString(pezConfig->metadataFormat, mdata)) == NULL) {
+		if (artist[0] == '\0' && title[0] == '\0')
+			songInfo = xstrdup(metadata_get_string(mdata));
+		else
+			songInfo = metadata_assemble_string(mdata);
+		if (artist[0] != '\0' && title[0] != '\0') {
+			if (shout_metadata_add(shout_mdata, "artist", artist) != SHOUTERR_SUCCESS) {
+				printf("%s: shout_metadata_add(): %s\n", __progname,
+				       strerror(ENOMEM));
+				exit(1);
+			}
+			if (shout_metadata_add(shout_mdata, "title", title) != SHOUTERR_SUCCESS) {
+				printf("%s: shout_metadata_add(): %s\n", __progname,
+				       strerror(ENOMEM));
+				exit(1);
+			}
+		} else {
+			if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
+				printf("%s: shout_metadata_add(): %s\n", __progname,
+				       strerror(ENOMEM));
+				exit(1);
+			}
+		}
+	} else if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
+		printf("%s: shout_metadata_add(): %s\n", __progname,
+		       strerror(ENOMEM));
+		exit(1);
+	}
+
 	if ((ret = shout_set_metadata(shout, shout_mdata)) != SHOUTERR_SUCCESS)
 		printf("%s: shout_set_metadata(): %s\n",
 		       __progname, shout_get_error(shout));
+
 	shout_metadata_free(shout_mdata);
-	if (ret == SHOUTERR_SUCCESS &&
-	    mdata_copy != NULL && *mdata_copy == NULL)
-		*mdata_copy = xstrdup(songInfo);
+
+	if (ret == SHOUTERR_SUCCESS) {
+		if (mdata_copy != NULL && *mdata_copy == NULL)
+			*mdata_copy = xstrdup(songInfo);
+	}
 
 	xfree(songInfo);
-	xfree(encSongInfo);
 	return (ret);
 }
 

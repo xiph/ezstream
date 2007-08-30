@@ -236,7 +236,7 @@ CHARtoUTF8(const char *in_str, int mode)
 	setlocale(LC_CTYPE, "C");
 # else
 	codeset = (char *)"";
-# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 #else
 	char	 codeset[24];
 
@@ -261,7 +261,7 @@ UTF8toCHAR(const char *in_str, int mode)
 	setlocale(LC_CTYPE, "C");
 # else
 	codeset = (char *)"";
-# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE */
+# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 #else
 	char	 codeset[24];
 
@@ -272,15 +272,6 @@ UTF8toCHAR(const char *in_str, int mode)
 		return (NULL);
 
 	return (iconvert(in_str, "UTF-8", codeset, mode));
-}
-
-char *
-UTF8toISO8859_1(const char *in_str, int mode)
-{
-	if (in_str == NULL || strlen(in_str) == 0)
-		return (NULL);
-
-	return (iconvert(in_str, "UTF-8", "ISO-8859-1", mode));
 }
 
 char *
