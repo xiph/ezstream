@@ -39,7 +39,7 @@ if test -z "$GCC"; then
 		;;
 	esac
 else
-	XIPH_CPPFLAGS="-fstrict-aliasing -Wall -Wno-unused-parameter -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
+	XIPH_CPPFLAGS="-fstrict-aliasing -Wall -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
 fi
 
 ez_enable_debug=no
