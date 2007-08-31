@@ -2,6 +2,7 @@ Microsoft Visual Studio Solution File, Format Version 8.00
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ezstream", "ezstream.vcproj", "{4C27B249-0C17-4007-9D51-2ED145DF06C2}"
 	ProjectSection(ProjectDependencies) = postProject
 		{376BDB5E-7092-44EC-AF16-C087D2D80FC6} = {376BDB5E-7092-44EC-AF16-C087D2D80FC6}
+		{A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E} = {A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E}
 		{3E590C94-A4E0-4E79-839E-A7263F3CA6B1} = {3E590C94-A4E0-4E79-839E-A7263F3CA6B1}
 	EndProjectSection
 EndProject
@@ -41,6 +42,15 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlib", "..\..\zlib\win32\zl
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libiconv", "..\..\libiconv\win32\libiconv.vcproj", "{12329AC8-F4EC-4663-AEE2-93911D033E97}"
 	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taglib", "..\..\taglib\win32\taglib.vcproj", "{F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taglib_c", "..\..\taglib\win32\taglib_c.vcproj", "{A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD} = {F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD}
 	EndProjectSection
 EndProject
 Global
@@ -85,6 +95,14 @@ Global
 		{12329AC8-F4EC-4663-AEE2-93911D033E97}.Debug.Build.0 = Debug|Win32
 		{12329AC8-F4EC-4663-AEE2-93911D033E97}.Release.ActiveCfg = Release|Win32
 		{12329AC8-F4EC-4663-AEE2-93911D033E97}.Release.Build.0 = Release|Win32
+		{F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD}.Debug.ActiveCfg = Debug|Win32
+		{F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD}.Debug.Build.0 = Debug|Win32
+		{F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD}.Release.ActiveCfg = Release|Win32
+		{F91FFAA9-0A12-4D51-9E10-FA7D8FCA8DFD}.Release.Build.0 = Release|Win32
+		{A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E}.Debug.ActiveCfg = Debug|Win32
+		{A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E}.Debug.Build.0 = Debug|Win32
+		{A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E}.Release.ActiveCfg = Release|Win32
+		{A1CA7E73-EA91-43C0-80B5-5B16CF3EA61E}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
