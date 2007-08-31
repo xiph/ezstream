@@ -6,6 +6,7 @@
 #define HAVE_LOCALE_H		1
 #define HAVE_STAT		1
 #define HAVE_STDINT_H		1
+#define HAVE_STRUCT_TIMEVAL	1
 #define HAVE_SYS_STAT_H 	1
 
 #define ICONV_CONST		const

@@ -29,5 +29,6 @@ int		strrcasecmp(const char *, const char *);
 shout_t *	stream_setup(const char *, const int, const char *);
 char *		CHARtoUTF8(const char *, int);
 char *		UTF8toCHAR(const char *, int);
+int		ez_gettimeofday(void *);
 
 #endif /* __UTIL_H__ */

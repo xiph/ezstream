@@ -69,6 +69,13 @@
 # define _PATH_DEVNULL	"/dev/null"
 #endif /* !_PATH_DEVNULL */
 
+#ifndef HAVE_STRUCT_TIMEVAL
+struct timeval {
+	long	tv_sec;
+	long	tv_usec;
+};
+#endif
+
 char *	local_basename(const char *);
 
 #endif /* __COMPAT_H__ */

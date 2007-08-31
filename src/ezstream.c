@@ -102,13 +102,13 @@ int			 quit = 0;
 #endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
-	char tag[3];
-	char trackName[30];
-	char artistName[30];
-	char albumName[30];
-	char year[3];
-	char comment[30];
-	char genre;
+	char	tag[3];
+	char	trackName[30];
+	char	artistName[30];
+	char	albumName[30];
+	char	year[3];
+	char	comment[30];
+	char	genre;
 } ID3Tag;
 
 int		urlParse(const char *, char **, int *, char **);
@@ -123,7 +123,7 @@ FILE *		openResource(shout_t *, const char *, int *, metadata_t **,
 int		reconnectServer(shout_t *, int);
 const char *	getTimeString(int);
 int		sendStream(shout_t *, FILE *, const char *, int, const char *,
-			   void *);
+			   struct timeval *);
 int		streamFile(shout_t *, const char *);
 int		streamPlaylist(shout_t *, const char *);
 char *		getProgname(const char *);
@@ -744,14 +744,13 @@ getTimeString(int seconds)
 
 int
 sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
-	   int isStdin, const char *songLenStr, void *tv)
+	   int isStdin, const char *songLenStr, struct timeval *tv)
 {
 	unsigned char	 buff[4096];
 	size_t		 read, total, oldTotal;
 	int		 ret;
-#ifdef HAVE_GETTIMEOFDAY
 	double		 kbps = -1.0;
-	struct timeval	 timeStamp, *startTime = (struct timeval *)tv;
+	struct timeval	 timeStamp, *startTime = tv;
 
 	if (startTime == NULL) {
 		printf("%s: sendStream(): Internal error: startTime is NULL\n",
@@ -761,7 +760,6 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 	timeStamp.tv_sec = startTime->tv_sec;
 	timeStamp.tv_usec = startTime->tv_usec;
-#endif /* HAVE_GETTIMEOFDAY */
 
 	total = oldTotal = 0;
 	ret = STREAM_DONE;
@@ -808,10 +806,8 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 		total += read;
 		if (qFlag && vFlag) {
-#ifdef HAVE_GETTIMEOFDAY
 			struct timeval	tv;
 			double		oldTime, newTime;
-#endif /* HAVE_GETTIMEOFDAY */
 
 			if (!isStdin && playlistMode) {
 				if (pezConfig->fileNameIsProgram) {
@@ -825,10 +821,9 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 					       playlist_get_num_items(playlist));
 			}
 
-#ifdef HAVE_GETTIMEOFDAY
 			oldTime = (double)timeStamp.tv_sec
 				+ (double)timeStamp.tv_usec / 1000000.0;
-			gettimeofday(&tv, NULL);
+			ez_gettimeofday((void *)&tv);
 			newTime = (double)tv.tv_sec
 				+ (double)tv.tv_usec / 1000000.0;
 			if (songLenStr == NULL)
@@ -848,7 +843,6 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 				printf("                 ");
 			else
 				printf("  [%8.2f kbps]", kbps);
-#endif /* HAVE_GETTIMEOFDAY */
 
 			printf("  \r");
 			fflush(stdout);
@@ -875,9 +869,7 @@ streamFile(shout_t *shout, const char *fileName)
 	int		 isStdin = 0;
 	int		 ret, retval = 0, songLen;
 	metadata_t	*mdata;
-#ifdef HAVE_GETTIMEOFDAY
 	struct timeval	 startTime;
-#endif
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag,
 					&mdata, &isStdin, &songLen))
@@ -905,17 +897,12 @@ streamFile(shout_t *shout, const char *fileName)
 		metadata_free(&mdata);
 	}
 
-#ifdef HAVE_GETTIMEOFDAY
 	if (songLen >= 0)
 		songLenStr = xstrdup(getTimeString(songLen));
-	gettimeofday(&startTime, NULL);
+	ez_gettimeofday((void *)&startTime);
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin,
-				 songLenStr, (void *)&startTime);
-#else
-	do {
-		ret = sendStream(shout, filepstream, fileName, isStdin, NULL, NULL);
-#endif
+				 songLenStr, &startTime);
 		if (quit)
 			break;
 		if (ret != STREAM_DONE) {

@@ -17,10 +17,16 @@ Changes in 0.5.0 (SVN):
              console. Unsupported characters are displayed as '?', which
              does not affect the actual metadata. This feature requires
              iconv() via libc, if available, or GNU libiconv.
+   - [NEW]   Support gettimeofday() functionality on all platforms, including
+             Windows. The "real-time status line" when using the -q and -v
+             parameters is now complete everywhere.
    - [MISC]  Add new --enable-debug configuration option to the configure
              script, which enables (also new) memory debugging features.
              (Not interesting for non-developers.)
    - [MISC]  Various small code cleanups.
+
+ * The Windows build of ezstream now supports reading metadata from files
+   with TagLib.
 
 
 

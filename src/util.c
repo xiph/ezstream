@@ -29,6 +29,11 @@
 #ifdef HAVE_SYS_TYPES_H
 # include <sys/types.h>
 #endif
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#else
+# include <time.h>
+#endif
 
 #include <ctype.h>
 #include <errno.h>
@@ -362,4 +367,44 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 #else
 	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
+}
+
+int
+ez_gettimeofday(void *tp_arg)
+{
+	struct timeval	*tp = (struct timeval *)tp_arg;
+	int		 ret = -1;
+
+#ifdef HAVE_GETTIMEOFDAY
+	ret = gettimeofday(tp, NULL);
+#else /* HAVE_GETTIMEOFDAY */
+# ifdef WIN32
+	/*
+	 * Idea for this way of implementing gettimeofday()-like functionality
+	 * on Windows taken from cURL, (C) 1998 - 2007 Daniel Steinberg, et al.
+	 * http://curl.haxx.se/docs/copyright.html
+	 */
+	SYSTEMTIME	 st;
+	struct tm	 tm;
+
+	GetLocalTime(&st);
+	tm.tm_sec = st.wSecond;
+	tm.tm_min = st.wMinute;
+	tm.tm_hour = st.wHour;
+	tm.tm_mday = st.wDay;
+	tm.tm_mon = st.wMonth - 1;
+	tm.tm_year = st.wYear - 1900;
+	tm.tm_isdst = -1;
+	tp->tv_sec = (long)mktime(&tm);
+	tp->tv_usec = st.wMilliseconds * 1000;
+	ret = 0;
+# else /* WIN32 */
+	/* Fallback to time(): */
+	tp->tv_sec = (long)time(NULL);
+	tp->tv_usec = 0;
+	ret = 0;
+# endif /* WIN32 */
+#endif /* HAVE_GETTIMEOFDAY */
+
+	return (ret);
 }
