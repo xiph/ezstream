@@ -192,22 +192,14 @@ if test x"$use_taglib" != "xno"; then
 	LIBS="${TAGLIB_LIBS}"
 
 	AC_CHECK_HEADERS([taglib/tag_c.h], [
-			AC_MSG_CHECKING([whether TagLib works])
+			AC_MSG_CHECKING([whether libtag_c works])
 			AC_LINK_IFELSE(
 				[AC_LANG_PROGRAM([[#include <taglib/tag_c.h>]],
 					[[ taglib_set_string_management_enabled(0); ]])],
 				[
 				AC_MSG_RESULT([yes])
 				have_taglib=yes
-				], [
-				if test x"$require_taglib" = "xyes"; then
-					AC_MSG_RESULT([no])
-					AC_MSG_ERROR([Cannot link against libtag_c in ${taglib_prefix}/lib])
-				else
-					AC_MSG_RESULT([no])
-					AC_MSG_WARN([Error while linking against libtag_c in ${taglib_prefix}/lib, disabling support])
-				fi
-				]
+				], [AC_MSG_RESULT([no])]
 			)
 		], [
 			if test x"$require_taglib" = "xyes"; then
@@ -216,6 +208,29 @@ if test x"$use_taglib" != "xno"; then
 				AC_MSG_NOTICE([No TagLib C header found on this system])
 			fi
 		])
+
+	dnl For static-only archs:
+	if test x"$have_taglib" = "xno" -a x"$ac_cv_header_taglib_tag_c_h" = "xyes"; then
+		AC_MSG_CHECKING([whether libtag_c works with -ltag -lstdc++ -lz (static arch)])
+		TAGLIB_LIBS="${TAGLIB_LIBS} -ltag -lstdc++ -lz"
+		LIBS="${TAGLIB_LIBS}"
+		AC_LINK_IFELSE(
+			[AC_LANG_PROGRAM([[#include <taglib/tag_c.h>]],
+				[[ taglib_set_string_management_enabled(0); ]])],
+			[
+			 AC_MSG_RESULT([yes])
+			 have_taglib=yes
+			], [
+			 if test x"$require_taglib" = "xyes"; then
+				AC_MSG_RESULT([no])
+				AC_MSG_ERROR([Cannot link against libtag_c in ${taglib_prefix}/lib])
+			 else
+				AC_MSG_RESULT([no])
+				AC_MSG_WARN([Error while linking against libtag_c in ${taglib_prefix}/lib, disabling support])
+			 fi
+			]
+		)
+	fi
 
 	CFLAGS="$ac_taglib_save_CFLAGS"
 	CPPFLAGS="$ac_taglib_save_CPPFLAGS"
