@@ -48,9 +48,10 @@ system.
 ------------------------
 
 
-A few useful features are missing in the Windows version of ezstream. Runtime
-control via signals is not possible, and native metadata support is restricted
-to MP3 (ID3v1) and Ogg Vorbis tags.
+A few useful features are missing in the Windows version of ezstream:
+ * Runtime control via signals is not possible.
+ * Some useful external utilities (encoders, decoders, etc) may not be
+   available on Windows.
 
 
 
@@ -58,7 +59,7 @@ to MP3 (ID3v1) and Ogg Vorbis tags.
 --------------
 
 
-Ezstream uses
+Ezstream uses:
  * zlib (http://www.zlib.net/, BSD-like license)
  * libiconv (http://www.gnu.org/software/libiconv/, LGPL)
  * libxml2 (http://xmlsoft.org/, BSD-like license)
