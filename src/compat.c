@@ -29,7 +29,7 @@
 
 /*
  * Modified basename() implementation from OpenBSD, based on:
- * $OpenBSD: basename.c,v 1.14 2005/08/08 08:05:33 espie Exp $
+ * $OpenBSD: src/lib/libc/gen/basename.c,v 1.14 2005/08/08 08:05:33 espie Exp $
  * Copyright (c) 1997, 2004 Todd C. Miller <Todd.Miller@courtesan.com>
  */
 char *
