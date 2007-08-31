@@ -1,3 +1,337 @@
+2007-08-31 16:02  moritz
+
+	* [r13671] configure.in:
+	  -Wno-unused-parameter breaks gcc2, remove it.
+
+2007-08-31 15:55  moritz
+
+	* [r13670] configure.in:
+	  Try harder to link against TagLib.
+
+2007-08-31 11:49  moritz
+
+	* [r13669] NEWS:
+	  Today is release day.
+
+2007-08-31 11:47  moritz
+
+	* [r13668] NEWS, configure.in, src/compat.h, src/ezstream.c,
+	  src/util.c, src/util.h, win32/config.h:
+	  gettimeofday() everywhere; now ezstream behaves almost the same
+	  on Windows compared to Unix. Also mention TagLib support on
+	  Windows in NEWS.
+
+2007-08-31 11:46  moritz
+
+	* [r13667] src/compat.c:
+	  Fake the location of my basename() source to be more clear.
+
+2007-08-31 01:59  moritz
+
+	* [r13665] win32/README.win32:
+	  Having TagLib on Windows means that reading metadata from files
+	  should work like elsewhere now. While here, do some minor
+	  tweaking as well.
+
+2007-08-31 01:48  moritz
+
+	* [r13664] win32/ezstream.sln, win32/ezstream.vcproj:
+	  ezstream.exe is now using TagLib as well.
+
+2007-08-30 18:36  moritz
+
+	* [r13662] win32/README.win32:
+	  Tweak, sync with what will be the new reality soon, and include
+	  COPYING.txt in the future.
+
+2007-08-30 12:27  moritz
+
+	* [r13660] NEWS:
+	  Document a few extra nits that also happened so far.
+
+2007-08-30 12:13  moritz
+
+	* [r13659] doc/ezstream.1.in:
+	  Sync with new reality, and fix a completely botched up sentence.
+
+2007-08-30 11:31  moritz
+
+	* [r13658] src/ezstream.c, src/util.c, src/util.h:
+	  * Back out conversions to ISO8859-1. * Add 'charset=UTF-8' to the
+	  metadata update query arguments. The current release of Icecast
+	  will ignore it, and the next one will know how to handle it
+	  (karl@ is still working on it at this point, but previous diffs
+	  worked as advertised.) * If no metadata format string is
+	  available and we have both an artist and a title, use the
+	  artist/title way of updating instead of the generic "song"
+	  interface.
+
+2007-08-26 14:31  moritz
+
+	* [r13632] configure.in:
+	  When configure found libiconv, it helps to also have it use that
+	  information to properly link against it. Problem spotted and fix
+	  tested by iCER on #icecast.
+
+2007-08-25 15:07  moritz
+
+	* [r13627] doc/ezstream.1.in:
+	  Expand the "Metadata Caveats" subsection wrt codesets and actual
+	  abilities of ezstream and Icecast.
+
+2007-08-25 14:37  moritz
+
+	* [r13626] src/util.c:
+	  Need to consider converting from an unknown/unsupported codeset
+	  as well.
+
+2007-08-25 14:16  moritz
+
+	* [r13624] src/util.c:
+	  Whoops. Fix error message ...
+
+2007-08-25 12:24  moritz
+
+	* [r13622] src/ezstream.c, src/metadata.c, src/util.c, src/util.h:
+	  Get closer to what Icecast does (or will) expect wrt used
+	  codesets. I still disagree with the new ISO-8859-1 assumption for
+	  non-Ogg streams, because (for example) with ID3 tags, a codeset
+	  is simply not part of the specification and a better assumption
+	  would be that they are in the user's locale. Therefore, it would
+	  make more sense, IMO, to clearly specify that ANY metadata sent
+	  to Icecast should be UTF-8 and let the source client figure out
+	  the rest. This would also answer the question what codeset an
+	  /admin user should use if the content type of a mountpoint isn't
+	  known (although that can be figured out with an unclean read of
+	  the mountpoint's stats beforehand.)
+
+2007-08-24 17:23  moritz
+
+	* [r13616] src/util.c:
+	  Less code is always better.
+
+2007-08-24 12:37  moritz
+
+	* [r13611] README:
+	  Mention optional iconv() dependency.
+
+2007-08-24 12:09  moritz
+
+	* [r13610] NEWS:
+	  Add ticket no. to the MP3 metadata fix.
+
+2007-08-24 11:57  moritz
+
+	* [r13609] NEWS, configure.in, doc/ezstream.1.in, src/ezstream.c,
+	  src/metadata.c, src/util.c, win32/config.h,
+	  win32/ezstream.vcproj:
+	  UTF-8 support is now ready to be used.
+
+2007-08-24 00:52  moritz
+
+	* [r13607] ., Makefile.am, build-aux, build-aux/Makefile.am,
+	  build-aux/config.rpath, configure.in, m4/iconv.m4, src/util.c,
+	  src/util.h:
+	  Work in progress: Proper UTF-8 support that doesn't affect
+	  console output. No new code is actually used, yet, as there's
+	  still more work to be done. This adds the whole iconv-related
+	  build stuff and moves most auto* files into build-aux/.
+
+2007-08-24 00:46  moritz
+
+	* [r13606] src/metadata.c:
+	  Fix native ID3v1 reading (no-op, since affected fields were not
+	  used.)
+
+2007-08-23 13:48  moritz
+
+	* [r13592] src/ezstream.c:
+	  Change the MP3 special case, so working with metadata is more
+	  flexible. Turns out that there is still a problem with MP3
+	  streams that are being reencoded. This allows me to try out more
+	  solutions.
+
+2007-08-22 18:29  moritz
+
+	* [r13589] NEWS:
+	  Consistency + typo fix.
+
+2007-08-22 15:19  moritz
+
+	* [r13587] doc/ezstream.1.in, src/ezstream.c:
+	  The -c parameter is not optional.
+
+2007-08-22 15:15  moritz
+
+	* [r13586] src/ezstream.c, src/util.c, src/util.h:
+	  Make main() smaller by moving the libshout setup into a separate
+	  function.
+
+2007-08-14 04:10  moritz
+
+	* [r13546] win32/config.h:
+	  Bump version numbers here, too.
+
+2007-08-14 04:08  moritz
+
+	* [r13545] NEWS:
+	  Sync.
+
+2007-08-14 03:43  moritz
+
+	* [r13544] doc/ezstream.1.in, src/ezstream.c, src/metadata.c,
+	  src/metadata.h:
+	  Ticket #1225, reported by matpoc at lenta dot ru: Looks like
+	  there's demand for normalizing metadata strings, which -- I
+	  assume -- is due to strange (MP3) encoders that do weird things.
+	  Well, why not. It's not too intrusive, and disabled by default.
+	  Enable string normalization with the new -n command line
+	  parameter.
+
+2007-08-14 03:33  moritz
+
+	* [r13543] configure.in:
+	  Bump to 0.5.0, new feature coming up.
+
+2007-08-14 03:32  moritz
+
+	* [r13542] src/ezstream.c, src/util.c, src/util.h:
+	  Ticket #1225, reported by matpoc at lenta dot ru: Bring back
+	  special case for streaming MP3 files without reencoding, which
+	  was lost during the many changes in 0.3.0 and subsequently
+	  forgotten. Sorry for the inconvenience, and thanks for the
+	  report.
+
+2007-08-09 11:13  moritz
+
+	* [r13494] win32/ezstream.sln, win32/ezstream.vcproj:
+	  More build tweaks. The only thing that still doesn't work by now
+	  is building a static, thread-safe libshout. Bugger all, this can
+	  wait until if/when I need threads.
+
+2007-08-08 21:52  moritz
+
+	* [r13467] src/playlist.c:
+	  Since playlist_t is using size_t, change two unsigned longs to
+	  size_t as well.
+
+2007-08-08 21:33  moritz
+
+	* [r13466] win32/config.h, win32/ezstream.sln,
+	  win32/ezstream.vcproj:
+	  More Win32 project and build cleanups.
+
+2007-08-08 14:21  moritz
+
+	* [r13464] win32/ezstream.sln, win32/ezstream.vcproj:
+	  Reorder project list and add xalloc.* to the build.
+
+2007-08-08 14:20  moritz
+
+	* [r13463] src/ezstream.c, win32/config.h:
+	  WIN32 #ifdef reduction.
+
+2007-08-08 13:46  moritz
+
+	* [r13462] configure.in:
+	  A few tweaks: * Get ISO C99 from the compiler, if possible. *
+	  Check for ssize_t for --enable-debug portability. * Add
+	  AC_C_VOLATILE check, because we use it.
+
+2007-08-08 13:25  moritz
+
+	* [r13461] win32/config.h:
+	  Damn, it looks like I forgot to update this for the Win32 builds
+	  ...
+
+2007-08-08 13:24  moritz
+
+	* [r13460] src/xalloc.c:
+	  Sync.
+
+2007-08-08 13:15  moritz
+
+	* [r13458] src/ezstream.c:
+	  Rename shutdown() to ez_shutdown() to prevent a function name
+	  clash on Windows.
+
+2007-08-08 13:04  moritz
+
+	* [r13457] src/metadata.c, src/playlist.c:
+	  Use a better \n and \r trimming idiom after fgets().
+
+2007-08-04 17:24  moritz
+
+	* [r13443] src/xalloc.c, src/xalloc.h:
+	  It's good to know how to spell the own email address.
+
+2007-08-04 17:10  moritz
+
+	* [r13441] src/xalloc.c:
+	  Merge.
+
+2007-08-04 17:10  moritz
+
+	* [r13440] src/playlist.c:
+	  Sprinkle in some consistency ...
+
+2007-08-04 17:04  moritz
+
+	* [r13438] src/configfile.c, src/configfile.h, src/ezstream.c:
+	  Do a clean shutdown on SIGINT and SIGTERM.
+
+2007-08-04 16:46  moritz
+
+	* [r13437] src/xalloc.c, src/xalloc.h:
+	  Merge xalloc changes.
+
+2007-08-04 16:39  moritz
+
+	* [r13436] src/ezstream.c, src/metadata.c, src/playlist.c:
+	  Now that xalloc is pretty much an external entity, explicitly set
+	  freed pointers to NULL if we lateron expect them to be NULL (no
+	  longer rely on xalloc to do this for us.)
+
+2007-08-04 16:09  moritz
+
+	* [r13433] src/metadata.c:
+	  Do not xfree() something that wasn't x*alloc()'ed.
+
+2007-08-02 18:50  moritz
+
+	* [r13432] configure.in:
+	  Make PACKAGE_BUGREPORT point to the bug tracker URI.
+
+2007-08-02 18:48  moritz
+
+	* [r13431] Makefile.am, NEWS, README, compat, compat/Makefile.am,
+	  compat/sys, compat/sys/Makefile.am, compat/sys/tree.3,
+	  compat/sys/tree.h, configure.in, src/Makefile.am,
+	  src/configfile.c, src/ezstream.c, src/metadata.c, src/playlist.c,
+	  src/util.c, src/util.h, src/xalloc.c, src/xalloc.h:
+	  Switch to using the (integrated) libxalloc.
+
+2007-07-24 15:29  moritz
+
+	* [r13304] src/ezstream.c, src/metadata.c:
+	  Cosmetic changes; no functional change. Use the calloc()-style
+	  API correctly.
+
+2007-07-24 15:13  moritz
+
+	* [r13303] src/util.c:
+	  Cosmetic changes. No functional change.
+
+2007-07-24 13:44  moritz
+
+	* [r13302] configure.in:
+	  Bump version number after the 0.4.3 release.
+
+2007-07-24 13:21  moritz
+
+	* [r13298] ChangeLog:
+	  Sync.
+
 2007-07-24 13:20  moritz
 
 	* [r13297] NEWS:
