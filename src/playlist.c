@@ -382,7 +382,7 @@ playlist_goto_entry(playlist_t *pl, const char *entry)
 		exit(1);
 	}
 
-	if (pl->program || pl->num == 0)
+	if (pl->program)
 		return (0);
 
 	for (i = 0; i < pl->num; i++) {
