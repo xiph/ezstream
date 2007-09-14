@@ -980,14 +980,21 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		} else {
 			if ((playlist = playlist_read(fileName)) == NULL)
 				return (0);
+			if (vFlag && playlist_get_num_items(playlist) == 0)
+				printf("%s: Warning: Playlist '%s' is empty\n",
+				       __progname, fileName);
 		}
-	} else
+	} else {
 		/*
 		 * XXX: This preserves traditional behavior, however,
 		 *      rereading the playlist after each walkthrough seems a
 		 *      bit more logical.
 		 */
 		playlist_rewind(playlist);
+		if (vFlag && playlist_get_num_items(playlist) == 0)
+			printf("%s: Warning: Playlist '%s' is empty\n",
+			       __progname, fileName);
+	}
 
 	if (!pezConfig->fileNameIsProgram && pezConfig->shuffle)
 		playlist_shuffle(playlist);
