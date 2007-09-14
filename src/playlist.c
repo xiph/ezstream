@@ -287,6 +287,9 @@ playlist_get_next(playlist_t *pl)
 	if (pl->program)
 		return (playlist_run_program(pl));
 
+	if (pl->num == 0)
+		return (NULL);
+
 	return ((const char *)pl->list[pl->index++]);
 }
 
@@ -299,7 +302,7 @@ playlist_peek_next(playlist_t *pl)
 		exit(1);
 	}
 
-	if (pl->program)
+	if (pl->program || pl->num == 0)
 		return (NULL);
 
 	return ((const char *)pl->list[pl->index]);
@@ -314,7 +317,7 @@ playlist_skip_next(playlist_t *pl)
 		exit(1);
 	}
 
-	if (pl->program)
+	if (pl->program || pl->num == 0)
 		return;
 
 	if (pl->list[pl->index] != NULL)
