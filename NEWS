@@ -1,3 +1,17 @@
+Changes in 0.5.1 (SVN):
+
+ * src/playlist.c:
+   - [FIX]   Fix a segmentation fault in playlist_*_next() when trying to
+             access empty playlists.
+
+ * src/ezstream.c:
+   - [MISC]  Issue a warning in verbose mode when dealing with an empty
+             playlist file. This also makes it more obvious what is going on
+             when a user makes ezstream spin on an empty playlist with
+             <stream_once/> set to 0.
+
+
+
 Changes in 0.5.0, released on 2007-08-31:
 
  * src/ezstream.c:
