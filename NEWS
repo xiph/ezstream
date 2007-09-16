@@ -1,4 +1,4 @@
-Changes in 0.5.1 (SVN):
+Changes in 0.5.1, released on 2007-09-16:
 
  * src/playlist.c:
    - [FIX]   Fix a segmentation fault in playlist_*_next() when trying to
