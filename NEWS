@@ -2,7 +2,7 @@ Changes in 0.5.1, released on 2007-09-16:
 
  * src/playlist.c:
    - [FIX]   Fix a segmentation fault in playlist_*_next() when trying to
-             access empty playlists.
+             access empty playlists. (Ticket #1240)
 
  * src/ezstream.c:
    - [MISC]  Issue a warning in verbose mode when dealing with an empty
