@@ -1,3 +1,39 @@
+2007-09-16 12:20  moritz
+
+	* [r13834] NEWS:
+	  0.5.1 will be released today.
+
+2007-09-14 07:01  moritz
+
+	* [r13803] NEWS:
+	  Update.
+
+2007-09-14 07:01  moritz
+
+	* [r13802] src/ezstream.c:
+	  Warn, in verbose mode, when dealing with empty playlists.
+
+2007-09-14 07:00  moritz
+
+	* [r13801] src/playlist.c:
+	  In this case, the pl->num check is superfluous.
+
+2007-09-14 06:59  moritz
+
+	* [r13800] src/playlist.c:
+	  If there are no playlist entries, dereferencing pl->list causes a
+	  segfault. Fix this by checking pl->num early.
+
+2007-08-31 17:19  moritz
+
+	* [r13678] configure.in, win32/config.h:
+	  Bump version number after the 0.5.0 release.
+
+2007-08-31 16:22  moritz
+
+	* [r13672] ChangeLog:
+	  Sync.
+
 2007-08-31 16:02  moritz
 
 	* [r13671] configure.in:
