@@ -1,3 +1,18 @@
+Changes in 0.5.2 (SVN):
+
+ * src/ezstream.c:
+   - [FIX]   Fix a crash that occurs when streaming from standard input without
+             using a script or program that supplies metadata information.
+             (Ticket #1247)
+   - [FIX]   Provide a useful error message when there's no more data to read
+             from standard input instead of talking about scary, bad file
+             descriptors.
+   - [FIX]   Similar to the fix for #1247, properly initialize another
+             variable. The result is a cosmetic fix for the "real-time" status
+             line when streaming from standard input.
+
+
+
 Changes in 0.5.1, released on 2007-09-16:
 
  * src/playlist.c:
