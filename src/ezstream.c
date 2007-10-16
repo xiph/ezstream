@@ -561,6 +561,8 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 	if (mdata_p != NULL)
 		*mdata_p = NULL;
+	if (songLen != NULL)
+		*songLen = 0;
 
 	if (strcmp(fileName, "stdin") == 0) {
 		if (metadataFromProgram) {
