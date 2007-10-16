@@ -905,7 +905,7 @@ streamFile(shout_t *shout, const char *fileName)
 		metadata_free(&mdata);
 	}
 
-	if (songLen >= 0)
+	if (songLen > 0)
 		songLenStr = xstrdup(getTimeString(songLen));
 	ez_gettimeofday((void *)&startTime);
 	do {
