@@ -559,6 +559,9 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 	char		*pCommandString = NULL;
 	metadata_t	*mdata;
 
+	if (mdata_p != NULL)
+		*mdata_p = NULL;
+
 	if (strcmp(fileName, "stdin") == 0) {
 		if (metadataFromProgram) {
 			if ((mdata = getMetadata(pezConfig->metadataProgram)) == NULL)
