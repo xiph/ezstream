@@ -855,7 +855,10 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		if (errno == EINTR) {
 			clearerr(filepstream);
 			ret = STREAM_CONT;
-		} else
+		} else if (errno == EBADF && isStdin)
+			printf("%s: No (more) data available on standard input\n",
+			       __progname);
+		else
 			printf("%s: sendStream(): Error while reading '%s': %s\n",
 			       __progname, fileName, strerror(errno));
 	}
