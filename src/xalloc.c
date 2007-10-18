@@ -172,7 +172,7 @@ _xalloc_error(int errnum, const char *fmt, ...)
 	if (errnum > 0) {
 		if (xalloc_initialized)
 			XALLOC_LOCK(strerror_mutex);
-		vfprintf(debug_output, ": %s\n", strerror(errnum));
+		fprintf(debug_output, ": %s\n", strerror(errnum));
 		if (xalloc_initialized)
 			XALLOC_UNLOCK(strerror_mutex);
 	}
