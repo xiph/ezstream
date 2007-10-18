@@ -578,9 +578,6 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 				metadata_free(&mdata);
 		}
 
-		if (vFlag)
-			printf("%s: Reading from standard input\n",
-			       __progname);
 		if (isStdin != NULL)
 			*isStdin = 1;
 #ifdef WIN32
@@ -889,7 +886,8 @@ streamFile(shout_t *shout, const char *fileName)
 		char	*tmp, *metaData;
 
 		tmp = metadata_assemble_string(mdata);
-		metaData = UTF8toCHAR(tmp, ICONV_REPLACE);
+		if ((metaData = UTF8toCHAR(tmp, ICONV_REPLACE)) == NULL)
+			metaData = xstrdup("(unknown title)");
 		xfree(tmp);
 		printf("%s: Streaming ``%s''", __progname, metaData);
 		if (vFlag)
@@ -903,7 +901,8 @@ streamFile(shout_t *shout, const char *fileName)
 			setMetadata(shout, mdata, NULL);
 
 		metadata_free(&mdata);
-	}
+	} else if (isStdin)
+		printf("%s: Streaming from standard input\n", __progname);
 
 	if (songLen > 0)
 		songLenStr = xstrdup(getTimeString(songLen));
