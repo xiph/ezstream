@@ -1,0 +1,36 @@
+<!--
+   EXAMPLE: Ogg Vorbis stream from standard input WITHOUT reencoding
+
+   This example streams an Ogg Vorbis stream from standard input (stdin.)
+   Since ezstream will not be doing any reencoding, the resulting stream
+   format (quality/bitrate, samplerate, channels) will be of the respective
+   input stream.
+ -->
+<ezstream>
+    <url>http://localhost:8000/vorbis.ogg</url>
+    <sourcepassword>hackme</sourcepassword>
+    <format>VORBIS</format>
+    <filename>stdin</filename>
+    <!--
+      Important:
+      For streaming from standard input, the default for continuous streaming
+      is bad. Set <stream_once /> to 1 here to prevent ezstream from spinning
+      endlessly when the input stream stops:
+     -->
+    <stream_once>1</stream_once>
+    <!--
+      The following settings are used to describe your stream to the server.
+      It's up to you to make sure that the bitrate/quality/samplerate/channels
+      information matches up with your input stream files.
+     -->
+    <svrinfoname>My Stream</svrinfoname>
+    <svrinfourl>http://www.oddsock.org</svrinfourl>
+    <svrinfogenre>RockNRoll</svrinfogenre>
+    <svrinfodescription>This is a stream description</svrinfodescription>
+    <svrinfobitrate>96</svrinfobitrate>
+    <svrinfoquality>2.0</svrinfoquality>
+    <svrinfochannels>2</svrinfochannels>
+    <svrinfosamplerate>44100</svrinfosamplerate>
+    <!-- Allow the server to advertise the stream on a public YP directory: -->
+    <svrinfopublic>1</svrinfopublic>
+</ezstream>
