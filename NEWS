@@ -16,6 +16,12 @@ Changes in 0.5.2 (SVN):
  * src/xalloc.c:
    - [FIX]   A rare, possible crash has been fixed in an error path.
 
+ * examples/*:
+   - [NEW]   Add an example configuration for streaming from standard input.
+   - [MISC]  Improve reencoding examples to make them more easily usable with
+             fewer changes.
+   - [MISC]  Reenconding example files have been renamed.
+
 
 
 Changes in 0.5.1, released on 2007-09-16:
