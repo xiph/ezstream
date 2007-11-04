@@ -49,7 +49,14 @@
            the appropriate command line parameters of the encoders in the
            <encode /> elements.
 
-           New encdec sections can be added for new input/output formats.
+           New <encdec /> sections can be added for new input/output formats.
+
+           Distorted audio, or audio playing at the wrong speed/pitch may be
+           caused by conflicting sample rates in the various <decode /> and
+           <encode /> sections, byte order (endianness) issues and mono input
+           files. See the documentation on the various de-/encoders for
+           the options that need to be used to create a consistent stream of
+           raw samples.
          -->
         <encdec>
             <!-- Support for FLAC decoding: -->
@@ -64,8 +71,9 @@
              -->
             <format>MP3</format>
             <match>.mp3</match>
-            <decode>madplay -o raw:- "@T@"</decode>
-            <encode>lame -r -x -b 56 -s 44.1 --resample 22.05 -a - -</encode>
+            <!-- Note: madplay uses host byte order for raw samples. -->
+            <decode>madplay -b 16 -R 44100 -S -o raw:- "@T@"</decode>
+            <encode>lame --preset cbr 128 -r -x -s 44.1 --bitwidth 16 - -</encode>
         </encdec>
         <encdec>
             <!--
@@ -73,8 +81,8 @@
              -->
             <format>VORBIS</format>
             <match>.ogg</match>
-            <decode>oggdec -R -o - "@T@"</decode>
-            <encode>oggenc -r -q 1.5 --resample=44100 -t "@M@" -</encode>
+            <decode>oggdec -R -b 16 -e 0 -s 1 -o - "@T@"</decode>
+            <encode>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t "@M@" -</encode>
         </encdec>
     </reencode>
 </ezstream>
