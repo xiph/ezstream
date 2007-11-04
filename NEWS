@@ -1,4 +1,4 @@
-Changes in 0.5.2 (SVN):
+Changes in 0.5.2, released on 2007-11-04:
 
  * src/ezstream.c:
    - [FIX]   Fix a crash that occurs when streaming from standard input without
