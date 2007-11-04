@@ -1,3 +1,97 @@
+2007-11-04 13:50  moritz
+
+	* [r14096] NEWS:
+	  Today is release day, finally.
+
+2007-11-04 13:43  moritz
+
+	* [r14095] NEWS:
+	  Sync.
+
+2007-11-04 13:40  moritz
+
+	* [r14094] examples/Makefile.am,
+	  examples/ezstream_reencode_mp3.xml,
+	  examples/ezstream_reencode_theora.xml,
+	  examples/ezstream_reencode_vorbis.xml,
+	  examples/ezstream_reencoding_example_mp3.xml,
+	  examples/ezstream_reencoding_example_theora.xml,
+	  examples/ezstream_reencoding_example_vorbis.xml,
+	  examples/ezstream_stdin_vorbis.xml:
+	  * Add new configuration example for streaming from standard
+	  input. * Rename reencoding examples to shorter and less redundant
+	  filenames.
+
+2007-11-04 13:09  moritz
+
+	* [r14093] examples/ezstream_reencoding_example_mp3.xml,
+	  examples/ezstream_reencoding_example_theora.xml,
+	  examples/ezstream_reencoding_example_vorbis.xml:
+	  Improve the reencoding examples; more usable defaults and add
+	  more options to create a more well-defined stream of raw samples.
+
+2007-10-18 07:39  moritz
+
+	* [r14010] NEWS:
+	  Sync.
+
+2007-10-18 07:39  moritz
+
+	* [r14009] src/ezstream.c:
+	  Improve output messages some more when dealing with standard
+	  input.
+
+2007-10-18 06:38  moritz
+
+	* [r14008] src/xalloc.c:
+	  Wow, now how did that one creep in an remain undetected for so
+	  long?
+
+2007-10-16 14:51  moritz
+
+	* [r14000] NEWS:
+	  Update.
+
+2007-10-16 14:51  moritz
+
+	* [r13999] src/ezstream.c:
+	  This needs changin' as well.
+
+2007-10-16 14:46  moritz
+
+	* [r13998] src/ezstream.c:
+	  Fix use of yet another uninitialized-if-streaming-from-stdin
+	  variable. This prevents bogus output in the "real-time" status
+	  line.
+
+2007-10-16 14:44  moritz
+
+	* [r13997] src/ezstream.c:
+	  Return a proper error message when there's no more data to read
+	  from standard input.
+
+2007-10-16 14:28  moritz
+
+	* [r13996] src/ezstream.c:
+	  Ticket #1247: Don't dereference uninitialized junk pointers; this
+	  fixes a crash when streaming standard input without also using a
+	  metadata program (d'oh.)
+
+2007-09-16 12:50  moritz
+
+	* [r13840] NEWS:
+	  Post-release tweak: Add Ticket number.
+
+2007-09-16 12:49  moritz
+
+	* [r13839] configure.in, win32/config.h:
+	  Bump version number after the 0.5.1 release.
+
+2007-09-16 12:23  moritz
+
+	* [r13835] ChangeLog:
+	  Sync.
+
 2007-09-16 12:20  moritz
 
 	* [r13834] NEWS:
