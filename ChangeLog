@@ -1,3 +1,25 @@
+2007-12-01 21:13  moritz
+
+	* [r14256] NEWS:
+	  It has been very quiet after 0.5.2, so get this minor bugfix
+	  release out the door today.
+
+2007-12-01 16:02  moritz
+
+	* [r14255] NEWS, src/ezstream.c:
+	  Ignore SIGPIPE, which turned out to be the cause for silent
+	  deaths of long- running ezstream processes.
+
+2007-11-04 14:34  moritz
+
+	* [r14101] configure.in, win32/config.h:
+	  Post-release version bump.
+
+2007-11-04 13:52  moritz
+
+	* [r14097] ChangeLog:
+	  Sync.
+
 2007-11-04 13:50  moritz
 
 	* [r14096] NEWS:
