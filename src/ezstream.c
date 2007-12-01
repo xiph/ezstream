@@ -132,7 +132,11 @@ void		usageHelp(void);
 int		ez_shutdown(int);
 
 #ifdef HAVE_SIGNALS
-void	sig_handler(int);
+void		sig_handler(int);
+
+# ifndef SIG_IGN
+#  define SIG_IGN	 (void (*)(int))1
+# endif /* !SIG_IGN */
 
 void
 sig_handler(int sig)
@@ -1249,6 +1253,16 @@ main(int argc, char *argv[])
 			       __progname, strerror(errno));
 			return (ez_shutdown(1));
 		}
+	}
+	/*
+	 * Ignore SIGPIPE, which has been seen to give a long-running ezstream
+	 * process trouble. EOF and/or EPIPE are also easier to handle.
+	 */
+	act.sa_handler = SIG_IGN;
+	if (sigaction(SIGPIPE, &act, NULL) == -1) {
+		printf("%s: sigaction(): %s\n",
+		       __progname, strerror(errno));
+		return (ez_shutdown(1));
 	}
 #endif /* HAVE_SIGNALS */
 
