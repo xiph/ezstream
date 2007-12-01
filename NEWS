@@ -1,4 +1,4 @@
-Changes in 0.5.3 (SVN):
+Changes in 0.5.3, released on 2007-12-01:
 
  * src/ezstream.c:
    - [FIX]   Prevent (very) long-running ezstream processes from dying without
