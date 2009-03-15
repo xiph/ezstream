@@ -1,8 +1,13 @@
 Changes in 0.5.4, released on XXXX-XX-XX:
 
- * sys/compat/tree.*:
+ * compat/sys/tree.*:
    - [MISC]  Update tree macros to a newer version. The manual, shipped for
              reference, now has a more friendly 2-clause BSD license.
+
+ * various:
+   - [FIX]   Add a missing metadata charset conversion, and add charset
+             conversions for filenames. From Roman Donchenko.
+   - [FIX]   Fix build on MinGW. From Roman Donchenko.
 
 
 
