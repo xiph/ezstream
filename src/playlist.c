@@ -355,7 +355,7 @@ playlist_get_position(playlist_t *pl)
 }
 
 int
-playlist_set_position(playlist_t *pl, unsigned long index)
+playlist_set_position(playlist_t *pl, unsigned long idx)
 {
 	if (pl == NULL) {
 		printf("%s: playlist_set_position(): Internal error: NULL argument\n",
@@ -363,10 +363,10 @@ playlist_set_position(playlist_t *pl, unsigned long index)
 		exit(1);
 	}
 
-	if (pl->program || index > pl->num - 1)
+	if (pl->program || idx > pl->num - 1)
 		return (0);
 
-	pl->index = (size_t)index;
+	pl->index = (size_t)idx;
 
 	return (1);
 }

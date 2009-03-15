@@ -111,7 +111,7 @@ typedef struct tag_ID3Tag {
 	char	genre;
 } ID3Tag;
 
-int		urlParse(const char *, char **, int *, char **);
+int		urlParse(const char *, char **, unsigned short *, char **);
 void		replaceString(const char *, char *, size_t, const char *,
 			      const char *);
 char *		buildCommandString(const char *, const char *, metadata_t *);
@@ -163,9 +163,10 @@ sig_handler(int sig)
 #endif /* HAVE_SIGNALS */
 
 int
-urlParse(const char *url, char **hostname, int *port, char **mountname)
+urlParse(const char *url, char **hostname, unsigned short *port,
+	 char **mountname)
 {
-	char		*p1, *p2, *p3;
+	const char	*p1, *p2, *p3;
 	char		 tmpPort[6] = "";
 	size_t		 hostsiz, mountsiz;
 	const char	*errstr;
@@ -182,7 +183,7 @@ urlParse(const char *url, char **hostname, int *port, char **mountname)
 		return (0);
 	}
 
-	p1 = (char *)(url) + strlen("http://");
+	p1 = url + strlen("http://");
 	p2 = strchr(p1, ':');
 	if (p2 == NULL) {
 		printf("%s: Error: Invalid <url>: Missing port\n",
@@ -202,8 +203,8 @@ urlParse(const char *url, char **hostname, int *port, char **mountname)
 		return (0);
 	}
 
-	strlcpy(tmpPort, p2, (p3 - p2) + 1);
-	*port = (int)strtonum(tmpPort, 1, 65535, &errstr);
+	strlcpy(tmpPort, p2, (p3 - p2) + 1UL);
+	*port = (unsigned short)strtonum(tmpPort, 1LL, (long long)USHRT_MAX, &errstr);
 	if (errstr) {
 		printf("%s: Error: Invalid <url>: Port '%s' is %s\n",
 		       __progname, tmpPort, errstr);
@@ -222,8 +223,8 @@ void
 replaceString(const char *source, char *dest, size_t size,
 	      const char *from, const char *to)
 {
-	char	*p1 = (char *)source;
-	char	*p2;
+	const char	*p1 = source;
+	const char	*p2;
 
 	p2 = strstr(p1, from);
 	if (p2 != NULL) {
@@ -232,7 +233,7 @@ replaceString(const char *source, char *dest, size_t size,
 			       __progname);
 			abort();
 		}
-		strncat(dest, p1, p2 - p1);
+		strncat(dest, p1, (size_t)(p2 - p1));
 		strlcat(dest, to, size);
 		p1 = p2 + strlen(from);
 	}
@@ -768,7 +769,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 	   int isStdin, const char *songLenStr, struct timeval *tv)
 {
 	unsigned char	 buff[4096];
-	size_t		 read, total, oldTotal;
+	size_t		 bytes_read, total, oldTotal;
 	int		 ret;
 	double		 kbps = -1.0;
 	struct timeval	 timeStamp, *startTime = tv;
@@ -784,7 +785,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 	total = oldTotal = 0;
 	ret = STREAM_DONE;
-	while ((read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
+	while ((bytes_read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
 		if (shout_get_connected(shout) != SHOUTERR_CONNECTED &&
 		    reconnectServer(shout, 0) == 0) {
 			ret = STREAM_SERVERR;
@@ -793,7 +794,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 		shout_sync(shout);
 
-		if (shout_send(shout, buff, read) != SHOUTERR_SUCCESS) {
+		if (shout_send(shout, buff, bytes_read) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_send(): %s\n", __progname,
 			       shout_get_error(shout));
 			if (reconnectServer(shout, 1))
@@ -825,9 +826,9 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			}
 		}
 
-		total += read;
+		total += bytes_read;
 		if (qFlag && vFlag) {
-			struct timeval	tv;
+			struct timeval	tval;
 			double		oldTime, newTime;
 
 			if (!isStdin && playlistMode) {
@@ -844,20 +845,20 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 			oldTime = (double)timeStamp.tv_sec
 				+ (double)timeStamp.tv_usec / 1000000.0;
-			ez_gettimeofday((void *)&tv);
-			newTime = (double)tv.tv_sec
-				+ (double)tv.tv_usec / 1000000.0;
+			ez_gettimeofday((void *)&tval);
+			newTime = (double)tval.tv_sec
+				+ (double)tval.tv_usec / 1000000.0;
 			if (songLenStr == NULL)
 				printf("  [ %s]",
-				       getTimeString(tv.tv_sec - startTime->tv_sec));
+				       getTimeString(tval.tv_sec - startTime->tv_sec));
 			else
 				printf("  [ %s/%s]",
-				       getTimeString(tv.tv_sec - startTime->tv_sec),
+				       getTimeString(tval.tv_sec - startTime->tv_sec),
 				       songLenStr);
 			if (newTime - oldTime >= 1.0) {
 				kbps = (((double)(total - oldTotal) / (newTime - oldTime)) * 8.0) / 1000.0;
-				timeStamp.tv_sec = tv.tv_sec;
-				timeStamp.tv_usec = tv.tv_usec;
+				timeStamp.tv_sec = tval.tv_sec;
+				timeStamp.tv_usec = tval.tv_usec;
 				oldTotal = total;
 			}
 			if (kbps < 0)
@@ -1060,6 +1061,7 @@ char *
 getProgname(const char *argv0)
 {
 #ifdef HAVE___PROGNAME
+	(void)argv0;
 	return (strdup(__progname));
 #else
 	char	*p;
@@ -1113,7 +1115,7 @@ main(int argc, char *argv[])
 	int		 c;
 	char		*configFile = NULL;
 	char		*host = NULL;
-	int		 port = 0;
+	unsigned short	 port = 0;
 	char		*mount = NULL;
 	shout_t 	*shout;
 	extern char	*optarg;
@@ -1284,7 +1286,7 @@ main(int argc, char *argv[])
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
 		int	ret;
 
-		printf("%s: Connected to http://%s:%d%s\n", __progname,
+		printf("%s: Connected to http://%s:%hu%s\n", __progname,
 		       host, port, mount);
 
 		if (pezConfig->fileNameIsProgram ||
@@ -1314,7 +1316,7 @@ main(int argc, char *argv[])
 
 		shout_close(shout);
 	} else
-		printf("%s: Connection to http://%s:%d%s failed: %s\n", __progname,
+		printf("%s: Connection to http://%s:%hu%s failed: %s\n", __progname,
 		       host, port, mount, shout_get_error(shout));
 
 	if (quit)

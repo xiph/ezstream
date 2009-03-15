@@ -100,7 +100,7 @@ strrcasecmp(const char *s, const char *sub)
 }
 
 shout_t *
-stream_setup(const char *host, const int port, const char *mount)
+stream_setup(const char *host, unsigned short port, const char *mount)
 {
 	shout_t *shout = NULL;
 
@@ -219,7 +219,7 @@ stream_setup(const char *host, const int port, const char *mount)
 		return (NULL);
 	}
 
-	if (shout_set_public(shout, pezConfig->serverPublic) != SHOUTERR_SUCCESS) {
+	if (shout_set_public(shout, (unsigned int)pezConfig->serverPublic) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_public(): %s\n",
 		       __progname, shout_get_error(shout));
 		shout_free(shout);
@@ -365,6 +365,10 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	xfree(tocode);
 	return (output);
 #else
+	(void)from;
+	(void)to;
+	(void)mode;
+
 	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
 }

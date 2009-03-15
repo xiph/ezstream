@@ -150,6 +150,9 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 }
 #else
 {
+	(void)md;
+	(void)filep;
+
 	printf("%s: Internal error: metadata_use_taglib() called without TagLib support\n",
 	       __progname);
 	abort();
@@ -160,6 +163,9 @@ void
 metadata_use_self(metadata_t *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
+	(void)md;
+	(void)filep;
+
 	printf("%s: Internal error: metadata_use_self() called with TagLib support\n",
 	       __progname);
 	abort();
