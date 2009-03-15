@@ -1,3 +1,11 @@
+Changes in 0.5.4, released on XXXX-XX-XX:
+
+ * sys/compat/tree.*:
+   - [MISC]  Update tree macros to a newer version. The manual, shipped for
+             reference, now has a more friendly 2-clause BSD license.
+
+
+
 Changes in 0.5.3, released on 2007-12-01:
 
  * src/ezstream.c:

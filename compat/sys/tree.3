@@ -1,4 +1,4 @@
-.\"	$OpenBSD: tree.3,v 1.13 2007/05/31 19:19:48 jmc Exp $
+.\"	$OpenBSD: tree.3,v 1.20 2009/01/28 12:22:48 stsp Exp $
 .\"/*
 .\" * Copyright 2002 Niels Provos <provos@citi.umich.edu>
 .\" * All rights reserved.
@@ -11,11 +11,6 @@
 .\" * 2. Redistributions in binary form must reproduce the above copyright
 .\" *    notice, this list of conditions and the following disclaimer in the
 .\" *    documentation and/or other materials provided with the distribution.
-.\" * 3. All advertising materials mentioning features or use of this software
-.\" *    must display the following acknowledgement:
-.\" *      This product includes software developed by Niels Provos.
-.\" * 4. The name of the author may not be used to endorse or promote products
-.\" *    derived from this software without specific prior written permission.
 .\" *
 .\" * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
 .\" * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -28,7 +23,7 @@
 .\" * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 .\" * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 .\" */
-.Dd $Mdocdate$
+.Dd $Mdocdate: January 28 2009 $
 .Dt TREE 3
 .Os
 .Sh NAME
@@ -50,20 +45,25 @@
 .Nm SPLAY_INSERT ,
 .Nm SPLAY_REMOVE ,
 .Nm RB_PROTOTYPE ,
+.Nm RB_PROTOTYPE_STATIC ,
 .Nm RB_GENERATE ,
+.Nm RB_GENERATE_STATIC ,
 .Nm RB_ENTRY ,
 .Nm RB_HEAD ,
 .Nm RB_INITIALIZER ,
 .Nm RB_ROOT ,
 .Nm RB_EMPTY ,
 .Nm RB_NEXT ,
+.Nm RB_PREV ,
 .Nm RB_MIN ,
 .Nm RB_MAX ,
 .Nm RB_FIND ,
+.Nm RB_NFIND ,
 .Nm RB_LEFT ,
 .Nm RB_RIGHT ,
 .Nm RB_PARENT ,
 .Nm RB_FOREACH ,
+.Nm RB_FOREACH_REVERSE ,
 .Nm RB_INIT ,
 .Nm RB_INSERT ,
 .Nm RB_REMOVE
@@ -78,7 +78,7 @@
 .Ft "struct TYPE *"
 .Fn SPLAY_INITIALIZER "SPLAY_HEAD *head"
 .Fn SPLAY_ROOT "SPLAY_HEAD *head"
-.Ft "bool"
+.Ft "int"
 .Fn SPLAY_EMPTY "SPLAY_HEAD *head"
 .Ft "struct TYPE *"
 .Fn SPLAY_NEXT "NAME" "SPLAY_HEAD *head" "struct TYPE *elm"
@@ -101,16 +101,20 @@
 .Fn SPLAY_REMOVE "NAME" "SPLAY_HEAD *head" "struct TYPE *elm"
 .Pp
 .Fn RB_PROTOTYPE "NAME" "TYPE" "FIELD" "CMP"
+.Fn RB_PROTOTYPE_STATIC "NAME" "TYPE" "FIELD" "CMP"
 .Fn RB_GENERATE "NAME" "TYPE" "FIELD" "CMP"
+.Fn RB_GENERATE_STATIC "NAME" "TYPE" "FIELD" "CMP"
 .Fn RB_ENTRY "TYPE"
 .Fn RB_HEAD "HEADNAME" "TYPE"
 .Fn RB_INITIALIZER "RB_HEAD *head"
 .Ft "struct TYPE *"
 .Fn RB_ROOT "RB_HEAD *head"
-.Ft "bool"
+.Ft "int"
 .Fn RB_EMPTY "RB_HEAD *head"
 .Ft "struct TYPE *"
 .Fn RB_NEXT "NAME" "RB_HEAD *head" "struct TYPE *elm"
+.Ft "struct TYPE *"
+.Fn RB_PREV "NAME" "RB_HEAD *head" "struct TYPE *elm"
 .Ft "struct TYPE *"
 .Fn RB_MIN "NAME" "RB_HEAD *head"
 .Ft "struct TYPE *"
@@ -118,12 +122,15 @@
 .Ft "struct TYPE *"
 .Fn RB_FIND "NAME" "RB_HEAD *head" "struct TYPE *elm"
 .Ft "struct TYPE *"
+.Fn RB_NFIND "NAME" "RB_HEAD *head" "struct TYPE *elm"
+.Ft "struct TYPE *"
 .Fn RB_LEFT "struct TYPE *elm" "RB_ENTRY NAME"
 .Ft "struct TYPE *"
 .Fn RB_RIGHT "struct TYPE *elm" "RB_ENTRY NAME"
 .Ft "struct TYPE *"
 .Fn RB_PARENT "struct TYPE *elm" "RB_ENTRY NAME"
 .Fn RB_FOREACH "VARNAME" "NAME" "RB_HEAD *head"
+.Fn RB_FOREACH_REVERSE "VARNAME" "NAME" "RB_HEAD *head"
 .Ft void
 .Fn RB_INIT "RB_HEAD *head"
 .Ft "struct TYPE *"
@@ -136,12 +143,12 @@ splay trees and red-black trees.
 .Pp
 In the macro definitions,
 .Fa TYPE
-is the name tag of a user defined structure that must contain a field of type
-.Li SPLAY_ENTRY ,
+is the name tag of a user defined structure that must contain a field named
+.Fa FIELD ,
+of type
+.Li SPLAY_ENTRY
 or
-.Li RB_ENTRY ,
-named
-.Fa ENTRYNAME .
+.Li RB_ENTRY .
 The argument
 .Fa HEADNAME
 is the name tag of a user defined structure that must be declared
@@ -153,14 +160,16 @@ The argument
 .Fa NAME
 has to be a unique name prefix for every tree that is defined.
 .Pp
-The function prototypes are declared with either
-.Li SPLAY_PROTOTYPE
+The function prototypes are declared with
+.Li SPLAY_PROTOTYPE ,
+.Li RB_PROTOTYPE ,
 or
-.Li RB_PROTOTYPE .
-The function bodies are generated with either
-.Li SPLAY_GENERATE
+.Li RB_PROTOTYPE_STATIC .
+The function bodies are generated with
+.Li SPLAY_GENERATE ,
+.Li RB_GENERATE ,
 or
-.Li RB_GENERATE .
+.Li RB_GENERATE_STATIC .
 See the examples below for further explanation of how these macros are used.
 .Sh SPLAY TREES
 A splay tree is a self-organizing data structure.
@@ -222,7 +231,7 @@ macro, but should be used only once.
 Finally,
 the
 .Fa CMP
-argument is the name of a function used to compare trees noded
+argument is the name of a function used to compare trees' nodes
 with each other.
 The function takes two arguments of type
 .Fa "struct TYPE *" .
@@ -328,7 +337,9 @@ macro declares a structure that allows elements to be connected in the tree.
 In order to use the functions that manipulate the tree structure,
 their prototypes need to be declared with the
 .Fn RB_PROTOTYPE
-macro,
+or
+.Fn RB_PROTOTYPE_STATIC
+macros,
 where
 .Fa NAME
 is a unique identifier for this particular tree.
@@ -343,15 +354,19 @@ argument is the name of the element defined by
 .Pp
 The function bodies are generated with the
 .Fn RB_GENERATE
-macro.
-It takes the same arguments as the
+or
+.Fn RB_GENERATE_STATIC
+macros.
+These macros take the same arguments as the
 .Fn RB_PROTOTYPE
-macro, but should be used only once.
+and
+.Fn RB_PROTOTYPE_STATIC
+macros, but should be used only once.
 .Pp
 Finally,
 the
 .Fa CMP
-argument is the name of a function used to compare trees noded
+argument is the name of a function used to compare trees' nodes
 with each other.
 The function takes two arguments of type
 .Fa "struct TYPE *" .
@@ -378,6 +393,11 @@ The
 macro inserts the new element
 .Fa elm
 into the tree.
+Upon success,
+.Va NULL
+is returned.
+If a matching element already exists in the tree, the insertion is
+aborted, and a pointer to the existing element is returned.
 .Pp
 The
 .Fn RB_REMOVE
@@ -388,7 +408,14 @@ from the tree pointed by
 .Pp
 The
 .Fn RB_FIND
-macro can be used to find a particular element in the tree.
+and
+.Fn RB_NFIND
+macros can be used to find a particular element in the tree.
+.Fn RB_FIND
+finds the node with the same key as
+.Fa elm .
+.Fn RB_NFIND
+finds the first node greater than or equal to the search key.
 .Bd -literal -offset indent
 struct TYPE find, *res;
 find.key = 30;
@@ -399,8 +426,9 @@ The
 .Fn RB_ROOT ,
 .Fn RB_MIN ,
 .Fn RB_MAX ,
+.Fn RB_NEXT ,
 and
-.Fn RB_NEXT
+.Fn RB_PREV
 macros can be used to traverse the tree:
 .Bd -literal -offset indent
 for (np = RB_MIN(NAME, &head); np != NULL; np = RB_NEXT(NAME, &head, np))
@@ -408,7 +436,9 @@ for (np = RB_MIN(NAME, &head); np != NULL; np = RB_NEXT(NAME, &head, np))
 .Pp
 Or, for simplicity, one can use the
 .Fn RB_FOREACH
-macro:
+or
+.Fn RB_FOREACH_REVERSE
+macros:
 .Bd -literal -offset indent
 RB_FOREACH(np, NAME, &head)
 .Ed
@@ -436,7 +466,7 @@ struct node {
 int
 intcmp(struct node *e1, struct node *e2)
 {
-	return (e1->i - e2->i);
+	return (e1->i < e2->i ? -1 : e1->i > e2->i);
 }
 
 RB_HEAD(inttree, node) head = RB_INITIALIZER(&head);
