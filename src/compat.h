@@ -39,6 +39,8 @@
 #endif /* !SIZE_T_MAX */
 
 #ifdef WIN32
+# include <windows.h>
+
 # define _PATH_DEVNULL	"nul"
 
 # define pclose 	_pclose
@@ -46,7 +48,9 @@
 # define snprintf	_snprintf
 # define stat		_stat
 # define strncasecmp	strnicmp
-# define strtoll	_strtoi64
+# ifndef __GNUC__
+#  define strtoll	_strtoi64
+# endif /* !__GNUC__ */
 
 # define S_IRGRP	0
 # define S_IROTH	0
