@@ -251,11 +251,20 @@ buildCommandString(const char *extension, const char *fileName,
 	size_t	 newDecoderLen = 0;
 	char	*newEncoder = NULL;
 	size_t	 newEncoderLen = 0;
+	char	*localTitle = UTF8toCHAR(metadata_get_title(mdata),
+					 ICONV_REPLACE);
+	char	*localArtist = UTF8toCHAR(metadata_get_artist(mdata),
+					  ICONV_REPLACE);
+	char	*localMetaString = UTF8toCHAR(metadata_get_string(mdata),
+					      ICONV_REPLACE);
 
 	decoder = xstrdup(getFormatDecoder(extension));
 	if (strlen(decoder) == 0) {
 		printf("%s: Unknown extension '%s', cannot decode '%s'\n",
 		       __progname, extension, fileName);
+		xfree(localTitle);
+		xfree(localArtist);
+		xfree(localMetaString);
 		xfree(decoder);
 		return (NULL);
 	}
@@ -264,18 +273,18 @@ buildCommandString(const char *extension, const char *fileName,
 	replaceString(decoder, newDecoder, newDecoderLen, TRACK_PLACEHOLDER,
 		      fileName);
 	if (strstr(decoder, ARTIST_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_artist(mdata)) + 1;
+		size_t tmpLen = strlen(newDecoder) + strlen(localArtist) + 1;
 		char *tmpStr = xcalloc(tmpLen, sizeof(char));
 		replaceString(newDecoder, tmpStr, tmpLen, ARTIST_PLACEHOLDER,
-			      metadata_get_artist(mdata));
+			      localArtist);
 		xfree(newDecoder);
 		newDecoder = tmpStr;
 	}
 	if (strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_title(mdata)) + 1;
+		size_t tmpLen = strlen(newDecoder) + strlen(localTitle) + 1;
 		char *tmpStr = xcalloc(tmpLen, sizeof(char));
 		replaceString(newDecoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
-			      metadata_get_title(mdata));
+			      localTitle);
 		xfree(newDecoder);
 		newDecoder = tmpStr;
 	}
@@ -308,11 +317,11 @@ buildCommandString(const char *extension, const char *fileName,
 				xfree(newDecoder);
 				newDecoder = tmpStr;
 			} else {
-				size_t tmpLen = strlen(newDecoder) + strlen(metadata_get_string(mdata)) + 1;
+				size_t tmpLen = strlen(newDecoder) + strlen(localMetaString) + 1;
 				char *tmpStr = xcalloc(tmpLen, sizeof(char));
 				replaceString(newDecoder, tmpStr, tmpLen,
 					      METADATA_PLACEHOLDER,
-					      metadata_get_string(mdata));
+					      localMetaString);
 				xfree(newDecoder);
 				newDecoder = tmpStr;
 			}
@@ -329,21 +338,24 @@ buildCommandString(const char *extension, const char *fileName,
 		commandStringLen = strlen(newDecoder) + 1;
 		commandString = xcalloc(commandStringLen, sizeof(char));
 		strlcpy(commandString, newDecoder, commandStringLen);
+		xfree(localTitle);
+		xfree(localArtist);
+		xfree(localMetaString);
 		xfree(decoder);
 		xfree(encoder);
 		xfree(newDecoder);
 		return (commandString);
 	}
 
-	newEncoderLen = strlen(encoder) + strlen(metadata_get_artist(mdata)) + 1;
+	newEncoderLen = strlen(encoder) + strlen(localArtist) + 1;
 	newEncoder = xcalloc(newEncoderLen, sizeof(char));
 	replaceString(encoder, newEncoder, newEncoderLen, ARTIST_PLACEHOLDER,
-		      metadata_get_artist(mdata));
+		      localArtist);
 	if (strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newEncoder) + strlen(metadata_get_title(mdata)) + 1;
+		size_t tmpLen = strlen(newEncoder) + strlen(localTitle) + 1;
 		char *tmpStr = xcalloc(tmpLen, sizeof(char));
 		replaceString(newEncoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
-			      metadata_get_title(mdata));
+			      localTitle);
 		xfree(newEncoder);
 		newEncoder = tmpStr;
 	}
@@ -366,11 +378,11 @@ buildCommandString(const char *extension, const char *fileName,
 				xfree(newEncoder);
 				newEncoder = tmpStr;
 			} else {
-				size_t tmpLen = strlen(newEncoder) + strlen(metadata_get_string(mdata)) + 1;
+				size_t tmpLen = strlen(newEncoder) + strlen(localMetaString) + 1;
 				char *tmpStr = xcalloc(tmpLen, sizeof(char));
 				replaceString(newEncoder, tmpStr, tmpLen,
 					      METADATA_PLACEHOLDER,
-					      metadata_get_string(mdata));
+					      localMetaString);
 				xfree(newEncoder);
 				newEncoder = tmpStr;
 			}
@@ -383,6 +395,9 @@ buildCommandString(const char *extension, const char *fileName,
 	snprintf(commandString, commandStringLen, "%s | %s", newDecoder,
 		 newEncoder);
 
+	xfree(localTitle);
+	xfree(localArtist);
+	xfree(localMetaString);
 	xfree(decoder);
 	xfree(encoder);
 	xfree(newDecoder);

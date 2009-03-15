@@ -29,6 +29,7 @@
 #include "compat.h"
 #include "configfile.h"
 #include "strfctns.h"
+#include "util.h"
 #include "xalloc.h"
 
 extern char		*__progname;
@@ -175,7 +176,7 @@ parseConfig(const char *fileName)
 					config_error++;
 					continue;
 				}
-				ezConfig.fileName = xstrdup(ls_xmlContentPtr);
+				ezConfig.fileName = UTF8toCHAR(ls_xmlContentPtr, ICONV_REPLACE);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
@@ -194,7 +195,7 @@ parseConfig(const char *fileName)
 					config_error++;
 					continue;
 				}
-				ezConfig.metadataProgram = xstrdup(ls_xmlContentPtr);
+				ezConfig.metadataProgram = UTF8toCHAR(ls_xmlContentPtr, ICONV_REPLACE);
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
@@ -516,7 +517,7 @@ parseConfig(const char *fileName)
 								unsigned int	ret;
 
 								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
-								pformatEncDec->decoder = xstrdup(ls_xmlContentPtr);
+								pformatEncDec->decoder = UTF8toCHAR(ls_xmlContentPtr, ICONV_REPLACE);
 								xmlFree(ls_xmlContentPtr);
 								if ((ret = checkDecoderLine(pformatEncDec->decoder,
 											    fileName, xmlGetLineNo(cur3)))
@@ -537,7 +538,7 @@ parseConfig(const char *fileName)
 								unsigned int	ret;
 
 								ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur3->xmlChildrenNode, 1);
-								pformatEncDec->encoder = xstrdup(ls_xmlContentPtr);
+								pformatEncDec->encoder = UTF8toCHAR(ls_xmlContentPtr, ICONV_REPLACE);
 								xmlFree(ls_xmlContentPtr);
 								if ((ret = checkEncoderLine(pformatEncDec->encoder,
 											    fileName, xmlGetLineNo(cur3)))
