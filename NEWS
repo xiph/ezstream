@@ -8,6 +8,9 @@ Changes in 0.5.4, released on XXXX-XX-XX:
    - [FIX]   Add a missing metadata charset conversion, and add charset
              conversions for filenames. From Roman Donchenko.
    - [FIX]   Fix build on MinGW. From Roman Donchenko.
+   - [MISC]  Overhaul and modernize the build system. Ezstream is now expected
+             to build "out of the box" on more systems without configuration
+             tweaks.
 
 
 

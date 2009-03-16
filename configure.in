@@ -1,112 +1,119 @@
-dnl INITIALIZATION
+dnl ###########
+dnl ## SETUP ###########################################################
+dnl ###########
 
-AC_INIT([ezstream], [0.5.4], [https://trac.xiph.org/newticket?component=ezstream])
-AC_PREREQ(2.61)
-AC_CONFIG_SRCDIR(src/ezstream.c)
-AC_CONFIG_AUX_DIR(build-aux)
+AC_INIT([ezstream], [0.5.4],
+	[https://trac.xiph.org/newticket?component=ezstream])
+AC_PREREQ([2.61])
+AC_CONFIG_SRCDIR([src/ezstream.c])
+AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE
-AC_CONFIG_HEADERS(src/config.h)
-AC_CONFIG_LIBOBJ_DIR(src)
+AC_CONFIG_HEADERS([src/config.h])
+AC_CONFIG_LIBOBJ_DIR([src])
 AM_MAINTAINER_MODE
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC_STDC
-
-
-dnl SETUP
-
-EXAMPLES_DIR="\$(datadir)/examples/${PACKAGE_TARNAME}"
-AC_ARG_ENABLE(examplesdir,
-	AS_HELP_STRING([--enable-examplesdir=DIR],
-		[example configuration files installation directory (default: DATADIR/examples/ezstream)]),
-[case "$enableval" in
-	yes) ;;
-	no) AC_MSG_ERROR([Must have an example configuration files install dir.]) ;;
-	*) EXAMPLES_DIR="$enableval" ;;
-esac], [])
-AC_SUBST(EXAMPLES_DIR)
-
+AC_PROG_FGREP
 AC_CANONICAL_HOST
 
-if test -z "$GCC"; then
-	case $host in 
-	*-irix*)
-		XIPH_CPPFLAGS="-fullwarn"
-		;;
-	*-solaris*)
-		XIPH_CPPFLAGS="-v"
-		;;
-	*)
-		;;
-	esac
-else
-	XIPH_CPPFLAGS="-fstrict-aliasing -Wall -Wwrite-strings -Wpointer-arith -Wsign-compare -Wstrict-prototypes -Wmissing-prototypes -Wmissing-declarations"
-fi
+EXAMPLES_DIR="\$(datadir)/examples/${PACKAGE_TARNAME}"
+AC_ARG_ENABLE([examplesdir],
+	[AS_HELP_STRING([--enable-examplesdir=DIR],
+		[examples installation directory (default: DATADIR/examples/ezstream)])],
+[case "$enableval" in
+	yes) ;;
+	no) AC_MSG_ERROR([Must have an install directory for the examples.]) ;;
+	*) EXAMPLES_DIR="$enableval" ;;
+esac], [])
+AC_SUBST([EXAMPLES_DIR])
 
 ez_enable_debug=no
-AC_ARG_ENABLE(debug,
-	AS_HELP_STRING([--enable-debug],
-		[enable memory debugging (default: no)]),
+AC_ARG_ENABLE([debug],
+	[AS_HELP_STRING([--enable-debug],
+		[enable memory debugging (default: no)])],
 [case "$enableval" in
 	no) ;;
 	*) ez_enable_debug=yes ;;
 esac], [])
 AC_MSG_CHECKING([whether to enable debugging])
-if test x"$ez_enable_debug" = "xyes"; then
-	AC_DEFINE(XALLOC_DEBUG, 1, [Define whether to build with XALLOC debugging])
+if test x"${ez_enable_debug}" = "xyes"; then
+	AC_DEFINE([XALLOC_DEBUG], [1],
+		[Define whether to build with XALLOC debugging])
 fi
 AC_MSG_RESULT([$ez_enable_debug])
 
+EZ_CFLAGS=""
+EZ_CPPFLAGS=""
+EZ_LDFLAGS=""
+EZ_LIBS=""
 
-dnl USEFUL HEADERS
 
-AC_CHECK_HEADERS(sys/time.h paths.h signal.h langinfo.h libgen.h locale.h)
+dnl ##############
+dnl ## COMPILER ########################################################
+dnl ##############
 
-COMPAT_INCLUDES=""
-if test x"$ez_enable_debug" = "xyes"; then
-	AC_CHECK_HEADERS(sys/tree.h)
-	if test x"$ac_cv_header_sys_tree_h" = "xyes"; then
-		AC_MSG_CHECKING([for RB_FOREACH and RB_INSERT in sys/tree.h])
-		AC_EGREP_CPP([yes], [
-#include <sys/tree.h>
-#if defined(RB_FOREACH) && defined(RB_INSERT)
- yes
-#endif
-		], [
-			AC_MSG_RESULT([yes])
-			AC_DEFINE(HAVE_WORKING_SYS_TREE_H, 1,
-				[Define whether RB_FOREACH is defined in <sys/tree.h>])
-		], [
-			AC_MSG_RESULT([no])
-			COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
+if test -n "${GCC}"; then
+	for _flag in fstack-protector fstrict-aliasing Wall W Wstrict-aliasing \
+		Wwrite-strings Wpointer-arith Wshadow Wconversion Wcast-qual \
+		Wcast-align Wbounded Wmissing-declarations Wmissing-prototypes \
+		Wstrict-prototypes
+	do
+		AX_CHECK_CFLAG([${_flag}],
+			[ AX_UNIQVAR_APPEND([EZ_CFLAGS], [-${_flag}]) ], [])
+	done
+	AX_CHECK_CFLAG([Wformat=2],
+		[ AX_UNIQVAR_APPEND([EZ_CFLAGS], [-Wformat=2]) ],
+		[
+		  AX_CHECK_CFLAG([Wformat],
+			[ AX_UNIQVAR_APPEND([EZ_CFLAGS], [-Wformat]) ], [])
 		])
-	else
-		COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
-	fi
-fi
-AC_SUBST(COMPAT_INCLUDES)
-
-
-dnl MISC SYSTEM CHARACTERISTICS
-
-dnl __progname check adapted from OpenNTPd-portable configure.ac
-AC_MSG_CHECKING([whether libc defines __progname])
-AC_LINK_IFELSE(
-	[AC_LANG_PROGRAM([[#include <stdio.h>]],
-		[[extern char *__progname; printf("%s\n", __progname); ]])],
-	[ac_cv_libc_defines___progname="yes"],
-	[ac_cv_libc_defines___progname="no"]
-)
-if test x"$ac_cv_libc_defines___progname" = "xyes"; then
-	AC_MSG_RESULT([yes])
-	AC_DEFINE(HAVE___PROGNAME, 1, [Define whether libc defines __progname])
 else
-	AC_MSG_RESULT([no])
+	case "${host}" in
+	*-irix*)
+		EZ_CFLAGS="-fullwarn"
+		;;
+	*-solaris*)
+		EZ_CFLAGS="-v"
+		;;
+	*)
+		;;
+	esac
 fi
 
 AC_C_CONST
 AC_C_VOLATILE
+
+
+dnl #############
+dnl ## HEADERS #########################################################
+dnl #############
+
+AC_CHECK_HEADERS([ \
+	sys/time.h signal.h langinfo.h libgen.h locale.h paths.h \
+], [], [],
+[
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif
+])
+
+COMPAT_INCLUDES=""
+if test x"${ez_enable_debug}" = "xyes"; then
+	AX_HEADER_TREE([RB_FOREACHx], [],
+		[
+		  COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
+		])
+fi
+AC_SUBST([COMPAT_INCLUDES])
+
+
+dnl ###########
+dnl ## TYPES ###########################################################
+dnl ###########
+
 AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
+
 AC_CHECK_TYPES(struct timeval, , ,
 [
 #ifdef HAVE_SYS_TIME_H
@@ -115,181 +122,178 @@ AC_CHECK_TYPES(struct timeval, , ,
 ])
 
 
-dnl LIBRARY FUNCTIONS
+dnl ###############
+dnl ## LIBRARIES #######################################################
+dnl ###############
 
-AC_CHECK_LIB(gen, basename)
-AC_CHECK_FUNCS(arc4random gettimeofday nl_langinfo random setlocale srandomdev stat)
-AC_REPLACE_FUNCS(getopt strlcat strlcpy strtonum)
-if test x"$ac_cv_header_signal_h" = "xyes"; then
-	AC_CHECK_FUNCS([sigaction], [
-		AC_DEFINE(HAVE_SIGNALS, 1, [Define whether we have BSD signals])
-		], [], [#include <signal.h>])
-fi
+AC_CHECK_LIB([gen], [basename],
+	[ AX_UNIQVAR_PREPEND([EZ_LIBS], [-lgen]) ])
 
+AX_CHECK_LIBOGG([], [],
+	[AC_MSG_ERROR([libogg is required.], [1])])
+AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${LIBOGG_CPPFLAGS}])
+AX_UNIQVAR_APPEND([EZ_CFLAGS], [${LIBOGG_CFLAGS}])
+AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${LIBOGG_LDFLAGS}])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBOGG_LIBS}])
+
+AX_CHECK_LIBVORBIS([], [],
+	[AC_MSG_ERROR([libvorbis is required.], [1])])
+AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${VORBIS_CPPFLAGS}])
+AX_UNIQVAR_APPEND([EZ_CFLAGS], [${VORBIS_CFLAGS}])
+AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${VORBIS_LDFLAGS}])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBVORBIS_LIBS}])
+
+AX_CHECK_LIBVORBISFILE([], [],
+	[AC_MSG_ERROR([libvorbisfile is required.], [1])])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBVORBISFILE_LIBS}])
+
+AX_CHECK_LIBSHOUT([], [],
+	[AC_MSG_ERROR([libshout is required.], [1])])
+AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${LIBSHOUT_CPPFLAGS}])
+AX_UNIQVAR_APPEND([EZ_CFLAGS], [${LIBSHOUT_CFLAGS}])
+AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${LIBSHOUT_LDFLAGS}])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBSHOUT_LIBS}])
+
+AX_CHECK_LIBXML2([], [],
+	[AC_MSG_ERROR([libxml 2.x is required.], [1])])
+AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${LIBXML2_CPPFLAGS}])
+AX_UNIQVAR_APPEND([EZ_CFLAGS], [${LIBXML2_CFLAGS}])
+AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${LIBXML2_LDFLAGS}])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBXML2_LIBS}])
+
+use_taglib="No"
+AX_CHECK_TAGLIB_C([
+	AC_DEFINE([HAVE_TAGLIB], [1],
+		[Define to 1 if you have the libtag_c library.]
+	)
+	AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${TAGLIB_CFLAGS}])
+	AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${TAGLIB_LDFLAGS}])
+	AX_UNIQVAR_PREPEND([EZ_LIBS], [${TAGLIB_C_LIBS}])
+	use_taglib="Yes"
+], [])
+
+# Not using AM_ICONV to check for iconv(), with or without libiconv(),
+# is not a viable option. Something in the past went horribly wrong;
+# the whole topic is extremely complex and not worth rewriting.
+# Instead, work around the buggy no-op that is --with-libiconv-prefix,
+# and at least try to find it in --prefix. Thankfully, it is and will
+# remain optional in ezstream.
+
+INCICONV=""
+LDICONV=""
 LIBICONV=""
 LTLIBICONV=""
-INCICONV=""
-AM_ICONV
 EZ_LIBICONV=""
-if test -n "$LTLIBICONV"; then
-	EZ_LIBICONV="$LTLIBICONV"
-else
-	EZ_LIBICONV="$LIBICONV"
-fi
-XIPH_VAR_PREPEND([XIPH_LIBS], [$EZ_LIBICONV])
-XIPH_VAR_APPEND([XIPH_CPPFLAGS], [$INCICONV])
-
-
-dnl CONFIGURE OPTIONS
-
-dnl Optional: TagLib support
-AC_ARG_VAR([TAGLIB_PREFIX], [path to TagLib installation])
-if test -n "${TAGLIB_PREFIX}"; then
-	taglib_prefix="${TAGLIB_PREFIX}"
-else
-	taglib_prefix=""
-fi
-use_taglib=yes
-require_taglib=no
-AC_ARG_WITH(taglib,
-	[AS_HELP_STRING([--with-taglib=PREFIX],
-		[Prefix where TagLib is installed (default: autodetect)])],
-[case "$withval" in
-	yes) require_taglib=yes
-	     if test -z "$taglib_prefix"; then
-		taglib_prefix=/usr/local
-	     fi
-	     ;;
-	no)  use_taglib=no ;;
-	*)   require_taglib=yes
-	     taglib_prefix="$withval"
-	     ;;
-esac], [])
-
-have_taglib=no
-AC_MSG_CHECKING([for TagLib option])
-if test x"$use_taglib" != "xno"; then
-	if test x"$require_taglib" = "xyes"; then
-		AC_MSG_RESULT([enabled])
+AM_ICONV
+if test x"${am_cv_func_iconv}" != "xyes"; then
+	unset am_cv_func_iconv
+	unset am_cv_lib_iconv
+	if test x"${prefix}" = "xNONE"; then
+		libiconv_prefix="/usr/local"
 	else
-		AC_MSG_RESULT([autodetect])
+		libiconv_prefix="${prefix}"
 	fi
-
-	TAGLIB_CFLAGS=""
-	TAGLIB_CPPFLAGS=""
-	TAGLIB_LIBS="-ltag_c"
-	if test -n "$taglib_prefix"; then
-		TAGLIB_CPPFLAGS="-I${taglib_prefix}/include"
-		TAGLIB_LIBS="-L${taglib_prefix}/lib ${TAGLIB_LIBS}"
+	AC_MSG_NOTICE([Looking for libiconv in ${libiconv_prefix} ...])
+	libiconv_save_CPPFLAGS="${CPPFLAGS}"
+	libiconv_save_LDFLAGS="${LDFLAGS}"
+	libiconv_save_LIBS="${LIBS}"
+	CPPFLAGS="${CPPFLAGS} -I${libiconv_prefix}/include"
+	LDFLAGS="${LDFLAGS} -L${libiconv_prefix}/lib"
+	LIBS="-liconv"
+	AM_ICONV
+	if test x"${am_cv_func_iconv}" = "xyes"; then
+		INCICONV="-I${libiconv_prefix}/include"
+		LDICONV="-L${libiconv_prefix}/lib"
+		LIBICONV="-liconv"
 	fi
-
-	ac_taglib_save_CFLAGS="$CFLAGS"
-	ac_taglib_save_CPPFLAGS="$CPPFLAGS"
-	ac_taglib_save_LIBS="$LIBS"
-
-	CFLAGS="${TAGLIB_CFLAGS}"
-	CPPFLAGS="${TAGLIB_CPPFLAGS}"
-	LIBS="${TAGLIB_LIBS}"
-
-	AC_CHECK_HEADERS([taglib/tag_c.h], [
-			AC_MSG_CHECKING([whether libtag_c works])
-			AC_LINK_IFELSE(
-				[AC_LANG_PROGRAM([[#include <taglib/tag_c.h>]],
-					[[ taglib_set_string_management_enabled(0); ]])],
-				[
-				AC_MSG_RESULT([yes])
-				have_taglib=yes
-				], [AC_MSG_RESULT([no])]
-			)
-		], [
-			if test x"$require_taglib" = "xyes"; then
-				AC_MSG_ERROR([Cannot find taglib/tag_c.h in ${taglib_prefix}/include])
-			else
-				AC_MSG_NOTICE([No TagLib C header found on this system])
-			fi
-		])
-
-	dnl For static-only archs:
-	if test x"$have_taglib" = "xno" -a x"$ac_cv_header_taglib_tag_c_h" = "xyes"; then
-		AC_MSG_CHECKING([whether libtag_c works with -ltag -lstdc++ -lz (static arch)])
-		TAGLIB_LIBS="${TAGLIB_LIBS} -ltag -lstdc++ -lz"
-		LIBS="${TAGLIB_LIBS}"
-		AC_LINK_IFELSE(
-			[AC_LANG_PROGRAM([[#include <taglib/tag_c.h>]],
-				[[ taglib_set_string_management_enabled(0); ]])],
-			[
-			 AC_MSG_RESULT([yes])
-			 have_taglib=yes
-			], [
-			 if test x"$require_taglib" = "xyes"; then
-				AC_MSG_RESULT([no])
-				AC_MSG_ERROR([Cannot link against libtag_c in ${taglib_prefix}/lib])
-			 else
-				AC_MSG_RESULT([no])
-				AC_MSG_WARN([Error while linking against libtag_c in ${taglib_prefix}/lib, disabling support])
-			 fi
-			]
-		)
-	fi
-
-	CFLAGS="$ac_taglib_save_CFLAGS"
-	CPPFLAGS="$ac_taglib_save_CPPFLAGS"
-	LIBS="$ac_taglib_save_LIBS"
+	CPPFLAGS="${libiconv_save_CPPFLAGS}"
+	LDFLAGS="${libiconv_save_LDFLAGS}"
+	LIBS="${libiconv_save_LIBS}"
+fi
+if test -n "${LTLIBICONV}"; then
+	EZ_LIBICONV="${LTLIBICONV}"
 else
-	AC_MSG_RESULT([disabled])
+	EZ_LIBICONV="${LIBICONV}"
+fi
+AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [$INCICONV])
+AX_UNIQVAR_APPEND([EZ_LDFLAGS], [$LDICONV])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [$EZ_LIBICONV])
+use_iconv="No"
+if test x"${am_cv_func_iconv}" = "xyes"; then
+	use_iconv="Yes"
 fi
 
-if test x"$have_taglib" = "xyes"; then
-	AC_DEFINE(HAVE_TAGLIB, 1, [Define whether we're using TagLib])
-else
-	TAGLIB_CFLAGS=""
-	TAGLIB_CPPFLAGS=""
-	TAGLIB_LIBS=""
-fi
-AC_SUBST(TAGLIB_CFLAGS)
-AC_SUBST(TAGLIB_CPPFLAGS)
-AC_SUBST(TAGLIB_LIBS)
 
-dnl Check for Ogg Vorbis
-XIPH_PATH_OGG(, AC_MSG_ERROR([Must have libogg 1.x installed.]))
-XIPH_PATH_VORBIS(, AC_MSG_ERROR([Must have libvorbis 1.x installed.]))
+dnl #######################
+dnl ## FUNCTIONS / MACROS ##############################################
+dnl #######################
 
-dnl Check for libshout.
-XIPH_PATH_SHOUT(, AC_MSG_ERROR([Must have libshout 2.x installed.]))
+AC_CHECK_FUNCS([ \
+	arc4random \
+	gettimeofday \
+	nl_langinfo \
+	random \
+	setlocale \
+	srandomdev \
+	stat \
+])
 
-dnl Check for libxml
-XIPH_PATH_XML(, AC_MSG_ERROR([Must have libxml 2.x installed.]))
+AC_REPLACE_FUNCS([ \
+	getopt \
+	strlcat \
+	strlcpy \
+	strtonum \
+])
 
-dnl Assemble *FLAGS and *LIBS in the proper order.
-XIPH_VAR_APPEND([XIPH_CFLAGS], [$OGG_CFLAGS])
-XIPH_VAR_PREPEND([XIPH_LIBS], [$OGG_LIBS])
-XIPH_VAR_APPEND([XIPH_CFLAGS], [$VORBIS_CFLAGS])
-XIPH_VAR_PREPEND([XIPH_LIBS], [$VORBIS_LIBS])
-XIPH_VAR_APPEND([XIPH_CFLAGS], [$VORBISFILE_CFLAGS])
-XIPH_VAR_PREPEND([XIPH_LIBS], [$VORBISFILE_LIBS])
-XIPH_VAR_APPEND([XIPH_CFLAGS], [$SHOUT_CFLAGS])
-XIPH_VAR_APPEND([XIPH_CPPFLAGS], [$SHOUT_CPPFLAGS])
-XIPH_VAR_PREPEND([XIPH_LIBS], [$SHOUT_LIBS])
-XIPH_VAR_APPEND([XIPH_CFLAGS], [$XML_CFLAGS])
-XIPH_VAR_PREPEND([XIPH_LIBS], [$XML_LIBS])
+AX_FUNC_VA_COPY
+
+AC_CHECK_FUNCS([sigaction], [
+	AC_DEFINE([HAVE_SIGNALS], [1],
+		[Define to 1 if we have BSD signals.])
+	], [], [
+	  #ifdef HAVE_SIGNAL_H
+	  # include <signal.h>
+	  #endif
+	])
 
 
-dnl OUTPUT
+dnl ##################
+dnl ## MISCELLANEOUS ###################################################
+dnl ##################
 
-AC_CONFIG_FILES(Makefile \
-		build-aux/Makefile \
-		compat/Makefile \
-		compat/sys/Makefile \
-		doc/Makefile \
-		examples/Makefile \
-		m4/Makefile \
-		src/Makefile \
-		win32/Makefile)
+AX_CHECK___PROGNAME
 
-AC_SUBST(XIPH_CPPFLAGS)
-AC_SUBST(XIPH_CFLAGS)
-AC_SUBST(XIPH_LIBS)
-AC_SUBST(LIBS)
-AC_SUBST(CFLAGS)
+
+dnl ############
+dnl ## OUTPUT ##########################################################
+dnl ############
+
+AC_SUBST([EZ_CPPFLAGS])
+AC_SUBST([EZ_CFLAGS])
+AC_SUBST([EZ_LDFLAGS])
+AC_SUBST([EZ_LIBS])
+
+AC_CONFIG_FILES([
+	Makefile
+	build-aux/Makefile
+	compat/Makefile
+	compat/sys/Makefile
+	doc/Makefile
+	examples/Makefile
+	m4/Makefile
+	src/Makefile
+	win32/Makefile
+])
 
 AC_OUTPUT
+
+cat << __EOT
+
+${PACKAGE_STRING} has been configured successfully.
+
+Configuration:
+    TagLib support ............... : ${use_taglib}
+    Charset conversion support ... : ${use_iconv}
+    Prefix ....................... : ${prefix}
+
+__EOT

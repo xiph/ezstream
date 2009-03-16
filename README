@@ -57,15 +57,17 @@ configure script, a couple of additional options are available:
                           example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
   --enable-debug          enable memory debugging (default: no)
+  --with-taglib=PFX       prefix where the TagLib header files and library are
+                          installed (default: autodetect
+  --with-taglib-includes=DIR
+                          directory where TagLib header files are installed
+                          (optional)
+  --with-taglib-libs=DIR  directory where TagLib is installed (optional)
+  --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libiconv-prefix[=DIR]
                           search for libiconv in DIR/include and DIR/lib
   --without-libiconv-prefix
                           don't search for libiconv in includedir and libdir
-  --with-taglib=PREFIX    Prefix where TagLib is installed (default:
-                          autodetect)
-  --with-ogg=PREFIX       Prefix where libogg is installed (optional)
-  --with-vorbis=PREFIX    Prefix where libvorbis is installed (optional)
-  --with-xml-config=PATH  use xml-config in PATH to find libxml
 
 The compilation and installation process boils down to the usual
 
@@ -76,6 +78,12 @@ The compilation and installation process boils down to the usual
 
 If this procedure is unfamiliar to you, please consult the INSTALL file for
 more detailed instructions.
+
+When the configuration keeps failing despite having all dependencies
+installed, take note of the more verbose error messages in config.log. If
+necessary, it is possible to directly customize many build flags through
+environment variables. See the "influential environment variables" list
+in the --help output.
 
 
 

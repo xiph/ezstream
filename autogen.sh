@@ -7,7 +7,12 @@ if [ ! -f "./`basename $0`" ]; then
 	exit 1
 fi
 
-AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 aclocal -I m4
+EXTRA=
+if [ -d /usr/local/share/aclocal ]; then
+	EXTRA="-I /usr/local/share/aclocal"
+fi
+
+AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 aclocal -I m4 ${EXTRA}
 AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 autoconf
 AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 autoheader
 # AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 libtoolize --automake -c -f
