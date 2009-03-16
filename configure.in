@@ -232,6 +232,7 @@ dnl #######################
 AC_CHECK_FUNCS([ \
 	arc4random \
 	gettimeofday \
+	getopt \
 	nl_langinfo \
 	random \
 	setlocale \
@@ -240,7 +241,6 @@ AC_CHECK_FUNCS([ \
 ])
 
 AC_REPLACE_FUNCS([ \
-	getopt \
 	strlcat \
 	strlcpy \
 	strtonum \

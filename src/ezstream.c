@@ -53,9 +53,6 @@
 
 #include "compat.h"
 #include "configfile.h"
-#ifndef HAVE_GETOPT
-# include "getopt.h"
-#endif
 #include "metadata.h"
 #include "playlist.h"
 #include "strfctns.h"
@@ -1140,7 +1137,7 @@ main(int argc, char *argv[])
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = getopt(argc, argv, "c:hnqVv")) != -1) {
+	while ((c = local_getopt(argc, argv, "c:hnqVv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {

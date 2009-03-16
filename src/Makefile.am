@@ -6,6 +6,7 @@ ezstream_SOURCES = \
 	compat.c \
 	configfile.c \
 	ezstream.c \
+	getopt.c \
 	metadata.c \
 	playlist.c \
 	util.c \
@@ -20,7 +21,6 @@ AM_LDFLAGS	 = @EZ_LDFLAGS@
 EXTRA_DIST	 = \
 	compat.h \
 	configfile.h \
-	getopt.h \
 	metadata.h \
 	playlist.h \
 	strfctns.h \

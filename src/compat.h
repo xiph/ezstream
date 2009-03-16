@@ -80,6 +80,15 @@ struct timeval {
 };
 #endif
 
+extern int	 opterr;
+extern int	 optind;
+extern int	 optopt;
+extern int	 optreset;
+extern char	*optarg;
+
+extern int
+	local_getopt(int, char * const *, const char *);
+
 char *	local_basename(const char *);
 
 #endif /* __COMPAT_H__ */
