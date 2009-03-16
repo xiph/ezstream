@@ -248,9 +248,6 @@ CHARtoUTF8(const char *in_str, int mode)
 	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
 #endif /* !WIN32 */
 
-	if (in_str == NULL || strlen(in_str) == 0)
-		return (NULL);
-
 	return (iconvert(in_str, codeset, "UTF-8", mode));
 }
 
@@ -273,9 +270,6 @@ UTF8toCHAR(const char *in_str, int mode)
 	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
 #endif /* !WIN32 */
 
-	if (in_str == NULL || strlen(in_str) == 0)
-		return (NULL);
-
 	return (iconvert(in_str, "UTF-8", codeset, mode));
 }
 
@@ -292,6 +286,9 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	size_t			 bufavail;
 	size_t			 out_pos;
 	char			*tocode;
+
+	if (NULL == in_str)
+		return (xstrdup(""));
 
 	switch (mode) {
 		size_t	siz;
@@ -318,7 +315,7 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	    (cd = iconv_open(tocode, "")) == (iconv_t)-1) {
 		xfree(tocode);
 		printf("%s: iconv_open(): %s\n", __progname, strerror(errno));
-		return (NULL);
+		return (xstrdup(in_str));
 	}
 
 	ip = input = (ICONV_CONST char *)in_str;
@@ -359,7 +356,7 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 		printf("%s: iconv_close(): %s\n", __progname, strerror(errno));
 		xfree(output);
 		xfree(tocode);
-		return (NULL);
+		return (xstrdup(in_str));
 	}
 
 	xfree(tocode);
@@ -368,6 +365,9 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	(void)from;
 	(void)to;
 	(void)mode;
+
+	if (NULL == in_str)
+		return (xstrdup(""));
 
 	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
