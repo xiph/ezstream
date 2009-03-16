@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2007 Moritz Grimm <mdgrimm@gmx.net>
+ * Copyright (c) 1997, 2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -30,7 +30,6 @@
 /*
  * Modified basename() implementation from OpenBSD, based on:
  * $OpenBSD: src/lib/libc/gen/basename.c,v 1.14 2005/08/08 08:05:33 espie Exp $
- * Copyright (c) 1997, 2004 Todd C. Miller <Todd.Miller@courtesan.com>
  */
 char *
 local_basename(const char *path)
