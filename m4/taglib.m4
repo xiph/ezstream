@@ -34,6 +34,7 @@ dnl #     [ACTION-IF-NOT-FOUND])
 
 AC_DEFUN([_AX_CHECK_TAGLIB_OPTS],
 [
+AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 AC_ARG_VAR([TAGLIB_CFLAGS],
 	[C compiler flags for TagLib])
 AC_ARG_VAR([TAGLIB_CPPFLAGS],
@@ -50,7 +51,7 @@ have_taglib_libs=""
 want_taglib="auto"
 AC_ARG_WITH([taglib],
 	[AS_HELP_STRING([--with-taglib=PFX],
-		[prefix where the TagLib header files and library are installed (default: autodetect]) ],
+		[prefix where the TagLib header files and library are installed (default: autodetect)])],
 	[
 case "${withval}" in
 	yes)
@@ -134,7 +135,6 @@ local_cv_have_lib_taglib_opts=yes
 
 AC_DEFUN([AX_CHECK_TAGLIB],
 [
-AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 AC_REQUIRE([_AX_CHECK_TAGLIB_OPTS])
 AC_ARG_VAR([TAGLIB_LIBS],
 	[libraries to use for TagLib])
@@ -232,7 +232,6 @@ fi
 
 AC_DEFUN([AX_CHECK_TAGLIB_C],
 [
-AC_REQUIRE([PKG_PROG_PKG_CONFIG])
 AC_REQUIRE([_AX_CHECK_TAGLIB_OPTS])
 AC_ARG_VAR([TAGLIB_C_LIBS],
 	[libraries to use for the TagLib C wrapper])

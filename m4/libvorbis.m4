@@ -48,22 +48,95 @@ AC_ARG_VAR([VORBIS_CPPFLAGS],
 AC_ARG_VAR([VORBIS_LDFLAGS],
 	[linker flags for the Vorbis libraries])
 if test x"${prefix}" = "xNONE"; then
-	ax_check_libvorbis_prefix="/usr/local"
+	have_libvorbis_prefix="/usr/local"
 else
-	ax_check_libvorbis_prefix="${prefix}"
+	have_libvorbis_prefix="${prefix}"
 fi
+have_libvorbis_includes=""
+have_libvorbis_libs=""
+want_libvorbis="auto"
+AC_ARG_WITH([libvorbis],
+	[AS_HELP_STRING([--with-libvorbis=PFX],
+		[prefix where the Vorbis library header files and library are installed (default: autodetect)])],
+	[
+case "${withval}" in
+	yes)
+		want_libvorbis="yes"
+		;;
+	no)
+		want_libvorbis="no"
+		;;
+	*)
+		have_libvorbis_prefix="${withval}"
+		want_libvorbis="yes"
+		;;
+esac
+	]
+)
+AC_ARG_WITH([libvorbis-includes],
+	[AS_HELP_STRING([--with-libvorbis-includes=DIR],
+		[directory where Vorbis library header files are installed (optional)]) ],
+	[
+case "${withval}" in
+	yes|no) ;;
+	*)
+		have_libvorbis_includes="${withval}"
+		;;
+esac
+	]
+)
+AC_ARG_WITH([libvorbis-libs],
+	[AS_HELP_STRING([--with-libvorbis-libs=DIR],
+		[directory where the Vorbis libraries are installed (optional)]) ],
+	[
+case "${withval}" in
+	yes|no) ;;
+	*)
+		have_libvorbis_libs="${withval}"
+		;;
+esac
+	]
+)
+AC_CACHE_VAL([local_cv_have_lib_libvorbis_opts],
+[
 if test -z "${VORBIS_CFLAGS}"; then
 	VORBIS_CFLAGS="`${PKG_CONFIG} --cflags-only-other vorbis`"
 fi
-if test -z "${VORBIS_CPPFLAGS}"; then
-	VORBIS_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I vorbis`"
+if test -n "${VORBIS_CPPFLAGS}"; then
+	if test x"${have_libvorbis_includes}" != "x"; then
+		VORBIS_CPPFLAGS="${VORBIS_CPPFLAGS} -I${have_libvorbis_includes}"
+	fi
+else
+	if test x"${have_libvorbis_includes}" != "x"; then
+		VORBIS_CPPFLAGS="-I${have_libvorbis_includes}"
+	else
+		if test x"${want_libvorbis}" = "xauto"; then
+			VORBIS_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I vorbis`"
+		else
+			VORBIS_CPPFLAGS="-I${have_libvorbis_prefix}/include"
+		fi
+	fi
 fi
-if test -z "${VORBIS_LDFLAGS}"; then
-	VORBIS_LDFLAGS="\
-		`${PKG_CONFIG} --libs-only-L vorbis` \
-		`${PKG_CONFIG} --libs-only-other vorbis` \
-	"
+if test -n "${VORBIS_LDFLAGS}"; then
+	if test x"${have_libvorbis_libs}" != "x"; then
+		VORBIS_LDFLAGS="-L${have_libvorbis_libs} ${VORBIS_LDFLAGS}"
+	fi
+else
+	if test -n "${have_libvorbis_libs}"; then
+		VORBIS_LDFLAGS="-L${have_libvorbis_libs}"
+	else
+		if test x"${want_libvorbis}" = "xauto"; then
+			VORBIS_LDFLAGS=" \
+				`${PKG_CONFIG} --libs-only-L vorbis` \
+				`${PKG_CONFIG} --libs-only-other vorbis` \
+			"
+		else
+			VORBIS_LDFLAGS="-L${have_libvorbis_prefix}/lib"
+		fi
+	fi
 fi
+local_cv_have_lib_libvorbis_opts=yes
+])
 ])
 
 AC_DEFUN([AX_CHECK_LIBVORBIS],
@@ -84,12 +157,12 @@ dnl ####### BEGIN CHECK ######
 PKG_CHECK_EXISTS([vorbis $1], [
 dnl ##########################
 
+if test x"${want_libvorbis}" != "xno"; then	# want_libvorbis != no
 libvorbis_libs_autodetect=no
 if test -z "${LIBVORBIS_LIBS}"; then
 	LIBVORBIS_LIBS="`${PKG_CONFIG} --libs-only-l vorbis`"
 	libvorbis_libs_autodetect=yes
 fi
-
 ax_check_libvorbis_save_CFLAGS="${CFLAGS}"
 ax_check_libvorbis_save_CPPFLAGS="${CPPFLAGS}"
 ax_check_libvorbis_save_LDFLAGS="${LDFLAGS}"
@@ -137,13 +210,13 @@ CPPFLAGS="${ax_check_libvorbis_save_CPPFLAGS}"
 LDFLAGS="${ax_check_libvorbis_save_LDFLAGS}"
 LIBS="${ax_check_libvorbis_save_LIBS}"
 AC_LANG_POP([C])
+fi						# want_libvorbis != no
 
 dnl ####### END CHECK ########
 ], [])
 dnl ##########################
 
 ])
-
 AC_MSG_CHECKING([for libvorbis $1])
 if test x"${local_cv_have_lib_libvorbis}" = "xyes"; then
 	AC_MSG_RESULT([yes])
@@ -175,12 +248,12 @@ dnl ####### BEGIN CHECK ######
 PKG_CHECK_EXISTS([vorbisfile $1], [
 dnl ##########################
 
+if test x"${want_libvorbis}" != "xno"; then	# want_libvorbis != no
 libvorbisfile_libs_autodetect=no
 if test -z "${LIBVORBISFILE_LIBS}"; then
 	LIBVORBISFILE_LIBS="`${PKG_CONFIG} --libs-only-l vorbisfile`"
 	libvorbisfile_libs_autodetect=yes
 fi
-
 ax_check_libvorbisfile_save_CFLAGS="${CFLAGS}"
 ax_check_libvorbisfile_save_CPPFLAGS="${CPPFLAGS}"
 ax_check_libvorbisfile_save_LDFLAGS="${LDFLAGS}"
@@ -217,13 +290,13 @@ CPPFLAGS="${ax_check_libvorbisfile_save_CPPFLAGS}"
 LDFLAGS="${ax_check_libvorbisfile_save_LDFLAGS}"
 LIBS="${ax_check_libvorbisfile_save_LIBS}"
 AC_LANG_POP([C])
+fi						# want_libvorbis != no
 
 dnl ####### END CHECK ########
 ], [])
 dnl ##########################
 
 ])
-
 AC_MSG_CHECKING([for libvorbisfile $1])
 if test x"${local_cv_have_lib_libvorbisfile}" = "xyes"; then
 	AC_MSG_RESULT([yes])
@@ -255,12 +328,12 @@ dnl ####### BEGIN CHECK ######
 PKG_CHECK_EXISTS([vorbisenc $1], [
 dnl ##########################
 
+if test x"${want_libvorbis}" != "xno"; then	# want_libvorbis != no
 libvorbisenc_libs_autodetect=no
 if test -z "${LIBVORBISENC_LIBS}"; then
 	LIBVORBISENC_LIBS="`${PKG_CONFIG} --libs-only-l vorbisenc`"
 	libvorbisenc_libs_autodetect=yes
 fi
-
 ax_check_libvorbisenc_save_CFLAGS="${CFLAGS}"
 ax_check_libvorbisenc_save_CPPFLAGS="${CPPFLAGS}"
 ax_check_libvorbisenc_save_LDFLAGS="${LDFLAGS}"
@@ -299,13 +372,13 @@ CPPFLAGS="${ax_check_libvorbisenc_save_CPPFLAGS}"
 LDFLAGS="${ax_check_libvorbisenc_save_LDFLAGS}"
 LIBS="${ax_check_libvorbisenc_save_LIBS}"
 AC_LANG_POP([C])
+fi						# want_libvorbis != no
 
 dnl ####### END CHECK ########
 ], [])
 dnl ##########################
 
 ])
-
 AC_MSG_CHECKING([for libvorbisenc $1])
 if test x"${local_cv_have_lib_libvorbisenc}" = "xyes"; then
 	AC_MSG_RESULT([yes])

@@ -31,17 +31,23 @@ PREREQUISITES
 
 
 Ezstream depends on:
- * libshout 2.2.x (http://www.icecast.org/)
- * libshout dependencies, such as libogg, libvorbis, libtheora, etc.
-   (http://www.vorbis.com/ and http://www.theora.org/)
+ * libshout 2.2.x
+   (http://www.icecast.org/)
  * libxml 2.x (http://xmlsoft.org/)
 
 Ezstream optionally uses:
- * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
-   wrapper)
-   (http://developer.kde.org/~wheeler/taglib.html)
- * Libiconv, if iconv() is not available in the system libc.
-   (http://www.gnu.org/software/libiconv/)
+ - For reading metadata from Ogg Vorbis files:
+   * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
+     wrapper)
+     (http://developer.kde.org/~wheeler/taglib.html)
+   OR:
+   * libvorbis 1.x
+     (http://www.vorbis.com)
+   Using TagLib is recommended, as it allows ezstream to read metadata from
+   many additional media file types.
+ - For basic non-ASCII charset support in metadata and filenames:
+   * Libiconv, if iconv() is not available in the system libc.
+     (http://www.gnu.org/software/libiconv/)
 
 
 
@@ -57,19 +63,22 @@ configure script, a couple of additional options are available:
                           example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
   --enable-debug          enable memory debugging (default: no)
+  --with-libvorbis=PFX    prefix where the Vorbis library header files and
+                          library are installed (default: autodetect)
+  --with-libvorbis-includes=DIR
+                          directory where Vorbis library header files are
+                          installed (optional)
+  --with-libvorbis-libs=DIR
+                          directory where the Vorbis libraries are installed
+                          (optional)
   --with-taglib=PFX       prefix where the TagLib header files and library are
-                          installed (default: autodetect
+                          installed (default: autodetect)
   --with-taglib-includes=DIR
                           directory where TagLib header files are installed
                           (optional)
   --with-taglib-libs=DIR  directory where TagLib is installed (optional)
-  --with-gnu-ld           assume the C compiler uses GNU ld default=no
-  --with-libiconv-prefix[=DIR]
-                          search for libiconv in DIR/include and DIR/lib
-  --without-libiconv-prefix
-                          don't search for libiconv in includedir and libdir
 
-The compilation and installation process boils down to the usual
+The compilation and installation process then boils down to the usual
 
     $ ./configure --help | less         # Skim over the available options
     $ ./configure [options] && make && [sudo] make install

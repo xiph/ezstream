@@ -11,6 +11,10 @@ Changes in 0.5.4, released on XXXX-XX-XX:
    - [MISC]  Overhaul and modernize the build system. Ezstream is now expected
              to build "out of the box" on more systems without configuration
              tweaks.
+   - [FIX]   Adjust the build system to better handle optional dependencies.
+             It is now possible to choose between TagLib and libvorbis for
+             reading Ogg Vorbis metadata, or no Vorbis metadata support at
+             all. (Ticket #1398)
 
 
 

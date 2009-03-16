@@ -35,8 +35,10 @@
 
 #ifdef HAVE_TAGLIB
 # include <taglib/tag_c.h>
-#endif
-#include <vorbis/vorbisfile.h>
+#endif /* HAVE_TAGLIB */
+#ifdef HAVE_VORBISFILE
+# include <vorbis/vorbisfile.h>
+#endif /* HAVE_VORBISFILE */
 #include <shout/shout.h>
 
 #include "compat.h"
@@ -188,18 +190,19 @@ metadata_use_self(metadata_t *md, FILE **filep)
 	if (strcmp(extension, ".mp3") == 0) {
 		memset(&id3tag, 0, sizeof(id3tag));
 		fseek(*filep, -128L, SEEK_END);
-		fread(&id3tag, 1, sizeof(struct ID3Tag), *filep);
-		if (memcmp(id3tag.tag, "TAG", 3) == 0) {
+		fread(&id3tag, 1UL, sizeof(struct ID3Tag), *filep);
+		if (memcmp(id3tag.tag, "TAG", 3UL) == 0) {
 			if (strlen(id3tag.artistName) > 0)
 				md->artist = CHARtoUTF8(id3tag.artistName, ICONV_REPLACE);
 			if (strlen(id3tag.trackName) > 0)
 				md->title = CHARtoUTF8(id3tag.trackName, ICONV_REPLACE);
 		}
+#ifdef HAVE_VORBISFILE
 	} else if (strcmp(extension, ".ogg") == 0) {
 		OggVorbis_File	vf;
 		int		ret;
 
-		if ((ret = ov_open(*filep, &vf, NULL, 0)) != 0) {
+		if ((ret = ov_open(*filep, &vf, NULL, 0L)) != 0) {
 			switch (ret) {
 			case OV_EREAD:
 				printf("%s: ov_open(): %s: Media read error\n",
@@ -245,6 +248,7 @@ metadata_use_self(metadata_t *md, FILE **filep)
 			ov_clear(&vf);
 			*filep = NULL;
 		}
+#endif /* HAVE_VORBISFILE */
 	}
 
 	if (*filep != NULL)
