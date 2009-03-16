@@ -57,7 +57,7 @@ playlist_create(const char *filename)
 {
 	playlist_t	*pl;
 
-	pl = xcalloc(1, sizeof(playlist_t));
+	pl = xcalloc(1UL, sizeof(playlist_t));
 	pl->filename = xstrdup(filename);
 
 	return (pl);
@@ -77,14 +77,14 @@ playlist_add(playlist_t *pl, const char *entry)
 	num = pl->num + 1;
 
 	if (pl->size == 0) {
-		pl->list = xcalloc(2, sizeof(char *));
+		pl->list = xcalloc(2UL, sizeof(char *));
 		pl->size = 2 * sizeof(char *);
 	}
 
 	if (pl->size / sizeof(char *) <= num) {
 		size_t	i;
 
-		pl->list = xrealloc(pl->list, 2, pl->size);
+		pl->list = xrealloc(pl->list, 2UL, pl->size);
 		pl->size = 2 * pl->size;
 
 		for (i = num; i < pl->size / sizeof(char *); i++)
@@ -146,7 +146,7 @@ playlist_read(const char *filename)
 	}
 
 	line = 0;
-	while (fgets(buf, sizeof(buf), filep) != NULL) {
+	while (fgets(buf, (int)sizeof(buf), filep) != NULL) {
 		line++;
 
 		if (strlen(buf) == sizeof(buf) - 1) {
@@ -155,7 +155,7 @@ playlist_read(const char *filename)
 			printf("%s[%lu]: File or path name too long\n",
 			       filename, line);
 			/* Discard any excess chars in that line. */
-			while (fgets(skip_buf, sizeof(skip_buf), filep) != NULL) {
+			while (fgets(skip_buf, (int)sizeof(skip_buf), filep) != NULL) {
 				if (skip_buf[0] == '\n')
 					break;
 			}
@@ -504,7 +504,7 @@ playlist_run_program(playlist_t *pl)
 		return (NULL);
 	}
 
-	if (fgets(buf, sizeof(buf), filep) == NULL) {
+	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
 		if (ferror(filep))
 			printf("%s: Error while reading output from program '%s': %s\n",
 			       __progname, pl->filename, strerror(errno));

@@ -116,9 +116,9 @@ char *		getMetadataString(const char *, metadata_t *);
 metadata_t *	getMetadata(const char *);
 int		setMetadata(shout_t *, metadata_t *, char **);
 FILE *		openResource(shout_t *, const char *, int *, metadata_t **,
-			     int *, int *);
+			     int *, long *);
 int		reconnectServer(shout_t *, int);
-const char *	getTimeString(int);
+const char *	getTimeString(long);
 int		sendStream(shout_t *, FILE *, const char *, int, const char *,
 			   struct timeval *);
 int		streamFile(shout_t *, const char *);
@@ -568,7 +568,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 
 FILE *
 openResource(shout_t *shout, const char *fileName, int *popenFlag,
-	     metadata_t **mdata_p, int *isStdin, int *songLen)
+	     metadata_t **mdata_p, int *isStdin, long *songLen)
 {
 	FILE		*filep = NULL;
 	char		 extension[25];
@@ -743,10 +743,10 @@ reconnectServer(shout_t *shout, int closeConn)
 }
 
 const char *
-getTimeString(int seconds)
+getTimeString(long seconds)
 {
 	static char	str[20];
-	int		secs, mins, hours;
+	long		secs, mins, hours;
 
 	if (seconds < 0)
 		return (NULL);
@@ -757,7 +757,7 @@ getTimeString(int seconds)
 	mins = secs / 60;
 	secs %= 60;
 
-	snprintf(str, sizeof(str), "%uh%02um%02us", hours, mins, secs);
+	snprintf(str, sizeof(str), "%ldh%02ldm%02lds", hours, mins, secs);
 	return ((const char *)str);
 }
 
@@ -782,7 +782,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 	total = oldTotal = 0;
 	ret = STREAM_DONE;
-	while ((bytes_read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
+	while ((bytes_read = fread(buff, 1UL, sizeof(buff), filepstream)) > 0) {
 		if (shout_get_connected(shout) != SHOUTERR_CONNECTED &&
 		    reconnectServer(shout, 0) == 0) {
 			ret = STREAM_SERVERR;
@@ -889,7 +889,8 @@ streamFile(shout_t *shout, const char *fileName)
 	int		 popenFlag = 0;
 	char		*songLenStr = NULL;
 	int		 isStdin = 0;
-	int		 ret, retval = 0, songLen;
+	int		 ret, retval = 0;
+	long		 songLen;
 	metadata_t	*mdata;
 	struct timeval	 startTime;
 

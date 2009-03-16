@@ -468,7 +468,7 @@ parseConfig(const char *fileName)
 					xmlNodePtr	 cur3;
 					FORMAT_ENCDEC	*pformatEncDec;
 
-					pformatEncDec = xcalloc(1, sizeof(FORMAT_ENCDEC));
+					pformatEncDec = xcalloc(1UL, sizeof(FORMAT_ENCDEC));
 
 					for (cur3 = cur2->xmlChildrenNode;
 					     cur3 != NULL; cur3 = cur3->next) {

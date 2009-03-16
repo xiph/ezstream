@@ -237,7 +237,7 @@ CHARtoUTF8(const char *in_str, int mode)
 
 # if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
-	codeset = nl_langinfo(CODESET);
+	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 # else
 	codeset = (char *)"";
@@ -259,7 +259,7 @@ UTF8toCHAR(const char *in_str, int mode)
 
 # if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
-	codeset = nl_langinfo(CODESET);
+	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 # else
 	codeset = (char *)"";

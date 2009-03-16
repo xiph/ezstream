@@ -84,7 +84,7 @@ metadata_create(const char *filename)
 {
 	metadata_t	*md;
 
-	md = xcalloc(1, sizeof(metadata_t));
+	md = xcalloc(1UL, sizeof(metadata_t));
 	md->filename = xstrdup(filename);
 	md->songLen = -1;
 
@@ -572,7 +572,7 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 		return (0);
 	}
 
-	if (fgets(buf, sizeof(buf), filep) == NULL) {
+	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
 		if (ferror(filep))
 			printf("%s: Error while reading output from program '%s': %s\n",
 			       __progname, md->filename, strerror(errno));
