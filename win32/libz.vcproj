@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="ezstream"
-	ProjectGUID="{43809192-0B8F-4AFE-85E6-C54E265CFB75}"
-	RootNamespace="ezstream"
+	Name="libz"
+	ProjectGUID="{1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5}"
+	RootNamespace="libz"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,8 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="0"
+			ConfigurationType="4"
 			CharacterSet="0"
 			BuildLogFile="$(IntDir)\$(TargetName)-BuildLog.htm"
 			>
@@ -44,13 +43,13 @@
 				UseUnicodeResponseFiles="false"
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..\src;taglib-bin\include;libxml2-bin\include;libiconv-bin\include;.\libshout\include;.\libvorbis\include;.\libogg\include;"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;HAVE_CONFIG_H=1;"
+				AdditionalIncludeDirectories=".;.\zlib;"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;_DEBUG;"
 				StringPooling="true"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="false"
 				ObjectFile="$(IntDir)\$(TargetName).obj\"
@@ -69,19 +68,12 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				AdditionalDependencies="ws2_32.lib .\taglib-bin\lib\tag.lib .\taglib-bin\lib\tag_c.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
-				GenerateDebugInformation="true"
-				SubSystem="0"
-				LargeAddressAware="2"
-				TargetMachine="1"
+				LinkLibraryDependencies="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -93,9 +85,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -103,8 +92,8 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="2"
+			ConfigurationType="4"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			BuildLogFile="$(IntDir)\$(TargetName)-BuildLog.htm"
 			>
@@ -128,8 +117,8 @@
 				UseUnicodeResponseFiles="false"
 				Optimization="3"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..\src;taglib-bin\include;libxml2-bin\include;libiconv-bin\include;.\libshout\include;.\libvorbis\include;.\libogg\include;"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NDEBUG;HAVE_CONFIG_H=1;"
+				AdditionalIncludeDirectories=".;.\zlib;"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -151,22 +140,12 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				AdditionalDependencies="ws2_32.lib .\taglib-bin\lib\tag.lib .\taglib-bin\lib\tag_c.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
-				GenerateDebugInformation="false"
-				SubSystem="1"
-				LargeAddressAware="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				SetChecksum="true"
-				TargetMachine="1"
+				LinkLibraryDependencies="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -176,9 +155,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -194,47 +170,55 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\compat.c"
+				RelativePath=".\zlib\adler32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\configfile.c"
+				RelativePath=".\zlib\compress.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\ezstream.c"
+				RelativePath=".\zlib\crc32.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\getopt.c"
+				RelativePath=".\zlib\deflate.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\metadata.c"
+				RelativePath=".\zlib\gzio.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\playlist.c"
+				RelativePath=".\zlib\infback.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\strlcat.c"
+				RelativePath=".\zlib\inffast.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\strlcpy.c"
+				RelativePath=".\zlib\inflate.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\strtonum.c"
+				RelativePath=".\zlib\inftrees.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\util.c"
+				RelativePath=".\zlib\trees.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\xalloc.c"
+				RelativePath=".\zlib\uncompr.c"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\win32\zlib.def"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\zutil.c"
 				>
 			</File>
 		</Filter>
@@ -244,45 +228,45 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\src\compat.h"
+				RelativePath=".\zlib\crc32.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\configfile.h"
+				RelativePath=".\zlib\deflate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\metadata.h"
+				RelativePath=".\zlib\inffast.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\playlist.h"
+				RelativePath=".\zlib\inffixed.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\strfctns.h"
+				RelativePath=".\zlib\inflate.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\util.h"
+				RelativePath=".\zlib\inftrees.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\xalloc.h"
+				RelativePath=".\zlib\trees.h"
 				>
 			</File>
-			<Filter
-				Name="win32"
+			<File
+				RelativePath=".\zlib\zconf.h"
 				>
-				<File
-					RelativePath=".\compat.h"
-					>
-				</File>
-				<File
-					RelativePath=".\config.h"
-					>
-				</File>
-			</Filter>
+			</File>
+			<File
+				RelativePath=".\zlib\zlib.h"
+				>
+			</File>
+			<File
+				RelativePath=".\zlib\zutil.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Resource Files"

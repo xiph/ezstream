@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9,00"
-	Name="ezstream"
-	ProjectGUID="{43809192-0B8F-4AFE-85E6-C54E265CFB75}"
-	RootNamespace="ezstream"
+	Name="libshout"
+	ProjectGUID="{29A3AE75-E9A8-4A43-BADB-A4EF0972BD5B}"
+	RootNamespace="libshout"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -19,8 +19,7 @@
 			Name="Debug|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			UseOfMFC="0"
+			ConfigurationType="4"
 			CharacterSet="0"
 			BuildLogFile="$(IntDir)\$(TargetName)-BuildLog.htm"
 			>
@@ -44,13 +43,13 @@
 				UseUnicodeResponseFiles="false"
 				Optimization="0"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..\src;taglib-bin\include;libxml2-bin\include;libiconv-bin\include;.\libshout\include;.\libvorbis\include;.\libogg\include;"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;_DEBUG;HAVE_CONFIG_H=1;"
+				AdditionalIncludeDirectories=".;.\libshout\include;.\libshout\src;.\libogg\include;.\speex\include;.\libtheora\include;.\libvorbis\include;"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NO_THREAD;HAVE_SPEEX;HAVE_THEORA;HAVE_CONFIG_H;"
 				StringPooling="true"
 				MinimalRebuild="true"
 				ExceptionHandling="0"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="false"
 				ObjectFile="$(IntDir)\$(TargetName).obj\"
@@ -58,6 +57,7 @@
 				WarningLevel="3"
 				DebugInformationFormat="4"
 				CompileAs="1"
+				DisableSpecificWarnings="4005;4091;4133;4244"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -69,19 +69,12 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				AdditionalDependencies="ws2_32.lib .\taglib-bin\lib\tag.lib .\taglib-bin\lib\tag_c.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
-				GenerateDebugInformation="true"
-				SubSystem="0"
-				LargeAddressAware="2"
-				TargetMachine="1"
+				AdditionalDependencies="winmm.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -93,9 +86,6 @@
 				Name="VCFxCopTool"
 			/>
 			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
@@ -103,8 +93,8 @@
 			Name="Release|Win32"
 			OutputDirectory="$(SolutionDir)$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
-			CharacterSet="2"
+			ConfigurationType="4"
+			CharacterSet="0"
 			WholeProgramOptimization="1"
 			BuildLogFile="$(IntDir)\$(TargetName)-BuildLog.htm"
 			>
@@ -128,8 +118,8 @@
 				UseUnicodeResponseFiles="false"
 				Optimization="3"
 				EnableIntrinsicFunctions="false"
-				AdditionalIncludeDirectories=".;..\src;taglib-bin\include;libxml2-bin\include;libiconv-bin\include;.\libshout\include;.\libvorbis\include;.\libogg\include;"
-				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NDEBUG;HAVE_CONFIG_H=1;"
+				AdditionalIncludeDirectories=".;.\libshout\include;.\libshout\src;.\libogg\include;.\speex\include;.\libtheora\include;.\libvorbis\include;"
+				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;NO_THREAD;HAVE_SPEEX;HAVE_THEORA;HAVE_CONFIG_H;"
 				StringPooling="true"
 				ExceptionHandling="0"
 				RuntimeLibrary="2"
@@ -140,6 +130,7 @@
 				WarningLevel="3"
 				DebugInformationFormat="0"
 				CompileAs="1"
+				DisableSpecificWarnings="4005;4091;4133;4244"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -151,22 +142,12 @@
 				Name="VCPreLinkEventTool"
 			/>
 			<Tool
-				Name="VCLinkerTool"
+				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				AdditionalDependencies="ws2_32.lib .\taglib-bin\lib\tag.lib .\taglib-bin\lib\tag_c.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
-				GenerateDebugInformation="false"
-				SubSystem="1"
-				LargeAddressAware="2"
-				OptimizeReferences="2"
-				EnableCOMDATFolding="2"
-				SetChecksum="true"
-				TargetMachine="1"
+				AdditionalDependencies="winmm.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
 			/>
 			<Tool
 				Name="VCXDCMakeTool"
@@ -176,9 +157,6 @@
 			/>
 			<Tool
 				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
 			/>
 			<Tool
 				Name="VCPostBuildEventTool"
@@ -194,94 +172,142 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\compat.c"
+				RelativePath=".\libshout\src\mp3.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\configfile.c"
+				RelativePath=".\libshout\src\ogg.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\ezstream.c"
+				RelativePath=".\libshout\src\shout.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\getopt.c"
+				RelativePath=".\libshout\src\speex.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\metadata.c"
+				RelativePath=".\libshout\src\theora.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\playlist.c"
+				RelativePath=".\libshout\src\util.c"
 				>
 			</File>
 			<File
-				RelativePath="..\src\strlcat.c"
+				RelativePath=".\libshout\src\vorbis.c"
 				>
 			</File>
-			<File
-				RelativePath="..\src\strlcpy.c"
+			<Filter
+				Name="avl"
 				>
-			</File>
-			<File
-				RelativePath="..\src\strtonum.c"
+				<File
+					RelativePath=".\libshout\src\avl\avl.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="httpp"
 				>
-			</File>
-			<File
-				RelativePath="..\src\util.c"
+				<File
+					RelativePath=".\libshout\src\httpp\httpp.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="net"
 				>
-			</File>
-			<File
-				RelativePath="..\src\xalloc.c"
+				<File
+					RelativePath=".\libshout\src\net\resolver.c"
+					>
+				</File>
+				<File
+					RelativePath=".\libshout\src\net\sock.c"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="timing"
 				>
-			</File>
+				<File
+					RelativePath=".\libshout\src\timing\timing.c"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
-			<File
-				RelativePath="..\src\compat.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\configfile.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\metadata.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\playlist.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\strfctns.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\util.h"
-				>
-			</File>
-			<File
-				RelativePath="..\src\xalloc.h"
-				>
-			</File>
 			<Filter
-				Name="win32"
+				Name="public"
+				>
+				<Filter
+					Name="shout"
+					>
+					<File
+						RelativePath=".\shout\shout.h"
+						>
+					</File>
+				</Filter>
+			</Filter>
+			<Filter
+				Name="private"
 				>
 				<File
-					RelativePath=".\compat.h"
+					RelativePath=".\libshout\include\os.h"
 					>
 				</File>
 				<File
-					RelativePath=".\config.h"
+					RelativePath=".\libshout\src\shout_ogg.h"
 					>
 				</File>
+				<File
+					RelativePath=".\libshout\src\shout_private.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libshout\src\util.h"
+					>
+				</File>
+				<Filter
+					Name="avl"
+					>
+					<File
+						RelativePath=".\libshout\src\avl\avl.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="httpp"
+					>
+					<File
+						RelativePath=".\libshout\src\httpp\httpp.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="net"
+					>
+					<File
+						RelativePath=".\libshout\src\net\resolver.h"
+						>
+					</File>
+					<File
+						RelativePath=".\libshout\src\net\sock.h"
+						>
+					</File>
+				</Filter>
+				<Filter
+					Name="timing"
+					>
+					<File
+						RelativePath=".\libshout\src\timing\timing.h"
+						>
+					</File>
+				</Filter>
 			</Filter>
 		</Filter>
 		<Filter
