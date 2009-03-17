@@ -1,3 +1,4 @@
+/*	$Id$	*/
 /*
  * Copyright (c) 1997, 2004 Todd C. Miller <Todd.Miller@courtesan.com>
  *

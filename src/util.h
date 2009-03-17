@@ -1,3 +1,4 @@
+/*	$Id$	*/
 /*
  *  ezstream - source client for Icecast with external en-/decoder support
  *  Copyright (C) 2003, 2004, 2005, 2006  Ed Zaleski <oddsock@oddsock.org>

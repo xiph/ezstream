@@ -1,3 +1,4 @@
+/*	$Id$	*/
 /*
  * libxalloc - Portable memory allocation wrapper library, with extensive
  *             error checking, debugging facilities and hooks for 3rd party

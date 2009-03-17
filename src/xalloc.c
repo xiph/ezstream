@@ -1,3 +1,4 @@
+/*	$Id$	*/
 /*
  * Copyright (C) 2007  Moritz Grimm <mdgrimm@gmx.net>
  *

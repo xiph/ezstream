@@ -1,4 +1,4 @@
-dnl $Id: libogg.m4 729 2008-11-01 17:38:43Z mgrimm $
+dnl $Id$
 
 dnl # Check for a working installation of libogg.
 dnl # Provides appropriate --with configuration options, fills and substitutes

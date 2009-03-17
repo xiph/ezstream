@@ -1,4 +1,4 @@
-dnl # $Id: libxml2.m4 736 2008-11-01 19:04:55Z mgrimm $
+dnl # $Id$
 
 dnl # Check for a working installation of libxml (version 2.)
 dnl # Provides appropriate --with configuration options, fills and substitutes
