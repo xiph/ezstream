@@ -1,6 +1,12 @@
 AUTOMAKE_OPTIONS = 1.9 foreign
 
-EXTRA_DIST	 = README.win32 config.h ezstream.sln ezstream.vcproj
+SUBDIRS 	 = shout
+
+EXTRA_DIST	 = \
+	README.win32 config.h compat.h \
+	ezstream.sln ezstream.vcproj \
+	libflac.vcproj libogg.vcproj libshout.vcproj libspeex.vcproj \
+	libtheora.vcproj libvorbis.vcproj libvorbisfile.vcproj libz.vcproj
 
 CLEANFILES	 = core *.core *~ .*~ ezstream.1.pdf
 

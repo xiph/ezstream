@@ -280,6 +280,7 @@ AC_CONFIG_FILES([
 	m4/Makefile
 	src/Makefile
 	win32/Makefile
+	win32/shout/Makefile
 ])
 
 AC_OUTPUT
