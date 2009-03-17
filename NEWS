@@ -15,6 +15,7 @@ Changes in 0.5.4, released on XXXX-XX-XX:
              It is now possible to choose between TagLib and libvorbis for
              reading Ogg Vorbis metadata, or no Vorbis metadata support at
              all. (Ticket #1398)
+   - [MISC]  Miscellaneous code maintenance and a bit of cleaning up.
 
 
 
