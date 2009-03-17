@@ -4,7 +4,9 @@ man_MANS	 = ezstream.1
 
 EXTRA_DIST	 = ezstream.1.in
 
-do_subst	 = sed -e 's,!!EXAMPLES_DIR!!,@EXAMPLES_DIR@,g'
+do_subst	 = sed \
+	-e 's|!!EXAMPLES_DIR!!|@EXAMPLES_DIR@|g' \
+	-e 's|!!BUILD_DATE!!|@BUILD_DATE@|g'
 
 ezstream.1: ezstream.1.in Makefile
 	$(do_subst) < $(srcdir)/ezstream.1.in > ezstream.1

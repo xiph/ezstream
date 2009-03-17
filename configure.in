@@ -17,6 +17,9 @@ AC_PROG_CC_STDC
 AC_PROG_FGREP
 AC_CANONICAL_HOST
 
+BUILD_DATE=$(date '+%B %d, %Y')
+AC_SUBST([BUILD_DATE])
+
 EXAMPLES_DIR="\$(datadir)/examples/${PACKAGE_TARNAME}"
 AC_ARG_ENABLE([examplesdir],
 	[AS_HELP_STRING([--enable-examplesdir=DIR],

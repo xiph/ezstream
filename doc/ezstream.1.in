@@ -3,7 +3,7 @@
 .\" This document may be be used and/or modified under the licensing terms
 .\" of the Ezstream software.
 .\"
-.Dd February 20, 2007
+.Dd !!BUILD_DATE!!
 .Dt EZSTREAM 1
 .Os
 .Sh NAME
