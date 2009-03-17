@@ -33,7 +33,8 @@ PREREQUISITES
 Ezstream depends on:
  * libshout 2.2.x
    (http://www.icecast.org/)
- * libxml 2.x (http://xmlsoft.org/)
+ * libxml 2.x
+   (http://xmlsoft.org/)
 
 Ezstream optionally uses:
  - For reading metadata from Ogg Vorbis files:
