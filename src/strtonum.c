@@ -22,11 +22,12 @@
 # include "config.h"
 #endif
 
+#include "ezstream.h"
+
 #include <errno.h>
 #include <limits.h>
 #include <stdlib.h>
 #include "strfctns.h"
-#include "compat.h"
 
 #define INVALID 	1
 #define TOOSMALL	2

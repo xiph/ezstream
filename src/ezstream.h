@@ -57,6 +57,10 @@
 # endif /* WIN32 */
 #endif /* !_PATH_DEVNULL */
 
+#ifndef PATH_MAX
+# define PATH_MAX		256
+#endif /* !PATH_MAX */
+
 #if !defined(HAVE_PCLOSE) && defined(HAVE__PCLOSE)
 # define pclose 	_pclose
 #endif /* !HAVE_PCLOSE && HAVE__PCLOSE */
@@ -91,13 +95,6 @@
 # include <windows.h>
 # define sleep(a)	Sleep((a) * 1000)
 #endif /* WIN32 */
-
-#ifndef HAVE_STRUCT_TIMEVAL
-struct timeval {
-	long	tv_sec;
-	long	tv_usec;
-};
-#endif
 
 /*
  * For compat.c and getopt.c:

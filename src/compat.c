@@ -10,10 +10,6 @@
 # include <libgen.h>
 #endif /* HAVE_LIBGEN_H && !__linux__ */
 
-#ifndef PATH_MAX
-# define PATH_MAX		256
-#endif /* !PATH_MAX */
-
 #ifndef PATH_SEPARATORS
 # define PATH_SEPARATORS	"/"
 #endif /* !PATH_SEPARATORS */
