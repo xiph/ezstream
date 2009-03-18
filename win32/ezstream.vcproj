@@ -244,11 +244,11 @@
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath="..\src\compat.h"
+				RelativePath="..\src\configfile.h"
 				>
 			</File>
 			<File
-				RelativePath="..\src\configfile.h"
+				RelativePath="..\src\ezstream.h"
 				>
 			</File>
 			<File

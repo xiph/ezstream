@@ -18,9 +18,9 @@
 # define PATH_SEPARATORS	"/"
 #endif /* !PATH_SEPARATORS */
 
-char *	local_basename(const char *);
+const char	*path_separators = PATH_SEPARATORS;
 
-static const char	*path_separators = PATH_SEPARATORS;
+char *	local_basename(const char *);
 
 static inline int
 	is_separator(int);
@@ -83,7 +83,7 @@ local_basename(const char *path)
 	 * list as the default.
 	 */
 	if (endp == path && is_separator(*endp)) {
-		bname[0] = PATH_SEPARATOR;
+		bname[0] = path_separators[0];
 		bname[1] = '\0';
 		return (bname);
 	}

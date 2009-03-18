@@ -1044,7 +1044,7 @@ getProgname(const char *argv0)
 
 	if (argv0 == NULL)
 		return ((char *)"ezstream");
-	p = strrchr(argv0, PATH_SEPARATOR);
+	p = strrchr(argv0, path_separators[0]);
 	if (p == NULL)
 		p = (char *)argv0;
 	else

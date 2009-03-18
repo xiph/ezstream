@@ -57,25 +57,38 @@
 # endif /* WIN32 */
 #endif /* !_PATH_DEVNULL */
 
+#if !defined(HAVE_PCLOSE) && defined(HAVE__PCLOSE)
+# define pclose 	_pclose
+#endif /* !HAVE_PCLOSE && HAVE__PCLOSE */
+#if !defined(HAVE_POPEN) && defined(HAVE__POPEN)
+# define popen		_popen
+#endif /* !HAVE_POPEN && HAVE__POPEN */
+#if !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
+# define snprintf	_snprintf
+#endif /* !HAVE_SNPRINTF && HAVE__SNPRINTF */
+#if !defined(HAVE_STAT) && defined(HAVE__STAT)
+# define stat		_stat
+#endif /* !HAVE_STAT && HAVE__STAT */
+#if !defined(HAVE_STRNCASECMP) && defined(HAVE_STRNICMP)
+# define strncasecmp	strnicmp
+#endif /* !HAVE_STRNCASECMP && HAVE_STRNICMP */
+#if !defined(HAVE_STRTOLL) && defined(HAVE__STRTOI64)
+# define strtoll	_strtoi64
+#endif /* !HAVE_STRTOLL && HAVE__STRTOI64 */
+
+#ifndef S_IRGRP
+# define S_IRGRP	0
+# define S_IWGRP	0
+# define S_IXGRP	0
+#endif /* !S_IRGRP */
+#ifndef S_IROTH
+# define S_IROTH	0
+# define S_IWOTH	0
+# define S_IXOTH	0
+#endif /* !S_IROTH */
+
 #ifdef WIN32
 # include <windows.h>
-
-# define pclose 	_pclose
-# define popen		_popen
-# define snprintf	_snprintf
-# define stat		_stat
-# define strncasecmp	strnicmp
-# ifndef __GNUC__
-#  define strtoll	_strtoi64
-# endif /* !__GNUC__ */
-
-# define S_IRGRP	0
-# define S_IROTH	0
-# define S_IWGRP	0
-# define S_IWOTH	0
-# define S_IXGRP	0
-# define S_IXOTH	0
-
 # define sleep(a)	Sleep((a) * 1000)
 #endif /* WIN32 */
 
@@ -98,6 +111,9 @@ extern char	*optarg;
 
 extern int
 	local_getopt(int, char * const *, const char *);
+
+extern const char *path_separators;
+
 extern char *
 	local_basename(const char *);
 

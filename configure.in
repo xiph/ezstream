@@ -228,13 +228,24 @@ dnl #######################
 AC_CHECK_FUNCS([ \
 	arc4random \
 	basename \
-	gettimeofday \
 	getopt \
+	gettimeofday \
 	nl_langinfo \
+	pclose \
+	_pclose \
+	popen \
+	_popen \
 	random \
 	setlocale \
+	snprintf \
+	_snprintf \
 	srandomdev \
 	stat \
+	_stat \
+	strncasecmp \
+	strnicmp \
+	strtoll \
+	_strtoi64 \
 ])
 
 AC_REPLACE_FUNCS([ \
