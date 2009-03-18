@@ -317,7 +317,7 @@ metadata_get_name(const char *file)
 	if (strlen(p1) == 0)
 		name = xstrdup("[unknown]");
 	else
-		name = xstrdup(p1);
+		name = CHARtoUTF8(p1);
 
 	xfree(filename);
 	return (name);
