@@ -22,27 +22,43 @@
 # include "config.h"
 #endif
 
-#ifndef PATH_SEPARATOR
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
+#ifdef HAVE_SYS_TIME_H
+# include <sys/time.h>
+#else /* HAVE_SYS_TIME_H */
+# include <time.h>
+#endif /* HAVE_SYS_TIME_H */
+#ifdef HAVE_SYS_STAT_H
+# include <sys/stat.h>
+#endif /* HAVE_SYS_STAT_H */
+
+#include <ctype.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
+#ifdef HAVE_PATHS_H
+# include <paths.h>
+#endif /* HAVE_PATHS_H */
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#ifdef HAVE_UNISTD_H
+# include <unistd.h>
+#endif
+
+#ifndef _PATH_DEVNULL
 # ifdef WIN32
-#  define PATH_SEPARATOR	'\\'
-# else
-#  define PATH_SEPARATOR	'/'
+#  define _PATH_DEVNULL 	"nul"
+# else /* WIN32 */
+#  define _PATH_DEVNULL 	"/dev/null"
 # endif /* WIN32 */
-#endif /* !PATH_SEPARATOR */
-
-#ifndef PATH_MAX
-# define PATH_MAX	256
-#endif /* !PATH_MAX */
-
-/* Sometimes defined through <limits.h>. */
-#ifndef SIZE_T_MAX
-# define SIZE_T_MAX	((size_t)-1)
-#endif /* !SIZE_T_MAX */
+#endif /* !_PATH_DEVNULL */
 
 #ifdef WIN32
 # include <windows.h>
-
-# define _PATH_DEVNULL	"nul"
 
 # define pclose 	_pclose
 # define popen		_popen
@@ -60,19 +76,8 @@
 # define S_IXGRP	0
 # define S_IXOTH	0
 
-# define basename	local_basename
 # define sleep(a)	Sleep((a) * 1000)
 #endif /* WIN32 */
-
-/* Usually defined in <sys/stat.h>. */
-#ifndef S_IEXEC
-# define S_IEXEC	S_IXUSR
-#endif /* !S_IEXEC */
-
-/* For Solaris, possibly others (usually defined in <paths.h>.) */
-#ifndef _PATH_DEVNULL
-# define _PATH_DEVNULL	"/dev/null"
-#endif /* !_PATH_DEVNULL */
 
 #ifndef HAVE_STRUCT_TIMEVAL
 struct timeval {
@@ -80,6 +85,10 @@ struct timeval {
 	long	tv_usec;
 };
 #endif
+
+/*
+ * For compat.c and getopt.c:
+ */
 
 extern int	 opterr;
 extern int	 optind;
@@ -89,7 +98,7 @@ extern char	*optarg;
 
 extern int
 	local_getopt(int, char * const *, const char *);
-
-char *	local_basename(const char *);
+extern char *
+	local_basename(const char *);
 
 #endif /* __COMPAT_H__ */

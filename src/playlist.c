@@ -19,22 +19,15 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-# include <sys/stat.h>
-#endif
-#include <errno.h>
-#include <limits.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "ezstream.h"
 
-#include "compat.h"
 #include "playlist.h"
 #include "xalloc.h"
+
+/* Usually defined in <sys/stat.h>. */
+#ifndef S_IEXEC
+# define S_IEXEC	S_IXUSR
+#endif /* !S_IEXEC */
 
 extern char	*__progname;
 

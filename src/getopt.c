@@ -54,15 +54,7 @@
 # include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <errno.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif /* HAVE_UNISTD_H */
-
-#include "compat.h"
+#include "ezstream.h"
 
 int	local_getopt(int, char * const *, const char *);
 

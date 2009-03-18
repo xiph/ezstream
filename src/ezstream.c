@@ -22,37 +22,14 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-# include <sys/stat.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#endif
-#include <ctype.h>
-#include <errno.h>
-#include <fcntl.h>
-#ifdef HAVE_LIBGEN_H
-# include <libgen.h>
-#endif
-#include <limits.h>
-#ifdef HAVE_PATHS_H
-# include <paths.h>
-#endif
+#include "ezstream.h"
+
 #ifdef HAVE_SIGNAL_H
 # include <signal.h>
 #endif
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#ifdef HAVE_UNISTD_H
-# include <unistd.h>
-#endif
+
 #include <shout/shout.h>
 
-#include "compat.h"
 #include "configfile.h"
 #include "metadata.h"
 #include "playlist.h"
@@ -833,7 +810,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 				if (pezConfig->fileNameIsProgram) {
 					char *tmp = xstrdup(pezConfig->fileName);
 					printf("  [%s]",
-					       basename(tmp));
+					       local_basename(tmp));
 					xfree(tmp);
 				} else
 					printf("  [%4lu/%-4lu]",

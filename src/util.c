@@ -27,32 +27,20 @@
 # include "config.h"
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-# include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-# include <sys/time.h>
-#else
-# include <time.h>
-#endif
+#include "ezstream.h"
 
-#include <ctype.h>
-#include <errno.h>
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif
-#include <stdio.h>
-#include <string.h>
 
 #ifdef HAVE_ICONV
 # include <iconv.h>
 #endif
 #include <shout/shout.h>
 
-#include "compat.h"
 #include "util.h"
 #include "configfile.h"
 #include "xalloc.h"

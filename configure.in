@@ -227,6 +227,7 @@ dnl #######################
 
 AC_CHECK_FUNCS([ \
 	arc4random \
+	basename \
 	gettimeofday \
 	getopt \
 	nl_langinfo \

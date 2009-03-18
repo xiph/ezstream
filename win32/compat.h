@@ -12,8 +12,11 @@
 #define popen			_popen
 #define pclose			_pclose
 #define snprintf		_snprintf
-#define strncasecmp		strnicmp
 #define stat			_stat
+#define strncasecmp		strnicmp
+#ifndef __GNUC__
+# define strtoll		_strtoi64
+#endif /* !__GNUC__ */
 
 #define sleep(a)		Sleep((a) * 1000)
 
@@ -25,11 +28,10 @@
 #define S_IWOTH 		0
 #define S_IXGRP 		0
 #define S_IXOTH 		0
-#define PATH_SEPARATOR		'\\'
-#define _PATH_DEVNULL		"nul"
+#define PATH_SEPARATORS 	"\\/"
 
 #ifndef ssize_t
-# define ssize_t	long
+# define ssize_t		long
 #endif /* !ssize_t */
 
 #endif /* __WIN32_COMPAT_H__ */

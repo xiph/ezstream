@@ -37,8 +37,7 @@
  *                over time!)
  *
  * Define XALLOC_SILENT to suppress all messages, which makes libxalloc
- * abort() and exit() silently. This has no effect when THREAD_DEBUG is
- * defined.
+ * abort() and exit() silently.
  *
  * Define XALLOC_WITH_XASPRINTF to expose the xasprintf() interface. Doing
  * so will require libxalloc to be compiled with a compiler that supports C99
@@ -54,10 +53,6 @@
 
 /* The default output stream for messages: */
 #define XALLOC_DEFAULT_OUTPUT	stderr
-
-#if (defined(_REENTRANT) || defined(_POSIX_THREADS)) && !defined(THREAD_SAFE)
-# define THREAD_SAFE		1
-#endif
 
 
 /*

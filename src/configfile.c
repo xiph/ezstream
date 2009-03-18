@@ -22,12 +22,8 @@
 # include "config.h"
 #endif
 
-#include <ctype.h>
-#include <limits.h>
-#include <stdio.h>
-#include <string.h>
+#include "ezstream.h"
 
-#include "compat.h"
 #include "configfile.h"
 #include "strfctns.h"
 #include "util.h"

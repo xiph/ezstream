@@ -19,8 +19,8 @@ AM_CPPFLAGS	 = @EZ_CPPFLAGS@
 AM_LDFLAGS	 = @EZ_LDFLAGS@
 
 EXTRA_DIST	 = \
-	compat.h \
 	configfile.h \
+	ezstream.h \
 	metadata.h \
 	playlist.h \
 	strfctns.h \
