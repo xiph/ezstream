@@ -1,4 +1,4 @@
-Changes in 0.5.4, released on XXXX-XX-XX:
+Changes in 0.5.4, released on 2009-03-28:
 
  * compat/sys/tree.*:
    - [MISC]  Update the tree macros to a newer version. The manual, shipped for
