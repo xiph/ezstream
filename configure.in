@@ -2,7 +2,7 @@ dnl ###########
 dnl ## SETUP ###########################################################
 dnl ###########
 
-AC_INIT([ezstream], [0.5.4],
+AC_INIT([ezstream], [0.5.5],
 	[https://trac.xiph.org/newticket?component=ezstream])
 AC_REVISION([$Id$])
 AC_PREREQ([2.61])
