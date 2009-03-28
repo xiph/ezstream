@@ -37,10 +37,16 @@ README.win32 - Information about the binary Ezstream distribution for Windows
 As of version 0.3.0, ezstream no longer comes with an installer. If you have a
 previous version of ezstream installed, you might want to simply uninstall it.
 
-The ezstream.exe file will work from any location. To install it, simply copy
-it to a location of your choosing. Add this place to your PATH environment
-variable, if ezstream.exe is supposed to be executable from anywhere on the
-system.
+The ezstream.exe file can be run from any location. To install it, simply copy
+it to a location of your choosing. To make it available anywhere on the
+system, add the installation folder to your PATH environment variable.
+
+If it doesn't start, e.g. running
+  > ezstream.exe -h
+does not show the command line help, the Microsoft Visual C++ 2008 runtime
+libraries are missing. Download and install vcredist_x86.exe, which can be
+easily found on www.microsoft.com via
+  http://www.google.com/search?q=vc+2008+redist
 
 
 
@@ -50,8 +56,8 @@ system.
 
 A few useful features are missing in the Windows version of ezstream:
  * Runtime control via signals is not possible.
- * Some useful external utilities (encoders, decoders, etc) may not be
-   available on Windows.
+ * Some useful external utilities (encoders, decoders) may not be available on
+   Windows.
 
 
 
@@ -64,6 +70,7 @@ Ezstream uses:
  * libiconv (http://www.gnu.org/software/libiconv/, LGPL)
  * libxml2 (http://xmlsoft.org/, BSD-like license)
  * libogg, libvorbis, libvorbisfile (http://www.vorbis.com/, BSD-like license)
+ * libFLAC (http://flac.sourceforge.net/, BSD-like license)
  * libtheora (http://www.theora.org/, BSD-like license)
  * libshout (http://www.icecast.org, LGPL)
  * TagLib (http://ktown.kde.org/~wheeler/taglib.html, LGPL)
