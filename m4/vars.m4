@@ -44,7 +44,12 @@ done
 AC_DEFUN([AX_UNIQVAR_PREPEND],
 [
 AC_REQUIRE([AC_PROG_FGREP])
+_prepend_args=""
 for arg in $2
+do
+	_prepend_args="${arg} ${_prepend_args}"
+done
+for arg in ${_prepend_args}
 do
 	if `echo " ${$1} x" | ${FGREP} -v -e " ${arg} " > /dev/null`; then
 		if test -z "${$1}"; then
