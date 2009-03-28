@@ -1,3 +1,257 @@
+2009-03-28 18:33  moritz
+
+	* [r15880] NEWS:
+	  If everything goes to plan, then today is release day.
+
+2009-03-28 15:40  moritz
+
+	* [r15876] win32/README.win32:
+	  vcredist is now a requirement, and mention FLAC.
+
+2009-03-28 13:38  moritz
+
+	* [r15875] examples/ezstream_reencode_mp3.xml,
+	  examples/ezstream_reencode_vorbis.xml:
+	  Remove -x argument to lame. This makes the examples work for me
+	  by default again, with a more recent lame version.
+
+2009-03-28 11:14  moritz
+
+	* [r15874] m4/vars.m4:
+	  AX_UNIQVAR_PREPEND needs to reverse its arguments before
+	  prepending.
+
+2009-03-19 08:14  moritz
+
+	* [r15799] configure.in:
+	  Autoconf/M4 chokes on CRLF line endings in configure.in/.ac, so
+	  enforce LF on configure.in. Found out the hard way by Roman
+	  Donchenko.
+
+2009-03-18 20:24  moritz
+
+	* [r15798] configure.in, src/compat.c, src/ezstream.h,
+	  src/strtonum.c, win32/compat.h, win32/config.h:
+	  Finish up the modifications to the Windows build. In case
+	  anything remains to be done, it'll be nits.
+
+2009-03-18 20:15  moritz
+
+	* [r15797] src/metadata.c:
+	  Mh... compiling before commit would've helped.
+
+2009-03-18 19:57  moritz
+
+	* [r15796] src/metadata.c:
+	  Make metadata_get_name() return UTF8, which is what the rest of
+	  ezstream now expects. From Roman Donchenko.
+
+2009-03-18 19:55  moritz
+
+	* [r15795] configure.in, src/compat.c, src/ezstream.c,
+	  src/ezstream.h, win32/ezstream.vcproj:
+	  Repair some fallout from previous commits, and work more on Win32
+	  builds.
+
+2009-03-18 09:10  moritz
+
+	* [r15794] configure.in, src/Makefile.am, src/compat.c,
+	  src/compat.h, src/configfile.c, src/ezstream.c, src/ezstream.h,
+	  src/getopt.c, src/metadata.c, src/playlist.c, src/util.c,
+	  src/xalloc.c, src/xalloc.h, win32/compat.h:
+	  Work towards cleaner portability goo, and remove some ununsed
+	  code while there.
+
+2009-03-17 22:25  moritz
+
+	* [r15793] configure.in, win32/Makefile.am, win32/shout:
+	  Adjust auto-fu to handle the changed win32/ stuff.
+
+2009-03-17 22:18  moritz
+
+	* [r15792] win32/compat.h, win32/config.h, win32/ezstream.sln,
+	  win32/ezstream.vcproj, win32/libflac.vcproj, win32/libogg.vcproj,
+	  win32/libshout.vcproj, win32/libspeex.vcproj,
+	  win32/libtheora.vcproj, win32/libvorbis.vcproj,
+	  win32/libvorbisfile.vcproj, win32/libz.vcproj, win32/shout,
+	  win32/shout/Makefile.am, win32/shout/shout.h:
+	  After having lost the previous build environment some time ago, I
+	  had to start over completely. What a chore ... Anyways, commit
+	  this to make it easier to get back to a MSVC build, in case this
+	  happens again.
+
+2009-03-17 18:56  moritz
+
+	* [r15791] NEWS:
+	  Write complete sentences.
+
+2009-03-17 18:32  moritz
+
+	* [r15790] configure.in, doc/Makefile.am, doc/ezstream.1.in:
+	  Set the manual date to the build date.
+
+2009-03-17 18:29  moritz
+
+	* [r15789] COPYING, src/compat.h, src/configfile.c, src/ezstream.c,
+	  src/metadata.c, src/playlist.c, src/util.c:
+	  Bump copyright year where applicable.
+
+2009-03-17 18:20  moritz
+
+	* [r15788] COPYING, ChangeLog, INSTALL, Makefile.am, NEWS, README,
+	  autogen.sh, build-aux/Makefile.am, build-aux/config.rpath,
+	  compat/Makefile.am, compat/sys/Makefile.am, compat/sys/tree.3,
+	  compat/sys/tree.h, configure.in, doc/Makefile.am,
+	  doc/ezstream.1.in, examples/Makefile.am,
+	  examples/ezstream_metadata.xml, examples/ezstream_mp3.xml,
+	  examples/ezstream_reencode_mp3.xml,
+	  examples/ezstream_reencode_theora.xml,
+	  examples/ezstream_reencode_vorbis.xml,
+	  examples/ezstream_stdin_vorbis.xml, examples/ezstream_vorbis.xml,
+	  examples/meta.sh, examples/play.sh, m4/Makefile.am,
+	  m4/ccflags.m4, m4/libogg.m4, m4/libshout.m4, m4/libvorbis.m4,
+	  m4/libxml2.m4, m4/progname.m4, m4/taglib.m4, m4/tree.m4,
+	  m4/vacopy.m4, m4/vars.m4, mkcl.sh, src/Makefile.am, src/compat.c,
+	  src/compat.h, src/configfile.c, src/configfile.h, src/ezstream.c,
+	  src/getopt.c, src/metadata.c, src/metadata.h, src/playlist.c,
+	  src/playlist.h, src/strfctns.h, src/strlcat.c, src/strlcpy.c,
+	  src/strtonum.c, src/util.c, src/util.h, src/xalloc.c,
+	  src/xalloc.h, win32/Makefile.am, win32/README.win32,
+	  win32/config.h, win32/ezstream.sln, win32/ezstream.vcproj:
+	  Native EOL-style, and Id tags in a couple of places.
+
+2009-03-17 18:07  moritz
+
+	* [r15787] README:
+	  Consistent formatting.
+
+2009-03-17 18:03  moritz
+
+	* [r15786] NEWS:
+	  Mention the miscellaneous stuff I also did.
+
+2009-03-16 22:59  moritz
+
+	* [r15782] Makefile.am, NEWS, README, configure.in,
+	  m4/libvorbis.m4, m4/taglib.m4, src/metadata.c:
+	  #1398: Make optional components optional. (For real.)
+
+2009-03-16 20:39  moritz
+
+	* [r15781] src/compat.c:
+	  It's stupid to put my own copyright on a file where I didn't
+	  really write the code. Luckily, I had the proper copyright
+	  statement in there already, so moving it fixes things.
+
+2009-03-16 20:22  moritz
+
+	* [r15780] src/configfile.c, src/ezstream.c, src/metadata.c,
+	  src/playlist.c, src/util.c:
+	  Squelch another bunch of warnings after checking that what's
+	  happening is what's wanted.
+
+2009-03-16 20:12  moritz
+
+	* [r15779] configure.in, src/Makefile.am, src/compat.h,
+	  src/ezstream.c, src/getopt.c, src/getopt.h:
+	  Use a wrapper around getopt() for portability. This uses the
+	  system getopt() whenever possible, and otherwise uses a stripped
+	  down, single options only, BSD getopt() (which is smaller and
+	  doesn't come with ifdef-stuff-in-features.h.)
+
+2009-03-16 19:51  moritz
+
+	* [r15778] src/util.c:
+	  Guarantee that iconvert() never returns NULL. This is a clumsy,
+	  but effective way to prevent NULL dereferences after the recent
+	  character conversion changes in other parts of ezstream.
+
+2009-03-16 00:40  moritz
+
+	* [r15777] configure.in, m4/taglib.m4:
+	  Unbreak the TagLib checks.
+
+2009-03-16 00:08  moritz
+
+	* [r15776] Makefile.am, NEWS, README, autogen.sh,
+	  build-aux/Makefile.am, compat/Makefile.am,
+	  compat/sys/Makefile.am, configure.in, doc/Makefile.am,
+	  examples/Makefile.am, m4/Makefile.am, m4/ccflags.m4,
+	  m4/libogg.m4, m4/libshout.m4, m4/libvorbis.m4, m4/libxml2.m4,
+	  m4/progname.m4, m4/taglib.m4, m4/tree.m4, m4/vacopy.m4,
+	  m4/vars.m4, m4/xiph_compiler.m4, m4/xiph_xml2.m4,
+	  src/Makefile.am, win32/Makefile.am:
+	  Overhaul the ezstream build system, using my own library of
+	  autoconf macros. There are a few benefits to this, but the main
+	  reason is consistency and me completely understanding what's
+	  going on. Regressions are not expected, but wouldn't surprise
+	  either ... this needs lots of testing.
+
+2009-03-15 17:18  moritz
+
+	* [r15775] src/configfile.c, src/ezstream.c, src/metadata.c,
+	  src/playlist.c, src/util.c, src/util.h:
+	  Assorted type fixes, unshadowing of variables, etc.
+
+2009-03-15 13:15  moritz
+
+	* [r15774] m4/Makefile.am, m4/shout.m4:
+	  "pkg-config --libs shout" has produced correct results for a long
+	  time now, making a custom shout.m4 obsolete.
+
+2009-03-15 13:13  moritz
+
+	* [r15773] m4/iconv.m4:
+	  Remove iconv.m4, it comes with gettext (i.e. gettext-devel)
+	  packages.
+
+2009-03-15 13:12  moritz
+
+	* [r15772] m4/Makefile.am, m4/ogg.m4, m4/vorbis.m4:
+	  Remove ogg.m4 and vorbis.m4; the ones installed by libogg/-vorbis
+	  are fine.
+
+2009-03-15 11:15  moritz
+
+	* [r15771] NEWS:
+	  Update.
+
+2009-03-15 11:05  moritz
+
+	* [r15770] src/configfile.c, src/ezstream.c:
+	  Perform more charset conversions where necessary. This should fix
+	  the handling of files with non-ASCII filenames, as well as some
+	  more cases related to metadata. From Roman Donchenko <DXDragon at
+	  yandex dot ru>, with some minor fixes by myself.
+
+2009-03-15 11:00  moritz
+
+	* [r15769] src/compat.h:
+	  Fixes for MinGW. From Roman Donchenko <DXDragon at yandex dot
+	  ru>.
+
+2009-03-15 10:59  moritz
+
+	* [r15768] src/util.h:
+	  Add missing include for shout_t. From Roman Donchenko <DXDragon
+	  at yandex dot ru>.
+
+2009-03-15 10:55  moritz
+
+	* [r15767] NEWS, compat/sys/tree.3, compat/sys/tree.h:
+	  Update tree macros. The manual now actually has an acceptable
+	  license.
+
+2007-12-01 21:43  moritz
+
+	* [r14260] configure.in, win32/config.h:
+	  Post-release version bump.
+
+2007-12-01 21:21  moritz
+
+	* [r14257] ChangeLog:
+	  Sync.
+
 2007-12-01 21:13  moritz
 
 	* [r14256] NEWS:
