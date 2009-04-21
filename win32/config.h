@@ -14,6 +14,7 @@
 #define HAVE__STRTOI64		1
 
 #define HAVE_ICONV		1
+#define HAVE_TAGLIB		1
 #define ICONV_CONST
 
 #include <compat.h>
