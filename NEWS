@@ -1,3 +1,11 @@
+Changes in 0.5.5, released on XXXX-XX-XX:
+
+ * win32/config.h:
+   - [FIX]   Re-enable TagLib support in MSVC build. Found by Roman Donchenko.
+             (Ticket #1535)
+
+
+
 Changes in 0.5.4, released on 2009-03-28:
 
  * compat/sys/tree.*:
