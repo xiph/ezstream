@@ -1,4 +1,4 @@
-dnl $Id$
+dnl # $Id$
 
 dnl # Check for working installations of TagLib and its C-wrapper library,
 dnl # libtag_c.
@@ -7,12 +7,12 @@ dnl # the TAGLIB_CFLAGS, TAGLIB_CPPFLAGS, TAGLIB_LDFLAGS, TAGLIB_LIBS and
 dnl # TAGLIB_C_LIBS variables accordingly.
 
 
-dnl # Copyright (c) 2008 Moritz Grimm <mgrimm@mrsserver.net>
-dnl
+dnl # Copyright (c) 2008, 2009 Moritz Grimm <mgrimm@mrsserver.net>
+dnl #
 dnl # Permission to use, copy, modify, and distribute this software for any
 dnl # purpose with or without fee is hereby granted, provided that the above
 dnl # copyright notice and this permission notice appear in all copies.
-dnl
+dnl #
 dnl # THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
 dnl # WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
 dnl # MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
@@ -20,6 +20,7 @@ dnl # ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
 dnl # WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
 dnl # ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
 dnl # OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+
 
 dnl # Both check functions provide TAGLIB_CPPFLAGS and TAGLIB_LDFLAGS.
 
@@ -35,6 +36,9 @@ dnl #     [ACTION-IF-NOT-FOUND])
 AC_DEFUN([_AX_CHECK_TAGLIB_OPTS],
 [
 AC_REQUIRE([PKG_PROG_PKG_CONFIG])
+if test -z "${PKG_CONFIG}"; then
+	AC_MSG_ERROR([The pkg-config utility is required.], [1])
+fi
 AC_ARG_VAR([TAGLIB_CFLAGS],
 	[C compiler flags for TagLib])
 AC_ARG_VAR([TAGLIB_CPPFLAGS],
@@ -93,7 +97,11 @@ esac
 )
 AC_CACHE_VAL([local_cv_have_lib_taglib_opts],
 [
-if test -z "${TAGLIB_CFLAGS}"; then
+ax_check_taglib_taglib_pc="no"
+PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_taglib_prefix}/lib/pkgconfig"
+PKG_CHECK_EXISTS([taglib], [ax_check_taglib_taglib_pc=yes])
+if test -z "${TAGLIB_CFLAGS}" \
+    -a x"${ax_check_taglib_taglib_pc}" = "xyes"; then
 	TAGLIB_CFLAGS="`${PKG_CONFIG} --cflags-only-other taglib`"
 fi
 if test -n "${TAGLIB_CPPFLAGS}"; then
@@ -104,7 +112,8 @@ else
 	if test x"${have_taglib_includes}" != "x"; then
 		TAGLIB_CPPFLAGS="-I${have_taglib_includes}"
 	else
-		if test x"${want_taglib}" = "xauto"; then
+		if test x"${want_taglib}" = "xauto" \
+		    -a x"${ax_check_taglib_taglib_pc}" = "xyes"; then
 			TAGLIB_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I taglib`"
 		else
 			TAGLIB_CPPFLAGS="-I${have_taglib_prefix}/include/taglib"
@@ -119,7 +128,8 @@ else
 	if test -n "${have_taglib_libs}"; then
 		TAGLIB_LDFLAGS="-L${have_taglib_libs}"
 	else
-		if test x"${want_taglib}" = "xauto"; then
+		if test x"${want_taglib}" = "xauto" \
+		    -a x"${ax_check_taglib_taglib_pc}" = "xyes"; then
 			TAGLIB_LDFLAGS=" \
 				`${PKG_CONFIG} --libs-only-L taglib` \
 				`${PKG_CONFIG} --libs-only-other taglib` \
@@ -133,6 +143,7 @@ local_cv_have_lib_taglib_opts=yes
 ])
 ])
 
+
 AC_DEFUN([AX_CHECK_TAGLIB],
 [
 AC_REQUIRE([_AX_CHECK_TAGLIB_OPTS])
@@ -141,6 +152,8 @@ AC_ARG_VAR([TAGLIB_LIBS],
 AC_CACHE_VAL([local_cv_have_lib_taglib],
 [
 local_cv_have_lib_taglib=no
+
+if test x"${want_taglib}" != "xno"; then	# want_taglib != no
 
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_taglib_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
@@ -151,16 +164,18 @@ dnl ####### BEGIN CHECK ######
 PKG_CHECK_EXISTS([taglib $1], [
 dnl ##########################
 
-if test x"${want_taglib}" != "xno"; then	# want_taglib != no
 libtag_libs_autodetected=no
 if test -z "${TAGLIB_LIBS}"; then
 	TAGLIB_LIBS="`${PKG_CONFIG} --libs-only-l taglib`"
 	libtag_libs_autodetected=yes
 fi
+
+ax_check_taglib_save_CXXFLAGS="${CXXFLAGS}"
 ax_check_taglib_save_CPPFLAGS="${CPPFLAGS}"
 ax_check_taglib_save_LDFLAGS="${LDFLAGS}"
 ax_check_taglib_save_LIBS="${LIBS}"
 AC_LANG_PUSH([C++])
+CXXFLAGS="${CXXFLAGS} ${TAGLIB_CFLAGS}"
 CPPFLAGS="${CPPFLAGS} ${TAGLIB_CPPFLAGS}"
 LDFLAGS="${LDFLAGS} ${TAGLIB_LDFLAGS}"
 LIBS="${TAGLIB_LIBS} ${LIBS}"
@@ -207,17 +222,20 @@ AC_CHECK_HEADER([tag.h],
 		]
 	)
 ])
+CXXFLAGS="${ax_check_taglib_save_CXXFLAGS}"
 CPPFLAGS="${ax_check_taglib_save_CPPFLAGS}"
 LDFLAGS="${ax_check_taglib_save_LDFLAGS}"
 LIBS="${ax_check_taglib_save_LIBS}"
 AC_LANG_POP([C++])
-fi						# want_taglib != no
 
 dnl ####### END CHECK ########
 ], [])
 dnl ##########################
 
+fi						# want_taglib != no
+
 ])
+
 AC_MSG_CHECKING([for TagLib])
 if test x"${local_cv_have_lib_taglib}" = "xyes"; then
 	AC_MSG_RESULT([yes])
@@ -230,6 +248,7 @@ else
 fi
 ])
 
+
 AC_DEFUN([AX_CHECK_TAGLIB_C],
 [
 AC_REQUIRE([_AX_CHECK_TAGLIB_OPTS])
@@ -238,6 +257,8 @@ AC_ARG_VAR([TAGLIB_C_LIBS],
 AC_CACHE_VAL([local_cv_have_lib_taglib_c],
 [
 local_cv_have_lib_taglib_c=no
+
+if test x"${want_taglib}" != "xno"; then	# want_taglib != no
 
 PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_taglib_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
@@ -248,14 +269,16 @@ dnl ####### BEGIN CHECK ######
 PKG_CHECK_EXISTS([taglib $1], [
 dnl ##########################
 
-if test x"${want_taglib}" != "xno"; then	# want_taglib != no
 if test -z "${TAGLIB_C_LIBS}"; then
 	TAGLIB_C_LIBS="-ltag_c"
 fi
+
+ax_check_taglib_c_save_CFLAGS="${CFLAGS}"
 ax_check_taglib_c_save_CPPFLAGS="${CPPFLAGS}"
 ax_check_taglib_c_save_LDFLAGS="${LDFLAGS}"
 ax_check_taglib_c_save_LIBS="${LIBS}"
 AC_LANG_PUSH([C])
+CFLAGS="${CFLAGS} ${TAGLIB_CFLAGS}"
 CPPFLAGS="${CPPFLAGS} ${TAGLIB_CPPFLAGS}"
 LDFLAGS="${LDFLAGS} ${TAGLIB_LDFLAGS}"
 LIBS="${TAGLIB_C_LIBS} ${LIBS}"
@@ -300,17 +323,20 @@ AC_CHECK_HEADER([tag_c.h],
 		]
 	)
 ])
+CFLAGS="${ax_check_taglib_c_save_CFLAGS}"
 CPPFLAGS="${ax_check_taglib_c_save_CPPFLAGS}"
 LDFLAGS="${ax_check_taglib_c_save_LDFLAGS}"
 LIBS="${ax_check_taglib_c_save_LIBS}"
 AC_LANG_POP([C])
-fi						# want_taglib != no
 
 dnl ####### END CHECK ########
 ], [])
 dnl ##########################
 
+fi						# want_taglib != no
+
 ])
+
 AC_MSG_CHECKING([for libtag_c])
 if test x"${local_cv_have_lib_taglib_c}" = "xyes"; then
 	AC_MSG_RESULT([yes])

@@ -64,6 +64,25 @@ configure script, a couple of additional options are available:
                           example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
   --enable-debug          enable memory debugging (default: no)
+  --with-libshout=PFX     prefix where the libshout header files and library
+                          are installed (default: autodetect)
+  --with-libshout-includes=DIR
+                          directory where libshout header files are installed
+                          (optional)
+  --with-libshout-libs=DIR
+                          directory where libshout is installed (optional)
+  --with-libxml2=PFX      prefix where the libxml2 header files and library
+                          are installed (default: autodetect)
+  --with-libxml2-includes=DIR
+                          directory where libxml2 header files are installed
+                          (optional)
+  --with-libxml2-libs=DIR directory where libxml2 is installed (optional)
+  --with-taglib=PFX       prefix where the TagLib header files and library are
+                          installed (default: autodetect)
+  --with-taglib-includes=DIR
+                          directory where TagLib header files are installed
+                          (optional)
+  --with-taglib-libs=DIR  directory where TagLib is installed (optional)
   --with-libvorbis=PFX    prefix where the Vorbis library header files and
                           library are installed (default: autodetect)
   --with-libvorbis-includes=DIR
@@ -72,12 +91,8 @@ configure script, a couple of additional options are available:
   --with-libvorbis-libs=DIR
                           directory where the Vorbis libraries are installed
                           (optional)
-  --with-taglib=PFX       prefix where the TagLib header files and library are
-                          installed (default: autodetect)
-  --with-taglib-includes=DIR
-                          directory where TagLib header files are installed
-                          (optional)
-  --with-taglib-libs=DIR  directory where TagLib is installed (optional)
+  --with-libiconv-prefix[=DIR]  search for libiconv in DIR/include and DIR/lib
+  --without-libiconv-prefix     don't search for libiconv in includedir and libdir
 
 The compilation and installation process then boils down to the usual
 

@@ -4,6 +4,9 @@ Changes in 0.5.5, released on XXXX-XX-XX:
    - [FIX]   Re-enable TagLib support in MSVC build. Found by Roman Donchenko.
              (Ticket #1535)
 
+ * various:
+   - [MISC]  Further improvements and minor fixes in the build system.
+
 
 
 Changes in 0.5.4, released on 2009-03-28:

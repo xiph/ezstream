@@ -1,4 +1,4 @@
-dnl $Id$
+dnl # $Id$
 
 dnl # Append or prepend items to a variable, but keep the items in the
 dnl # variable unique.
@@ -7,7 +7,7 @@ dnl # by Karl Heyes of the Icecast project, in action. The end result turned
 dnl # out to be quite similar ...
 
 
-dnl # Copyright (c) 2008 Moritz Grimm <mgrimm@mrsserver.net>
+dnl # Copyright (c) 2008, 2009 Moritz Grimm <mgrimm@mrsserver.net>
 dnl #
 dnl # Permission to use, copy, modify, and distribute this software for any
 dnl # purpose with or without fee is hereby granted, provided that the above
@@ -40,6 +40,7 @@ do
 	fi
 done
 ])
+
 
 AC_DEFUN([AX_UNIQVAR_PREPEND],
 [

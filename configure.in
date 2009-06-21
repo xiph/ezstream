@@ -103,7 +103,7 @@ AC_CHECK_HEADERS([ \
 
 COMPAT_INCLUDES=""
 if test x"${ez_enable_debug}" = "xyes"; then
-	AX_HEADER_TREE([RB_FOREACHx], [],
+	AX_HEADER_TREE([RB_FOREACH], [],
 		[
 		  COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
 		])
