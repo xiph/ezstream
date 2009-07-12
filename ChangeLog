@@ -1,3 +1,58 @@
+2009-07-12 16:24  moritz
+
+	* [r16264] NEWS:
+	  Today is release day.
+
+2009-06-21 14:35  moritz
+
+	* [r16150] src/configfile.h:
+	  Actually, we agreed on GPLv2 only ...
+
+2009-06-21 14:21  moritz
+
+	* [r16149] NEWS, README, configure.in, m4/ccflags.m4,
+	  m4/libshout.m4, m4/libvorbis.m4, m4/libxml2.m4, m4/progname.m4,
+	  m4/taglib.m4, m4/tree.m4, m4/vacopy.m4, m4/vars.m4:
+	  Update m4 macros, allowing for more easy control over the build
+	  process among other things. Fix a silly bug in --enable-debug
+	  while there.
+
+2009-06-21 14:08  moritz
+
+	* [r16148] m4/libogg.m4:
+	  No need for this, a direct dependency check on libogg is not
+	  being done.
+
+2009-04-21 16:51  moritz
+
+	* [r15943] NEWS:
+	  Update.
+
+2009-04-21 16:47  moritz
+
+	* [r15942] win32/config.h:
+	  Build with TagLib support. (Ticket #1535)
+
+2009-03-28 22:58  moritz
+
+	* [r15888] win32/compat.h:
+	  Add missing newline at end of file.
+
+2009-03-28 22:58  moritz
+
+	* [r15887] win32/config.h:
+	  Post-release version bump here, too.
+
+2009-03-28 22:56  moritz
+
+	* [r15886] configure.in:
+	  Post-release version bump.
+
+2009-03-28 18:47  moritz
+
+	* [r15881] ChangeLog:
+	  Sync.
+
 2009-03-28 18:33  moritz
 
 	* [r15880] NEWS:
