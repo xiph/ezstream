@@ -128,6 +128,19 @@ parseConfig(const char *fileName)
 				xmlFree(ls_xmlContentPtr);
 			}
 		}
+		if (!xmlStrcmp(cur->name, (const xmlChar *)"sourceuser")) {
+			if (ezConfig.username != NULL) {
+				printf("%s[%ld]: Error: Cannot have multiple <sourceuser> elements\n",
+				       fileName, xmlGetLineNo(cur));
+				config_error++;
+				continue;
+			}
+			if (cur->xmlChildrenNode != NULL) {
+				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
+				ezConfig.username = xstrdup(ls_xmlContentPtr);
+				xmlFree(ls_xmlContentPtr);
+			}
+		}
 		if (!xmlStrcmp(cur->name, (const xmlChar *)"sourcepassword")) {
 			if (ezConfig.password != NULL) {
 				printf("%s[%ld]: Error: Cannot have multiple <sourcepassword> elements\n",

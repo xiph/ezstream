@@ -130,6 +130,15 @@ The content must be of the form
 For example:
 .Pp
 .Dl \&<url\&>http://example.com:8000/stream.ogg\&</url\&>
+.It Sy \&<sourceuser\ /\&>
+.Pq Optional.
+Sets the source username for authentication with the Icecast server.
+The default user
+.Po
+usually
+.Dq Li source
+.Pc
+is used if this element is not provided.
 .It Sy \&<sourcepassword\ /\&>
 .Pq Mandatory.
 Sets the source password for authentication with the Icecast server.

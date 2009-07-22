@@ -151,6 +151,13 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 		return (NULL);
 	}
 
+	if (pezConfig->username &&
+	    shout_set_user(shout, pezConfig->username) != SHOUTERR_SUCCESS) {
+		printf("%s: shout_set_user(): %s\n",
+		       __progname, shout_get_error(shout));
+		shout_free(shout);
+		return (NULL);
+	}
 	if (pezConfig->serverName &&
 	    shout_set_name(shout, pezConfig->serverName) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_name(): %s\n",

@@ -8,6 +8,11 @@
  -->
 <ezstream>
     <url>http://localhost:8000/vorbis.ogg</url>
+    <!--
+      If a different user name than "source" should be used, set it in
+      <sourceuser/>:
+     -->
+    <!-- <sourceuser>mr_stream</sourceuser> -->
     <sourcepassword>hackme</sourcepassword>
     <format>VORBIS</format>
     <filename>playlist.m3u</filename>

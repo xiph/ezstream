@@ -44,6 +44,7 @@ typedef struct tag_FORMAT_ENCDEC {
 
 typedef struct tag_EZCONFIG {
 	char		*URL;
+	char		*username;
 	char		*password;
 	char		*format;
 	char		*fileName;
