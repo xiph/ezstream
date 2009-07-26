@@ -63,13 +63,13 @@ if test -n "${GCC}"; then
 		Wstrict-prototypes
 	do
 		AX_CHECK_CFLAG([${_flag}],
-			[ AX_UNIQVAR_APPEND([EZ_CFLAGS], [-${_flag}]) ], [])
+			[AX_UNIQVAR_APPEND([EZ_CFLAGS], [-${_flag}])], [])
 	done
 	AX_CHECK_CFLAG([Wformat=2],
-		[ AX_UNIQVAR_APPEND([EZ_CFLAGS], [-Wformat=2]) ],
+		[AX_UNIQVAR_APPEND([EZ_CFLAGS], [-Wformat=2])],
 		[
 		  AX_CHECK_CFLAG([Wformat],
-			[ AX_UNIQVAR_APPEND([EZ_CFLAGS], [-Wformat]) ], [])
+			[AX_UNIQVAR_APPEND([EZ_CFLAGS], [-Wformat])], [])
 		])
 else
 	case "${host}" in
