@@ -155,7 +155,8 @@ if test -n "$1" -a x"${ax_check_libshout_shout_pc}" = "xyes"; then
 fi
 
 libshout_libs_autodetect=no
-if test -z "${LIBSHOUT_LIBS}"; then
+if test -z "${LIBSHOUT_LIBS}" \
+    -a x"${ax_check_libshout_shout_pc}" = "xyes"; then
 	LIBSHOUT_LIBS="`${PKG_CONFIG} --libs-only-l shout`"
 	libshout_libs_autodetect=yes
 fi
@@ -195,6 +196,27 @@ AC_CHECK_HEADER([shout/shout.h],
 		],
 		[
 		  AC_MSG_RESULT([no])
+		  if test x"${libshout_libs_autodetect}" = "xyes"; then
+			LIBSHOUT_LIBS="`${PKG_CONFIG} --static --libs-only-l shout`"
+			LIBS="${LIBSHOUT_LIBS} ${ax_check_libshout_save_LIBS}"
+			AC_MSG_CHECKING([if libshout works with explicit dependencies])
+			AC_LINK_IFELSE(
+				[AC_LANG_PROGRAM(
+				[[
+				  #include <shout/shout.h>
+				]],
+				[[
+				  shout_new();
+				]])],
+				[
+				  AC_MSG_RESULT([yes])
+				  local_cv_have_lib_libshout=yes
+				],
+				[
+				  AC_MSG_RESULT([no])
+				]
+			)
+		  fi
 		]
 	)
 ])
