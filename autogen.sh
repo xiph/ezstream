@@ -10,6 +10,8 @@ if [ ! -f "./`basename $0`" ]; then
 	exit 1
 fi
 
+USE_LIBTOOL="$(grep AC_PROG_LIBTOOL ./configure.* 2> /dev/null)"
+
 EXTRA=
 if [ -d m4 ]; then
 	EXTRA="-I m4"
@@ -25,8 +27,10 @@ AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
 	autoconf || exit 1
 AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
 	autoheader || exit 1
-AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
-	libtoolize --automake -c -f || exit 1
+if [ -n "${USE_LIBTOOL}" ]; then
+	AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
+		libtoolize --automake -c -f || exit 1
+fi
 AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
 	automake -a -c || exit 1
 
