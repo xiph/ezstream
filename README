@@ -104,9 +104,20 @@ The compilation and installation process then boils down to the usual
 If this procedure is unfamiliar to you, please consult the INSTALL file for
 more detailed instructions.
 
+On systems where the libshout installation does not include the required
+shout.pc file for pkg-config(1), the non-standard ``shout-config'' utility
+is available. However, the ezstream build system does not support the latter.
+
+If this is an issue, configure ezstream with
+
+    $ ./configure \
+        LIBSHOUT_CPPFLAGS="$(shout-config --cppflags)" \
+        LIBSHOUT_CFLAGS="$(shout-config --cflags-only)" \
+        LIBSHOUT_LIBS="$(shout-config --libs)"
+
 When the configuration keeps failing despite having all dependencies
 installed, take note of the more verbose error messages in config.log. If
-necessary, it is possible to directly customize many build flags through
+necessary, it is possible to further customize many build flags through
 environment variables. See the "influential environment variables" list
 in the --help output.
 
