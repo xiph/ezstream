@@ -258,7 +258,7 @@ if test -z "${PKG_CONFIG}"; then
 fi
 
 dnl ####### BEGIN CHECK ######
-PKG_CHECK_EXISTS([taglib $1], [
+PKG_CHECK_EXISTS([taglib_c $1], [
 dnl ##########################
 
 if test -z "${TAGLIB_C_LIBS}"; then
