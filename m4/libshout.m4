@@ -148,9 +148,11 @@ if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi
 
-dnl ####### BEGIN CHECK ######
-PKG_CHECK_EXISTS([shout $1], [
-dnl ##########################
+if test -n "$1" -a x"${ax_check_libshout_shout_pc}" = "xyes"; then
+	PKG_CHECK_EXISTS([shout $1], [],
+		[AC_MSG_ERROR([libshout version $1 is required.], [1])]
+	)
+fi
 
 libshout_libs_autodetect=no
 if test -z "${LIBSHOUT_LIBS}"; then
@@ -201,10 +203,6 @@ CPPFLAGS="${ax_check_libshout_save_CPPFLAGS}"
 LDFLAGS="${ax_check_libshout_save_LDFLAGS}"
 LIBS="${ax_check_libshout_save_LIBS}"
 AC_LANG_POP([C])
-
-dnl ####### END CHECK ########
-], [])
-dnl ##########################
 
 fi						# want_libshout != no
 
