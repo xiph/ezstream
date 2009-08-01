@@ -187,10 +187,10 @@ AC_CHECK_HEADER([libxml/parser.h],
 			LIBXML2_LIBS="`${PKG_CONFIG} --static --libs-only-l libxml-2.0`"
 			LIBS="${LIBXML2_LIBS} ${ax_check_libxml2_save_LIBS}"
 			AC_MSG_CHECKING([if libxml2 works with explicit dependencies])
-			AC_RUN_IFELSE(
+			AC_LINK_IFELSE(
 				[AC_LANG_PROGRAM(
 				[[
-                                  #include <stdlib.h>
+				  #include <stdlib.h>
 				  #include <libxml/parser.h>
 				]],
 				[[
