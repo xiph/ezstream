@@ -6,7 +6,8 @@ EXTRA_DIST	 = \
 	README.win32 config.h compat.h \
 	ezstream.sln ezstream.vcproj \
 	libflac.vcproj libogg.vcproj libshout.vcproj libspeex.vcproj \
-	libtheora.vcproj libvorbis.vcproj libvorbisfile.vcproj libz.vcproj
+	libtheora.vcproj libvorbis.vcproj libvorbisfile.vcproj libz.vcproj \
+	taglib.vcproj taglib_c.vcproj
 
 CLEANFILES	 = core *.core *~ .*~ ezstream.1.pdf
 
