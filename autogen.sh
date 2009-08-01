@@ -1,6 +1,9 @@
 #!/bin/sh
 
-PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin"
+PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/pkg/bin:/usr/pkg/sbin"
+
+_ac_version="2.61"
+_am_version="1.10"
 
 if [ ! -f "./`basename $0`" ]; then
 	echo "Please chdir into `basename $0`'s directory first."
@@ -8,13 +11,25 @@ if [ ! -f "./`basename $0`" ]; then
 fi
 
 EXTRA=
-if [ -d /usr/local/share/aclocal ]; then
-	EXTRA="-I /usr/local/share/aclocal"
+if [ -d m4 ]; then
+	EXTRA="-I m4"
 fi
 
-AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 aclocal -I m4 ${EXTRA}
-AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 autoconf
-AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 autoheader
-# AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 libtoolize --automake -c -f
-AUTOCONF_VERSION=2.61 AUTOMAKE_VERSION=1.9 automake -a -c
+if [ -d /usr/local/share/aclocal ]; then
+	EXTRA="${EXTRA} -I /usr/local/share/aclocal"
+fi
+
+AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
+	aclocal ${EXTRA} || exit 1
+AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
+	autoconf || exit 1
+AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
+	autoheader || exit 1
+AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
+	libtoolize --automake -c -f || exit 1
+AUTOCONF_VERSION="${_ac_version}" AUTOMAKE_VERSION="${_am_version}" \
+	automake -a -c || exit 1
+
 rm -r autom4te.cache
+
+exit 0
