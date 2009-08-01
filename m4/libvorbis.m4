@@ -2,8 +2,8 @@ dnl $Id$
 
 dnl # Check for working installations of libvorbis, libvorbisfile and
 dnl # libvorbisenc.
-dnl # Provides appropriate --with configuration options, fills and substitutes
-dnl # the VORBIS_CFLAGS, VORBIS_CPPFLAGS, VORBIS_LDFLAGS, LIBVORBIS_LIBS,
+dnl # Provides appropriate --with configuration options, fills the
+dnl # VORBIS_CFLAGS, VORBIS_CPPFLAGS, VORBIS_LDFLAGS, LIBVORBIS_LIBS,
 dnl # LIBVORBISENC_LIBS and LIBVORBISFILE_LIBS variables accordingly.
 
 
@@ -50,11 +50,6 @@ AC_ARG_VAR([VORBIS_CPPFLAGS],
 	[C preprocessor flags for the Vorbis libraries])
 AC_ARG_VAR([VORBIS_LDFLAGS],
 	[linker flags for the Vorbis libraries])
-if test x"${prefix}" = "xNONE"; then
-	have_libvorbis_prefix="/usr/local"
-else
-	have_libvorbis_prefix="${prefix}"
-fi
 have_libvorbis_includes=""
 have_libvorbis_libs=""
 want_libvorbis="auto"
@@ -103,30 +98,29 @@ esac
 AC_CACHE_VAL([local_cv_have_lib_libvorbis_opts],
 [
 ax_check_libvorbis_vorbis_pc="no"
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libvorbis_prefix}/lib/pkgconfig"
 PKG_CHECK_EXISTS([vorbis], [ax_check_libvorbis_vorbis_pc=yes])
 if test -z "${VORBIS_CFLAGS}" \
     -a x"${ax_check_libvorbis_vorbis_pc}" = "xyes"; then
 	VORBIS_CFLAGS="`${PKG_CONFIG} --cflags-only-other vorbis`"
 fi
 if test -n "${VORBIS_CPPFLAGS}"; then
-	if test x"${have_libvorbis_includes}" != "x"; then
+	if test -n "${have_libvorbis_includes}"; then
 		VORBIS_CPPFLAGS="${VORBIS_CPPFLAGS} -I${have_libvorbis_includes}"
 	fi
 else
-	if test x"${have_libvorbis_includes}" != "x"; then
+	if test -n "${have_libvorbis_includes}"; then
 		VORBIS_CPPFLAGS="-I${have_libvorbis_includes}"
 	else
 		if test x"${want_libvorbis}" = "xauto" \
 		    -a x"${ax_check_libvorbis_vorbis_pc}" = "xyes"; then
 			VORBIS_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I vorbis`"
-		else
+		elif test -n "${have_libvorbis_prefix}"; then
 			VORBIS_CPPFLAGS="-I${have_libvorbis_prefix}/include"
 		fi
 	fi
 fi
 if test -n "${VORBIS_LDFLAGS}"; then
-	if test x"${have_libvorbis_libs}" != "x"; then
+	if test -n "${have_libvorbis_libs}"; then
 		VORBIS_LDFLAGS="-L${have_libvorbis_libs} ${VORBIS_LDFLAGS}"
 	fi
 else
@@ -139,7 +133,7 @@ else
 				`${PKG_CONFIG} --libs-only-L vorbis` \
 				`${PKG_CONFIG} --libs-only-other vorbis` \
 			"
-		else
+		elif test -n "${have_libvorbis_prefix}"; then
 			VORBIS_LDFLAGS="-L${have_libvorbis_prefix}/lib"
 		fi
 	fi
@@ -160,7 +154,6 @@ local_cv_have_lib_libvorbis=no
 
 if test x"${want_libvorbis}" != "xno"; then	# want_libvorbis != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libvorbis_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi
@@ -255,7 +248,6 @@ local_cv_have_lib_libvorbisfile=no
 
 if test x"${want_libvorbis}" != "xno"; then	# want_libvorbis != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libvorbis_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi
@@ -339,7 +331,6 @@ local_cv_have_lib_libvorbisenc=no
 
 if test x"${want_libvorbis}" != "xno"; then	# want_libvorbis != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libvorbis_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi

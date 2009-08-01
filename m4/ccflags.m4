@@ -85,10 +85,17 @@ AC_CACHE_VAL([local_cv_prog_cc_error_flag],
 	AC_MSG_CHECKING([if ${CC} supports an error flag])
 	AC_LANG_PUSH([C])
 	save_CFLAGS="${CFLAGS}"
-	CFLAGS="${CFLAGS} -Werror"
-	AC_TRY_LINK([], [],
-		[local_cv_prog_cc_error_flag=-Werror],
-		[local_cv_prog_cc_error_flag=no])
+	local_cv_prog_cc_error_flag="-Werror" # GCC
+	CFLAGS="${save_CFLAGS} ${local_cv_prog_cc_error_flag}"
+	AC_TRY_LINK([], [], [],
+	[
+	  local_cv_prog_cc_error_flag="-errwarn" # Sun C
+	  CFLAGS="${save_CFLAGS} ${local_cv_prog_cc_error_flag}"
+	  AC_TRY_LINK([], [], [],
+	  [
+	    local_cv_prog_cc_error_flag=no]
+	  )]
+	)
 	CFLAGS="${save_CFLAGS}"
 	AC_LANG_POP([C])
 	if test x"${local_cv_prog_cc_error_flag}" != "xno"; then

@@ -1,9 +1,9 @@
 dnl # $Id$
 
 dnl # Check for a working installation of libshout.
-dnl # Provides appropriate --with configuration options, fills and substitutes
-dnl # the LIBSHOUT_CFLAGS, LIBSHOUT_CPPFLAGS, LIBSHOUT_LDFLAGS and
-dnl # LIBSHOUT_LIBS variables accordingly.
+dnl # Provides appropriate --with configuration options, fills the
+dnl # LIBSHOUT_CFLAGS, LIBSHOUT_CPPFLAGS, LIBSHOUT_LDFLAGS and LIBSHOUT_LIBS
+dnl # variables accordingly.
 
 
 dnl # Copyright (c) 2009 Moritz Grimm <mgrimm@mrsserver.net>
@@ -39,11 +39,6 @@ AC_ARG_VAR([LIBSHOUT_CPPFLAGS],
 	[C preprocessor flags for libshout])
 AC_ARG_VAR([LIBSHOUT_LDFLAGS],
 	[linker flags for libshout])
-if test x"${prefix}" = "xNONE"; then
-	have_libshout_prefix="/usr/local"
-else
-	have_libshout_prefix="${prefix}"
-fi
 have_libshout_includes=""
 have_libshout_libs=""
 want_libshout="auto"
@@ -92,30 +87,29 @@ esac
 AC_CACHE_VAL([local_cv_have_lib_libshout_opts],
 [
 ax_check_libshout_shout_pc="no"
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libshout_prefix}/lib/pkgconfig"
 PKG_CHECK_EXISTS([shout], [ax_check_libshout_shout_pc=yes])
 if test -z "${LIBSHOUT_CFLAGS}" \
     -a x"${ax_check_libshout_shout_pc}" = "xyes"; then
 	LIBSHOUT_CFLAGS="`${PKG_CONFIG} --cflags-only-other shout`"
 fi
 if test -n "${LIBSHOUT_CPPFLAGS}"; then
-	if test x"${have_libshout_includes}" != "x"; then
+	if test -n "${have_libshout_includes}"; then
 		LIBSHOUT_CPPFLAGS="${LIBSHOUT_CPPFLAGS} -I${have_libshout_includes}"
 	fi
 else
-	if test x"${have_libshout_includes}" != "x"; then
+	if test -n "${have_libshout_includes}"; then
 		LIBSHOUT_CPPFLAGS="-I${have_libshout_includes}"
 	else
 		if test x"${want_libshout}" = "xauto" \
 		    -a x"${ax_check_libshout_shout_pc}" = "xyes"; then
 			LIBSHOUT_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I shout`"
-		else
+		elif test -n "${have_libshout_prefix}"; then
 			LIBSHOUT_CPPFLAGS="-I${have_libshout_prefix}/include"
 		fi
 	fi
 fi
 if test -n "${LIBSHOUT_LDFLAGS}"; then
-	if test x"${have_libshout_libs}" != "x"; then
+	if test -n "${have_libshout_libs}"; then
 		LIBSHOUT_LDFLAGS="-L${have_libshout_libs} ${LIBSHOUT_LDFLAGS}"
 	fi
 else
@@ -128,7 +122,7 @@ else
 				`${PKG_CONFIG} --libs-only-L shout` \
 				`${PKG_CONFIG} --libs-only-other shout` \
 			"
-		else
+		elif test -n "${have_libshout_prefix}"; then
 			LIBSHOUT_LDFLAGS="-L${have_libshout_prefix}/lib"
 		fi
 	fi
@@ -150,7 +144,6 @@ local_cv_have_lib_libshout=no
 
 if test x"${want_libshout}" != "xno"; then	# want_libshout != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have__libshout_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi

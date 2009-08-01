@@ -1,8 +1,8 @@
 dnl # $Id$
 
 dnl # Check for a working installation of libxml (version 2.)
-dnl # Provides appropriate --with configuration options, fills and substitutes
-dnl # the LIBXML2_CFLAGS, LIBXML2_CPPFLAGS, LIBXML2_LDFLAGS and LIBXML2_LIBS
+dnl # Provides appropriate --with configuration options, fills the
+dnl # LIBXML2_CFLAGS, LIBXML2_CPPFLAGS, LIBXML2_LDFLAGS and LIBXML2_LIBS
 dnl # variables accordingly.
 
 
@@ -38,11 +38,6 @@ AC_ARG_VAR([LIBXML2_CPPFLAGS],
 	[C preprocessor flags for libxml2])
 AC_ARG_VAR([LIBXML2_LDFLAGS],
 	[linker flags for libxml2])
-if test x"${prefix}" = "xNONE"; then
-	have_libxml2_prefix="/usr/local"
-else
-	have_libxml2_prefix="${prefix}"
-fi
 have_libxml2_includes=""
 have_libxml2_libs=""
 want_libxml2="auto"
@@ -91,30 +86,29 @@ esac
 AC_CACHE_VAL([local_cv_have_lib_libxml2_opts],
 [
 ax_check_libxml2_xml2_pc="no"
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libxml2_prefix}/lib/pkgconfig"
 PKG_CHECK_EXISTS([libxml-2.0], [ax_check_libxml2_xml2_pc=yes])
 if test -z "${LIBXML2_CFLAGS}" \
     -a x"${ax_check_libxml2_xml2_pc}" = "xyes"; then
 	LIBXML2_CFLAGS="`${PKG_CONFIG} --cflags-only-other libxml-2.0`"
 fi
 if test -n "${LIBXML2_CPPFLAGS}"; then
-	if test x"${have_libxml2_includes}" != "x"; then
+	if test -n "${have_libxml2_includes}"; then
 		LIBXML2_CPPFLAGS="${LIBXML2_CPPFLAGS} -I${have_libxml2_includes}"
 	fi
 else
-	if test x"${have_libxml2_includes}" != "x"; then
+	if test -n "${have_libxml2_includes}"; then
 		LIBXML2_CPPFLAGS="-I${have_libxml2_includes}"
 	else
 		if test x"${want_libxml2}" = "xauto" \
 		    -a x"${ax_check_libxml2_xml2_pc}" = "xyes"; then
 			LIBXML2_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I libxml-2.0`"
-		else
+		elif test -n "${have_libxml2_prefix}"; then
 			LIBXML2_CPPFLAGS="-I${have_libxml2_prefix}/include"
 		fi
 	fi
 fi
 if test -n "${LIBXML2_LDFLAGS}"; then
-	if test x"${have_libxml2_libs}" != "x"; then
+	if test -n "${have_libxml2_libs}"; then
 		LIBXML2_LDFLAGS="-L${have_libxml2_libs} ${LIBXML2_LDFLAGS}"
 	fi
 else
@@ -127,7 +121,7 @@ else
 				`${PKG_CONFIG} --libs-only-L libxml-2.0` \
 				`${PKG_CONFIG} --libs-only-other libxml-2.0` \
 			"
-		else
+		elif test -n "${have_libxml2_prefix}"; then
 			LIBXML2_LDFLAGS="-L${have_libxml2_prefix}/lib"
 		fi
 	fi
@@ -148,7 +142,6 @@ local_cv_have_lib_libxml2=no
 
 if test x"${want_libxml2}" != "xno"; then	# want_libxml2 != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_libxml2_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi
@@ -172,7 +165,7 @@ CFLAGS="${CFLAGS} ${LIBXML2_CFLAGS}"
 CPPFLAGS="${CPPFLAGS} ${LIBXML2_CPPFLAGS}"
 LDFLAGS="${LDFLAGS} ${LIBXML2_LDFLAGS}"
 LIBS="${LIBXML2_LIBS} ${LIBS}"
-AC_CHECK_HEADERS([libxml/parser.h],
+AC_CHECK_HEADER([libxml/parser.h],
 [
 	AC_MSG_CHECKING([if libxml2 works])
 	AC_LINK_IFELSE(

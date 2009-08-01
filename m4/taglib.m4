@@ -2,8 +2,8 @@ dnl # $Id$
 
 dnl # Check for working installations of TagLib and its C-wrapper library,
 dnl # libtag_c.
-dnl # Provides appropriate --with configuration options, fills and substitutes
-dnl # the TAGLIB_CFLAGS, TAGLIB_CPPFLAGS, TAGLIB_LDFLAGS, TAGLIB_LIBS and
+dnl # Provides appropriate --with configuration options, fills the
+dnl # TAGLIB_CFLAGS, TAGLIB_CPPFLAGS, TAGLIB_LDFLAGS, TAGLIB_LIBS and
 dnl # TAGLIB_C_LIBS variables accordingly.
 
 
@@ -45,11 +45,6 @@ AC_ARG_VAR([TAGLIB_CPPFLAGS],
 	[C preprocessor flags for TagLib])
 AC_ARG_VAR([TAGLIB_LDFLAGS],
 	[linker flags for TagLib])
-if test x"${prefix}" = "xNONE"; then
-	have_taglib_prefix="/usr/local"
-else
-	have_taglib_prefix="${prefix}"
-fi
 have_taglib_includes=""
 have_taglib_libs=""
 want_taglib="auto"
@@ -98,30 +93,29 @@ esac
 AC_CACHE_VAL([local_cv_have_lib_taglib_opts],
 [
 ax_check_taglib_taglib_pc="no"
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_taglib_prefix}/lib/pkgconfig"
 PKG_CHECK_EXISTS([taglib], [ax_check_taglib_taglib_pc=yes])
 if test -z "${TAGLIB_CFLAGS}" \
     -a x"${ax_check_taglib_taglib_pc}" = "xyes"; then
 	TAGLIB_CFLAGS="`${PKG_CONFIG} --cflags-only-other taglib`"
 fi
 if test -n "${TAGLIB_CPPFLAGS}"; then
-	if test x"${have_taglib_includes}" != "x"; then
+	if test -n "${have_taglib_includes}"; then
 		TAGLIB_CPPFLAGS="${TAGLIB_CPPFLAGS} -I${have_taglib_includes}"
 	fi
 else
-	if test x"${have_taglib_includes}" != "x"; then
+	if test -n "${have_taglib_includes}"; then
 		TAGLIB_CPPFLAGS="-I${have_taglib_includes}"
 	else
 		if test x"${want_taglib}" = "xauto" \
 		    -a x"${ax_check_taglib_taglib_pc}" = "xyes"; then
 			TAGLIB_CPPFLAGS="`${PKG_CONFIG} --cflags-only-I taglib`"
-		else
+		elif test -n "${have_taglib_prefix}"; then
 			TAGLIB_CPPFLAGS="-I${have_taglib_prefix}/include/taglib"
 		fi
 	fi
 fi
 if test -n "${TAGLIB_LDFLAGS}"; then
-	if test x"${have_taglib_libs}" != "x"; then
+	if test -n "${have_taglib_libs}"; then
 		TAGLIB_LDFLAGS="-L${have_taglib_libs} ${TAGLIB_LDFLAGS}"
 	fi
 else
@@ -134,7 +128,7 @@ else
 				`${PKG_CONFIG} --libs-only-L taglib` \
 				`${PKG_CONFIG} --libs-only-other taglib` \
 			"
-		else
+		elif test -n "${have_taglib_prefix}"; then
 			TAGLIB_LDFLAGS="-L${have_taglib_prefix}/lib"
 		fi
 	fi
@@ -155,7 +149,6 @@ local_cv_have_lib_taglib=no
 
 if test x"${want_taglib}" != "xno"; then	# want_taglib != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_taglib_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi
@@ -260,7 +253,6 @@ local_cv_have_lib_taglib_c=no
 
 if test x"${want_taglib}" != "xno"; then	# want_taglib != no
 
-PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${have_taglib_prefix}/lib/pkgconfig"
 if test -z "${PKG_CONFIG}"; then
 	AC_MSG_ERROR([The pkg-config utility is required.], [1])
 fi
