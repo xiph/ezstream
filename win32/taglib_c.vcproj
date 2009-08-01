@@ -56,7 +56,7 @@
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="4"
-				CompileAs="0"
+				CompileAs="2"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -127,7 +127,7 @@
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="0"
-				CompileAs="0"
+				CompileAs="2"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"

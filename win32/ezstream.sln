@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 # Visual Studio 2008
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ezstream", "ezstream.vcproj", "{43809192-0B8F-4AFE-85E6-C54E265CFB75}"
 	ProjectSection(ProjectDependencies) = postProject
+		{0A70BF55-FCF6-4DD8-A455-8233666A60E1} = {0A70BF55-FCF6-4DD8-A455-8233666A60E1}
 		{1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5} = {1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5}
 		{29A3AE75-E9A8-4A43-BADB-A4EF0972BD5B} = {29A3AE75-E9A8-4A43-BADB-A4EF0972BD5B}
 		{8FB7BDB7-B66C-4D45-A03D-2FD46AAB1B08} = {8FB7BDB7-B66C-4D45-A03D-2FD46AAB1B08}
@@ -46,6 +47,13 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libshout", "libshout.vcproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libz", "libz.vcproj", "{1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taglib", "taglib.vcproj", "{B1A6316C-A73A-4B34-A428-E967A698CA37}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "taglib_c", "taglib_c.vcproj", "{0A70BF55-FCF6-4DD8-A455-8233666A60E1}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B1A6316C-A73A-4B34-A428-E967A698CA37} = {B1A6316C-A73A-4B34-A428-E967A698CA37}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -88,6 +96,14 @@ Global
 		{1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5}.Debug|Win32.Build.0 = Debug|Win32
 		{1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5}.Release|Win32.ActiveCfg = Release|Win32
 		{1ACB165E-8C63-4B44-A4EB-791EFA8FA0A5}.Release|Win32.Build.0 = Release|Win32
+		{B1A6316C-A73A-4B34-A428-E967A698CA37}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B1A6316C-A73A-4B34-A428-E967A698CA37}.Debug|Win32.Build.0 = Debug|Win32
+		{B1A6316C-A73A-4B34-A428-E967A698CA37}.Release|Win32.ActiveCfg = Release|Win32
+		{B1A6316C-A73A-4B34-A428-E967A698CA37}.Release|Win32.Build.0 = Release|Win32
+		{0A70BF55-FCF6-4DD8-A455-8233666A60E1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0A70BF55-FCF6-4DD8-A455-8233666A60E1}.Debug|Win32.Build.0 = Debug|Win32
+		{0A70BF55-FCF6-4DD8-A455-8233666A60E1}.Release|Win32.ActiveCfg = Release|Win32
+		{0A70BF55-FCF6-4DD8-A455-8233666A60E1}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

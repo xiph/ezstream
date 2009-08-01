@@ -56,7 +56,8 @@
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="4"
-				CompileAs="0"
+				CompileAs="2"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -127,7 +128,8 @@
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="0"
-				CompileAs="0"
+				CompileAs="2"
+				DisableSpecificWarnings="4996"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -201,10 +203,6 @@
 			</File>
 			<File
 				RelativePath=".\taglib\taglib\flac\flacproperties.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\mpeg\id3v2\frames\generalencapsulatedobjectframe.cpp"
 				>
 			</File>
 			<File
@@ -284,19 +282,7 @@
 				>
 			</File>
 			<File
-				RelativePath=".\taglib\taglib\ogg\speex\speexfile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\ogg\speex\speexproperties.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\taglib\taglib\tag.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\tagunion.cpp"
 				>
 			</File>
 			<File
@@ -320,14 +306,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\taglib\taglib\trueaudio\trueaudiofile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\trueaudio\trueaudioproperties.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\taglib\taglib\toolkit\tstring.cpp"
 				>
 			</File>
@@ -348,27 +326,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\taglib\taglib\mpeg\id3v2\frames\unsynchronizedlyricsframe.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\mpeg\id3v2\frames\urllinkframe.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\taglib\taglib\ogg\vorbis\vorbisfile.cpp"
 				>
 			</File>
 			<File
 				RelativePath=".\taglib\taglib\ogg\vorbis\vorbisproperties.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\wavpack\wavpackfile.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\taglib\taglib\wavpack\wavpackproperties.cpp"
 				>
 			</File>
 			<File

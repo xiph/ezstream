@@ -71,7 +71,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseUnicodeResponseFiles="false"
-				AdditionalDependencies="ws2_32.lib .\taglib-bin\lib\tag.lib .\taglib-bin\lib\tag_c.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
+				AdditionalDependencies="ws2_32.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
 				GenerateDebugInformation="true"
 				SubSystem="0"
 				LargeAddressAware="2"
@@ -153,7 +153,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				UseUnicodeResponseFiles="false"
-				AdditionalDependencies="ws2_32.lib .\taglib-bin\lib\tag.lib .\taglib-bin\lib\tag_c.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
+				AdditionalDependencies="ws2_32.lib libxml2-bin\lib\libxml2_a.lib .\libiconv-bin\lib\libiconv-vc9.lib"
 				GenerateDebugInformation="false"
 				SubSystem="1"
 				LargeAddressAware="2"
