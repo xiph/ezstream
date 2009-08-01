@@ -293,7 +293,7 @@ AC_CHECK_HEADER([tag_c.h],
 		[
 		  AC_MSG_RESULT([no])
 		  LIBS="${LIBS} -ltag -lstdc++ -lz"
-		  TAGLIB_LIBS="${TAGLIB_LIBS} -ltag -lstdc++ -lz"
+		  TAGLIB_C_LIBS="${TAGLIB_C_LIBS} -ltag -lstdc++ -lz"
 		  AC_MSG_CHECKING([if libtag_c works with -ltag -lstdc++ -lz])
 		  AC_LINK_IFELSE(
 			[AC_LANG_PROGRAM(
