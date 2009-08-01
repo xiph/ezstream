@@ -49,14 +49,14 @@
 				MinimalRebuild="true"
 				ExceptionHandling="1"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				ObjectFile="$(IntDir)\$(TargetName).obj\"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="4"
-				CallingConvention="0"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -70,7 +70,6 @@
 			<Tool
 				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				LinkLibraryDependencies="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -128,7 +127,7 @@
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="0"
-				CallingConvention="0"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -142,7 +141,6 @@
 			<Tool
 				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				LinkLibraryDependencies="false"
 			/>
 			<Tool
 				Name="VCALinkTool"

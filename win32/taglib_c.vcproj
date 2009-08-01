@@ -49,13 +49,14 @@
 				MinimalRebuild="true"
 				ExceptionHandling="1"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="false"
+				RuntimeTypeInfo="true"
 				ObjectFile="$(IntDir)\$(TargetName).obj\"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
 				DebugInformationFormat="4"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -69,7 +70,6 @@
 			<Tool
 				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				LinkLibraryDependencies="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -114,19 +114,20 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				UseUnicodeResponseFiles="false"
-				Optimization="2"
+				Optimization="3"
 				EnableIntrinsicFunctions="false"
 				AdditionalIncludeDirectories=".;.\taglib;.\taglib\taglib;.\taglib\taglib\toolkit;.\taglib\taglib\ogg;.\taglib\taglib\ogg\vorbis;.\taglib\taglib\ogg\flac;.\taglib\taglib\ogg\speex;.\taglib\taglib\flac;.\taglib\taglib\mpeg;.\taglib\taglib\mpeg\id3v1;.\taglib\taglib\mpeg\id3v2;.\taglib\taglib\mpc;.\taglib\taglib\ape;.\taglib\taglib\trueaudio;.\taglib\taglib\wavpack;"
 				PreprocessorDefinitions="WIN32;_CRT_SECURE_NO_WARNINGS;NDEBUG;MAKE_TAGLIB_C_LIB;"
 				StringPooling="true"
 				ExceptionHandling="1"
 				RuntimeLibrary="2"
-				EnableFunctionLevelLinking="true"
-				RuntimeTypeInfo="false"
+				EnableFunctionLevelLinking="false"
+				RuntimeTypeInfo="true"
 				ObjectFile="$(IntDir)\$(TargetName).obj\"
 				ProgramDataBaseFileName="$(IntDir)\$(TargetName)-vc90.pdb"
 				WarningLevel="3"
-				DebugInformationFormat="3"
+				DebugInformationFormat="0"
+				CompileAs="0"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -140,7 +141,6 @@
 			<Tool
 				Name="VCLibrarianTool"
 				UseUnicodeResponseFiles="false"
-				LinkLibraryDependencies="false"
 			/>
 			<Tool
 				Name="VCALinkTool"
