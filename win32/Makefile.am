@@ -7,7 +7,8 @@ EXTRA_DIST	 = \
 	ezstream.sln ezstream.vcproj \
 	libflac.vcproj libogg.vcproj libshout.vcproj libspeex.vcproj \
 	libtheora.vcproj libvorbis.vcproj libvorbisfile.vcproj libz.vcproj \
-	taglib.vcproj taglib_c.vcproj
+	taglib.vcproj taglib_c.vcproj \
+	tfile.cpp
 
 CLEANFILES	 = core *.core *~ .*~ ezstream.1.pdf
 
