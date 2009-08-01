@@ -1,3 +1,123 @@
+2009-08-01 16:15  moritz
+
+	* [r16381] README:
+	  Almost everyone chooses the pkg-config(1) way and installs
+	  shout.pc. Document how to configure ezstream on differently
+	  enabled systems. ... heh, PC talk is so deliciously nasty.
+
+2009-08-01 16:08  moritz
+
+	* [r16380] m4/libshout.m4:
+	  Give it a chance to link statically.
+
+2009-08-01 16:08  moritz
+
+	* [r16379] m4/taglib.m4:
+	  Check for taglib_c in the libtag_c test.
+
+2009-08-01 16:01  moritz
+
+	* [r16378] m4/libxml2.m4:
+	  Don't use AC_RUN_IFELSE (breaks cross-compiles.)
+
+2009-08-01 15:28  moritz
+
+	* [r16377] m4/libshout.m4:
+	  Do not rely on a succesful pkg-config(1) check for libshout2, as
+	  there are still some systems where only shout-config gets
+	  installed (NetBSD for example.)
+
+2009-08-01 15:26  moritz
+
+	* [r16376] autogen.sh:
+	  Fix for non-libtool project.
+
+2009-08-01 13:52  moritz
+
+	* [r16375] autogen.sh:
+	  Update to what I use everywhere else now.
+
+2009-08-01 13:50  moritz
+
+	* [r16374] NEWS:
+	  Today is (the real) release day.
+
+2009-08-01 13:46  moritz
+
+	* [r16373] m4/ccflags.m4, m4/libshout.m4, m4/libvorbis.m4,
+	  m4/libxml2.m4, m4/taglib.m4:
+	  Update m4 macros to latest version.
+
+2009-08-01 10:54  moritz
+
+	* [r16372] win32/Makefile.am, win32/tfile.cpp:
+	  Add and redistribute tfile.cpp, which I needed to modify in order
+	  to build Taglib 1.4 on Windows. This should also satisfy the
+	  LGPL.
+
+2009-08-01 10:51  moritz
+
+	* [r16371] win32/Makefile.am:
+	  Distribute taglib project files.
+
+2009-08-01 10:49  moritz
+
+	* [r16370] win32/ezstream.sln, win32/ezstream.vcproj,
+	  win32/taglib.vcproj, win32/taglib_c.vcproj:
+	  Downgrade the Taglib project files to v1.4 -- this actually works
+	  now, so hook it up to ezstream.
+
+2009-08-01 09:04  moritz
+
+	* [r16369] win32/taglib.vcproj, win32/taglib_c.vcproj:
+	  Make these look like the other project files; maybe it helps with
+	  the linking issue (to be tested later.)
+
+2009-07-26 10:52  moritz
+
+	* [r16337] configure.in:
+	  Whitespace removal for consistency with other projects.
+
+2009-07-22 20:19  moritz
+
+	* [r16319] NEWS, doc/ezstream.1.in, examples/ezstream_mp3.xml,
+	  examples/ezstream_vorbis.xml, src/configfile.c, src/configfile.h,
+	  src/util.c:
+	  Akos Veres suggested that ezstream should be able to set the
+	  login username, and I concur.
+
+2009-07-17 22:52  moritz
+
+	* [r16296] win32/ezstream.sln:
+	  Remove taglib projects again. I failed to build a taglib that can
+	  be coerced into linking statically with ezstream. *sigh* ...
+	  hours of frustrating trial and error for nothing.
+	  
+	  Without a bright idea real soon, the next release -- whose sole
+	  purpose is to fix TagLib support on Windows -- will require
+	  tag.dll and tag_c.dll to be shipped and installed as well.
+
+2009-07-12 22:05  moritz
+
+	* [r16268] win32/taglib.vcproj, win32/taglib_c.vcproj:
+	  EOL style.
+
+2009-07-12 22:03  moritz
+
+	* [r16267] win32/ezstream.sln, win32/taglib.vcproj,
+	  win32/taglib_c.vcproj:
+	  This still doesn't work right, but commit to avoid losing work.
+
+2009-07-12 16:40  moritz
+
+	* [r16266] NEWS:
+	  Actually, no ... *grr*.
+
+2009-07-12 16:27  moritz
+
+	* [r16265] ChangeLog:
+	  Sync.
+
 2009-07-12 16:24  moritz
 
 	* [r16264] NEWS:
