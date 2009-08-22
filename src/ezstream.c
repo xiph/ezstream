@@ -874,9 +874,9 @@ streamFile(shout_t *shout, const char *fileName)
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag,
 					&mdata, &isStdin, &songLen))
-	    == NULL) {
-		return (retval);
-	}
+	    == NULL)
+		/* Continue with next resource on failure: */
+		return (1);
 
 	if (mdata != NULL) {
 		char	*tmp, *metaData;
