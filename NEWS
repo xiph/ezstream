@@ -5,6 +5,8 @@ Changes in 0.5.6, released on XXXX-XX-XX:
              Failure to open a resource (e.g. a media file) is no longer fatal
              and operation will continue as far as possible. Idea from dhorton.
              (Ticket #1585)
+ * examples/:
+   - [NEW]   Add a real-world example playlist script with logging feature.
 
 
 Changes in 0.5.5, released on 2009-08-01:

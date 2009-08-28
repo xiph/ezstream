@@ -1,6 +1,7 @@
 #!/bin/sh
 
-# Example metadata script that has the behavior required by ezstream.
+# Minimalist example metadata script that has the behavior required by
+# ezstream.
 
 test -z "${1}" && echo "Ezstream presents"
 test x"${1}" = "xartist" && echo "Great Artist"
