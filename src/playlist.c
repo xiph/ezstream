@@ -499,13 +499,18 @@ playlist_run_program(playlist_t *pl)
 	}
 
 	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
-		if (ferror(filep))
-			printf("%s: Error while reading output from program '%s': %s\n",
-			       __progname, pl->filename, strerror(errno));
+		int	errnum = errno;
+
 		pclose(filep);
-		printf("%s: FATAL: External program '%s' not (or no longer) usable.\n",
-		       __progname, pl->filename);
-		exit(1);
+
+		if (ferror(filep)) {
+			printf("%s: Error while reading output from program '%s': %s\n",
+			       __progname, pl->filename, strerror(errnum));
+			exit(1);
+		}
+
+		/* No output (end of playlist.) */
+		return (NULL);
 	}
 
 	pclose(filep);
@@ -518,11 +523,9 @@ playlist_run_program(playlist_t *pl)
 
 	buf[strcspn(buf, "\n")] = '\0';
 	buf[strcspn(buf, "\r")] = '\0';
-	if (buf[0] == '\0') {
-		printf("%s: Empty line received from program '%s'\n",
-		       __progname, pl->filename);
+	if (buf[0] == '\0')
+		/* Empty line (end of playlist.) */
 		return (NULL);
-	}
 
 	if (pl->prog_track != NULL)
 		xfree(pl->prog_track);
