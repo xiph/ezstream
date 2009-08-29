@@ -1001,9 +1001,6 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		 *      bit more logical.
 		 */
 		playlist_rewind(playlist);
-		if (vFlag && playlist_get_num_items(playlist) == 0)
-			printf("%s: Warning: Playlist '%s' is empty\n",
-			       __progname, fileName);
 	}
 
 	if (!pezConfig->fileNameIsProgram && pezConfig->shuffle)
