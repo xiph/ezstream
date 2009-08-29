@@ -101,6 +101,8 @@ fi
 if [ ${_track_no} -gt ${_num_tracks} ]; then
 	if [ ${REPEAT} -ne 1 ]; then
 		# We're done.
+		# Output an empty line to indicate end-of-playlist:
+		echo
 		rm -f "${_state}"
 		exit 0
 	fi
