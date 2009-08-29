@@ -57,6 +57,7 @@ int			 metadataFromProgram;
 EZCONFIG		*pezConfig = NULL;
 playlist_t		*playlist = NULL;
 int			 playlistMode = 0;
+unsigned int		 resource_errors = 0;
 
 #ifdef HAVE_SIGNALS
 const int		 ezstream_signals[] = {
@@ -874,9 +875,15 @@ streamFile(shout_t *shout, const char *fileName)
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag,
 					&mdata, &isStdin, &songLen))
-	    == NULL)
+	    == NULL) {
+		if (++resource_errors > 100) {
+			printf("%s: Too many errors -- giving up.\n", __progname);
+			return (0);
+		}
 		/* Continue with next resource on failure: */
 		return (1);
+	}
+	resource_errors = 0;
 
 	if (mdata != NULL) {
 		char	*tmp, *metaData;

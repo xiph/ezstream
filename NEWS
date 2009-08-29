@@ -5,6 +5,8 @@ Changes in 0.5.6, released on XXXX-XX-XX:
              Failure to open a resource (e.g. a media file) is no longer fatal
              and operation will continue as far as possible. Idea from dhorton.
              (Ticket #1585)
+   - [MISC]  With the previous change, still abort ezstream after 100
+             subsequent errors to prevent a very verbose infinite loop.
  * src/playlist.c:
    - [MISC]  Consider no output from a playlist program to be equivalent to an
              empty line, indicating that the end of the playlist is reached.
