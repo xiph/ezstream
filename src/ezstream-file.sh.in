@@ -117,16 +117,16 @@ trap 'rm -rf ${_temp_dir}; exit 1' 2 15
 _cfg="${_temp_dir}/config.xml"
 _playlist="${_temp_dir}/playlist.txt"
 
-touch "${_cfg}"
-if [ $? -ne 0 ]; then
-	echo "${_myname}: Unable to create configuration." >&2
-	exit 1
-fi
-chmod 0600 "${_cfg}"
+touch "${_cfg}" || exit 1
+chmod 0600 "${_cfg}" || exit 1
 
 sed -e "s,${_filename_placeholder},${_playlist},g" \
 	< "${_cfg_template}" \
 	> "${_cfg}"
+if [ $? -ne 0 ]; then
+	echo "${_myname}: Unable to create configuration." >&2
+	exit 1
+fi
 
 if [ -n "$1" ]; then
 	for _file in $*
