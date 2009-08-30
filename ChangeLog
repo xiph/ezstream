@@ -1,3 +1,109 @@
+2009-08-30 21:55  moritz
+
+	* [r16537] NEWS, doc/ezstream.1.in.in, src/ezstream.c:
+	  Teach ezstream a different mode of operation, as a one-shot line
+	  shuffling tool.
+
+2009-08-30 21:46  moritz
+
+	* [r16536] src/ezstream.h, src/playlist.c:
+	  Support reading playlists from standard input.
+
+2009-08-30 20:34  moritz
+
+	* [r16535] examples/Makefile.am,
+	  examples/ezstream-file_template.xml:
+	  Add an example template configuration for ezstream-file.sh(1).
+
+2009-08-30 19:41  moritz
+
+	* [r16534] src/ezstream-file.sh.in:
+	  Move the verbose error check where it belongs.
+
+2009-08-30 19:38  moritz
+
+	* [r16533] COPYING, doc/ezstream-file.sh.1.in.in,
+	  doc/ezstream.1.in.in:
+	  Some licensing blah-blah and RCS IDs.
+
+2009-08-30 18:28  moritz
+
+	* [r16532] NEWS:
+	  Merge two related changes into one bullet point, and set release
+	  date to tomorrow.
+
+2009-08-30 18:23  moritz
+
+	* [r16531] src/ezstream-file.sh.in:
+	  Do not quote $EZSTREAM, which breaks paths with whitespace but
+	  allows to smuggle in default command line arguments.
+
+2009-08-30 18:22  moritz
+
+	* [r16530] doc/ezstream-file.sh.1.in.in:
+	  Tweak.
+
+2009-08-30 12:49  moritz
+
+	* [r16529] NEWS, configure.in, doc/Makefile.am,
+	  doc/ezstream-file.sh.1.in.in, doc/ezstream.1.in,
+	  doc/ezstream.1.in.in, src/Makefile.am, src/ezstream-file.sh.in:
+	  Add new wrapper/convenience script ezstream-file.sh -- generates
+	  ezstreams on- the-fly.
+
+2009-08-29 09:37  moritz
+
+	* [r16528] src/ezstream.c:
+	  Remove pointless and (at this point) irritating warning message.
+
+2009-08-29 09:36  moritz
+
+	* [r16527] NEWS, src/ezstream.c:
+	  The original reason to abort ezstream when running into problems
+	  opening a media file was to prevent a very verbose infinite loop
+	  (e.g. when accidentially playing an outdated playlist.) Bring
+	  that back by aborting after 100 subsequent errors.
+
+2009-08-29 09:14  moritz
+
+	* [r16526] NEWS, src/playlist.c:
+	  ... also fix ezstream in this regard: No need to complain when
+	  receiving such an empty line, and not receiving any output should
+	  not be a fatal error. Consider the latter to be
+	  "end-of-playlist", too.
+
+2009-08-29 09:12  moritz
+
+	* [r16525] examples/playlist-logger.sh:
+	  Listen to my own documentation: the end-of-playlist case is
+	  indicated by an empty line. But ...
+
+2009-08-28 15:55  moritz
+
+	* [r16523] NEWS, examples/Makefile.am, examples/meta.sh,
+	  examples/play.sh, examples/playlist-logger.sh:
+	  Add a more fancy playlist script.
+
+2009-08-22 10:03  moritz
+
+	* [r16497] NEWS, src/ezstream.c:
+	  #1585: Continue when openResource() fails.
+
+2009-08-01 18:44  moritz
+
+	* [r16388] configure.in, win32/config.h:
+	  Post-release version bump.
+
+2009-08-01 16:36  moritz
+
+	* [r16383] ChangeLog:
+	  Sync.
+
+2009-08-01 16:32  moritz
+
+	* [r16382] m4/taglib.m4:
+	  Fix copy+paste'o.
+
 2009-08-01 16:15  moritz
 
 	* [r16381] README:
