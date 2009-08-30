@@ -281,9 +281,12 @@ AC_CONFIG_FILES([
 	compat/Makefile
 	compat/sys/Makefile
 	doc/Makefile
+	doc/ezstream-file.sh.1.in
+	doc/ezstream.1.in
 	examples/Makefile
 	m4/Makefile
 	src/Makefile
+	src/ezstream-file.sh
 	win32/Makefile
 	win32/shout/Makefile
 ])

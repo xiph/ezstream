@@ -1,6 +1,7 @@
 AUTOMAKE_OPTIONS = 1.9 foreign
 
 bin_PROGRAMS	 = ezstream
+bin_SCRIPTS	 = ezstream-file.sh
 
 ezstream_SOURCES = \
 	compat.c \

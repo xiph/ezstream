@@ -1,5 +1,11 @@
 Changes in 0.5.6, released on XXXX-XX-XX:
 
+ * ezstream-file.sh:
+   - [NEW]   Add and install ezstream-file.sh, a new convenience shell script
+             that generates configuration and playlist from a template and
+             command line, respectively. (Bourne shell and POSIX utilities
+             required.)
+             See ezstream-file.sh(1) for details.
  * src/ezstream.c:
    - [MISC]  Be more tolerant towards faulty playlists and similar issues.
              Failure to open a resource (e.g. a media file) is no longer fatal

@@ -3,9 +3,9 @@
 .\" This document may be be used and/or modified under the licensing terms
 .\" of the Ezstream software.
 .\"
-.Dd !!BUILD_DATE!!
+.Dd @BUILD_DATE@
 .Dt EZSTREAM 1
-.Os
+.Os @PACKAGE_NAME@ @PACKAGE_VERSION@
 .Sh NAME
 .Nm ezstream
 .Nd source client for Icecast with external de-/encoder support
@@ -598,6 +598,8 @@ Directory containing example configuration files for various uses of
 .Nm ,
 as well as example playlist and metadata scripts.
 .El
+.Sh SEE ALSO
+.Xr ezstream-file.sh 1
 .Sh AUTHORS
 .Nm
 was written by:
