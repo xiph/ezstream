@@ -49,6 +49,10 @@
 # include <unistd.h>
 #endif
 
+#ifndef STDIN_FILENO
+# define STDIN_FILENO		0
+#endif /* !STDIN_FILENO */
+
 #ifndef _PATH_DEVNULL
 # ifdef WIN32
 #  define _PATH_DEVNULL 	"nul"

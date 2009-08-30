@@ -131,12 +131,22 @@ playlist_read(const char *filename)
 	FILE		*filep;
 	char		 buf[PATH_MAX];
 
-	pl = playlist_create(filename);
+	if (filename != NULL) {
+		pl = playlist_create(filename);
 
-	if ((filep = fopen(filename, "r")) == NULL) {
-		printf("%s: %s: %s\n", __progname, filename, strerror(errno));
-		playlist_free(&pl);
-		return (NULL);
+		if ((filep = fopen(filename, "r")) == NULL) {
+			printf("%s: %s: %s\n", __progname, filename, strerror(errno));
+			playlist_free(&pl);
+			return (NULL);
+		}
+	} else {
+		pl = playlist_create("stdin");
+
+		if ((filep = fdopen(STDIN_FILENO, "r")) == NULL) {
+			printf("%s: stdin: %s\n", __progname, strerror(errno));
+			playlist_free(&pl);
+			return (NULL);
+		}
 	}
 
 	line = 0;
@@ -147,7 +157,7 @@ playlist_read(const char *filename)
 			char skip_buf[2];
 
 			printf("%s[%lu]: File or path name too long\n",
-			       filename, line);
+			       pl->filename, line);
 			/* Discard any excess chars in that line. */
 			while (fgets(skip_buf, (int)sizeof(skip_buf), filep) != NULL) {
 				if (skip_buf[0] == '\n')
@@ -181,7 +191,7 @@ playlist_read(const char *filename)
 	}
 	if (ferror(filep)) {
 		printf("%s: playlist_read(): Error while reading %s: %s\n",
-		       __progname, filename, strerror(errno));
+		       __progname, pl->filename, strerror(errno));
 		fclose(filep);
 		playlist_free(&pl);
 		return (NULL);
