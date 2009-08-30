@@ -140,6 +140,6 @@ else
 	done
 fi
 
-"${EZSTREAM}" ${_normalize} ${_quiet} ${_verbose} -c "${_cfg}"
+${EZSTREAM} ${_normalize} ${_quiet} ${_verbose} -c "${_cfg}"
 
 exit $?
