@@ -51,6 +51,7 @@ char			*__progname;
 
 int			 nFlag;
 int			 qFlag;
+int			 sFlag;
 int			 vFlag;
 int			 metadataFromProgram;
 
@@ -1073,6 +1074,7 @@ void
 usage(void)
 {
 	printf("usage: %s [-hnqVv] -c configfile\n", __progname);
+	printf("       %s -s [playlist]\n", __progname);
 }
 
 void
@@ -1083,6 +1085,8 @@ usageHelp(void)
 	printf("  -h             display this additional help and exit\n");
 	printf("  -n             normalize metadata strings\n");
 	printf("  -q             suppress STDERR output from external en-/decoders\n");
+	printf("  -s [playlist]  read lines from playlist (or STDIN), shuffle and print them to\n");
+	printf("                 STDOUT, then exit\n");
 	printf("  -V             print the version number and exit\n");
 	printf("  -v             verbose output (use twice for more effect)\n");
 	printf("\n");
@@ -1120,7 +1124,7 @@ main(int argc, char *argv[])
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = local_getopt(argc, argv, "c:hnqVv")) != -1) {
+	while ((c = local_getopt(argc, argv, "c:hnqsVv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {
@@ -1140,6 +1144,9 @@ main(int argc, char *argv[])
 		case 'q':
 			qFlag = 1;
 			break;
+		case 's':
+			sFlag = 1;
+			break;
 		case 'V':
 			printf("%s\n", PACKAGE_STRING);
 			return (ez_shutdown(0));
@@ -1155,6 +1162,35 @@ main(int argc, char *argv[])
 	}
 	argc -= optind;
 	argv += optind;
+
+	if (sFlag) {
+		playlist_t	*pl;
+		const char	*entry;
+
+		switch (argc) {
+		case 0:
+			pl = playlist_read(NULL);
+			if (pl == NULL)
+				return (ez_shutdown(1));
+			break;
+		case 1:
+			pl = playlist_read(argv[0]);
+			if (pl == NULL)
+				return (ez_shutdown(1));
+			break;
+		default:
+			printf("Error: Too many arguments.\n");
+			return (ez_shutdown(2));
+		}
+
+		playlist_shuffle(pl);
+		while ((entry = playlist_get_next(pl)) != NULL)
+			printf("%s\n", entry);
+
+		playlist_free(&pl);
+
+		return (ez_shutdown(0));
+	}
 
 	if (configFile == NULL) {
 		printf("You must supply a config file with the -c argument.\n");

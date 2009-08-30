@@ -12,6 +12,8 @@ Changes in 0.5.6, released on 2009-08-31:
              and operation will continue until 100 subsequent errors. Based on
              an idea from dhorton.
              (Ticket #1585)
+   - [NEW]   New command line option -s: Make ezstream function as a line-
+             based shuffling utility.
  * src/playlist.c:
    - [MISC]  Consider no output from a playlist program to be equivalent to an
              empty line, indicating that the end of the playlist is reached.

@@ -27,6 +27,11 @@
 .Op Fl hnqVv
 .Fl c Ar configfile
 .Ek
+.Nm
+.Bk -words
+.Fl s
+.Op Ar playlist
+.Ek
 .Sh DESCRIPTION
 The
 .Nm
@@ -44,7 +49,6 @@ reading from standard input, and can be used from the command line.
 .It Fl c Ar configfile
 Use the XML configuration in
 .Ar configfile .
-.Pq Mandatory.
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
@@ -53,6 +57,18 @@ Normalize metadata strings by removing excess whitespaces.
 .It Fl q
 Be more quiet.
 Suppress the output that external programs send to standard error.
+.It Fl s Op Ar playlist
+Run
+.Nm
+as a line-based shuffling utility.
+If no
+.Ar playlist
+argument is given, a list of media file names is read from standard input
+instead of an input file.
+After successfully reading the entire list, it is shuffled and printed to
+standard output, and
+.Nm
+will exit.
 .It Fl V
 Print the
 .Nm
