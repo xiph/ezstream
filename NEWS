@@ -1,3 +1,13 @@
+Changes in 0.5.7, released on XXXX-XX-XX:
+
+ * various:
+   - [NEW]   Add new <metadata_refreshinterval/> feature from Matthew Adams
+             (with minor changes plus documentation.) This allows for recurring
+             and custom metadata updates inbetween song changes via
+             <metadata_progname/>.
+
+
+
 Changes in 0.5.6, released on 2009-08-31:
 
  * ezstream-file.sh:

@@ -275,6 +275,17 @@ See the
 .Sy METADATA
 section for details on how metadata is handled by
 .Nm .
+.It Sy \&<metadata_refreshinterval\ /\&>
+.Pq Optional.
+Configures the time
+.Pq in seconds
+inbetween additional metadata updates via
+.Li \&<metadata_progname/\&> .
+A value of 0
+.Pq zero
+triggers updates as fast as possible, while a value of \&-1
+.Pq minus one
+or the absence of this configuration element disables this feature.
 .It Sy \&<stream_once\ /\&>
 Set to
 .Sy 1
