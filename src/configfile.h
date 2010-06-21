@@ -66,6 +66,7 @@ typedef struct tag_EZCONFIG {
 	int		 fileNameIsProgram;
 	int		 streamOnce;
 	unsigned int	 reconnectAttempts;
+	int		 metadataRefreshInterval;
 } EZCONFIG;
 
 EZCONFIG *	getEZConfig(void);
