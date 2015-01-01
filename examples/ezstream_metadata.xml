@@ -20,8 +20,6 @@
     <metadata_progname>meta.sh</metadata_progname>
     <!-- Set the metadata string according to this format: -->
     <metadata_format>@s@: @a@ - @t@</metadata_format>
-    <!-- Update metadata from meta.sh at least once every 10 seconds: -->
-    <metadata_refreshinterval>10</metadata_refreshinterval>
     <!--
       The following settings are used to describe your stream to the server.
       It's up to you to make sure that the bitrate/quality/samplerate/channels

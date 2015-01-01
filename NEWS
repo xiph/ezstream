@@ -1,13 +1,3 @@
-Changes in 0.5.7, released on XXXX-XX-XX:
-
- * various:
-   - [NEW]   Add new <metadata_refreshinterval/> feature from Matthew Adams
-             (with minor changes plus documentation.) This allows for recurring
-             and custom metadata updates inbetween song changes via
-             <metadata_progname/>.
-
-
-
 Changes in 0.5.6, released on 2009-08-31:
 
  * ezstream-file.sh:
@@ -187,7 +177,7 @@ Changes in 0.4.0, released on 2007-03-11:
              program.
 
  * src/compat.c:
-   - [NEW]   Implement a basename() function for Windows that behaves like the
+   - [ADD]   Implement a basename() function for Windows that behaves like the
              ones used on Unix systems.
 
  * win32/:
@@ -195,19 +185,19 @@ Changes in 0.4.0, released on 2007-03-11:
              distribution, and provide a much better PDF version instead.
 
  * various:
-   - [NEW]   Allow ezstream to use TagLib for reading metadata from media
+   - [ADD]   Allow ezstream to use TagLib for reading metadata from media
              files. TagLib (libtag_c) is now an optional dependency.
-   - [NEW]   When built with TagLib support, include the song length in the
+   - [ADD]   When built with TagLib support, include the song length in the
              "real-time" information line, if available.
-   - [NEW]   New <metadata_progname> configuration option, which causes
+   - [ADD]   New <metadata_progname> configuration option, which causes
              metadata to be read from the output of an external program or
              script.
-   - [NEW]   New runtime control via the SIGUSR2 signal, which triggers reading
+   - [ADD]   New runtime control via the SIGUSR2 signal, which triggers reading
              of fresh metadata information from <metadata_progname> (metadata
              is always read at song changes.)
-   - [NEW]   New <metadata_format> configuration option, to customize metadata
+   - [ADD]   New <metadata_format> configuration option, to customize metadata
              strings when used with the new <metadata_progname> feature.
-   - [NEW]   New '@a@' and '@t@' placeholders for separate artist and title
+   - [ADD]   New '@a@' and '@t@' placeholders for separate artist and title
              metadata in de-/encoder commands.
 
 

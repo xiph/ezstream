@@ -19,11 +19,6 @@
      -->
     <filename>%FILENAME%</filename>
     <!--
-       If the generated playlist should not loop forever, set <stream_once />
-       to 1.
-     -->
-    <stream_once>0</stream_once>
-    <!--
       The usual, remaining configuration statements follow. See the other
       examples and the documentation for details.
      -->

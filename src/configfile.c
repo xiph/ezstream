@@ -89,8 +89,7 @@ parseConfig(const char *fileName)
 	xmlNodePtr	 cur;
 	char		*ls_xmlContentPtr;
 	int		 program_set, reconnect_set, shuffle_set,
-			 streamOnce_set, svrinfopublic_set,
-			 refresh_set;
+			 streamOnce_set, svrinfopublic_set;
 	unsigned int	 config_error;
 
 	xmlLineNumbersDefault(1);
@@ -107,17 +106,14 @@ parseConfig(const char *fileName)
 		return (0);
 	}
 
-	memset(&ezConfig, 0, sizeof(ezConfig));
-	ezConfig.metadataRefreshInterval = -1;
+	memset(&ezConfig, '\000', sizeof(ezConfig));
 
 	config_error = 0;
 	program_set = 0;
 	reconnect_set = 0;
-	refresh_set = 0;
 	shuffle_set = 0;
 	streamOnce_set = 0;
 	svrinfopublic_set = 0;
-
 	for (cur = cur->xmlChildrenNode; cur != NULL; cur = cur->next) {
 		if (!xmlStrcmp(cur->name, (const xmlChar *)"url")) {
 			if (ezConfig.URL != NULL) {
@@ -232,27 +228,6 @@ parseConfig(const char *fileName)
 					config_error += ret;
 					continue;
 				}
-			}
-		}
-		if (!xmlStrcmp(cur->name, (const xmlChar *)"metadata_refreshinterval")) {
-			if (refresh_set) {
-				printf("%s[%ld]: Error: Cannot have multiple <metadata_refreshinterval> elements\n",
-				       fileName, xmlGetLineNo(cur));
-				config_error++;
-				continue;
-			}
-			if (cur->xmlChildrenNode != NULL) {
-				const char *errstr;
-				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.metadataRefreshInterval = (unsigned int)strtonum(ls_xmlContentPtr, -1LL, (long long)INT_MAX, &errstr);
-				if (errstr) {
-					printf("%s[%ld]: Error: In <metadata_refreshinterval>: '%s' is %s\n",
-					       fileName, xmlGetLineNo(cur), ls_xmlContentPtr, errstr);
-					config_error++;
-					continue;
-				}
-				xmlFree(ls_xmlContentPtr);
-				refresh_set = 1;
 			}
 		}
 		if (!xmlStrcmp(cur->name, (const xmlChar *)"playlist_program")) {

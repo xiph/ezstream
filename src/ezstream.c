@@ -750,15 +750,12 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 	int		 ret;
 	double		 kbps = -1.0;
 	struct timeval	 timeStamp, *startTime = tv;
-	struct timeval	 callTime, currentTime;
 
 	if (startTime == NULL) {
 		printf("%s: sendStream(): Internal error: startTime is NULL\n",
 		       __progname);
 		abort();
 	}
-
-	ez_gettimeofday((void *)&callTime);
 
 	timeStamp.tv_sec = startTime->tv_sec;
 	timeStamp.tv_usec = startTime->tv_usec;
@@ -798,15 +795,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			ret = STREAM_SKIP;
 			break;
 		}
-
-		ez_gettimeofday((void *)&currentTime);
-
-		if (queryMetadata ||
-		    (pezConfig->metadataRefreshInterval != -1
-		     && (currentTime.tv_sec - callTime.tv_sec
-			 >= pezConfig->metadataRefreshInterval)
-		    )
-		   ) {
+		if (queryMetadata) {
 			queryMetadata = 0;
 			if (metadataFromProgram) {
 				ret = STREAM_UPDMDATA;
@@ -816,7 +805,8 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 		total += bytes_read;
 		if (qFlag && vFlag) {
-			double	oldTime, newTime;
+			struct timeval	tval;
+			double		oldTime, newTime;
 
 			if (!isStdin && playlistMode) {
 				if (pezConfig->fileNameIsProgram) {
@@ -832,22 +822,20 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 			oldTime = (double)timeStamp.tv_sec
 				+ (double)timeStamp.tv_usec / 1000000.0;
-			newTime = (double)currentTime.tv_sec
-				+ (double)currentTime.tv_usec / 1000000.0;
+			ez_gettimeofday((void *)&tval);
+			newTime = (double)tval.tv_sec
+				+ (double)tval.tv_usec / 1000000.0;
 			if (songLenStr == NULL)
 				printf("  [ %s]",
-				       getTimeString(currentTime.tv_sec -
-						     startTime->tv_sec));
+				       getTimeString(tval.tv_sec - startTime->tv_sec));
 			else
 				printf("  [ %s/%s]",
-				       getTimeString(currentTime.tv_sec -
-						     startTime->tv_sec),
+				       getTimeString(tval.tv_sec - startTime->tv_sec),
 				       songLenStr);
 			if (newTime - oldTime >= 1.0) {
-				kbps = (((double)(total - oldTotal)
-					 / (newTime - oldTime)) * 8.0) / 1000.0;
-				timeStamp.tv_sec = currentTime.tv_sec;
-				timeStamp.tv_usec = currentTime.tv_usec;
+				kbps = (((double)(total - oldTotal) / (newTime - oldTime)) * 8.0) / 1000.0;
+				timeStamp.tv_sec = tval.tv_sec;
+				timeStamp.tv_usec = tval.tv_usec;
 				oldTotal = total;
 			}
 			if (kbps < 0)
@@ -966,9 +954,8 @@ streamFile(shout_t *shout, const char *fileName)
 						continue;
 					}
 					metadata_free(&prog_mdata);
-					if (vFlag > 1)
-						printf("%s: New metadata: ``%s''\n",
-						       __progname, mdataStr);
+					printf("%s: New metadata: ``%s''\n",
+					       __progname, mdataStr);
 					xfree(mdataStr);
 				}
 			}
