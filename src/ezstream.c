@@ -982,7 +982,7 @@ streamFile(shout_t *shout, const char *fileName)
 
 	if (popenFlag)
 		pclose(filepstream);
-	else
+	else if (!isStdin)
 		fclose(filepstream);
 
 	if (songLenStr != NULL)
