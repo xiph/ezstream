@@ -24,7 +24,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hnqVv
+.Op Fl hmnqVv
 .Fl c Ar configfile
 .Ek
 .Nm
@@ -52,6 +52,8 @@ Use the XML configuration in
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
+.It Fl m
+Disable all metadata updates and keep existing metadata in streams untouched.
 .It Fl n
 Normalize metadata strings by removing excess whitespaces.
 .It Fl q

@@ -23,7 +23,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hnqVv
+.Op Fl hmnqVv
 .Op Fl T Ar cfg_template
 .Op Ar
 .Ek
@@ -62,6 +62,12 @@ binary.
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
+.It Fl m
+.Po
+Passed to
+.Nm ezstream .
+.Pc
+Disable all metadata updates and keep existing metadata in streams untouched.
 .It Fl n
 .Po
 Passed to

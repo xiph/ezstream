@@ -50,6 +50,7 @@ char			*__progname;
 #endif /* HAVE___PROGNAME */
 
 int			 nFlag;
+int			 mFlag;
 int			 qFlag;
 int			 sFlag;
 int			 vFlag;
@@ -476,6 +477,9 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 		       __progname);
 		abort();
 	}
+
+	if (mFlag)
+		return (SHOUTERR_SUCCESS);
 
 	if (mdata == NULL)
 		return 1;
@@ -948,6 +952,8 @@ streamFile(shout_t *shout, const char *fileName)
 			}
 			if (ret == STREAM_UPDMDATA || queryMetadata) {
 				queryMetadata = 0;
+				if (mFlag)
+					continue;
 				if (metadataFromProgram) {
 					char		*mdataStr = NULL;
 					metadata_t	*prog_mdata;
@@ -1086,7 +1092,7 @@ ez_shutdown(int exitval)
 void
 usage(void)
 {
-	printf("usage: %s [-hnqVv] -c configfile\n", __progname);
+	printf("usage: %s [-hmnqVv] -c configfile\n", __progname);
 	printf("       %s -s [playlist]\n", __progname);
 }
 
@@ -1096,6 +1102,7 @@ usageHelp(void)
 	printf("\n");
 	printf("  -c configfile  use XML configuration in configfile (mandatory)\n");
 	printf("  -h             display this additional help and exit\n");
+	printf("  -m             disable metadata updates\n");
 	printf("  -n             normalize metadata strings\n");
 	printf("  -q             suppress STDERR output from external en-/decoders\n");
 	printf("  -s [playlist]  read lines from playlist (or STDIN), shuffle and print them to\n");
@@ -1133,11 +1140,12 @@ main(int argc, char *argv[])
 	__progname = getProgname(argv[0]);
 	pezConfig = getEZConfig();
 
+	mFlag = 0;
 	nFlag = 0;
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = local_getopt(argc, argv, "c:hnqsVv")) != -1) {
+	while ((c = local_getopt(argc, argv, "c:hmnqsVv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {
@@ -1151,6 +1159,9 @@ main(int argc, char *argv[])
 			usage();
 			usageHelp();
 			return (ez_shutdown(0));
+		case 'm':
+			mFlag = 1;
+			break;
 		case 'n':
 			nFlag = 1;
 			break;
