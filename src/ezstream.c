@@ -1340,7 +1340,6 @@ main(int argc, char *argv[])
 			printf("%s: Using program '%s' to get filenames for streaming\n",
 			       __progname, pezConfig->fileName);
 
-		ret = 1;
 		do {
 			if (playlistMode) {
 				ret = streamPlaylist(shout,
