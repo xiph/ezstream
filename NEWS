@@ -1,9 +1,13 @@
-Changes in 0.5.7, released on XXXX-XX-XX:
+Changes in n.n.n, released on XXXX-XX-XX:
 
+ * src/ezstream.c:
+   - [FIX]   Prevent ezstream from entering an infinite loop when stopping to
+             send data to standard input. From gquintard.
+             (Ticket #2045)
  * various:
    - [NEW]   Add new <metadata_refreshinterval/> feature from Matthew Adams
              (with minor changes plus documentation.) This allows for recurring
-             and custom metadata updates inbetween song changes via
+             and custom metadata updates in between song changes via
              <metadata_progname/>.
 
 
@@ -31,6 +35,7 @@ Changes in 0.5.6, released on 2009-08-31:
              program.
  * examples/:
    - [NEW]   Add a real-world example playlist script with logging feature.
+
 
 
 Changes in 0.5.5, released on 2009-08-01:
