@@ -90,8 +90,8 @@ typedef struct tag_ID3Tag {
 } ID3Tag;
 
 int		urlParse(const char *, char **, unsigned short *, char **);
-void		replaceString(const char *, char *, size_t, const char *,
-			      const char *);
+char *		shellQuote(const char *);
+char *		replaceString(const char *, const char *, const char *);
 char *		buildCommandString(const char *, const char *, metadata_t *);
 char *		getMetadataString(const char *, metadata_t *);
 metadata_t *	getMetadata(const char *);
@@ -197,25 +197,67 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	return (1);
 }
 
-void
-replaceString(const char *source, char *dest, size_t size,
-	      const char *from, const char *to)
-{
-	const char	*p1 = source;
-	const char	*p2;
+#define SHELLQUOTE_INLEN_MAX	8191UL
 
+char *
+shellQuote(const char *in)
+{
+	char		*out, *out_p;
+	size_t		 out_len;
+	const char	*in_p;
+
+	out_len = (strlen(in) > SHELLQUOTE_INLEN_MAX)
+	    ? SHELLQUOTE_INLEN_MAX
+	    : strlen(in);
+	out_len = out_len * 2 + 2;
+	out = xcalloc(out_len + 1, sizeof(char));
+
+	out_p = out;
+	in_p = in;
+
+	*out_p++ = '\'';
+	out_len--;
+	while (*in_p && out_len > 2) {
+		switch (*in_p) {
+		case '\'':
+		case '\\':
+			*out_p++ = '\\';
+			out_len--;
+			break;
+		default:
+			break;
+		}
+		*out_p++ = *in_p++;
+		out_len--;
+	}
+	*out_p++ = '\'';
+
+	return (out);
+}
+
+char *
+replaceString(const char *source, const char *from, const char *to)
+{
+	char		*to_quoted, *dest;
+	size_t		 dest_size;
+	const char	*p1, *p2;
+
+	to_quoted = shellQuote(to);
+	dest_size = strlen(source) + strlen(to_quoted) + 1;
+	dest = xcalloc(dest_size, sizeof(char));
+
+	p1 = source;
 	p2 = strstr(p1, from);
 	if (p2 != NULL) {
-		if ((unsigned int)(p2 - p1) >= size) {
-			printf("%s: replaceString(): Internal error: p2 - p1 >= size\n",
-			       __progname);
-			abort();
-		}
 		strncat(dest, p1, (size_t)(p2 - p1));
-		strlcat(dest, to, size);
+		strlcat(dest, to_quoted, dest_size);
 		p1 = p2 + strlen(from);
 	}
-	strlcat(dest, p1, size);
+	strlcat(dest, p1, dest_size);
+
+	xfree(to_quoted);
+
+	return (dest);
 }
 
 char *
@@ -227,9 +269,7 @@ buildCommandString(const char *extension, const char *fileName,
 	char	*encoder = NULL;
 	char	*decoder = NULL;
 	char	*newDecoder = NULL;
-	size_t	 newDecoderLen = 0;
 	char	*newEncoder = NULL;
-	size_t	 newEncoderLen = 0;
 	char	*localTitle = UTF8toCHAR(metadata_get_title(mdata),
 					 ICONV_REPLACE);
 	char	*localArtist = UTF8toCHAR(metadata_get_artist(mdata),
@@ -247,23 +287,16 @@ buildCommandString(const char *extension, const char *fileName,
 		xfree(decoder);
 		return (NULL);
 	}
-	newDecoderLen = strlen(decoder) + strlen(fileName) + 1;
-	newDecoder = xcalloc(newDecoderLen, sizeof(char));
-	replaceString(decoder, newDecoder, newDecoderLen, TRACK_PLACEHOLDER,
-		      fileName);
+	newDecoder = replaceString(decoder, TRACK_PLACEHOLDER, fileName);
 	if (strstr(decoder, ARTIST_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newDecoder) + strlen(localArtist) + 1;
-		char *tmpStr = xcalloc(tmpLen, sizeof(char));
-		replaceString(newDecoder, tmpStr, tmpLen, ARTIST_PLACEHOLDER,
-			      localArtist);
+		char *tmpStr = replaceString(newDecoder, ARTIST_PLACEHOLDER,
+		    localArtist);
 		xfree(newDecoder);
 		newDecoder = tmpStr;
 	}
 	if (strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newDecoder) + strlen(localTitle) + 1;
-		char *tmpStr = xcalloc(tmpLen, sizeof(char));
-		replaceString(newDecoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
-			      localTitle);
+		char *tmpStr = replaceString(newDecoder, TITLE_PLACEHOLDER,
+		    localTitle);
 		xfree(newDecoder);
 		newDecoder = tmpStr;
 	}
@@ -280,27 +313,20 @@ buildCommandString(const char *extension, const char *fileName,
 	if (strstr(decoder, METADATA_PLACEHOLDER) != NULL) {
 		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
 			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
-			size_t tmpLen = strlen(newDecoder) + strlen(mdataString) + 1;
-			char *tmpStr = xcalloc(tmpLen, sizeof(char));
-			replaceString(newDecoder, tmpStr, tmpLen,
-				      METADATA_PLACEHOLDER, mdataString);
+			char *tmpStr = replaceString(newDecoder,
+			    METADATA_PLACEHOLDER, mdataString);
 			xfree(newDecoder);
 			xfree(mdataString);
 			newDecoder = tmpStr;
 		} else {
 			if (!metadataFromProgram && strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
-				size_t tmpLen = strlen(newDecoder) + 1;
-				char *tmpStr = xcalloc(tmpLen, sizeof(char));
-				replaceString(newDecoder, tmpStr, tmpLen,
-					      METADATA_PLACEHOLDER, "");
+				char *tmpStr = replaceString(newDecoder,
+				    METADATA_PLACEHOLDER, "");
 				xfree(newDecoder);
 				newDecoder = tmpStr;
 			} else {
-				size_t tmpLen = strlen(newDecoder) + strlen(localMetaString) + 1;
-				char *tmpStr = xcalloc(tmpLen, sizeof(char));
-				replaceString(newDecoder, tmpStr, tmpLen,
-					      METADATA_PLACEHOLDER,
-					      localMetaString);
+				char *tmpStr = replaceString(newDecoder,
+				    METADATA_PLACEHOLDER, localMetaString);
 				xfree(newDecoder);
 				newDecoder = tmpStr;
 			}
@@ -326,42 +352,30 @@ buildCommandString(const char *extension, const char *fileName,
 		return (commandString);
 	}
 
-	newEncoderLen = strlen(encoder) + strlen(localArtist) + 1;
-	newEncoder = xcalloc(newEncoderLen, sizeof(char));
-	replaceString(encoder, newEncoder, newEncoderLen, ARTIST_PLACEHOLDER,
-		      localArtist);
+	newEncoder = replaceString(encoder, ARTIST_PLACEHOLDER, localArtist);
 	if (strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
-		size_t tmpLen = strlen(newEncoder) + strlen(localTitle) + 1;
-		char *tmpStr = xcalloc(tmpLen, sizeof(char));
-		replaceString(newEncoder, tmpStr, tmpLen, TITLE_PLACEHOLDER,
-			      localTitle);
+		char *tmpStr = replaceString(newEncoder, TITLE_PLACEHOLDER,
+		    localTitle);
 		xfree(newEncoder);
 		newEncoder = tmpStr;
 	}
 	if (strstr(encoder, METADATA_PLACEHOLDER) != NULL) {
 		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
 			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
-			size_t tmpLen = strlen(newEncoder) + strlen(mdataString) + 1;
-			char *tmpStr = xcalloc(tmpLen, sizeof(char));
-			replaceString(newEncoder, tmpStr, tmpLen,
-				      METADATA_PLACEHOLDER, mdataString);
+			char *tmpStr = replaceString(newEncoder,
+			    METADATA_PLACEHOLDER, mdataString);
 			xfree(newEncoder);
 			xfree(mdataString);
 			newEncoder = tmpStr;
 		} else {
 			if (!metadataFromProgram && strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
-				size_t tmpLen = strlen(newEncoder) + 1;
-				char *tmpStr = xcalloc(tmpLen, sizeof(char));
-				replaceString(newEncoder, tmpStr, tmpLen,
-					      METADATA_PLACEHOLDER, "");
+				char *tmpStr = replaceString(newEncoder,
+				    METADATA_PLACEHOLDER, "");
 				xfree(newEncoder);
 				newEncoder = tmpStr;
 			} else {
-				size_t tmpLen = strlen(newEncoder) + strlen(localMetaString) + 1;
-				char *tmpStr = xcalloc(tmpLen, sizeof(char));
-				replaceString(newEncoder, tmpStr, tmpLen,
-					      METADATA_PLACEHOLDER,
-					      localMetaString);
+				char *tmpStr = replaceString(newEncoder,
+				    METADATA_PLACEHOLDER, localMetaString);
 				xfree(newEncoder);
 				newEncoder = tmpStr;
 			}
@@ -389,7 +403,6 @@ char *
 getMetadataString(const char *format, metadata_t *mdata)
 {
 	char	*tmp, *str;
-	size_t	 len;
 
 	if (mdata == NULL) {
 		printf("%s: getMetadataString(): Internal error: NULL metadata_t\n",
@@ -403,34 +416,26 @@ getMetadataString(const char *format, metadata_t *mdata)
 	str = xstrdup(format);
 
 	if (strstr(format, ARTIST_PLACEHOLDER) != NULL) {
-		len = strlen(str) + strlen(metadata_get_artist(mdata)) + 1;
-		tmp = xcalloc(len, sizeof(char));
-		replaceString(str, tmp, len, ARTIST_PLACEHOLDER,
-			      metadata_get_artist(mdata));
+		tmp = replaceString(str, ARTIST_PLACEHOLDER,
+		    metadata_get_artist(mdata));
 		xfree(str);
 		str = tmp;
 	}
 	if (strstr(format, TITLE_PLACEHOLDER) != NULL) {
-		len = strlen(str) + strlen(metadata_get_title(mdata)) + 1;
-		tmp = xcalloc(len, sizeof(char));
-		replaceString(str, tmp, len, TITLE_PLACEHOLDER,
-			      metadata_get_title(mdata));
+		tmp = replaceString(str, TITLE_PLACEHOLDER,
+		    metadata_get_title(mdata));
 		xfree(str);
 		str = tmp;
 	}
 	if (strstr(format, STRING_PLACEHOLDER) != NULL) {
-		len = strlen(str) + strlen(metadata_get_string(mdata)) + 1;
-		tmp = xcalloc(len, sizeof(char));
-		replaceString(str, tmp, len, STRING_PLACEHOLDER,
-			      metadata_get_string(mdata));
+		tmp = replaceString(str, STRING_PLACEHOLDER,
+		    metadata_get_string(mdata));
 		xfree(str);
 		str = tmp;
 	}
 	if (strstr(format, TRACK_PLACEHOLDER) != NULL) {
-		len = strlen(str) + strlen(metadata_get_filename(mdata)) + 1;
-		tmp = xcalloc(len, sizeof(char));
-		replaceString(str, tmp, len, TRACK_PLACEHOLDER,
-			      metadata_get_filename(mdata));
+		tmp = replaceString(str, TRACK_PLACEHOLDER,
+		    metadata_get_filename(mdata));
 		xfree(str);
 		str = tmp;
 	}

@@ -1,6 +1,34 @@
 Changes in n.n.n, released on XXXX-XX-XX:
 
+ * This release contains a SECURITY FIX for a command injection vulnerability
+   that was found and reported by Alexandre Rebert:
+
+   The previous handling of metadata placeholders allowed for arbitrary shell
+   commands to be trivially injected and executed as the ezstream user, via
+   malicious media files.
+
+   This vulnerability depends on both a configuration using metadata
+   placeholders and the user streaming media files from untrusted sources
+   without noticing `commands` or $(commands) in artist or title fields.
+
+   While the group of actually affected users may be limited, all users are
+   advised to upgrade.
+
+ * This release requires users to ADJUST their CONFIGURATION:
+
+   To protect against the injection vulnerability above, metadata is now
+   properly quoted and escaped from the shell. This means that any extra
+   quoting must be removed from configuration files.
+
+   Remove all quoting from metadata placeholders in <encode/> and <decode/>
+   commands, e.g. replace "@M@" with @M@, and "@T@" with @T@, etc. Without
+   these changes, stream metadata will look both wrong and the injection
+   vulnerability may be re-introduced.
+
+   Configuration examples have been adjusted accordingly.
+
  * src/ezstream.c:
+   - [FIX]   Prevent certain characters from being interpreted by the shell.
    - [FIX]   Prevent ezstream from entering an infinite loop when stopping to
              send data to standard input. From gquintard.
              (Ticket #2045)

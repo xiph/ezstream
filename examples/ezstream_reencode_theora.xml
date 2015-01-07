@@ -67,12 +67,12 @@
              -->
             <format>THEORA</format>
             <match>.avi</match>
-            <decode>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title "@M@" -o - "@T@"</decode>
+            <decode>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title @M@ -o - @T@</decode>
         </encdec>
         <encdec>
             <format>THEORA</format>
             <match>.mpg</match>
-            <decode>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title "@M@" -o - "@T@"</decode>
+            <decode>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title @M@ -o - @T@</decode>
         </encdec>
     </reencode>
 </ezstream>

@@ -40,19 +40,19 @@
         <encdec>
             <format>FLAC</format>
             <match>.flac</match>
-            <decode>flac -s -d --force-raw-format --sign=signed --endian=little -o - "@T@"</decode>
+            <decode>flac -s -d --force-raw-format --sign=signed --endian=little -o - @T@</decode>
         </encdec>
         <encdec>
             <format>MP3</format>
             <match>.mp3</match>
-            <decode>madplay -b 16 -R 44100 -S -o raw:- "@T@"</decode>
+            <decode>madplay -b 16 -R 44100 -S -o raw:- @T@</decode>
             <encode>lame --preset cbr 128 -r -s 44.1 --bitwidth 16 - -</encode>
         </encdec>
         <encdec>
             <format>VORBIS</format>
             <match>.ogg</match>
-            <decode>oggdec -R -b 16 -e 0 -s 1 -o - "@T@"</decode>
-            <encode>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t "@M@" -</encode>
+            <decode>oggdec -R -b 16 -e 0 -s 1 -o - @T@</decode>
+            <encode>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t @M@ -</encode>
         </encdec>
     </reencode>
 </ezstream>

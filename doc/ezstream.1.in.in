@@ -519,9 +519,17 @@ The main tool for handling metadata with
 .Nm
 is placeholders in decoder and encoder commands that are replaced with real
 content during runtime.
-The tricky part is that one of the placeholders has to be handled differently,
-depending on where the metadata comes from.
-This section will explain each possible scenario.
+.Pp
+.Em Note:
+To prevent malicious shell script in metadata
+.Pq such as artist and title tags
+from being executed, all metadata content is automatically enclosed in single
+quotes, with escaped single quote and backslash characters inbetween.
+To prevent this from causing unwanted side-effects
+.Pq or introducting security risk ,
+placeholders
+.Em must not
+be quoted any further.
 .Ss Metadata Placeholders
 .Bl -tag -width -Ds
 .It Sy @T@
