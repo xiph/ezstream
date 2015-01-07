@@ -4,7 +4,7 @@
 # Convenience/wrapper script that uses ezstream to stream one or more files
 # given on the command line.
 
-# Copyright (c) 2009 Moritz Grimm <mdgrimm@gmx.net>
+# Copyright (c) 2009, 2015 Moritz Grimm <mgrimm@mrsserver.net>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above

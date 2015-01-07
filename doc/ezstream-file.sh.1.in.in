@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.\" Copyright (c) 2009 Moritz Grimm <mdgrimm@gmx.net>
+.\" Copyright (c) 2009, 2015 Moritz Grimm <mgrimm@mrsserver.net>
 .\"
 .\" Permission to use, copy, modify, and distribute this software for any
 .\" purpose with or without fee is hereby granted, provided that the above
@@ -114,4 +114,4 @@ as well as example playlist and metadata scripts.
 The
 .Nm
 script and this manual were written by
-.An Moritz Grimm Aq mdgrimm@gmx.net .
+.An Moritz Grimm .
