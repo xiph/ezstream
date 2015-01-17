@@ -37,6 +37,9 @@ Changes in 0.6.0, released on 2015-01-18:
              (with minor changes plus documentation.) This allows for recurring
              and custom metadata updates in between song changes via
              <metadata_progname/>.
+   - [NEW]   Add new command line option `-m' to disable any active metadata
+             updates. Idea from Richard Thomas.
+             (Ticket #1620)
 
 
 
