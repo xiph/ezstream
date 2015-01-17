@@ -1,4 +1,4 @@
-Changes in 0.6.0, released on XXXX-XX-XX:
+Changes in 0.6.0, released on 2015-01-18:
 
  * This release contains a SECURITY FIX for a command injection vulnerability
    that was found and reported by Alexandre Rebert:
