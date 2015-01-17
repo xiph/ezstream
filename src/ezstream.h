@@ -27,9 +27,8 @@
 #endif /* HAVE_SYS_TYPES_H */
 #ifdef HAVE_SYS_TIME_H
 # include <sys/time.h>
-#else /* HAVE_SYS_TIME_H */
-# include <time.h>
 #endif /* HAVE_SYS_TIME_H */
+#include <time.h>
 #ifdef HAVE_SYS_STAT_H
 # include <sys/stat.h>
 #endif /* HAVE_SYS_STAT_H */
