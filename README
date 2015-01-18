@@ -40,7 +40,7 @@ Ezstream optionally uses:
  - For reading metadata from Ogg Vorbis files:
    * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
      wrapper)
-     (http://developer.kde.org/~wheeler/taglib.html)
+     (https://taglib.github.io/)
    OR:
    * libvorbis 1.x
      (http://www.vorbis.com)
@@ -48,7 +48,7 @@ Ezstream optionally uses:
    many additional media file types.
  - For basic non-ASCII charset support in metadata and filenames:
    * Libiconv, if iconv() is not available in the system libc.
-     (http://www.gnu.org/software/libiconv/)
+     (https://www.gnu.org/software/libiconv/)
 
 
 

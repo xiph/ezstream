@@ -1,6 +1,6 @@
 .\" $Id$
 .\"
-.\" Copyright (c) 2007, 2009 Moritz Grimm <mdgrimm@gmx.net>
+.\" Copyright (c) 2007, 2009, 2015 Moritz Grimm <mgrimm@mrsserver.net>
 .\"
 .\" This program is free software; you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License version 2 as
@@ -24,7 +24,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hnqVv
+.Op Fl hmnqVv
 .Fl c Ar configfile
 .Ek
 .Nm
@@ -52,6 +52,8 @@ Use the XML configuration in
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
+.It Fl m
+Disable all metadata updates and keep existing metadata in streams untouched.
 .It Fl n
 Normalize metadata strings by removing excess whitespaces.
 .It Fl q
@@ -275,6 +277,17 @@ See the
 .Sy METADATA
 section for details on how metadata is handled by
 .Nm .
+.It Sy \&<metadata_refreshinterval\ /\&>
+.Pq Optional.
+Configures the time
+.Pq in seconds
+inbetween additional metadata updates via
+.Li \&<metadata_progname/\&> .
+A value of 0
+.Pq zero
+triggers updates as fast as possible, while a value of \&-1
+.Pq minus one
+or the absence of this configuration element disables this feature.
 .It Sy \&<stream_once\ /\&>
 Set to
 .Sy 1
@@ -428,7 +441,7 @@ For example, to decode Ogg Vorbis files using the
 .Cm oggdec
 utility:
 .Pp
-.Dl \&<decode\&>oggdec -R -o - \&"@T@\&"\&</decode\&>
+.Dl \&<decode\&>oggdec -R -o - @T@\&</decode\&>
 .It Sy \&<encode\ /\&>
 Set the command to encode raw data, received from standard input, to the
 specified stream format.
@@ -447,7 +460,7 @@ the
 .Cm oggenc
 utility:
 .Pp
-.Dl \&<encode\&>oggenc -r -q 1.5 -t \&"@M@\&" -\&</encode\&>
+.Dl \&<encode\&>oggenc -r -q 1.5 -t @M@ -\&</encode\&>
 .El
 .Sh SCRIPTING
 The
@@ -506,9 +519,17 @@ The main tool for handling metadata with
 .Nm
 is placeholders in decoder and encoder commands that are replaced with real
 content during runtime.
-The tricky part is that one of the placeholders has to be handled differently,
-depending on where the metadata comes from.
-This section will explain each possible scenario.
+.Pp
+.Em Note:
+To prevent malicious shell script in metadata
+.Pq such as artist and title tags
+from being executed, all metadata content is automatically enclosed in single
+quotes, with escaped single quote and backslash characters inbetween.
+To prevent this from causing unwanted side-effects
+.Pq or introducting security risk ,
+placeholders
+.Em must not
+be quoted any further.
 .Ss Metadata Placeholders
 .Bl -tag -width -Ds
 .It Sy @T@
@@ -633,6 +654,8 @@ as well as example playlist and metadata scripts.
 was written by:
 .Pp
 .An Ed Zaleski Aq oddsock@oddsock.org
-.An Moritz Grimm Aq mdgrimm@gmx.net
+.An Moritz Grimm Aq mgrimm@mrsserver.net
 .Pp
-This manual was written by Moritz Grimm.
+.An -nosplit
+This manual was written by
+.An Moritz Grimm .

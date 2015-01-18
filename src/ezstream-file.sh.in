@@ -4,7 +4,7 @@
 # Convenience/wrapper script that uses ezstream to stream one or more files
 # given on the command line.
 
-# Copyright (c) 2009 Moritz Grimm <mdgrimm@gmx.net>
+# Copyright (c) 2009, 2015 Moritz Grimm <mgrimm@mrsserver.net>
 #
 # Permission to use, copy, modify, and distribute this software for any
 # purpose with or without fee is hereby granted, provided that the above
@@ -21,10 +21,10 @@
 _myname="$(basename $0)"
 _filename_placeholder="%FILENAME%"
 
-_opt_string="hnqT:Vv"
+_opt_string="hmnqT:Vv"
 print_usage()
 {
-	echo "usage: ${_myname} [-hnqVv] [-T cfg_template] [file ...]" >&2
+	echo "usage: ${_myname} [-hmnqVv] [-T cfg_template] [file ...]" >&2
 }
 
 print_usage_help()
@@ -32,6 +32,7 @@ print_usage_help()
 	cat << __EOT >&2
 
   -h           print this help and exit
+  -m           [ezstream] disable metadata updates
   -n           [ezstream] normalize metadata strings
   -q           [ezstream] suppress STDERR output from external en-/decoders
   -T template  run ezstream using template for configuration
@@ -45,6 +46,7 @@ See the ezstream-file.sh(1) manual for detailed information.
 __EOT
 }
 
+_metadisable=""
 _normalize=""
 _quiet=""
 _verbose=""
@@ -64,6 +66,8 @@ do
 		print_usage_help
 		exit 0
 		;;
+	-m)
+		_metadisable="-m"; shift ;;
 	-n)
 		_normalize="-n"; shift ;;
 	-q)
@@ -140,6 +144,6 @@ else
 	done
 fi
 
-${EZSTREAM} ${_normalize} ${_quiet} ${_verbose} -c "${_cfg}"
+${EZSTREAM} ${_metadisable} ${_normalize} ${_quiet} ${_verbose} -c "${_cfg}"
 
 exit $?

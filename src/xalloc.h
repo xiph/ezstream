@@ -7,7 +7,7 @@
  *             and ensures that out-of-memory issues always cause the
  *             application to exit.
  *
- * Copyright (C) 2007  Moritz Grimm <mdgrimm@gmx.net>
+ * Copyright (C) 2007  Moritz Grimm <mgrimm@mrsserver.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

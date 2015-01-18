@@ -1,3 +1,48 @@
+Changes in 0.6.0, released on 2015-01-18:
+
+ * This release contains a SECURITY FIX for a command injection vulnerability
+   that was found and reported by Alexandre Rebert:
+
+   The previous handling of metadata placeholders allowed for arbitrary shell
+   commands to be trivially injected and executed as the ezstream user, via
+   malicious media files.
+
+   This vulnerability depends on both a configuration using metadata
+   placeholders and the user streaming media files from untrusted sources
+   without noticing `commands` or $(commands) in artist or title fields.
+
+   While the group of actually affected users may be limited, all users are
+   advised to upgrade.
+
+ * This release requires users to ADJUST their CONFIGURATION:
+
+   To protect against the injection vulnerability above, metadata is now
+   properly quoted and escaped from the shell. This means that any extra
+   quoting must be removed from configuration files.
+
+   Remove all quoting from metadata placeholders in <encode/> and <decode/>
+   commands, e.g. replace "@M@" with @M@, and "@T@" with @T@, etc. Without
+   these changes, stream metadata will look both wrong and the injection
+   vulnerability may be re-introduced.
+
+   Configuration examples have been adjusted accordingly.
+
+ * src/ezstream.c:
+   - [FIX]   Prevent certain characters from being interpreted by the shell.
+   - [FIX]   Prevent ezstream from entering an infinite loop when stopping to
+             send data to standard input. From gquintard.
+             (Ticket #2045)
+ * various:
+   - [NEW]   Add new <metadata_refreshinterval/> feature from Matthew Adams
+             (with minor changes plus documentation.) This allows for recurring
+             and custom metadata updates in between song changes via
+             <metadata_progname/>.
+   - [NEW]   Add new command line option `-m' to disable any active metadata
+             updates. Idea from Richard Thomas.
+             (Ticket #1620)
+
+
+
 Changes in 0.5.6, released on 2009-08-31:
 
  * ezstream-file.sh:
@@ -21,6 +66,7 @@ Changes in 0.5.6, released on 2009-08-31:
              program.
  * examples/:
    - [NEW]   Add a real-world example playlist script with logging feature.
+
 
 
 Changes in 0.5.5, released on 2009-08-01:
@@ -177,7 +223,7 @@ Changes in 0.4.0, released on 2007-03-11:
              program.
 
  * src/compat.c:
-   - [ADD]   Implement a basename() function for Windows that behaves like the
+   - [NEW]   Implement a basename() function for Windows that behaves like the
              ones used on Unix systems.
 
  * win32/:
@@ -185,19 +231,19 @@ Changes in 0.4.0, released on 2007-03-11:
              distribution, and provide a much better PDF version instead.
 
  * various:
-   - [ADD]   Allow ezstream to use TagLib for reading metadata from media
+   - [NEW]   Allow ezstream to use TagLib for reading metadata from media
              files. TagLib (libtag_c) is now an optional dependency.
-   - [ADD]   When built with TagLib support, include the song length in the
+   - [NEW]   When built with TagLib support, include the song length in the
              "real-time" information line, if available.
-   - [ADD]   New <metadata_progname> configuration option, which causes
+   - [NEW]   New <metadata_progname> configuration option, which causes
              metadata to be read from the output of an external program or
              script.
-   - [ADD]   New runtime control via the SIGUSR2 signal, which triggers reading
+   - [NEW]   New runtime control via the SIGUSR2 signal, which triggers reading
              of fresh metadata information from <metadata_progname> (metadata
              is always read at song changes.)
-   - [ADD]   New <metadata_format> configuration option, to customize metadata
+   - [NEW]   New <metadata_format> configuration option, to customize metadata
              strings when used with the new <metadata_progname> feature.
-   - [ADD]   New '@a@' and '@t@' placeholders for separate artist and title
+   - [NEW]   New '@a@' and '@t@' placeholders for separate artist and title
              metadata in de-/encoder commands.
 
 
