@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = 1.9 foreign
+AUTOMAKE_OPTIONS = 1.10 foreign
 ACLOCAL_AMFLAGS  = -I m4
 
 SUBDIRS 	 = build-aux compat doc examples m4 src win32
