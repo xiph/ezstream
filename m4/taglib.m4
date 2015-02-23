@@ -1,5 +1,3 @@
-dnl # $Id$
-
 dnl # Check for working installations of TagLib and its C-wrapper library,
 dnl # libtag_c.
 dnl # Provides appropriate --with configuration options, fills the

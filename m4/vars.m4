@@ -1,5 +1,3 @@
-dnl # $Id$
-
 dnl # Append or prepend items to a variable, but keep the items in the
 dnl # variable unique.
 dnl # Re-implemented from scratch after seeing XIPH_VAR_[PRE,AP]PEND, written

@@ -1,5 +1,3 @@
-dnl # $Id$
-
 dnl # Check for a working installation of libshout.
 dnl # Provides appropriate --with configuration options, fills the
 dnl # LIBSHOUT_CFLAGS, LIBSHOUT_CPPFLAGS, LIBSHOUT_LDFLAGS and LIBSHOUT_LIBS

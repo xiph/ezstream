@@ -1,5 +1,3 @@
-dnl # $Id$
-
 dnl # Check whether libc defines __progname. Defines HAVE___PROGNAME, if
 dnl # applicable. This check is heavily inspired by the one in OpenNTPd
 dnl # (portable.)

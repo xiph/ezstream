@@ -1,4 +1,3 @@
-/*	$Id$	*/
 /*
  * Copyright (c) 2007 Moritz Grimm <mgrimm@mrsserver.net>
  *

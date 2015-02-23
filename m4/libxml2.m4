@@ -1,5 +1,3 @@
-dnl # $Id$
-
 dnl # Check for a working installation of libxml (version 2.)
 dnl # Provides appropriate --with configuration options, fills the
 dnl # LIBXML2_CFLAGS, LIBXML2_CPPFLAGS, LIBXML2_LDFLAGS and LIBXML2_LIBS

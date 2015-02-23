@@ -1,5 +1,3 @@
-dnl $Id$
-
 dnl # Check for working installations of libvorbis, libvorbisfile and
 dnl # libvorbisenc.
 dnl # Provides appropriate --with configuration options, fills the

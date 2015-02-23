@@ -1,5 +1,3 @@
-/*	$Id$	*/
-
 #ifndef __STRLFCTNS_H__
 #define __STRLFCTNS_H__
 

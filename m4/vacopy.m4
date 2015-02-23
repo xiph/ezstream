@@ -1,5 +1,3 @@
-dnl # $Id$
-
 dnl # Check for means to copy variable argument lists. After this check,
 dnl # va_copy will at least be defined to something working.
 dnl # This requires stdarg.h, which is assumed to exist.
