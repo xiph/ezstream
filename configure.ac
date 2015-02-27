@@ -56,10 +56,8 @@ dnl ## COMPILER ########################################################
 dnl ##############
 
 if test -n "${GCC}"; then
-	for _flag in fstack-protector fstrict-aliasing Wall W Wstrict-aliasing \
-		Wwrite-strings Wpointer-arith Wshadow Wconversion Wcast-qual \
-		Wcast-align Wbounded Wmissing-declarations Wmissing-prototypes \
-		Wstrict-prototypes
+	for _flag in Wall W Wshadow Wconversion Wbounded \
+	    Wmissing-declarations Wmissing-prototypes Wstrict-prototypes
 	do
 		AX_CHECK_CFLAG([${_flag}],
 			[AX_UNIQVAR_APPEND([EZ_CFLAGS], [-${_flag}])], [])
