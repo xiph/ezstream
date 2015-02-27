@@ -2,8 +2,8 @@
 
 PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/pkg/bin:/usr/pkg/sbin"
 
-_ac_version="2.61"
-_am_version="1.10"
+_ac_version="2.69"
+_am_version="1.14"
 
 if [ ! -f "./`basename $0`" ]; then
 	echo "Please chdir into `basename $0`'s directory first."
