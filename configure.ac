@@ -9,7 +9,7 @@ AC_CONFIG_SRCDIR([src/ezstream.c])
 AC_CONFIG_AUX_DIR([build-aux])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([src/config.h])
-AC_CONFIG_LIBOBJ_DIR([src])
+AC_CONFIG_LIBOBJ_DIR([compat])
 AM_MAINTAINER_MODE
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_CC_STDC
@@ -211,7 +211,6 @@ dnl #######################
 AC_CHECK_FUNCS([ \
 	arc4random \
 	basename \
-	getopt \
 	gettimeofday \
 	nl_langinfo \
 	pclose \
@@ -232,6 +231,7 @@ AC_CHECK_FUNCS([ \
 ])
 
 AC_REPLACE_FUNCS([ \
+	getopt \
 	strlcat \
 	strlcpy \
 	strtonum \

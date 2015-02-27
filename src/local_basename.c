@@ -2,11 +2,18 @@
 # include "config.h"
 #endif
 
-#include "ezstream.h"
+#ifdef HAVE_SYS_TYPES_H
+# include <sys/types.h>
+#endif /* HAVE_SYS_TYPES_H */
 
+#include <errno.h>
 #if defined(HAVE_LIBGEN_H) && !defined(__linux__)
 # include <libgen.h>
 #endif /* HAVE_LIBGEN_H && !__linux__ */
+#include <limits.h>
+#include <string.h>
+
+#include "local_basename.h"
 
 #ifndef PATH_SEPARATORS
 # define PATH_SEPARATORS	"/"
@@ -34,7 +41,7 @@ is_separator(int c)
 
 /*
  * Modified basename() implementation from OpenBSD, based on:
- * $OpenBSD: src/lib/libc/gen/basename.c,v 1.14 2005/08/08 08:05:33 espie Exp $
+ * $OpenBSD: src/lib/libc/gen/basename.c,v 1.15 2013/09/30 12:02:32 millert Exp $
  */
 /*
  * Copyright (c) 1997, 2004 Todd C. Miller <Todd.Miller@courtesan.com>

@@ -23,8 +23,9 @@
 
 #include "ezstream.h"
 
+#include "compat.h"
+
 #include "configfile.h"
-#include "strfctns.h"
 #include "util.h"
 #include "xalloc.h"
 

@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __COMPAT_H__
-#define __COMPAT_H__
+#ifndef __EZSTREAM_H__
+#define __EZSTREAM_H__
 
 #ifdef HAVE_CONFIG_H
 # include "config.h"
@@ -98,22 +98,4 @@
 # define sleep(a)	Sleep((a) * 1000)
 #endif /* WIN32 */
 
-/*
- * For compat.c and getopt.c:
- */
-
-extern int	 opterr;
-extern int	 optind;
-extern int	 optopt;
-extern int	 optreset;
-extern char	*optarg;
-
-extern int
-	local_getopt(int, char * const *, const char *);
-
-extern const char *path_separators;
-
-extern char *
-	local_basename(const char *);
-
-#endif /* __COMPAT_H__ */
+#endif /* __EZSTREAM_H__ */

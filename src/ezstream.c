@@ -29,12 +29,15 @@
 
 #include <shout/shout.h>
 
+#include "compat.h"
+
 #include "configfile.h"
 #include "metadata.h"
 #include "playlist.h"
-#include "strfctns.h"
 #include "util.h"
 #include "xalloc.h"
+
+#include "local_basename.h"
 
 #define STREAM_DONE	0
 #define STREAM_CONT	1
@@ -1149,7 +1152,7 @@ main(int argc, char *argv[])
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = local_getopt(argc, argv, "c:hmnqsVv")) != -1) {
+	while ((c = getopt(argc, argv, "c:hmnqsVv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {

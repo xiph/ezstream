@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = 1.10 foreign
+AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 
 man_MANS	 = ezstream.1 ezstream-file.sh.1
 

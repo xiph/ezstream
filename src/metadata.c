@@ -20,6 +20,8 @@
 
 #include "ezstream.h"
 
+#include "compat.h"
+
 #ifdef HAVE_TAGLIB
 # include <taglib/tag_c.h>
 #endif /* HAVE_TAGLIB */
@@ -29,9 +31,10 @@
 #include <shout/shout.h>
 
 #include "metadata.h"
-#include "strfctns.h"
 #include "util.h"
 #include "xalloc.h"
+
+#include "local_basename.h"
 
 /* Usually defined in <sys/stat.h>. */
 #ifndef S_IEXEC

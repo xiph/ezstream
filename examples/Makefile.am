@@ -1,4 +1,4 @@
-AUTOMAKE_OPTIONS = 1.10 foreign
+AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 
 examplesdir	 = @EXAMPLES_DIR@
 dist_examples_DATA = \

@@ -1,13 +1,12 @@
-AUTOMAKE_OPTIONS = 1.10 foreign
+AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 
 bin_PROGRAMS	 = ezstream
 bin_SCRIPTS	 = ezstream-file.sh
 
 ezstream_SOURCES = \
-	compat.c \
 	configfile.c \
 	ezstream.c \
-	getopt.c \
+	local_basename.c \
 	metadata.c \
 	playlist.c \
 	util.c \
@@ -21,9 +20,9 @@ AM_LDFLAGS	 = @EZ_LDFLAGS@
 EXTRA_DIST	 = \
 	configfile.h \
 	ezstream.h \
+	local_basename.h \
 	metadata.h \
 	playlist.h \
-	strfctns.h \
 	util.h \
 	xalloc.h
 
