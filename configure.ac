@@ -100,15 +100,6 @@ AC_CHECK_HEADERS([ \
 #endif
 ])
 
-COMPAT_INCLUDES=""
-if test x"${ez_enable_debug}" = "xyes"; then
-	AX_HEADER_TREE([RB_FOREACH], [],
-		[
-		  COMPAT_INCLUDES="-I\$(top_srcdir)/compat"
-		])
-fi
-AC_SUBST([COMPAT_INCLUDES])
-
 
 dnl ###########
 dnl ## TYPES ###########################################################
