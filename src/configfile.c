@@ -244,7 +244,7 @@ parseConfig(const char *fileName)
 			if (cur->xmlChildrenNode != NULL) {
 				const char *errstr;
 				ls_xmlContentPtr = (char *)xmlNodeListGetString(doc, cur->xmlChildrenNode, 1);
-				ezConfig.metadataRefreshInterval = (unsigned int)strtonum(ls_xmlContentPtr, -1LL, (long long)INT_MAX, &errstr);
+				ezConfig.metadataRefreshInterval = (int)strtonum(ls_xmlContentPtr, -1LL, (long long)INT_MAX, &errstr);
 				if (errstr) {
 					printf("%s[%ld]: Error: In <metadata_refreshinterval>: '%s' is %s\n",
 					       fileName, xmlGetLineNo(cur), ls_xmlContentPtr, errstr);
