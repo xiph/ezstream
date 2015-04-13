@@ -149,13 +149,13 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 
 	if (hostname == NULL || port == NULL || mountname == NULL) {
 		printf("%s: urlParse(): Internal error: Bad arguments\n",
-		       __progname);
+		    __progname);
 		exit(1);
 	}
 
 	if (strncmp(url, "http://", strlen("http://")) != 0) {
 		printf("%s: Error: Invalid <url>: Not an HTTP address\n",
-		       __progname);
+		    __progname);
 		return (0);
 	}
 
@@ -163,7 +163,7 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	p2 = strchr(p1, ':');
 	if (p2 == NULL) {
 		printf("%s: Error: Invalid <url>: Missing port\n",
-		       __progname);
+		    __progname);
 		return (0);
 	}
 	hostsiz = (p2 - p1) + 1;
@@ -174,7 +174,7 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	p3 = strchr(p2, '/');
 	if (p3 == NULL || p3 - p2 >= (int)sizeof(tmpPort)) {
 		printf("%s: Error: Invalid <url>: Missing mountpoint or too long port number\n",
-		       __progname);
+		    __progname);
 		xfree(*hostname);
 		return (0);
 	}
@@ -183,7 +183,7 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	*port = (unsigned short)strtonum(tmpPort, 1LL, (long long)USHRT_MAX, &errstr);
 	if (errstr) {
 		printf("%s: Error: Invalid <url>: Port '%s' is %s\n",
-		       __progname, tmpPort, errstr);
+		    __progname, tmpPort, errstr);
 		xfree(*hostname);
 		return (0);
 	}
@@ -278,7 +278,7 @@ buildCommandString(const char *extension, const char *fileName,
 	decoder = xstrdup(getFormatDecoder(extension));
 	if (strlen(decoder) == 0) {
 		printf("%s: Unknown extension '%s', cannot decode '%s'\n",
-		       __progname, extension, fileName);
+		    __progname, extension, fileName);
 		xfree(localTitle);
 		xfree(localArtist);
 		xfree(localMetaString);
@@ -335,9 +335,9 @@ buildCommandString(const char *extension, const char *fileName,
 	if (strlen(encoder) == 0) {
 		if (vFlag)
 			printf("%s: Passing through%s%s data from the decoder\n",
-			       __progname,
-			       (strcmp(pezConfig->format, THEORA_FORMAT) != 0) ? " (unsupported) " : " ",
-			       pezConfig->format);
+			    __progname,
+			    (strcmp(pezConfig->format, THEORA_FORMAT) != 0) ? " (unsupported) " : " ",
+			    pezConfig->format);
 		commandStringLen = strlen(newDecoder) + 1;
 		commandString = xcalloc(commandStringLen, sizeof(char));
 		strlcpy(commandString, newDecoder, commandStringLen);
@@ -381,10 +381,10 @@ buildCommandString(const char *extension, const char *fileName,
 	}
 
 	commandStringLen = strlen(newDecoder) + strlen(" | ") +
-		strlen(newEncoder) + 1;
+	    strlen(newEncoder) + 1;
 	commandString = xcalloc(commandStringLen, sizeof(char));
 	snprintf(commandString, commandStringLen, "%s | %s", newDecoder,
-		 newEncoder);
+	    newEncoder);
 
 	xfree(localTitle);
 	xfree(localArtist);
@@ -404,7 +404,7 @@ getMetadataString(const char *format, metadata_t *mdata)
 
 	if (mdata == NULL) {
 		printf("%s: getMetadataString(): Internal error: NULL metadata_t\n",
-		       __progname);
+		    __progname);
 		abort();
 	}
 
@@ -477,7 +477,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 
 	if (shout == NULL) {
 		printf("%s: setMetadata(): Internal error: NULL shout_t\n",
-		       __progname);
+		    __progname);
 		abort();
 	}
 
@@ -489,7 +489,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 
 	if ((shout_mdata = shout_metadata_new()) == NULL) {
 		printf("%s: shout_metadata_new(): %s\n", __progname,
-		       strerror(ENOMEM));
+		    strerror(ENOMEM));
 		exit(1);
 	}
 
@@ -505,7 +505,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 	if (shout_metadata_add(shout_mdata, "charset", "UTF-8") != SHOUTERR_SUCCESS) {
 		/* Assume SHOUTERR_MALLOC */
 		printf("%s: shout_metadata_add(): %s\n", __progname,
-		       strerror(ENOMEM));
+		    strerror(ENOMEM));
 		exit(1);
 	}
 
@@ -517,30 +517,30 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 		if (artist[0] != '\0' && title[0] != '\0') {
 			if (shout_metadata_add(shout_mdata, "artist", artist) != SHOUTERR_SUCCESS) {
 				printf("%s: shout_metadata_add(): %s\n", __progname,
-				       strerror(ENOMEM));
+				    strerror(ENOMEM));
 				exit(1);
 			}
 			if (shout_metadata_add(shout_mdata, "title", title) != SHOUTERR_SUCCESS) {
 				printf("%s: shout_metadata_add(): %s\n", __progname,
-				       strerror(ENOMEM));
+				    strerror(ENOMEM));
 				exit(1);
 			}
 		} else {
 			if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
 				printf("%s: shout_metadata_add(): %s\n", __progname,
-				       strerror(ENOMEM));
+				    strerror(ENOMEM));
 				exit(1);
 			}
 		}
 	} else if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_metadata_add(): %s\n", __progname,
-		       strerror(ENOMEM));
+		    strerror(ENOMEM));
 		exit(1);
 	}
 
 	if ((ret = shout_set_metadata(shout, shout_mdata)) != SHOUTERR_SUCCESS)
 		printf("%s: shout_set_metadata(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 
 	shout_metadata_free(shout_mdata);
 
@@ -603,7 +603,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 	if (strlen(extension) == 0) {
 		printf("%s: Error: Cannot determine file type of '%s'\n",
-		       __progname, fileName);
+		    __progname, fileName);
 		return (filep);
 	}
 
@@ -636,7 +636,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 			stderr_fd = dup(fileno(stderr));
 			if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
 				printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
-				       __progname, _PATH_DEVNULL, strerror(errno));
+				    __progname, _PATH_DEVNULL, strerror(errno));
 				exit(1);
 			}
 
@@ -649,7 +649,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		errno = 0;
 		if ((filep = popen(pCommandString, "r")) == NULL) {
 			printf("%s: popen(): Error while executing '%s'",
-			       __progname, pCommandString);
+			    __progname, pCommandString);
 			/* popen() does not set errno reliably ... */
 			if (errno)
 				printf(": %s\n", strerror(errno));
@@ -679,7 +679,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 	if ((filep = fopen(fileName, "rb")) == NULL)
 		printf("%s: %s: %s\n", __progname, fileName,
-		       strerror(errno));
+		    strerror(errno));
 
 	return (filep);
 }
@@ -696,8 +696,7 @@ reconnectServer(shout_t *shout, int closeConn)
 	while (++i) {
 		printf("%s: Attempting reconnection #", __progname);
 		if (pezConfig->reconnectAttempts > 0)
-			printf("%u/%u: ", i,
-			       pezConfig->reconnectAttempts);
+			printf("%u/%u: ", i, pezConfig->reconnectAttempts);
 		else
 			printf("%u: ", i);
 
@@ -707,7 +706,7 @@ reconnectServer(shout_t *shout, int closeConn)
 			shout_close(shout);
 		if (shout_open(shout) == SHOUTERR_SUCCESS) {
 			printf("OK\n%s: Reconnect to %s successful\n",
-			       __progname, pezConfig->URL);
+			    __progname, pezConfig->URL);
 			return (1);
 		}
 
@@ -718,7 +717,7 @@ reconnectServer(shout_t *shout, int closeConn)
 			break;
 
 		printf("%s: Waiting 5s for %s to come back ...\n",
-		       __progname, pezConfig->URL);
+		    __progname, pezConfig->URL);
 		if (quit)
 			return (0);
 		else
@@ -761,7 +760,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 	if (startTime == NULL) {
 		printf("%s: sendStream(): Internal error: startTime is NULL\n",
-		       __progname);
+		    __progname);
 		abort();
 	}
 
@@ -783,7 +782,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 		if (shout_send(shout, buff, bytes_read) != SHOUTERR_SUCCESS) {
 			printf("%s: shout_send(): %s\n", __progname,
-			       shout_get_error(shout));
+			    shout_get_error(shout));
 			if (reconnectServer(shout, 1))
 				break;
 			else {
@@ -798,7 +797,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			rereadPlaylist_notify = 0;
 			if (!pezConfig->fileNameIsProgram)
 				printf("%s: SIGHUP signal received, will reread playlist after this file\n",
-				       __progname);
+				    __progname);
 		}
 		if (skipTrack) {
 			skipTrack = 0;
@@ -810,10 +809,10 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 		if (queryMetadata ||
 		    (pezConfig->metadataRefreshInterval != -1
-		     && (currentTime.tv_sec - callTime.tv_sec
-			 >= pezConfig->metadataRefreshInterval)
-		    )
-		   ) {
+			&& (currentTime.tv_sec - callTime.tv_sec
+			    >= pezConfig->metadataRefreshInterval)
+			)
+		    ) {
 			queryMetadata = 0;
 			if (metadataFromProgram) {
 				ret = STREAM_UPDMDATA;
@@ -828,31 +827,30 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			if (!isStdin && playlistMode) {
 				if (pezConfig->fileNameIsProgram) {
 					char *tmp = xstrdup(pezConfig->fileName);
-					printf("  [%s]",
-					       local_basename(tmp));
+					printf("  [%s]", local_basename(tmp));
 					xfree(tmp);
 				} else
 					printf("  [%4lu/%-4lu]",
-					       playlist_get_position(playlist),
-					       playlist_get_num_items(playlist));
+					    playlist_get_position(playlist),
+					    playlist_get_num_items(playlist));
 			}
 
 			oldTime = (double)timeStamp.tv_sec
-				+ (double)timeStamp.tv_usec / 1000000.0;
+			    + (double)timeStamp.tv_usec / 1000000.0;
 			newTime = (double)currentTime.tv_sec
-				+ (double)currentTime.tv_usec / 1000000.0;
+			    + (double)currentTime.tv_usec / 1000000.0;
 			if (songLenStr == NULL)
 				printf("  [ %s]",
-				       getTimeString(currentTime.tv_sec -
-						     startTime->tv_sec));
+				    getTimeString(currentTime.tv_sec -
+					startTime->tv_sec));
 			else
 				printf("  [ %s/%s]",
-				       getTimeString(currentTime.tv_sec -
-						     startTime->tv_sec),
-				       songLenStr);
+				    getTimeString(currentTime.tv_sec -
+					startTime->tv_sec),
+				    songLenStr);
 			if (newTime - oldTime >= 1.0) {
 				kbps = (((double)(total - oldTotal)
-					 / (newTime - oldTime)) * 8.0) / 1000.0;
+				    / (newTime - oldTime)) * 8.0) / 1000.0;
 				timeStamp.tv_sec = currentTime.tv_sec;
 				timeStamp.tv_usec = currentTime.tv_usec;
 				oldTotal = total;
@@ -872,10 +870,10 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			ret = STREAM_CONT;
 		} else if (errno == EBADF && isStdin)
 			printf("%s: No (more) data available on standard input\n",
-			       __progname);
+			    __progname);
 		else
 			printf("%s: sendStream(): Error while reading '%s': %s\n",
-			       __progname, fileName, strerror(errno));
+			    __progname, fileName, strerror(errno));
 	}
 
 	return (ret);
@@ -893,8 +891,7 @@ streamFile(shout_t *shout, const char *fileName)
 	metadata_t	*mdata;
 	struct timeval	 startTime;
 
-	if ((filepstream = openResource(shout, fileName, &popenFlag,
-					&mdata, &isStdin, &songLen))
+	if ((filepstream = openResource(shout, fileName, &popenFlag, &mdata, &isStdin, &songLen))
 	    == NULL) {
 		if (++resource_errors > 100) {
 			printf("%s: Too many errors -- giving up.\n", __progname);
@@ -932,7 +929,7 @@ streamFile(shout_t *shout, const char *fileName)
 	ez_gettimeofday((void *)&startTime);
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin,
-				 songLenStr, &startTime);
+		    songLenStr, &startTime);
 		if (quit)
 			break;
 		if (ret != STREAM_DONE) {
@@ -949,7 +946,7 @@ streamFile(shout_t *shout, const char *fileName)
 				skipTrack = 0;
 				if (!isStdin && vFlag)
 					printf("%s: SIGUSR1 signal received, skipping current track\n",
-					       __progname);
+					    __progname);
 				retval = 1;
 				ret = STREAM_DONE;
 			}
@@ -963,7 +960,7 @@ streamFile(shout_t *shout, const char *fileName)
 
 					if (vFlag > 1)
 						printf("%s: Querying '%s' for fresh metadata\n",
-						       __progname, pezConfig->metadataProgram);
+						    __progname, pezConfig->metadataProgram);
 					if ((prog_mdata = getMetadata(pezConfig->metadataProgram)) == NULL) {
 						retval = 0;
 						ret = STREAM_DONE;
@@ -977,7 +974,7 @@ streamFile(shout_t *shout, const char *fileName)
 					metadata_free(&prog_mdata);
 					if (vFlag > 1)
 						printf("%s: New metadata: ``%s''\n",
-						       __progname, mdataStr);
+						    __progname, mdataStr);
 					xfree(mdataStr);
 				}
 			}
@@ -1015,7 +1012,7 @@ streamPlaylist(shout_t *shout, const char *fileName)
 				return (0);
 			if (vFlag && playlist_get_num_items(playlist) == 0)
 				printf("%s: Warning: Playlist '%s' is empty\n",
-				       __progname, fileName);
+				    __progname, fileName);
 		}
 	} else {
 		/*
@@ -1239,10 +1236,10 @@ main(int argc, char *argv[])
 		}
 		if (vFlag && (st.st_mode & (S_IRGRP | S_IROTH)))
 			printf("%s: Warning: %s is group and/or world readable\n",
-			       __progname, configFile);
+			    __progname, configFile);
 		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
 			printf("%s: Error: %s is group and/or world writeable\n",
-			       __progname, configFile);
+			    __progname, configFile);
 			return (ez_shutdown(2));
 		}
 #else
@@ -1310,7 +1307,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < sizeof(ezstream_signals) / sizeof(int); i++) {
 		if (sigaction(ezstream_signals[i], &act, NULL) == -1) {
 			printf("%s: sigaction(): %s\n",
-			       __progname, strerror(errno));
+			    __progname, strerror(errno));
 			return (ez_shutdown(1));
 		}
 	}
@@ -1321,7 +1318,7 @@ main(int argc, char *argv[])
 	act.sa_handler = SIG_IGN;
 	if (sigaction(SIGPIPE, &act, NULL) == -1) {
 		printf("%s: sigaction(): %s\n",
-		       __progname, strerror(errno));
+		    __progname, strerror(errno));
 		return (ez_shutdown(1));
 	}
 #endif /* HAVE_SIGNALS */
@@ -1330,7 +1327,7 @@ main(int argc, char *argv[])
 		int	ret;
 
 		printf("%s: Connected to http://%s:%hu%s\n", __progname,
-		       host, port, mount);
+		    host, port, mount);
 
 		if (pezConfig->fileNameIsProgram ||
 		    strrcasecmp(pezConfig->fileName, ".m3u") == 0 ||
@@ -1345,8 +1342,7 @@ main(int argc, char *argv[])
 
 		do {
 			if (playlistMode) {
-				ret = streamPlaylist(shout,
-						     pezConfig->fileName);
+				ret = streamPlaylist(shout, pezConfig->fileName);
 			} else {
 				ret = streamFile(shout, pezConfig->fileName);
 			}
@@ -1359,7 +1355,7 @@ main(int argc, char *argv[])
 		shout_close(shout);
 	} else
 		printf("%s: Connection to http://%s:%hu%s failed: %s\n", __progname,
-		       host, port, mount, shout_get_error(shout));
+		    host, port, mount, shout_get_error(shout));
 
 	if (quit)
 		printf("\r%s: SIGINT or SIGTERM received\n", __progname);

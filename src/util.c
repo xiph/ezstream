@@ -95,37 +95,37 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 
 	if (shout_set_host(shout, host) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_host(): %s\n", __progname,
-		       shout_get_error(shout));
+		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (shout_set_protocol(shout, SHOUT_PROTOCOL_HTTP) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_protocol(): %s\n", __progname,
-			shout_get_error(shout));
+		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (shout_set_port(shout, port) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_port: %s\n", __progname,
-			shout_get_error(shout));
+		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (shout_set_password(shout, pezConfig->password) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_password(): %s\n", __progname,
-			shout_get_error(shout));
+		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (shout_set_mount(shout, mount) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_mount(): %s\n", __progname,
-			shout_get_error(shout));
+		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (shout_set_user(shout, "source") != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_user(): %s\n", __progname,
-			shout_get_error(shout));
+		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
@@ -133,7 +133,7 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 	if (!strcmp(pezConfig->format, MP3_FORMAT) &&
 	    shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_format(MP3): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
@@ -141,7 +141,7 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 	     !strcmp(pezConfig->format, THEORA_FORMAT)) &&
 	    shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_format(OGG): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
@@ -149,70 +149,70 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 	if (pezConfig->username &&
 	    shout_set_user(shout, pezConfig->username) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_user(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverName &&
 	    shout_set_name(shout, pezConfig->serverName) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_name(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverURL &&
 	    shout_set_url(shout, pezConfig->serverURL) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_url(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverGenre &&
 	    shout_set_genre(shout, pezConfig->serverGenre) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_genre(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverDescription &&
 	    shout_set_description(shout, pezConfig->serverDescription) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_description(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverBitrate &&
 	    shout_set_audio_info(shout, SHOUT_AI_BITRATE, pezConfig->serverBitrate) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_audio_info(AI_BITRATE): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverChannels &&
 	    shout_set_audio_info(shout, SHOUT_AI_CHANNELS, pezConfig->serverChannels) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_audio_info(AI_CHANNELS): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverSamplerate &&
 	    shout_set_audio_info(shout, SHOUT_AI_SAMPLERATE, pezConfig->serverSamplerate) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_audio_info(AI_SAMPLERATE): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 	if (pezConfig->serverQuality &&
 	    shout_set_audio_info(shout, SHOUT_AI_QUALITY, pezConfig->serverQuality) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_audio_info(AI_QUALITY): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 
 	if (shout_set_public(shout, (unsigned int)pezConfig->serverPublic) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_public(): %s\n",
-		       __progname, shout_get_error(shout));
+		    __progname, shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
