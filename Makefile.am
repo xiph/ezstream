@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 ACLOCAL_AMFLAGS  = -I m4
 
-SUBDIRS 	 = build-aux compat doc examples m4 src win32
+SUBDIRS 	 = build-aux compat doc examples m4 src
 
 dist_doc_DATA	 = COPYING NEWS README
 
@@ -12,10 +12,7 @@ EXTRA_DIST	 = \
 
 CLEANFILES	 = core *.core *~ .*~
 
-.PHONY: regen-win32 snapshot
-
-regen-win32:
-	cd win32; ${MAKE} regen-win32
+.PHONY: snapshot
 
 snapshot:
 	${MAKE} distcheck distdir=${PACKAGE}-snapshot-`date +'%Y%m%d'`

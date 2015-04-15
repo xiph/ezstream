@@ -223,21 +223,15 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 char *
 CHARtoUTF8(const char *in_str, int mode)
 {
-#ifndef WIN32
 	char	*codeset;
 
-# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
-# else
-	codeset = (char *)"";
-# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 #else
-	char	 codeset[24];
-
-	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
-#endif /* !WIN32 */
+	codeset = (char *)"";
+#endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 
 	return (iconvert(in_str, codeset, "UTF-8", mode));
 }
@@ -245,21 +239,15 @@ CHARtoUTF8(const char *in_str, int mode)
 char *
 UTF8toCHAR(const char *in_str, int mode)
 {
-#ifndef WIN32
 	char	*codeset;
 
-# if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
-# else
-	codeset = (char *)"";
-# endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 #else
-	char	 codeset[24];
-
-	snprintf(codeset, sizeof(codeset), "CP%u", GetACP());
-#endif /* !WIN32 */
+	codeset = (char *)"";
+#endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 
 	return (iconvert(in_str, "UTF-8", codeset, mode));
 }
@@ -373,32 +361,10 @@ ez_gettimeofday(void *tp_arg)
 #ifdef HAVE_GETTIMEOFDAY
 	ret = gettimeofday(tp, NULL);
 #else /* HAVE_GETTIMEOFDAY */
-# ifdef WIN32
-	/*
-	 * Idea for this way of implementing gettimeofday()-like functionality
-	 * on Windows taken from cURL, (C) 1998 - 2007 Daniel Steinberg, et al.
-	 * http://curl.haxx.se/docs/copyright.html
-	 */
-	SYSTEMTIME	 st;
-	struct tm	 tm;
-
-	GetLocalTime(&st);
-	tm.tm_sec = st.wSecond;
-	tm.tm_min = st.wMinute;
-	tm.tm_hour = st.wHour;
-	tm.tm_mday = st.wDay;
-	tm.tm_mon = st.wMonth - 1;
-	tm.tm_year = st.wYear - 1900;
-	tm.tm_isdst = -1;
-	tp->tv_sec = (long)mktime(&tm);
-	tp->tv_usec = st.wMilliseconds * 1000;
-	ret = 0;
-# else /* WIN32 */
 	/* Fallback to time(): */
 	tp->tv_sec = (long)time(NULL);
 	tp->tv_usec = 0;
 	ret = 0;
-# endif /* WIN32 */
 #endif /* HAVE_GETTIMEOFDAY */
 
 	return (ret);

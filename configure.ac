@@ -212,20 +212,14 @@ AC_CHECK_FUNCS([ \
 	gettimeofday \
 	nl_langinfo \
 	pclose \
-	_pclose \
 	popen \
-	_popen \
 	random \
 	setlocale \
 	snprintf \
-	_snprintf \
 	srandomdev \
 	stat \
-	_stat \
 	strncasecmp \
-	strnicmp \
 	strtoll \
-	_strtoi64 \
 ])
 
 AC_REPLACE_FUNCS([ \
@@ -275,8 +269,6 @@ AC_CONFIG_FILES([
 	m4/Makefile
 	src/Makefile
 	src/ezstream-file.sh
-	win32/Makefile
-	win32/shout/Makefile
 ])
 
 AC_OUTPUT

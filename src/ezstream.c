@@ -33,8 +33,6 @@
 #include "util.h"
 #include "xalloc.h"
 
-#include "local_basename.h"
-
 #define STREAM_DONE	0
 #define STREAM_CONT	1
 #define STREAM_SKIP	2
@@ -584,9 +582,6 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 		if (isStdin != NULL)
 			*isStdin = 1;
-#ifdef WIN32
-		_setmode(_fileno(stdin), _O_BINARY);
-#endif
 		filep = stdin;
 		return (filep);
 	}
@@ -657,9 +652,6 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 				printf("\n");
 		} else {
 			*popenFlag = 1;
-#ifdef WIN32
-			_setmode(_fileno(filep), _O_BINARY );
-#endif
 		}
 		xfree(pCommandString);
 
@@ -827,7 +819,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			if (!isStdin && playlistMode) {
 				if (pezConfig->fileNameIsProgram) {
 					char *tmp = xstrdup(pezConfig->fileName);
-					printf("  [%s]", local_basename(tmp));
+					printf("  [%s]", basename(tmp));
 					xfree(tmp);
 				} else
 					printf("  [%4lu/%-4lu]",
@@ -1068,7 +1060,7 @@ getProgname(const char *argv0)
 
 	if (argv0 == NULL)
 		return ((char *)"ezstream");
-	p = strrchr(argv0, path_separators[0]);
+	p = strrchr(argv0, '/');
 	if (p == NULL)
 		p = (char *)argv0;
 	else

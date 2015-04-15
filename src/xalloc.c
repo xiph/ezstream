@@ -191,64 +191,18 @@ _xalloc_vasprintf(char **str_p, const char *fmt, va_list ap, size_t *strsiz)
 	va_list ap_local;
 
 	*str_p = NULL;
-#ifndef WIN32
-# ifndef HAVE_BROKEN_VSNPRINTF
-
-	/* MODERN UNIX */
 
 	va_copy(ap_local, ap);
 	*strsiz = vsnprintf(NULL, (size_t)0, fmt, ap_local) + 1;
 	va_end(ap_local);
-#  ifdef HAVE_ASPRINTF
+#ifdef HAVE_ASPRINTF
 	if ((ret = vasprintf(str_p, fmt, ap)) == -1)
 		*str_p = NULL;
-#  else
+#else
 	if ((*str_p = real_calloc(*strsiz, sizeof(char))) == NULL)
 		return (-1);
 	ret = vsnprintf(*str_p, *strsiz, fmt, ap);
-#  endif /* HAVE_ASPRINTF */
-# else
-
-	/* ANCIENT UNIX */
-
-	{
-		char	*buf = NULL;
-
-		*strsiz = 4;
-		for (;;) {
-			char	*tbuf;
-			int	 pret;
-
-			if ((tbuf = real_realloc(buf, *strsiz)) == NULL) {
-				real_free(buf);
-				return (-1);
-			}
-			buf = tbuf;
-			va_copy(ap_local, ap);
-			pret = vsnprintf(buf, *strsiz, fmt, ap_local);
-			va_end(ap_local);
-			if (pret > 0 && pret < (int)*strsiz)
-				break;
-			if ((int)(*strsiz *= 2) < 0) {
-				real_free(buf);
-				return (-1);
-			}
-		}
-		ret = vsnprintf(buf, *strsiz, fmt, ap);
-		*str_p = buf;
-	}
-# endif /* !HAVE_BROKEN_VSNPRINTF */
-#else
-
-	/* WINDOWS */
-
-	va_copy(ap_local, ap);
-	*strsiz = _vscprintf(fmt, ap_local) + 1;
-	va_end(ap_local);
-	if ((*str_p = real_calloc(*strsiz, sizeof(char))) == NULL)
-		return (-1);
-	ret = _vsnprintf(*str_p, *strsiz, fmt, ap);
-#endif /* !WIN32 */
+#endif /* HAVE_ASPRINTF */
 
 	return (ret);
 }

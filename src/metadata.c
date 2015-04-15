@@ -34,8 +34,6 @@
 #include "util.h"
 #include "xalloc.h"
 
-#include "local_basename.h"
-
 /* Usually defined in <sys/stat.h>. */
 #ifndef S_IEXEC
 # define S_IEXEC	S_IXUSR
@@ -307,7 +305,7 @@ metadata_get_name(const char *file)
 		abort();
 	}
 
-	if ((p1 = local_basename(filename)) == NULL) {
+	if ((p1 = basename(filename)) == NULL) {
 		printf("%s: Internal error: basename() failed with '%s'\n",
 		    __progname, filename);
 		exit(1);

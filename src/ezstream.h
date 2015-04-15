@@ -35,6 +35,9 @@
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
+#if defined(HAVE_LIBGEN_H) && !defined(__linux__)
+# include <libgen.h>
+#endif /* HAVE_LIBGEN_H && !__linux__ */
 #include <limits.h>
 #ifdef HAVE_PATHS_H
 # include <paths.h>
@@ -52,50 +55,11 @@
 #endif /* !STDIN_FILENO */
 
 #ifndef _PATH_DEVNULL
-# ifdef WIN32
-#  define _PATH_DEVNULL 	"nul"
-# else /* WIN32 */
-#  define _PATH_DEVNULL 	"/dev/null"
-# endif /* WIN32 */
+# define _PATH_DEVNULL		"/dev/null"
 #endif /* !_PATH_DEVNULL */
 
 #ifndef PATH_MAX
 # define PATH_MAX		256
 #endif /* !PATH_MAX */
-
-#if !defined(HAVE_PCLOSE) && defined(HAVE__PCLOSE)
-# define pclose 	_pclose
-#endif /* !HAVE_PCLOSE && HAVE__PCLOSE */
-#if !defined(HAVE_POPEN) && defined(HAVE__POPEN)
-# define popen		_popen
-#endif /* !HAVE_POPEN && HAVE__POPEN */
-#if !defined(HAVE_SNPRINTF) && defined(HAVE__SNPRINTF)
-# define snprintf	_snprintf
-#endif /* !HAVE_SNPRINTF && HAVE__SNPRINTF */
-#if !defined(HAVE_STAT) && defined(HAVE__STAT)
-# define stat		_stat
-#endif /* !HAVE_STAT && HAVE__STAT */
-#if !defined(HAVE_STRNCASECMP) && defined(HAVE_STRNICMP)
-# define strncasecmp	strnicmp
-#endif /* !HAVE_STRNCASECMP && HAVE_STRNICMP */
-#if !defined(HAVE_STRTOLL) && defined(HAVE__STRTOI64)
-# define strtoll	_strtoi64
-#endif /* !HAVE_STRTOLL && HAVE__STRTOI64 */
-
-#ifndef S_IRGRP
-# define S_IRGRP	0
-# define S_IWGRP	0
-# define S_IXGRP	0
-#endif /* !S_IRGRP */
-#ifndef S_IROTH
-# define S_IROTH	0
-# define S_IWOTH	0
-# define S_IXOTH	0
-#endif /* !S_IROTH */
-
-#ifdef WIN32
-# include <windows.h>
-# define sleep(a)	Sleep((a) * 1000)
-#endif /* WIN32 */
 
 #endif /* __EZSTREAM_H__ */

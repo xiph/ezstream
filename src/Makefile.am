@@ -6,7 +6,6 @@ bin_SCRIPTS	 = ezstream-file.sh
 ezstream_SOURCES = \
 	configfile.c \
 	ezstream.c \
-	local_basename.c \
 	metadata.c \
 	playlist.c \
 	util.c \
@@ -20,7 +19,6 @@ AM_LDFLAGS	 = @EZ_LDFLAGS@
 EXTRA_DIST	 = \
 	configfile.h \
 	ezstream.h \
-	local_basename.h \
 	metadata.h \
 	playlist.h \
 	util.h \
