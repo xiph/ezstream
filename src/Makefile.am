@@ -4,6 +4,7 @@ bin_PROGRAMS	 = ezstream
 bin_SCRIPTS	 = ezstream-file.sh
 
 noinst_HEADERS	 = \
+	attributes.h \
 	cfg.h \
 	configfile.h \
 	ezstream.h \

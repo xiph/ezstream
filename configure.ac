@@ -81,6 +81,30 @@ else
 	esac
 fi
 
+have_attributes=no
+CFG_ATTRIBUTE_UNUSED=0
+AX_FUNC_ATTRIBUTE_UNUSED([
+	CFG_ATTRIBUTE_UNUSED=1
+	have_attributes=yes
+], [])
+AC_SUBST([CFG_ATTRIBUTE_UNUSED])
+
+CFG_HAVE_ATTRIBUTES=0
+CFG_ATTRIBUTE_FORMAT=0
+CFG_ATTRIBUTE_NONNULL=0
+if test x"${have_attributes}" = "xyes"; then
+	CFG_HAVE_ATTRIBUTES=1
+	AX_FUNC_ATTRIBUTE([const char *a, ...],
+		[format], [(printf, 1, 2)],
+		[CFG_ATTRIBUTE_FORMAT=1], [])
+	AX_FUNC_ATTRIBUTE([const char *a],
+		[nonnull], [(1)],
+		[CFG_ATTRIBUTE_NONNULL=1], [])
+fi
+AC_SUBST([CFG_HAVE_ATTRIBUTES])
+AC_SUBST([CFG_ATTRIBUTE_FORMAT])
+AC_SUBST([CFG_ATTRIBUTE_NONNULL])
+
 AC_C_CONST
 AC_C_VOLATILE
 
@@ -268,6 +292,7 @@ AC_CONFIG_FILES([
 	examples/Makefile
 	m4/Makefile
 	src/Makefile
+	src/attr_config.h
 	src/ezstream-file.sh
 ])
 
