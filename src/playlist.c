@@ -63,7 +63,7 @@ playlist_add(playlist_t *pl, const char *entry)
 
 	if (pl == NULL || entry == NULL) {
 		printf("%s: playlist_add(): Internal error: Bad arguments\n",
-		       __progname);
+		    __progname);
 		exit(1);
 	}
 
@@ -156,7 +156,7 @@ playlist_read(const char *filename)
 			char skip_buf[2];
 
 			printf("%s[%lu]: File or path name too long\n",
-			       pl->filename, line);
+			    pl->filename, line);
 			/* Discard any excess chars in that line. */
 			while (fgets(skip_buf, (int)sizeof(skip_buf), filep) != NULL) {
 				if (skip_buf[0] == '\n')
