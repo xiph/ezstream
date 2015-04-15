@@ -1,9 +1,10 @@
 Changes in X.X.X, released on XXXX-XX-XX:
 
  * Windows is no longer actively supported.
-
  * Certain legacy UNIX systems are no longer actively supported.
-
+ * The behaviour of the -s command line argument was changed:
+   To shuffle lines from standard input, the special file name "-" needs
+   to be provided.
 
 
 Changes in 0.6.0, released on 2015-01-18:

@@ -23,7 +23,7 @@
 .Ek
 .Nm
 .Bk -words
-.Fl s
+.Fl s Ar playlistFile
 .Op Ar playlist
 .Ek
 .Sh DESCRIPTION
@@ -53,13 +53,15 @@ Normalize metadata strings by removing excess whitespaces.
 .It Fl q
 Be more quiet.
 Suppress the output that external programs send to standard error.
-.It Fl s Op Ar playlist
+.It Fl s Ar playlist
 Run
 .Nm
 as a line-based shuffling utility.
-If no
+If a
 .Ar playlist
-argument is given, a list of media file names is read from standard input
+argument of
+.Dq -
+is given, a list of media file names is read from standard input
 instead of an input file.
 After successfully reading the entire list, it is shuffled and printed to
 standard output, and

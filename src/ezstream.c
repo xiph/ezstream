@@ -1110,6 +1110,7 @@ main(int argc, char *argv[])
 {
 	int		 c;
 	char		*configFile = NULL;
+	char		*playlistFile = NULL;
 	char		*host = NULL;
 	unsigned short	 port = 0;
 	char		*mount = NULL;
@@ -1137,7 +1138,7 @@ main(int argc, char *argv[])
 	qFlag = 0;
 	vFlag = 0;
 
-	while ((c = getopt(argc, argv, "c:hmnqsVv")) != -1) {
+	while ((c = getopt(argc, argv, "c:hmnqs:Vv")) != -1) {
 		switch (c) {
 		case 'c':
 			if (configFile != NULL) {
@@ -1162,6 +1163,12 @@ main(int argc, char *argv[])
 			break;
 		case 's':
 			sFlag = 1;
+			if (playlistFile != NULL) {
+				printf("Error: multiple -s arguments given\n");
+				usage();
+				return (ez_shutdown(2));
+			}
+			playlistFile = xstrdup(optarg);
 			break;
 		case 'V':
 			printf("%s\n", PACKAGE_STRING);
@@ -1183,21 +1190,13 @@ main(int argc, char *argv[])
 		playlist_t	*pl;
 		const char	*entry;
 
-		switch (argc) {
-		case 0:
+		if (0 == strcmp(playlistFile, "-"))
 			pl = playlist_read(NULL);
-			if (pl == NULL)
-				return (ez_shutdown(1));
-			break;
-		case 1:
-			pl = playlist_read(argv[0]);
-			if (pl == NULL)
-				return (ez_shutdown(1));
-			break;
-		default:
-			printf("Error: Too many arguments.\n");
-			return (ez_shutdown(2));
-		}
+		else
+			pl = playlist_read(playlistFile);
+
+		if (pl == NULL)
+			return (ez_shutdown(1));
 
 		playlist_shuffle(pl);
 		while ((entry = playlist_get_next(pl)) != NULL)
