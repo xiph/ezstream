@@ -1037,6 +1037,7 @@ ez_shutdown(int exitval)
 	playlist_shutdown();
 	freeConfig(pezConfig);
 	xalloc_shutdown();
+	log_exit();
 
 	return (exitval);
 }
@@ -1061,6 +1062,7 @@ main(int argc, char *argv[])
 	ret = 1;
 	if (0 > cfg_cmdline_parse(argc, argv, &ret))
 		return (ret);
+	log_init();
 
 #ifdef XALLOC_DEBUG
 	xalloc_initialize_debug(2, NULL);

@@ -51,6 +51,7 @@
 #endif
 
 #include "cfg.h"
+#include "log.h"
 
 #ifndef STDIN_FILENO
 # define STDIN_FILENO		0

@@ -8,6 +8,7 @@ noinst_HEADERS	 = \
 	cfg.h \
 	configfile.h \
 	ezstream.h \
+	log.h \
 	metadata.h \
 	playlist.h \
 	util.h \
@@ -16,6 +17,7 @@ ezstream_SOURCES = \
 	cfg.c \
 	configfile.c \
 	ezstream.c \
+	log.c \
 	metadata.c \
 	playlist.c \
 	util.c \
