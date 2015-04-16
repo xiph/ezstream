@@ -21,11 +21,10 @@
 
 #include "compat.h"
 
+#include "cfg.h"
 #include "configfile.h"
 #include "util.h"
 #include "xalloc.h"
-
-extern char		*__progname;
 
 static EZCONFIG		 ezConfig;
 static const char	*blankString = "";
@@ -590,7 +589,7 @@ parseConfig(const char *fileName)
 		return (1);
 
 	freeConfig(&ezConfig);
-	printf("%s: %u configuration error(s) in %s\n", __progname,
+	printf("%s: %u configuration error(s) in %s\n", cfg_progname(),
 	       config_error, fileName);
 
 	return (0);

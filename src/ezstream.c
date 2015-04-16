@@ -39,17 +39,6 @@
 #define STREAM_SERVERR	3
 #define STREAM_UPDMDATA 4
 
-#ifdef HAVE___PROGNAME
-extern char		*__progname;
-#else
-char			*__progname;
-#endif /* HAVE___PROGNAME */
-
-int			 nFlag;
-int			 mFlag;
-int			 qFlag;
-int			 sFlag;
-int			 vFlag;
 int			 metadataFromProgram;
 
 EZCONFIG		*pezConfig = NULL;
@@ -100,9 +89,6 @@ int		sendStream(shout_t *, FILE *, const char *, int, const char *,
 			   struct timeval *);
 int		streamFile(shout_t *, const char *);
 int		streamPlaylist(shout_t *, const char *);
-char *		getProgname(const char *);
-void		usage(void);
-void		usageHelp(void);
 int		ez_shutdown(int);
 
 #ifdef HAVE_SIGNALS
@@ -147,13 +133,13 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 
 	if (hostname == NULL || port == NULL || mountname == NULL) {
 		printf("%s: urlParse(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		exit(1);
 	}
 
 	if (strncmp(url, "http://", strlen("http://")) != 0) {
 		printf("%s: Error: Invalid <url>: Not an HTTP address\n",
-		    __progname);
+		    cfg_progname());
 		return (0);
 	}
 
@@ -161,7 +147,7 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	p2 = strchr(p1, ':');
 	if (p2 == NULL) {
 		printf("%s: Error: Invalid <url>: Missing port\n",
-		    __progname);
+		    cfg_progname());
 		return (0);
 	}
 	hostsiz = (p2 - p1) + 1;
@@ -172,7 +158,7 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	p3 = strchr(p2, '/');
 	if (p3 == NULL || p3 - p2 >= (int)sizeof(tmpPort)) {
 		printf("%s: Error: Invalid <url>: Missing mountpoint or too long port number\n",
-		    __progname);
+		    cfg_progname());
 		xfree(*hostname);
 		return (0);
 	}
@@ -181,7 +167,7 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	*port = (unsigned short)strtonum(tmpPort, 1LL, (long long)USHRT_MAX, &errstr);
 	if (errstr) {
 		printf("%s: Error: Invalid <url>: Port '%s' is %s\n",
-		    __progname, tmpPort, errstr);
+		    cfg_progname(), tmpPort, errstr);
 		xfree(*hostname);
 		return (0);
 	}
@@ -276,7 +262,7 @@ buildCommandString(const char *extension, const char *fileName,
 	decoder = xstrdup(getFormatDecoder(extension));
 	if (strlen(decoder) == 0) {
 		printf("%s: Unknown extension '%s', cannot decode '%s'\n",
-		    __progname, extension, fileName);
+		    cfg_progname(), extension, fileName);
 		xfree(localTitle);
 		xfree(localArtist);
 		xfree(localMetaString);
@@ -331,9 +317,9 @@ buildCommandString(const char *extension, const char *fileName,
 
 	encoder = xstrdup(getFormatEncoder(pezConfig->format));
 	if (strlen(encoder) == 0) {
-		if (vFlag)
+		if (cfg_verbosity())
 			printf("%s: Passing through%s%s data from the decoder\n",
-			    __progname,
+			    cfg_progname(),
 			    (strcmp(pezConfig->format, THEORA_FORMAT) != 0) ? " (unsupported) " : " ",
 			    pezConfig->format);
 		commandStringLen = strlen(newDecoder) + 1;
@@ -402,7 +388,7 @@ getMetadataString(const char *format, metadata_t *mdata)
 
 	if (mdata == NULL) {
 		printf("%s: getMetadataString(): Internal error: NULL metadata_t\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -445,7 +431,7 @@ getMetadata(const char *fileName)
 	metadata_t	*mdata;
 
 	if (metadataFromProgram) {
-		if ((mdata = metadata_program(fileName, nFlag)) == NULL)
+		if ((mdata = metadata_program(fileName, cfg_normalize_strings())) == NULL)
 			return (NULL);
 
 		if (!metadata_program_update(mdata, METADATA_ALL)) {
@@ -453,7 +439,7 @@ getMetadata(const char *fileName)
 			return (NULL);
 		}
 	} else {
-		if ((mdata = metadata_file(fileName, nFlag)) == NULL)
+		if ((mdata = metadata_file(fileName, cfg_normalize_strings())) == NULL)
 			return (NULL);
 
 		if (!metadata_file_update(mdata)) {
@@ -475,18 +461,18 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 
 	if (shout == NULL) {
 		printf("%s: setMetadata(): Internal error: NULL shout_t\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
-	if (mFlag)
+	if (cfg_no_metadata_updates())
 		return (SHOUTERR_SUCCESS);
 
 	if (mdata == NULL)
 		return 1;
 
 	if ((shout_mdata = shout_metadata_new()) == NULL) {
-		printf("%s: shout_metadata_new(): %s\n", __progname,
+		printf("%s: shout_metadata_new(): %s\n", cfg_progname(),
 		    strerror(ENOMEM));
 		exit(1);
 	}
@@ -502,7 +488,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 	 */
 	if (shout_metadata_add(shout_mdata, "charset", "UTF-8") != SHOUTERR_SUCCESS) {
 		/* Assume SHOUTERR_MALLOC */
-		printf("%s: shout_metadata_add(): %s\n", __progname,
+		printf("%s: shout_metadata_add(): %s\n", cfg_progname(),
 		    strerror(ENOMEM));
 		exit(1);
 	}
@@ -514,31 +500,31 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 			songInfo = metadata_assemble_string(mdata);
 		if (artist[0] != '\0' && title[0] != '\0') {
 			if (shout_metadata_add(shout_mdata, "artist", artist) != SHOUTERR_SUCCESS) {
-				printf("%s: shout_metadata_add(): %s\n", __progname,
+				printf("%s: shout_metadata_add(): %s\n", cfg_progname(),
 				    strerror(ENOMEM));
 				exit(1);
 			}
 			if (shout_metadata_add(shout_mdata, "title", title) != SHOUTERR_SUCCESS) {
-				printf("%s: shout_metadata_add(): %s\n", __progname,
+				printf("%s: shout_metadata_add(): %s\n", cfg_progname(),
 				    strerror(ENOMEM));
 				exit(1);
 			}
 		} else {
 			if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
-				printf("%s: shout_metadata_add(): %s\n", __progname,
+				printf("%s: shout_metadata_add(): %s\n", cfg_progname(),
 				    strerror(ENOMEM));
 				exit(1);
 			}
 		}
 	} else if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
-		printf("%s: shout_metadata_add(): %s\n", __progname,
+		printf("%s: shout_metadata_add(): %s\n", cfg_progname(),
 		    strerror(ENOMEM));
 		exit(1);
 	}
 
 	if ((ret = shout_set_metadata(shout, shout_mdata)) != SHOUTERR_SUCCESS)
 		printf("%s: shout_set_metadata(): %s\n",
-		    __progname, shout_get_error(shout));
+		    cfg_progname(), shout_get_error(shout));
 
 	shout_metadata_free(shout_mdata);
 
@@ -598,7 +584,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 
 	if (strlen(extension) == 0) {
 		printf("%s: Error: Cannot determine file type of '%s'\n",
-		    __progname, fileName);
+		    cfg_progname(), fileName);
 		return (filep);
 	}
 
@@ -621,17 +607,17 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 			*mdata_p = mdata;
 		else
 			metadata_free(&mdata);
-		if (vFlag > 1)
-			printf("%s: Running command `%s`\n", __progname,
+		if (cfg_verbosity() > 1)
+			printf("%s: Running command `%s`\n", cfg_progname(),
 			       pCommandString);
 
-		if (qFlag) {
+		if (cfg_quiet_stderr()) {
 			int fd;
 
 			stderr_fd = dup(fileno(stderr));
 			if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
 				printf("%s: Cannot open %s for redirecting STDERR output: %s\n",
-				    __progname, _PATH_DEVNULL, strerror(errno));
+				    cfg_progname(), _PATH_DEVNULL, strerror(errno));
 				exit(1);
 			}
 
@@ -644,7 +630,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		errno = 0;
 		if ((filep = popen(pCommandString, "r")) == NULL) {
 			printf("%s: popen(): Error while executing '%s'",
-			    __progname, pCommandString);
+			    cfg_progname(), pCommandString);
 			/* popen() does not set errno reliably ... */
 			if (errno)
 				printf(": %s\n", strerror(errno));
@@ -655,7 +641,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		}
 		xfree(pCommandString);
 
-		if (qFlag)
+		if (cfg_quiet_stderr())
 			dup2(stderr_fd, fileno(stderr));
 
 		if (stderr_fd > 2)
@@ -670,7 +656,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		metadata_free(&mdata);
 
 	if ((filep = fopen(fileName, "rb")) == NULL)
-		printf("%s: %s: %s\n", __progname, fileName,
+		printf("%s: %s: %s\n", cfg_progname(), fileName,
 		    strerror(errno));
 
 	return (filep);
@@ -682,11 +668,11 @@ reconnectServer(shout_t *shout, int closeConn)
 	unsigned int	i;
 	int		close_conn = closeConn;
 
-	printf("%s: Connection to %s lost\n", __progname, pezConfig->URL);
+	printf("%s: Connection to %s lost\n", cfg_progname(), pezConfig->URL);
 
 	i = 0;
 	while (++i) {
-		printf("%s: Attempting reconnection #", __progname);
+		printf("%s: Attempting reconnection #", cfg_progname());
 		if (pezConfig->reconnectAttempts > 0)
 			printf("%u/%u: ", i, pezConfig->reconnectAttempts);
 		else
@@ -698,7 +684,7 @@ reconnectServer(shout_t *shout, int closeConn)
 			shout_close(shout);
 		if (shout_open(shout) == SHOUTERR_SUCCESS) {
 			printf("OK\n%s: Reconnect to %s successful\n",
-			    __progname, pezConfig->URL);
+			    cfg_progname(), pezConfig->URL);
 			return (1);
 		}
 
@@ -709,14 +695,14 @@ reconnectServer(shout_t *shout, int closeConn)
 			break;
 
 		printf("%s: Waiting 5s for %s to come back ...\n",
-		    __progname, pezConfig->URL);
+		    cfg_progname(), pezConfig->URL);
 		if (quit)
 			return (0);
 		else
 			sleep(5);
 	};
 
-	printf("%s: Giving up\n", __progname);
+	printf("%s: Giving up\n", cfg_progname());
 	return (0);
 }
 
@@ -752,7 +738,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 
 	if (startTime == NULL) {
 		printf("%s: sendStream(): Internal error: startTime is NULL\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -773,7 +759,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		shout_sync(shout);
 
 		if (shout_send(shout, buff, bytes_read) != SHOUTERR_SUCCESS) {
-			printf("%s: shout_send(): %s\n", __progname,
+			printf("%s: shout_send(): %s\n", cfg_progname(),
 			    shout_get_error(shout));
 			if (reconnectServer(shout, 1))
 				break;
@@ -789,7 +775,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			rereadPlaylist_notify = 0;
 			if (!pezConfig->fileNameIsProgram)
 				printf("%s: SIGHUP signal received, will reread playlist after this file\n",
-				    __progname);
+				    cfg_progname());
 		}
 		if (skipTrack) {
 			skipTrack = 0;
@@ -813,7 +799,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		}
 
 		total += bytes_read;
-		if (qFlag && vFlag) {
+		if (cfg_quiet_stderr() && cfg_verbosity()) {
 			double	oldTime, newTime;
 
 			if (!isStdin && playlistMode) {
@@ -862,10 +848,10 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			ret = STREAM_CONT;
 		} else if (errno == EBADF && isStdin)
 			printf("%s: No (more) data available on standard input\n",
-			    __progname);
+			    cfg_progname());
 		else
 			printf("%s: sendStream(): Error while reading '%s': %s\n",
-			    __progname, fileName, strerror(errno));
+			    cfg_progname(), fileName, strerror(errno));
 	}
 
 	return (ret);
@@ -886,7 +872,7 @@ streamFile(shout_t *shout, const char *fileName)
 	if ((filepstream = openResource(shout, fileName, &popenFlag, &mdata, &isStdin, &songLen))
 	    == NULL) {
 		if (++resource_errors > 100) {
-			printf("%s: Too many errors -- giving up.\n", __progname);
+			printf("%s: Too many errors -- giving up.\n", cfg_progname());
 			return (0);
 		}
 		/* Continue with next resource on failure: */
@@ -901,8 +887,8 @@ streamFile(shout_t *shout, const char *fileName)
 		if ((metaData = UTF8toCHAR(tmp, ICONV_REPLACE)) == NULL)
 			metaData = xstrdup("(unknown title)");
 		xfree(tmp);
-		printf("%s: Streaming ``%s''", __progname, metaData);
-		if (vFlag)
+		printf("%s: Streaming ``%s''", cfg_progname(), metaData);
+		if (cfg_verbosity())
 			printf(" (file: %s)\n", fileName);
 		else
 			printf("\n");
@@ -914,7 +900,7 @@ streamFile(shout_t *shout, const char *fileName)
 
 		metadata_free(&mdata);
 	} else if (isStdin)
-		printf("%s: Streaming from standard input\n", __progname);
+		printf("%s: Streaming from standard input\n", cfg_progname());
 
 	if (songLen > 0)
 		songLenStr = xstrdup(getTimeString(songLen));
@@ -936,23 +922,23 @@ streamFile(shout_t *shout, const char *fileName)
 			}
 			if (ret == STREAM_SKIP || skipTrack) {
 				skipTrack = 0;
-				if (!isStdin && vFlag)
+				if (!isStdin && cfg_verbosity())
 					printf("%s: SIGUSR1 signal received, skipping current track\n",
-					    __progname);
+					    cfg_progname());
 				retval = 1;
 				ret = STREAM_DONE;
 			}
 			if (ret == STREAM_UPDMDATA || queryMetadata) {
 				queryMetadata = 0;
-				if (mFlag)
+				if (cfg_no_metadata_updates())
 					continue;
 				if (metadataFromProgram) {
 					char		*mdataStr = NULL;
 					metadata_t	*prog_mdata;
 
-					if (vFlag > 1)
+					if (cfg_verbosity() > 1)
 						printf("%s: Querying '%s' for fresh metadata\n",
-						    __progname, pezConfig->metadataProgram);
+						    cfg_progname(), pezConfig->metadataProgram);
 					if ((prog_mdata = getMetadata(pezConfig->metadataProgram)) == NULL) {
 						retval = 0;
 						ret = STREAM_DONE;
@@ -964,9 +950,9 @@ streamFile(shout_t *shout, const char *fileName)
 						continue;
 					}
 					metadata_free(&prog_mdata);
-					if (vFlag > 1)
+					if (cfg_verbosity() > 1)
 						printf("%s: New metadata: ``%s''\n",
-						    __progname, mdataStr);
+						    cfg_progname(), mdataStr);
 					xfree(mdataStr);
 				}
 			}
@@ -1002,9 +988,9 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		} else {
 			if ((playlist = playlist_read(fileName)) == NULL)
 				return (0);
-			if (vFlag && playlist_get_num_items(playlist) == 0)
+			if (cfg_verbosity() && playlist_get_num_items(playlist) == 0)
 				printf("%s: Warning: Playlist '%s' is empty\n",
-				    __progname, fileName);
+				    cfg_progname(), fileName);
 		}
 	} else {
 		/*
@@ -1028,7 +1014,7 @@ streamPlaylist(shout_t *shout, const char *fileName)
 			rereadPlaylist = rereadPlaylist_notify = 0;
 			if (pezConfig->fileNameIsProgram)
 				continue;
-			printf("%s: Rereading playlist\n", __progname);
+			printf("%s: Rereading playlist\n", cfg_progname());
 			if (!playlist_reread(&playlist))
 				return (0);
 			if (pezConfig->shuffle)
@@ -1044,32 +1030,6 @@ streamPlaylist(shout_t *shout, const char *fileName)
 	return (1);
 }
 
-/*
- * Borrowed from OpenNTPd-portable's compat-openbsd/bsd-misc.c.
- * Does not use xalloc on purpose, as the 9 bytes of memory that don't get
- * cleaned up in the end really don't matter.
- */
-char *
-getProgname(const char *argv0)
-{
-#ifdef HAVE___PROGNAME
-	(void)argv0;
-	return (strdup(__progname));
-#else
-	char	*p;
-
-	if (argv0 == NULL)
-		return ((char *)"ezstream");
-	p = strrchr(argv0, '/');
-	if (p == NULL)
-		p = (char *)argv0;
-	else
-		p++;
-
-	return (strdup(p));
-#endif /* HAVE___PROGNAME */
-}
-
 int
 ez_shutdown(int exitval)
 {
@@ -1081,36 +1041,13 @@ ez_shutdown(int exitval)
 	return (exitval);
 }
 
-void
-usage(void)
-{
-	printf("usage: %s [-hmnqVv] -c configfile\n", __progname);
-	printf("       %s -s [playlist]\n", __progname);
-}
-
-void
-usageHelp(void)
-{
-	printf("\n");
-	printf("  -c configfile  use XML configuration in configfile (mandatory)\n");
-	printf("  -h             display this additional help and exit\n");
-	printf("  -m             disable metadata updates\n");
-	printf("  -n             normalize metadata strings\n");
-	printf("  -q             suppress STDERR output from external en-/decoders\n");
-	printf("  -s [playlist]  read lines from playlist (or STDIN), shuffle and print them to\n");
-	printf("                 STDOUT, then exit\n");
-	printf("  -V             print the version number and exit\n");
-	printf("  -v             verbose output (use twice for more effect)\n");
-	printf("\n");
-	printf("See the ezstream(1) manual for detailed information.\n");
-}
-
 int
 main(int argc, char *argv[])
 {
-	int		 c;
-	char		*configFile = NULL;
-	char		*playlistFile = NULL;
+	int		 ret;
+
+	const char	*configFile;
+	const char	*playlistFile;
 	char		*host = NULL;
 	unsigned short	 port = 0;
 	char		*mount = NULL;
@@ -1121,6 +1058,9 @@ main(int argc, char *argv[])
 	struct sigaction act;
 	unsigned int	 i;
 #endif
+	ret = 1;
+	if (0 > cfg_cmdline_parse(argc, argv, &ret))
+		return (ret);
 
 #ifdef XALLOC_DEBUG
 	xalloc_initialize_debug(2, NULL);
@@ -1130,63 +1070,10 @@ main(int argc, char *argv[])
 	playlist_init();
 	shout_init();
 
-	__progname = getProgname(argv[0]);
 	pezConfig = getEZConfig();
 
-	mFlag = 0;
-	nFlag = 0;
-	qFlag = 0;
-	vFlag = 0;
-
-	while ((c = getopt(argc, argv, "c:hmnqs:Vv")) != -1) {
-		switch (c) {
-		case 'c':
-			if (configFile != NULL) {
-				printf("Error: multiple -c arguments given\n");
-				usage();
-				return (ez_shutdown(2));
-			}
-			configFile = xstrdup(optarg);
-			break;
-		case 'h':
-			usage();
-			usageHelp();
-			return (ez_shutdown(0));
-		case 'm':
-			mFlag = 1;
-			break;
-		case 'n':
-			nFlag = 1;
-			break;
-		case 'q':
-			qFlag = 1;
-			break;
-		case 's':
-			sFlag = 1;
-			if (playlistFile != NULL) {
-				printf("Error: multiple -s arguments given\n");
-				usage();
-				return (ez_shutdown(2));
-			}
-			playlistFile = xstrdup(optarg);
-			break;
-		case 'V':
-			printf("%s\n", PACKAGE_STRING);
-			return (ez_shutdown(0));
-		case 'v':
-			vFlag++;
-			break;
-		case '?':
-			usage();
-			return (ez_shutdown(2));
-		default:
-			break;
-		}
-	}
-	argc -= optind;
-	argv += optind;
-
-	if (sFlag) {
+	playlistFile = cfg_shuffle_file();
+	if (playlistFile) {
 		playlist_t	*pl;
 		const char	*entry;
 
@@ -1207,30 +1094,26 @@ main(int argc, char *argv[])
 		return (ez_shutdown(0));
 	}
 
-	if (configFile == NULL) {
-		printf("You must supply a config file with the -c argument.\n");
-		usage();
-		return (ez_shutdown(2));
-	} else {
+	configFile = cfg_config_file();
+	{
 		/*
 		 * Attempt to open configFile here for a more meaningful error
 		 * message. Where possible, do it with stat() and check for
 		 * safe config file permissions.
 		 */
 #ifdef HAVE_STAT
-		struct stat	  st;
+		struct stat	st;
 
 		if (stat(configFile, &st) == -1) {
 			printf("%s: %s\n", configFile, strerror(errno));
-			usage();
 			return (ez_shutdown(2));
 		}
-		if (vFlag && (st.st_mode & (S_IRGRP | S_IROTH)))
+		if (cfg_verbosity() && (st.st_mode & (S_IRGRP | S_IROTH)))
 			printf("%s: Warning: %s is group and/or world readable\n",
-			    __progname, configFile);
+			    cfg_progname(), configFile);
 		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
 			printf("%s: Error: %s is group and/or world writeable\n",
-			    __progname, configFile);
+			    cfg_progname(), configFile);
 			return (ez_shutdown(2));
 		}
 #else
@@ -1279,8 +1162,6 @@ main(int argc, char *argv[])
 		printf("Specify a stream format of either MP3, VORBIS or THEORA\n");
 	}
 
-	xfree(configFile);
-
 	if ((shout = stream_setup(host, port, mount)) == NULL)
 		return (ez_shutdown(1));
 
@@ -1298,7 +1179,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < sizeof(ezstream_signals) / sizeof(int); i++) {
 		if (sigaction(ezstream_signals[i], &act, NULL) == -1) {
 			printf("%s: sigaction(): %s\n",
-			    __progname, strerror(errno));
+			    cfg_progname(), strerror(errno));
 			return (ez_shutdown(1));
 		}
 	}
@@ -1309,15 +1190,15 @@ main(int argc, char *argv[])
 	act.sa_handler = SIG_IGN;
 	if (sigaction(SIGPIPE, &act, NULL) == -1) {
 		printf("%s: sigaction(): %s\n",
-		    __progname, strerror(errno));
+		    cfg_progname(), strerror(errno));
 		return (ez_shutdown(1));
 	}
 #endif /* HAVE_SIGNALS */
 
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
-		int	ret;
+		int	cont;
 
-		printf("%s: Connected to http://%s:%hu%s\n", __progname,
+		printf("%s: Connected to http://%s:%hu%s\n", cfg_progname(),
 		    host, port, mount);
 
 		if (pezConfig->fileNameIsProgram ||
@@ -1327,32 +1208,32 @@ main(int argc, char *argv[])
 		else
 			playlistMode = 0;
 
-		if (vFlag && pezConfig->fileNameIsProgram)
+		if (cfg_verbosity() && pezConfig->fileNameIsProgram)
 			printf("%s: Using program '%s' to get filenames for streaming\n",
-			       __progname, pezConfig->fileName);
+			       cfg_progname(), pezConfig->fileName);
 
 		do {
 			if (playlistMode) {
-				ret = streamPlaylist(shout, pezConfig->fileName);
+				cont = streamPlaylist(shout, pezConfig->fileName);
 			} else {
-				ret = streamFile(shout, pezConfig->fileName);
+				cont = streamFile(shout, pezConfig->fileName);
 			}
 			if (quit)
 				break;
 			if (pezConfig->streamOnce)
 				break;
-		} while (ret);
+		} while (cont);
 
 		shout_close(shout);
 	} else
-		printf("%s: Connection to http://%s:%hu%s failed: %s\n", __progname,
+		printf("%s: Connection to http://%s:%hu%s failed: %s\n", cfg_progname(),
 		    host, port, mount, shout_get_error(shout));
 
 	if (quit)
-		printf("\r%s: SIGINT or SIGTERM received\n", __progname);
+		printf("\r%s: SIGINT or SIGTERM received\n", cfg_progname());
 
-	if (vFlag)
-		printf("%s: Exiting ...\n", __progname);
+	if (cfg_verbosity())
+		printf("%s: Exiting ...\n", cfg_progname());
 
 	xfree(host);
 	xfree(mount);

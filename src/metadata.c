@@ -30,6 +30,7 @@
 #endif /* HAVE_VORBISFILE */
 #include <shout/shout.h>
 
+#include "cfg.h"
 #include "metadata.h"
 #include "util.h"
 #include "xalloc.h"
@@ -38,9 +39,6 @@
 #ifndef S_IEXEC
 # define S_IEXEC	S_IXUSR
 #endif /* !S_IEXEC */
-
-extern char		*__progname;
-extern int		 vFlag;
 
 static const char	*blankString = "";
 
@@ -96,7 +94,7 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 
 	if (md == NULL || md->filename == NULL) {
 		printf("%s: metadata_use_taglib(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -148,7 +146,7 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 	(void)filep;
 
 	printf("%s: Internal error: metadata_use_taglib() called without TagLib support\n",
-	    __progname);
+	    cfg_progname());
 	abort();
 }
 #endif /* HAVE_TAGLIB */
@@ -161,7 +159,7 @@ metadata_use_self(metadata_t *md, FILE **filep)
 	(void)filep;
 
 	printf("%s: Internal error: metadata_use_self() called with TagLib support\n",
-	    __progname);
+	    cfg_progname());
 	abort();
 }
 #else
@@ -172,7 +170,7 @@ metadata_use_self(metadata_t *md, FILE **filep)
 	if (md == NULL || filep == NULL || *filep == NULL ||
 	    md->filename == NULL) {
 		printf("%s: metadata_use_self(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -198,27 +196,27 @@ metadata_use_self(metadata_t *md, FILE **filep)
 			switch (ret) {
 			case OV_EREAD:
 				printf("%s: ov_open(): %s: Media read error\n",
-				    __progname, md->filename);
+				    cfg_progname(), md->filename);
 				break;
 			case OV_ENOTVORBIS:
 				printf("%s: ov_open(): %s: Invalid Vorbis bitstream\n",
-				    __progname, md->filename);
+				    cfg_progname(), md->filename);
 				break;
 			case OV_EVERSION:
 				printf("%s: ov_open(): %s: Vorbis version mismatch\n",
-				    __progname, md->filename);
+				    cfg_progname(), md->filename);
 				break;
 			case OV_EBADHEADER:
 				printf("%s: ov_open(): %s: Invalid Vorbis bitstream header\n",
-				    __progname, md->filename);
+				    cfg_progname(), md->filename);
 				break;
 			case OV_EFAULT:
 				printf("%s: Fatal: Internal libvorbisfile fault\n",
-				    __progname);
+				    cfg_progname());
 				abort();
 			default:
 				printf("%s: ov_open(): %s: ov_read() returned unknown error\n",
-				    __progname, md->filename);
+				    cfg_progname(), md->filename);
 				break;
 			}
 		} else {
@@ -256,7 +254,7 @@ metadata_clean_md(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: Internal error: metadata_clean_md(): NULL argument\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -281,7 +279,7 @@ metadata_get_extension(char *buf, size_t siz, const char *filename)
 
 	if (buf == NULL || siz == 0 || filename == NULL) {
 		printf("%s: metadata_get_extension(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -301,13 +299,13 @@ metadata_get_name(const char *file)
 
 	if (file == NULL) {
 		printf("%s: metadata_get_name(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
 	if ((p1 = basename(filename)) == NULL) {
 		printf("%s: Internal error: basename() failed with '%s'\n",
-		    __progname, filename);
+		    cfg_progname(), filename);
 		exit(1);
 	}
 
@@ -328,7 +326,7 @@ metadata_process_md(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: metadata_process_md(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -380,7 +378,7 @@ metadata_file(const char *filename, int normalize)
 
 	if (filename == NULL || strlen(filename) == 0) {
 		printf("%s: metadata_file(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -407,7 +405,7 @@ metadata_program(const char *program, int normalize)
 
 	if (program == NULL || strlen(program) == 0) {
 		printf("%s: metadata_program(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -417,24 +415,24 @@ metadata_program(const char *program, int normalize)
 
 #ifdef HAVE_STAT
 	if (stat(program, &st) == -1) {
-		printf("%s: %s: %s\n", __progname, program, strerror(errno));
+		printf("%s: %s: %s\n", cfg_progname(), program, strerror(errno));
 		metadata_free(&md);
 		return (NULL);
 	}
 	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
 		printf("%s: Error: %s is group and/or world writeable\n",
-		    __progname, program);
+		    cfg_progname(), program);
 		metadata_free(&md);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
-		printf("%s: %s: Not an executable program\n", __progname, program);
+		printf("%s: %s: Not an executable program\n", cfg_progname(), program);
 		metadata_free(&md);
 		return (NULL);
 	}
 #else
 	if ((filep = fopen(program, "r")) == NULL) {
-		printf("%s: %s: %s\n", __progname, program, strerror(errno));
+		printf("%s: %s: %s\n", cfg_progname(), program, strerror(errno));
 		metadata_free(&md);
 		return (NULL);
 	}
@@ -471,18 +469,18 @@ metadata_file_update(metadata_t *md)
 
 	if (md == NULL) {
 		printf("%s: metadata_file_update(): Internal error: NULL argument\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
 	if (md->program) {
 		printf("%s: metadata_file_update(): Internal error: Called with program handle\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
 	if ((filep = fopen(md->filename, "rb")) == NULL) {
-		printf("%s: %s: %s\n", __progname, md->filename, strerror(errno));
+		printf("%s: %s: %s\n", cfg_progname(), md->filename, strerror(errno));
 		return (0);
 	}
 
@@ -506,13 +504,13 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 
 	if (md == NULL) {
 		printf("%s: metadata_program_update(): Internal error: NULL argument\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
 	if (!md->program) {
 		printf("%s: metadata_program_update(): Internal error: Received file handle\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -548,18 +546,18 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 		break;
 	default:
 		printf("%s: metadata_program_update(): Internal error: Unknown md_req\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
 	fflush(NULL);
 	errno = 0;
-	if (vFlag > 1)
-		printf("%s: Running command `%s`\n", __progname,
+	if (cfg_verbosity() > 1)
+		printf("%s: Running command `%s`\n", cfg_progname(),
 		    command);
 	if ((filep = popen(command, "r")) == NULL) {
 		printf("%s: playlist_run_program(): Error while executing '%s'",
-		    __progname, command);
+		    cfg_progname(), command);
 		/* popen() does not set errno reliably ... */
 		if (errno)
 			printf(": %s\n", strerror(errno));
@@ -571,10 +569,10 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
 		if (ferror(filep))
 			printf("%s: Error while reading output from program '%s': %s\n",
-			    __progname, md->filename, strerror(errno));
+			    cfg_progname(), md->filename, strerror(errno));
 		pclose(filep);
 		printf("%s: FATAL: External program '%s' not (or no longer) usable.\n",
-		       __progname, md->filename);
+		       cfg_progname(), md->filename);
 		exit(1);
 	}
 
@@ -582,7 +580,7 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 
 	if (strlen(buf) == sizeof(buf) - 1)
 		printf("%s: Warning: Metadata string received via '%s' is too long and has been truncated\n",
-		    __progname, command);
+		    cfg_progname(), command);
 
 	buf[strcspn(buf, "\n")] = '\0';
 	buf[strcspn(buf, "\r")] = '\0';
@@ -591,7 +589,7 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 	case METADATA_STRING:
 		if (strlen(buf) == 0) {
 			printf("%s: Warning: Empty metadata string received from '%s'\n",
-			    __progname, md->filename);
+			    cfg_progname(), md->filename);
 			md->string = xstrdup("");
 		} else
 			md->string = xstrdup(buf);
@@ -607,7 +605,7 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 	case METADATA_ALL:
 	default:
 		printf("%s: metadata_program_update(): Internal error: METADATA_ALL in code unreachable by METADATA_ALL\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -625,13 +623,13 @@ metadata_get_string(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: metadata_get_string(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
 	if (md->string == NULL) {
 		printf("%s: metadata_get_string(): Internal error: md->string cannot be NULL\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -643,7 +641,7 @@ metadata_get_artist(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: metadata_get_artist(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -658,7 +656,7 @@ metadata_get_title(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: metadata_get_title(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -673,7 +671,7 @@ metadata_get_filename(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: metadata_get_filename(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -689,7 +687,7 @@ metadata_get_length(metadata_t *md)
 {
 	if (md == NULL) {
 		printf("%s: metadata_get_length(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 
@@ -704,7 +702,7 @@ metadata_assemble_string(metadata_t *md)
 
 	if (md == NULL) {
 		printf("%s: metadata_assemble_string(): Internal error: Bad arguments\n",
-		    __progname);
+		    cfg_progname());
 		abort();
 	}
 

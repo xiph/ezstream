@@ -50,6 +50,8 @@
 # include <unistd.h>
 #endif
 
+#include "cfg.h"
+
 #ifndef STDIN_FILENO
 # define STDIN_FILENO		0
 #endif /* !STDIN_FILENO */
