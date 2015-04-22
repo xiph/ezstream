@@ -133,11 +133,6 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	size_t		 hostsiz, mountsiz;
 	const char	*errstr;
 
-	if (hostname == NULL || port == NULL || mountname == NULL) {
-		log_alert("urlParse: bad arguments");
-		abort();
-	}
-
 	if (strncmp(url, "http://", strlen("http://")) != 0) {
 		log_error("invalid <url>: not an HTTP address");
 		return (0);
@@ -385,11 +380,6 @@ getMetadataString(const char *format, metadata_t *mdata)
 {
 	char	*tmp, *str;
 
-	if (mdata == NULL) {
-		log_alert("getMetadataString: bad argument");
-		abort();
-	}
-
 	if (format == NULL)
 		return (NULL);
 
@@ -456,11 +446,6 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 	char			*songInfo;
 	const char		*artist, *title;
 	int			 ret = SHOUTERR_SUCCESS;
-
-	if (shout == NULL) {
-		log_alert("setMetadata: bad argument");
-		abort();
-	}
 
 	if (cfg_no_metadata_updates())
 		return (SHOUTERR_SUCCESS);
@@ -726,11 +711,6 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 	double		 kbps = -1.0;
 	struct timeval	 timeStamp, *startTime = tv;
 	struct timeval	 callTime, currentTime;
-
-	if (startTime == NULL) {
-		log_alert("sendStream: bad argument");
-		abort();
-	}
 
 	ez_gettimeofday((void *)&callTime);
 

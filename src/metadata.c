@@ -30,6 +30,8 @@
 #endif /* HAVE_VORBISFILE */
 #include <shout/shout.h>
 
+#include <assert.h>
+
 #include "log.h"
 #include "metadata.h"
 #include "util.h"
@@ -62,16 +64,16 @@ struct ID3Tag {
 	char genre;
 };
 
-metadata_t *	metadata_create(const char *);
-void		metadata_use_taglib(metadata_t *, FILE **);
-void		metadata_use_self(metadata_t *, FILE **);
-void    	metadata_clean_md(metadata_t *);
-void		metadata_get_extension(char *, size_t, const char *);
-char *		metadata_get_name(const char *);
-void		metadata_process_md(metadata_t *);
-void		metadata_normalize_string(char **);
+static metadata_t *	metadata_create(const char *);
+static void		metadata_use_taglib(metadata_t *, FILE **);
+static void		metadata_use_self(metadata_t *, FILE **);
+static void		metadata_clean_md(metadata_t *);
+static void		metadata_get_extension(char *, size_t, const char *);
+static char *		metadata_get_name(const char *);
+static void		metadata_process_md(metadata_t *);
+static void		metadata_normalize_string(char **);
 
-metadata_t *
+static metadata_t *
 metadata_create(const char *filename)
 {
 	metadata_t	*md;
@@ -83,7 +85,7 @@ metadata_create(const char *filename)
 	return (md);
 }
 
-void
+static void
 metadata_use_taglib(metadata_t *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
@@ -91,11 +93,6 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 	TagLib_Tag			*tt;
 	const TagLib_AudioProperties	*ta;
 	char				*str;
-
-	if (md == NULL || md->filename == NULL) {
-		log_alert("metadata_use_taglib: bad arguments");
-		abort();
-	}
 
 	if (filep != NULL)
 		fclose(*filep);
@@ -149,7 +146,7 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 }
 #endif /* HAVE_TAGLIB */
 
-void
+static void
 metadata_use_self(metadata_t *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
@@ -163,12 +160,6 @@ metadata_use_self(metadata_t *md, FILE **filep)
 {
 	char		extension[25];
 	struct ID3Tag	id3tag;
-
-	if (md == NULL || filep == NULL || *filep == NULL ||
-	    md->filename == NULL) {
-		log_alert("metadata_use_self: bad arguments");
-		abort();
-	}
 
 	metadata_clean_md(md);
 	metadata_get_extension(extension, sizeof(extension), md->filename);
@@ -244,14 +235,9 @@ metadata_use_self(metadata_t *md, FILE **filep)
 }
 #endif /* HAVE_TAGLIB */
 
-void
+static void
 metadata_clean_md(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_clean_md: bad argument");
-		abort();
-	}
-
 	if (md->string != NULL) {
 		xfree(md->string);
 		md->string = NULL;
@@ -266,15 +252,10 @@ metadata_clean_md(metadata_t *md)
 	}
 }
 
-void
+static void
 metadata_get_extension(char *buf, size_t siz, const char *filename)
 {
 	char	 *p;
-
-	if (buf == NULL || siz == 0 || filename == NULL) {
-		log_alert("metadata_get_extension: bad arguments");
-		abort();
-	}
 
 	if ((p = strrchr(filename, '.')) != NULL)
 		strlcpy(buf, p, siz);
@@ -284,16 +265,11 @@ metadata_get_extension(char *buf, size_t siz, const char *filename)
 		*p = tolower((int)*p);
 }
 
-char *
+static char *
 metadata_get_name(const char *file)
 {
 	char	*filename = xstrdup(file);
 	char	*p1, *p2, *name;
-
-	if (file == NULL) {
-		log_alert("metadata_get_name: bad arguments");
-		abort();
-	}
 
 	if ((p1 = basename(filename)) == NULL) {
 		log_alert("basename: unexpected failure with input: %s",
@@ -313,14 +289,9 @@ metadata_get_name(const char *file)
 	return (name);
 }
 
-void
+static void
 metadata_process_md(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_process_md: bad arguments");
-		abort();
-	}
-
 	if (md->string == NULL)
 		md->string = metadata_assemble_string(md);
 
@@ -331,7 +302,7 @@ metadata_process_md(metadata_t *md)
 	}
 }
 
-void
+static void
 metadata_normalize_string(char **s)
 {
 	char	*str, *cp, *tmpstr, *tp;
@@ -367,11 +338,6 @@ metadata_file(const char *filename, int normalize)
 {
 	metadata_t	*md;
 
-	if (filename == NULL || strlen(filename) == 0) {
-		log_alert("metadata_file: bad arguments");
-		abort();
-	}
-
 	md = metadata_create(filename);
 	if (!metadata_file_update(md)) {
 		metadata_free(&md);
@@ -392,11 +358,6 @@ metadata_program(const char *program, int normalize)
 #else
 	FILE		*filep;
 #endif
-
-	if (program == NULL || strlen(program) == 0) {
-		log_alert("metadata_program: bad arguments");
-		abort();
-	}
 
 	md = metadata_create(program);
 	md->program = 1;
@@ -456,15 +417,7 @@ metadata_file_update(metadata_t *md)
 {
 	FILE	*filep;
 
-	if (md == NULL) {
-		log_alert("metadata_file_update: bad argument");
-		abort();
-	}
-
-	if (md->program) {
-		log_alert("metadata_file_update: called with program handle");
-		abort();
-	}
+	assert(!md->program);
 
 	if ((filep = fopen(md->filename, "rb")) == NULL) {
 		log_error("%s: %s", md->filename, strerror(errno));
@@ -489,15 +442,7 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 	char	 buf[METADATA_MAX + 1];
 	char	 command[PATH_MAX + sizeof(" artist")];
 
-	if (md == NULL) {
-		log_alert("metadata_program_update: bad argument");
-		abort();
-	}
-
-	if (!md->program) {
-		log_alert("metadata_program_update: called with file handle");
-		abort();
-	}
+	assert(md->program);
 
 	switch (md_req) {
 	case METADATA_ALL:
@@ -600,27 +545,13 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 const char *
 metadata_get_string(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_get_string: bad argument");
-		abort();
-	}
-
-	if (md->string == NULL) {
-		log_alert("metadata_get_string: md->string is NULL");
-		abort();
-	}
-
+	assert(md->string);
 	return (md->string);
 }
 
 const char *
 metadata_get_artist(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_get_artist: bad argument");
-		abort();
-	}
-
 	if (md->artist == NULL)
 		return (blankString);
 	else
@@ -630,11 +561,6 @@ metadata_get_artist(metadata_t *md)
 const char *
 metadata_get_title(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_get_title: bad argument");
-		abort();
-	}
-
 	if (md->title == NULL)
 		return (blankString);
 	else
@@ -644,11 +570,6 @@ metadata_get_title(metadata_t *md)
 const char *
 metadata_get_filename(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_get_filename: bad argument");
-		abort();
-	}
-
 	if (md->filename == NULL)
 		/* Should never happen: */
 		return (blankString);
@@ -659,11 +580,6 @@ metadata_get_filename(metadata_t *md)
 int
 metadata_get_length(metadata_t *md)
 {
-	if (md == NULL) {
-		log_alert("metadata_get_length: bad argument");
-		abort();
-	}
-
 	return (md->songLen);
 }
 
@@ -672,11 +588,6 @@ metadata_assemble_string(metadata_t *md)
 {
 	size_t	  len;
 	char	 *str;
-
-	if (md == NULL) {
-		log_alert("metadata_assemble_string: bad argument");
-		abort();
-	}
 
 	if (md->artist == NULL && md->title == NULL && md->program == 0)
 		return (metadata_get_name(md->filename));

@@ -39,12 +39,12 @@ struct playlist {
 	char	 *prog_track;
 };
 
-playlist_t *	playlist_create(const char *);
-int		playlist_add(playlist_t *, const char *);
-unsigned int	playlist_random(void);
-const char *	playlist_run_program(playlist_t *);
+static playlist_t *	playlist_create(const char *);
+static int		playlist_add(playlist_t *, const char *);
+static unsigned int	playlist_random(void);
+static const char *	playlist_run_program(playlist_t *);
 
-playlist_t *
+static playlist_t *
 playlist_create(const char *filename)
 {
 	playlist_t	*pl;
@@ -55,15 +55,10 @@ playlist_create(const char *filename)
 	return (pl);
 }
 
-int
+static int
 playlist_add(playlist_t *pl, const char *entry)
 {
 	size_t	num;
-
-	if (pl == NULL || entry == NULL) {
-		log_alert("playlist_add: bad arguments");
-		abort();
-	}
 
 	num = pl->num + 1;
 
@@ -88,7 +83,7 @@ playlist_add(playlist_t *pl, const char *entry)
 	return (1);
 }
 
-unsigned int
+static unsigned int
 playlist_random(void)
 {
 	unsigned int	ret = 0;
@@ -102,6 +97,63 @@ playlist_random(void)
 #endif
 
 	return (ret);
+}
+
+static const char *
+playlist_run_program(playlist_t *pl)
+{
+	FILE	*filep;
+	char	 buf[PATH_MAX];
+
+	if (!pl->program)
+		return (NULL);
+
+	fflush(NULL);
+	errno = 0;
+	log_debug("running command: %s", pl->filename);
+	if ((filep = popen(pl->filename, "r")) == NULL) {
+		/* popen() does not set errno reliably ... */
+		if (errno)
+			log_error("execution error: %s: %s", pl->filename,
+			    strerror(errno));
+		else
+			log_error("execution error: %s", pl->filename);
+		return (NULL);
+	}
+
+	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
+		int	errnum = errno;
+
+		pclose(filep);
+
+		if (ferror(filep)) {
+			log_alert("%s: output read error: %s", pl->filename,
+			    strerror(errnum));
+			exit(1);
+		}
+
+		/* No output (end of playlist.) */
+		return (NULL);
+	}
+
+	pclose(filep);
+
+	if (strlen(buf) == sizeof(buf) - 1) {
+		log_error("%s: output too long", pl->filename);
+		return (NULL);
+	}
+
+	buf[strcspn(buf, "\n")] = '\0';
+	buf[strcspn(buf, "\r")] = '\0';
+	if (buf[0] == '\0')
+		/* Empty line (end of playlist.) */
+		return (NULL);
+
+	if (pl->prog_track != NULL)
+		xfree(pl->prog_track);
+	pl->prog_track = xstrdup(buf);
+
+	return ((const char *)pl->prog_track);
 }
 
 void
@@ -279,11 +331,6 @@ playlist_free(playlist_t **pl_p)
 const char *
 playlist_get_next(playlist_t *pl)
 {
-	if (pl == NULL) {
-		log_alert("playlist_get_next: bad argument");
-		abort();
-	}
-
 	if (pl->program)
 		return (playlist_run_program(pl));
 
@@ -296,11 +343,6 @@ playlist_get_next(playlist_t *pl)
 const char *
 playlist_peek_next(playlist_t *pl)
 {
-	if (pl == NULL) {
-		log_alert("playlist_peek_next: bad argument");
-		abort();
-	}
-
 	if (pl->program || pl->num == 0)
 		return (NULL);
 
@@ -310,11 +352,6 @@ playlist_peek_next(playlist_t *pl)
 void
 playlist_skip_next(playlist_t *pl)
 {
-	if (pl == NULL) {
-		log_alert("playlist_skip_next: bad argument");
-		abort();
-	}
-
 	if (pl->program || pl->num == 0)
 		return;
 
@@ -325,11 +362,6 @@ playlist_skip_next(playlist_t *pl)
 unsigned long
 playlist_get_num_items(playlist_t *pl)
 {
-	if (pl == NULL) {
-		log_alert("playlist_get_position: bad argument");
-		abort();
-	}
-
 	if (pl->program)
 		return (0);
 
@@ -339,11 +371,6 @@ playlist_get_num_items(playlist_t *pl)
 unsigned long
 playlist_get_position(playlist_t *pl)
 {
-	if (pl == NULL) {
-		log_alert("playlist_get_position: bad argument");
-		abort();
-	}
-
 	if (pl->program)
 		return (0);
 
@@ -353,11 +380,6 @@ playlist_get_position(playlist_t *pl)
 int
 playlist_set_position(playlist_t *pl, unsigned long idx)
 {
-	if (pl == NULL) {
-		log_alert("playlist_set_position: bad argument");
-		abort();
-	}
-
 	if (pl->program || idx > pl->num - 1)
 		return (0);
 
@@ -370,11 +392,6 @@ int
 playlist_goto_entry(playlist_t *pl, const char *entry)
 {
 	unsigned long	i;
-
-	if (pl == NULL || entry == NULL) {
-		log_alert("playlist_goto_entry: bad arguments");
-		abort();
-	}
 
 	if (pl->program)
 		return (0);
@@ -392,11 +409,6 @@ playlist_goto_entry(playlist_t *pl, const char *entry)
 void
 playlist_rewind(playlist_t *pl)
 {
-	if (pl == NULL) {
-		log_alert("playlist_rewind: bad argument");
-		abort();
-	}
-
 	if (pl->program)
 		return;
 
@@ -407,11 +419,6 @@ int
 playlist_reread(playlist_t **plist)
 {
 	playlist_t	*new_pl, *pl;
-
-	if (plist == NULL || *plist == NULL) {
-		log_alert("playlist_reread: bad argument");
-		abort();
-	}
 
 	pl = *plist;
 
@@ -435,11 +442,6 @@ playlist_shuffle(playlist_t *pl)
 {
 	size_t	 d, i, range;
 	char	*temp;
-
-	if (pl == NULL) {
-		log_alert("playlist_shuffle: bad argument");
-		abort();
-	}
 
 	if (pl->program || pl->num < 2)
 		return;
@@ -465,66 +467,4 @@ playlist_shuffle(playlist_t *pl)
 		pl->list[d] = pl->list[i];
 		pl->list[i] = temp;
 	}
-}
-
-const char *
-playlist_run_program(playlist_t *pl)
-{
-	FILE	*filep;
-	char	 buf[PATH_MAX];
-
-	if (pl == NULL) {
-		log_alert("playlist_run_program: bad argument");
-		abort();
-	}
-
-	if (!pl->program)
-		return (NULL);
-
-	fflush(NULL);
-	errno = 0;
-	log_debug("running command: %s", pl->filename);
-	if ((filep = popen(pl->filename, "r")) == NULL) {
-		/* popen() does not set errno reliably ... */
-		if (errno)
-			log_error("execution error: %s: %s", pl->filename,
-			    strerror(errno));
-		else
-			log_error("execution error: %s", pl->filename);
-		return (NULL);
-	}
-
-	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
-		int	errnum = errno;
-
-		pclose(filep);
-
-		if (ferror(filep)) {
-			log_alert("%s: output read error: %s", pl->filename,
-			    strerror(errnum));
-			exit(1);
-		}
-
-		/* No output (end of playlist.) */
-		return (NULL);
-	}
-
-	pclose(filep);
-
-	if (strlen(buf) == sizeof(buf) - 1) {
-		log_error("%s: output too long", pl->filename);
-		return (NULL);
-	}
-
-	buf[strcspn(buf, "\n")] = '\0';
-	buf[strcspn(buf, "\r")] = '\0';
-	if (buf[0] == '\0')
-		/* Empty line (end of playlist.) */
-		return (NULL);
-
-	if (pl->prog_track != NULL)
-		xfree(pl->prog_track);
-	pl->prog_track = xstrdup(buf);
-
-	return ((const char *)pl->prog_track);
 }
