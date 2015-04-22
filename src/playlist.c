@@ -70,7 +70,7 @@ playlist_add(playlist_t *pl, const char *entry)
 	if (pl->size / sizeof(char *) <= num) {
 		size_t	i;
 
-		pl->list = xrealloc(pl->list, 2UL, pl->size);
+		pl->list = xreallocarray(pl->list, 2UL, pl->size);
 		pl->size = 2 * pl->size;
 
 		for (i = num; i < pl->size / sizeof(char *); i++)

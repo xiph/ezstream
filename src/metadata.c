@@ -330,7 +330,7 @@ metadata_normalize_string(char **s)
 		tmpstr[strlen(tmpstr) - 1] = '\0';
 
 	xfree(str);
-	*s = xrealloc(tmpstr, strlen(tmpstr) + 1, sizeof (char));
+	*s = xreallocarray(tmpstr, strlen(tmpstr) + 1, sizeof(char));
 }
 
 metadata_t *

@@ -248,6 +248,7 @@ AC_CHECK_FUNCS([ \
 
 AC_REPLACE_FUNCS([ \
 	getopt \
+	reallocarray \
 	strlcat \
 	strlcpy \
 	strtonum \
@@ -285,7 +286,6 @@ AC_CONFIG_FILES([
 	Makefile
 	build-aux/Makefile
 	compat/Makefile
-	compat/sys/Makefile
 	doc/Makefile
 	doc/ezstream-file.sh.1.in
 	doc/ezstream.1.in

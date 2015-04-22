@@ -29,4 +29,8 @@ size_t strlcpy(char *, const char *, size_t);
 long long strtonum(const char *, long long, long long, const char **);
 #endif /* !HAVE_STROTONUM */
 
+#ifndef HAVE_REALLOCARRAY
+void *	reallocarray(void *, size_t, size_t);
+#endif /* !HAVE_REALLOCARRAY */
+
 #endif /* __COMPAT_H__ */

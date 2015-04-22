@@ -994,7 +994,6 @@ ez_shutdown(int exitval)
 	shout_shutdown();
 	playlist_shutdown();
 	freeConfig(pezConfig);
-	xalloc_shutdown();
 	log_exit();
 
 	return (exitval);
@@ -1022,11 +1021,6 @@ main(int argc, char *argv[])
 		return (ret);
 	log_init();
 
-#ifdef XALLOC_DEBUG
-	xalloc_initialize_debug(2, NULL);
-#else
-	xalloc_initialize();
-#endif /* XALLOC_DEBUG */
 	playlist_init();
 	shout_init();
 

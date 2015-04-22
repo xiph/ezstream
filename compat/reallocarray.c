@@ -1,5 +1,6 @@
+/*	$OpenBSD: reallocarray.c,v 1.2 2014/12/08 03:45:00 bcook Exp $	*/
 /*
- * Copyright (C) 2015  Moritz Grimm <mgrimm@mrsserver.net>
+ * Copyright (c) 2008 Otto Moerbeek <otto@drijf.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,19 +15,30 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __XALLOC_H__
-#define __XALLOC_H__
+#include <sys/types.h>
+#include <errno.h>
+#include <stdint.h>
+#include <stdlib.h>
 
-#define xmalloc(s)		xmalloc_c(s, __FILE__, __LINE__)
-#define xcalloc(n, s)		xcalloc_c(n, s, __FILE__, __LINE__)
-#define xreallocarray(p, n, s)	xreallocarray_c(p, n, s, __FILE__, __LINE__)
-#define xstrdup(str)		xstrdup_c(str, __FILE__, __LINE__)
-#define xfree(p)		xfree_c(p, __FILE__, __LINE__)
+#include "compat.h"
 
-void *	xmalloc_c(size_t, const char *, unsigned int);
-void *	xcalloc_c(size_t, size_t, const char *, unsigned int);
-void *	xreallocarray_c(void *, size_t, size_t, const char *, unsigned int);
-char *	xstrdup_c(const char *, const char *, unsigned int);
-void	xfree_c(void *, const char *, unsigned int);
+#ifndef SIZE_T_MAX
+# define SIZE_T_MAX	((size_t)-1)
+#endif /* !SIZE_T_MAX */
 
-#endif /* __XALLOC_H__ */
+/*
+ * This is sqrt(SIZE_MAX+1), as s1*s2 <= SIZE_MAX
+ * if both s1 < MUL_NO_OVERFLOW and s2 < MUL_NO_OVERFLOW
+ */
+#define MUL_NO_OVERFLOW	((size_t)1 << (sizeof(size_t) * 4))
+
+void *
+reallocarray(void *optr, size_t nmemb, size_t size)
+{
+	if ((nmemb >= MUL_NO_OVERFLOW || size >= MUL_NO_OVERFLOW) &&
+	    nmemb > 0 && SIZE_MAX / nmemb < size) {
+		errno = ENOMEM;
+		return NULL;
+	}
+	return realloc(optr, size * nmemb);
+}
