@@ -16,8 +16,6 @@
 #ifndef __CONFIGFILE_H__
 #define __CONFIGFILE_H__
 
-#include <libxml/parser.h>
-
 #define MP3_FORMAT		"MP3"
 #define VORBIS_FORMAT		"VORBIS"
 #define THEORA_FORMAT		"THEORA"

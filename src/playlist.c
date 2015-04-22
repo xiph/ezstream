@@ -20,7 +20,7 @@
 
 #include "ezstream.h"
 
-#include "cfg.h"
+#include "log.h"
 #include "playlist.h"
 #include "xalloc.h"
 
@@ -61,9 +61,8 @@ playlist_add(playlist_t *pl, const char *entry)
 	size_t	num;
 
 	if (pl == NULL || entry == NULL) {
-		printf("%s: playlist_add(): Internal error: Bad arguments\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_add: bad arguments");
+		abort();
 	}
 
 	num = pl->num + 1;
@@ -133,7 +132,7 @@ playlist_read(const char *filename)
 		pl = playlist_create(filename);
 
 		if ((filep = fopen(filename, "r")) == NULL) {
-			printf("%s: %s: %s\n", cfg_progname(), filename, strerror(errno));
+			log_error("%s: %s", filename, strerror(errno));
 			playlist_free(&pl);
 			return (NULL);
 		}
@@ -141,7 +140,7 @@ playlist_read(const char *filename)
 		pl = playlist_create("stdin");
 
 		if ((filep = fdopen(STDIN_FILENO, "r")) == NULL) {
-			printf("%s: stdin: %s\n", cfg_progname(), strerror(errno));
+			log_error("stdin: %s", strerror(errno));
 			playlist_free(&pl);
 			return (NULL);
 		}
@@ -154,7 +153,7 @@ playlist_read(const char *filename)
 		if (strlen(buf) == sizeof(buf) - 1) {
 			char skip_buf[2];
 
-			printf("%s[%lu]: File or path name too long\n",
+			log_error("%s[%lu]: file or path name too long",
 			    pl->filename, line);
 			/* Discard any excess chars in that line. */
 			while (fgets(skip_buf, (int)sizeof(skip_buf), filep) != NULL) {
@@ -188,8 +187,8 @@ playlist_read(const char *filename)
 		}
 	}
 	if (ferror(filep)) {
-		printf("%s: playlist_read(): Error while reading %s: %s\n",
-		    cfg_progname(), pl->filename, strerror(errno));
+		log_error("playlist_read: %s: %s", pl->filename,
+		    strerror(errno));
 		fclose(filep);
 		playlist_free(&pl);
 		return (NULL);
@@ -214,24 +213,24 @@ playlist_program(const char *filename)
 
 #ifdef HAVE_STAT
 	if (stat(filename, &st) == -1) {
-		printf("%s: %s: %s\n", cfg_progname(), filename, strerror(errno));
+		log_error("%s: %s", filename, strerror(errno));
 		playlist_free(&pl);
 		return (NULL);
 	}
 	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-		printf("%s: Error: %s is group and/or world writeable\n",
-		    cfg_progname(), filename);
+		log_error("%s: group and/or world writeable",
+		    filename);
 		playlist_free(&pl);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
-		printf("%s: %s: Not an executable program\n", cfg_progname(), filename);
+		log_error("%s: not an executable program", filename);
 		playlist_free(&pl);
 		return (NULL);
 	}
 #else
 	if ((filep = fopen(filename, "r")) == NULL) {
-		printf("%s: %s: %s\n", cfg_progname(), filename, strerror(errno));
+		log_error("%s: %s", filename, strerror(errno));
 		playlist_free(&pl);
 		return (NULL);
 	}
@@ -281,9 +280,8 @@ const char *
 playlist_get_next(playlist_t *pl)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_get_next(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_get_next: bad argument");
+		abort();
 	}
 
 	if (pl->program)
@@ -299,9 +297,8 @@ const char *
 playlist_peek_next(playlist_t *pl)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_peek_next(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_peek_next: bad argument");
+		abort();
 	}
 
 	if (pl->program || pl->num == 0)
@@ -314,9 +311,8 @@ void
 playlist_skip_next(playlist_t *pl)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_skip_next(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_skip_next: bad argument");
+		abort();
 	}
 
 	if (pl->program || pl->num == 0)
@@ -330,9 +326,8 @@ unsigned long
 playlist_get_num_items(playlist_t *pl)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_get_position(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_get_position: bad argument");
+		abort();
 	}
 
 	if (pl->program)
@@ -345,9 +340,8 @@ unsigned long
 playlist_get_position(playlist_t *pl)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_get_position(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_get_position: bad argument");
+		abort();
 	}
 
 	if (pl->program)
@@ -360,9 +354,8 @@ int
 playlist_set_position(playlist_t *pl, unsigned long idx)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_set_position(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_set_position: bad argument");
+		abort();
 	}
 
 	if (pl->program || idx > pl->num - 1)
@@ -379,9 +372,8 @@ playlist_goto_entry(playlist_t *pl, const char *entry)
 	unsigned long	i;
 
 	if (pl == NULL || entry == NULL) {
-		printf("%s: playlist_goto_entry(): Internal error: Bad arguments\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_goto_entry: bad arguments");
+		abort();
 	}
 
 	if (pl->program)
@@ -401,9 +393,8 @@ void
 playlist_rewind(playlist_t *pl)
 {
 	if (pl == NULL) {
-		printf("%s: playlist_rewind(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_rewind: bad argument");
+		abort();
 	}
 
 	if (pl->program)
@@ -418,9 +409,8 @@ playlist_reread(playlist_t **plist)
 	playlist_t	*new_pl, *pl;
 
 	if (plist == NULL || *plist == NULL) {
-		printf("%s: playlist_reread(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_reread: bad argument");
+		abort();
 	}
 
 	pl = *plist;
@@ -447,9 +437,8 @@ playlist_shuffle(playlist_t *pl)
 	char	*temp;
 
 	if (pl == NULL) {
-		printf("%s: playlist_shuffle(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_shuffle: bad argument");
+		abort();
 	}
 
 	if (pl->program || pl->num < 2)
@@ -485,9 +474,8 @@ playlist_run_program(playlist_t *pl)
 	char	 buf[PATH_MAX];
 
 	if (pl == NULL) {
-		printf("%s: playlist_run_program(): Internal error: NULL argument\n",
-		    cfg_progname());
-		exit(1);
+		log_alert("playlist_run_program: bad argument");
+		abort();
 	}
 
 	if (!pl->program)
@@ -495,14 +483,14 @@ playlist_run_program(playlist_t *pl)
 
 	fflush(NULL);
 	errno = 0;
+	log_debug("running command: %s", pl->filename);
 	if ((filep = popen(pl->filename, "r")) == NULL) {
-		printf("%s: playlist_run_program(): Error while executing '%s'",
-		    cfg_progname(), pl->filename);
 		/* popen() does not set errno reliably ... */
 		if (errno)
-			printf(": %s\n", strerror(errno));
+			log_error("execution error: %s: %s", pl->filename,
+			    strerror(errno));
 		else
-			printf("\n");
+			log_error("execution error: %s", pl->filename);
 		return (NULL);
 	}
 
@@ -512,8 +500,8 @@ playlist_run_program(playlist_t *pl)
 		pclose(filep);
 
 		if (ferror(filep)) {
-			printf("%s: Error while reading output from program '%s': %s\n",
-			    cfg_progname(), pl->filename, strerror(errnum));
+			log_alert("%s: output read error: %s", pl->filename,
+			    strerror(errnum));
 			exit(1);
 		}
 
@@ -524,8 +512,7 @@ playlist_run_program(playlist_t *pl)
 	pclose(filep);
 
 	if (strlen(buf) == sizeof(buf) - 1) {
-		printf("%s: Output from program '%s' too long\n", cfg_progname(),
-		    pl->filename);
+		log_error("%s: output too long", pl->filename);
 		return (NULL);
 	}
 
