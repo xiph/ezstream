@@ -323,7 +323,7 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 		count = sizeof(buf) - bufavail - 1;
 
 		output_size += count;
-		op = output = xrealloc(output, output_size, sizeof(char));
+		op = output = xreallocarray(output, output_size, sizeof(char));
 		op += out_pos;
 		memcpy(op, buf, count);
 		out_pos += count;
