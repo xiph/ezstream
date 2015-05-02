@@ -28,7 +28,7 @@
 #include <shout/shout.h>
 
 #include "cfg.h"
-#include "configfile.h"
+#include "cmdline.h"
 #include "log.h"
 #include "metadata.h"
 #include "playlist.h"
@@ -41,9 +41,6 @@
 #define STREAM_SERVERR	3
 #define STREAM_UPDMDATA 4
 
-int			 metadataFromProgram;
-
-EZCONFIG		*pezConfig = NULL;
 playlist_t		*playlist = NULL;
 int			 playlistMode = 0;
 unsigned int		 resource_errors = 0;
@@ -79,7 +76,7 @@ typedef struct tag_ID3Tag {
 int		urlParse(const char *, char **, unsigned short *, char **);
 char *		shellQuote(const char *);
 char *		replaceString(const char *, const char *, const char *);
-char *		buildCommandString(const char *, const char *, metadata_t *);
+char *		buildReencodeCommand(const char *, const char *, metadata_t *);
 char *		getMetadataString(const char *, metadata_t *);
 metadata_t *	getMetadata(const char *);
 int		setMetadata(shout_t *, metadata_t *, char **);
@@ -90,7 +87,7 @@ const char *	getTimeString(long);
 int		sendStream(shout_t *, FILE *, const char *, int, const char *,
 			   struct timeval *);
 int		streamFile(shout_t *, const char *);
-int		streamPlaylist(shout_t *, const char *);
+int		streamPlaylist(shout_t *);
 int		ez_shutdown(int);
 
 #ifdef HAVE_SIGNALS
@@ -239,44 +236,47 @@ replaceString(const char *source, const char *from, const char *to)
 }
 
 char *
-buildCommandString(const char *extension, const char *fileName,
-		   metadata_t *mdata)
+buildReencodeCommand(const char *extension, const char *fileName,
+    metadata_t *mdata)
 {
-	char	*commandString = NULL;
-	size_t	 commandStringLen = 0;
-	char	*encoder = NULL;
-	char	*decoder = NULL;
-	char	*newDecoder = NULL;
-	char	*newEncoder = NULL;
-	char	*localTitle = UTF8toCHAR(metadata_get_title(mdata),
-					 ICONV_REPLACE);
-	char	*localArtist = UTF8toCHAR(metadata_get_artist(mdata),
-					  ICONV_REPLACE);
-	char	*localMetaString = UTF8toCHAR(metadata_get_string(mdata),
-					      ICONV_REPLACE);
+	cfg_decoder_t	 decoder;
+	cfg_encoder_t	 encoder;
+	char		*dec_str, *enc_str;
+	char		*commandString;
+	size_t		 commandStringLen;
+	char		*localTitle, *localArtist, *localMetaString;
 
-	decoder = xstrdup(getFormatDecoder(extension));
-	if (strlen(decoder) == 0) {
-		log_error("cannot decode: %s: unknown file extension %s",
+	decoder = cfg_decoder_find(extension);
+	if (!decoder) {
+		log_error("cannot decode: %s: unsupported file extension %s",
 		    fileName, extension);
-		xfree(localTitle);
-		xfree(localArtist);
-		xfree(localMetaString);
-		xfree(decoder);
 		return (NULL);
 	}
-	newDecoder = replaceString(decoder, TRACK_PLACEHOLDER, fileName);
-	if (strstr(decoder, ARTIST_PLACEHOLDER) != NULL) {
-		char *tmpStr = replaceString(newDecoder, ARTIST_PLACEHOLDER,
-		    localArtist);
-		xfree(newDecoder);
-		newDecoder = tmpStr;
+	encoder = cfg_encoder_get(cfg_get_stream_encoder());
+	if (!encoder) {
+		log_error("cannot encode: %s: unknown encoder",
+		    cfg_get_stream_encoder());
+		return (NULL);
 	}
-	if (strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
-		char *tmpStr = replaceString(newDecoder, TITLE_PLACEHOLDER,
+
+	localTitle = UTF8toCHAR(metadata_get_title(mdata), ICONV_REPLACE);
+	localArtist = UTF8toCHAR(metadata_get_artist(mdata), ICONV_REPLACE);
+	localMetaString = UTF8toCHAR(metadata_get_string(mdata),
+	    ICONV_REPLACE);
+
+	dec_str = replaceString(cfg_decoder_get_program(decoder),
+	    PLACEHOLDER_TRACK, fileName);
+	if (strstr(dec_str, PLACEHOLDER_ARTIST) != NULL) {
+		char *tmpStr = replaceString(dec_str, PLACEHOLDER_ARTIST,
+		    localArtist);
+		xfree(dec_str);
+		dec_str = tmpStr;
+	}
+	if (strstr(dec_str, PLACEHOLDER_TITLE) != NULL) {
+		char *tmpStr = replaceString(dec_str, PLACEHOLDER_TITLE,
 		    localTitle);
-		xfree(newDecoder);
-		newDecoder = tmpStr;
+		xfree(dec_str);
+		dec_str = tmpStr;
 	}
 	/*
 	 * if meta
@@ -288,89 +288,77 @@ buildCommandString(const char *extension, const char *fileName,
 	 *     else
 	 *       replacemeta
 	 */
-	if (strstr(decoder, METADATA_PLACEHOLDER) != NULL) {
-		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
-			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
-			char *tmpStr = replaceString(newDecoder,
-			    METADATA_PLACEHOLDER, mdataString);
-			xfree(newDecoder);
+	if (strstr(dec_str, PLACEHOLDER_METADATA) != NULL) {
+		if (cfg_get_metadata_program() &&
+		    cfg_get_metadata_format_str()) {
+			char *mdataString = getMetadataString(cfg_get_metadata_format_str(),
+			    mdata);
+			char *tmpStr = replaceString(dec_str,
+			    PLACEHOLDER_METADATA, mdataString);
+			xfree(dec_str);
 			xfree(mdataString);
-			newDecoder = tmpStr;
+			dec_str = tmpStr;
 		} else {
-			if (!metadataFromProgram && strstr(decoder, TITLE_PLACEHOLDER) != NULL) {
-				char *tmpStr = replaceString(newDecoder,
-				    METADATA_PLACEHOLDER, "");
-				xfree(newDecoder);
-				newDecoder = tmpStr;
+			if (!cfg_get_metadata_program() &&
+			    strstr(dec_str, PLACEHOLDER_TITLE) != NULL) {
+				char *tmpStr = replaceString(dec_str,
+				    PLACEHOLDER_METADATA, "");
+				xfree(dec_str);
+				dec_str = tmpStr;
 			} else {
-				char *tmpStr = replaceString(newDecoder,
-				    METADATA_PLACEHOLDER, localMetaString);
-				xfree(newDecoder);
-				newDecoder = tmpStr;
+				char *tmpStr = replaceString(dec_str,
+				    PLACEHOLDER_METADATA, localMetaString);
+				xfree(dec_str);
+				dec_str = tmpStr;
 			}
 		}
 	}
 
-	encoder = xstrdup(getFormatEncoder(pezConfig->format));
-	if (strlen(encoder) == 0) {
-		log_notice("passing through%s%s data from the decoder",
-		    (strcmp(pezConfig->format, THEORA_FORMAT) != 0) ? " (unsupported) " : " ",
-		    pezConfig->format);
-		commandStringLen = strlen(newDecoder) + 1;
-		commandString = xcalloc(commandStringLen, sizeof(char));
-		strlcpy(commandString, newDecoder, commandStringLen);
-		xfree(localTitle);
-		xfree(localArtist);
-		xfree(localMetaString);
-		xfree(decoder);
-		xfree(encoder);
-		xfree(newDecoder);
-		return (commandString);
-	}
-
-	newEncoder = replaceString(encoder, ARTIST_PLACEHOLDER, localArtist);
-	if (strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
-		char *tmpStr = replaceString(newEncoder, TITLE_PLACEHOLDER,
+	enc_str = replaceString(cfg_encoder_get_program(encoder),
+	    PLACEHOLDER_ARTIST, localArtist);
+	if (strstr(enc_str, PLACEHOLDER_TITLE) != NULL) {
+		char *tmpStr = replaceString(enc_str, PLACEHOLDER_TITLE,
 		    localTitle);
-		xfree(newEncoder);
-		newEncoder = tmpStr;
+		xfree(enc_str);
+		enc_str = tmpStr;
 	}
-	if (strstr(encoder, METADATA_PLACEHOLDER) != NULL) {
-		if (metadataFromProgram && pezConfig->metadataFormat != NULL) {
-			char *mdataString = getMetadataString(pezConfig->metadataFormat, mdata);
-			char *tmpStr = replaceString(newEncoder,
-			    METADATA_PLACEHOLDER, mdataString);
-			xfree(newEncoder);
+	if (strstr(enc_str, PLACEHOLDER_METADATA) != NULL) {
+		if (cfg_get_metadata_program() &&
+		    cfg_get_metadata_format_str()) {
+			char *mdataString = getMetadataString(cfg_get_metadata_format_str(),
+			    mdata);
+			char *tmpStr = replaceString(enc_str,
+			    PLACEHOLDER_METADATA, mdataString);
+			xfree(enc_str);
 			xfree(mdataString);
-			newEncoder = tmpStr;
+			enc_str = tmpStr;
 		} else {
-			if (!metadataFromProgram && strstr(encoder, TITLE_PLACEHOLDER) != NULL) {
-				char *tmpStr = replaceString(newEncoder,
-				    METADATA_PLACEHOLDER, "");
-				xfree(newEncoder);
-				newEncoder = tmpStr;
+			if (!cfg_get_metadata_program() &&
+			    strstr(enc_str, PLACEHOLDER_TITLE) != NULL) {
+				char *tmpStr = replaceString(enc_str,
+				    PLACEHOLDER_METADATA, "");
+				xfree(enc_str);
+				enc_str = tmpStr;
 			} else {
-				char *tmpStr = replaceString(newEncoder,
-				    METADATA_PLACEHOLDER, localMetaString);
-				xfree(newEncoder);
-				newEncoder = tmpStr;
+				char *tmpStr = replaceString(enc_str,
+				    PLACEHOLDER_METADATA, localMetaString);
+				xfree(enc_str);
+				enc_str = tmpStr;
 			}
 		}
 	}
 
-	commandStringLen = strlen(newDecoder) + strlen(" | ") +
-	    strlen(newEncoder) + 1;
+	commandStringLen = strlen(dec_str) + strlen(" | ") +
+	    strlen(enc_str) + 1;
 	commandString = xcalloc(commandStringLen, sizeof(char));
-	snprintf(commandString, commandStringLen, "%s | %s", newDecoder,
-	    newEncoder);
+	snprintf(commandString, commandStringLen, "%s | %s", dec_str,
+	    enc_str);
 
 	xfree(localTitle);
 	xfree(localArtist);
 	xfree(localMetaString);
-	xfree(decoder);
-	xfree(encoder);
-	xfree(newDecoder);
-	xfree(newEncoder);
+	xfree(dec_str);
+	xfree(enc_str);
 
 	return (commandString);
 }
@@ -385,26 +373,26 @@ getMetadataString(const char *format, metadata_t *mdata)
 
 	str = xstrdup(format);
 
-	if (strstr(format, ARTIST_PLACEHOLDER) != NULL) {
-		tmp = replaceString(str, ARTIST_PLACEHOLDER,
+	if (strstr(format, PLACEHOLDER_ARTIST) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_ARTIST,
 		    metadata_get_artist(mdata));
 		xfree(str);
 		str = tmp;
 	}
-	if (strstr(format, TITLE_PLACEHOLDER) != NULL) {
-		tmp = replaceString(str, TITLE_PLACEHOLDER,
+	if (strstr(format, PLACEHOLDER_TITLE) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_TITLE,
 		    metadata_get_title(mdata));
 		xfree(str);
 		str = tmp;
 	}
-	if (strstr(format, STRING_PLACEHOLDER) != NULL) {
-		tmp = replaceString(str, STRING_PLACEHOLDER,
+	if (strstr(format, PLACEHOLDER_STRING) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_STRING,
 		    metadata_get_string(mdata));
 		xfree(str);
 		str = tmp;
 	}
-	if (strstr(format, TRACK_PLACEHOLDER) != NULL) {
-		tmp = replaceString(str, TRACK_PLACEHOLDER,
+	if (strstr(format, PLACEHOLDER_TRACK) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_TRACK,
 		    metadata_get_filename(mdata));
 		xfree(str);
 		str = tmp;
@@ -418,8 +406,9 @@ getMetadata(const char *fileName)
 {
 	metadata_t	*mdata;
 
-	if (metadataFromProgram) {
-		if ((mdata = metadata_program(fileName, cfg_normalize_strings())) == NULL)
+	if (cfg_get_metadata_program()) {
+		if (NULL == (mdata = metadata_program(fileName,
+		    cfg_get_metadata_normalize_strings())))
 			return (NULL);
 
 		if (!metadata_program_update(mdata, METADATA_ALL)) {
@@ -427,7 +416,8 @@ getMetadata(const char *fileName)
 			return (NULL);
 		}
 	} else {
-		if ((mdata = metadata_file(fileName, cfg_normalize_strings())) == NULL)
+		if (NULL == (mdata = metadata_file(fileName,
+		    cfg_get_metadata_normalize_strings())))
 			return (NULL);
 
 		if (!metadata_file_update(mdata)) {
@@ -447,7 +437,7 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 	const char		*artist, *title;
 	int			 ret = SHOUTERR_SUCCESS;
 
-	if (cfg_no_metadata_updates())
+	if (cfg_get_metadata_no_updates())
 		return (SHOUTERR_SUCCESS);
 
 	if (mdata == NULL)
@@ -473,7 +463,8 @@ setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
 		exit(1);
 	}
 
-	if ((songInfo = getMetadataString(pezConfig->metadataFormat, mdata)) == NULL) {
+	songInfo = getMetadataString(cfg_get_metadata_format_str(), mdata);
+	if (songInfo == NULL) {
 		if (artist[0] == '\0' && title[0] == '\0')
 			songInfo = xstrdup(metadata_get_string(mdata));
 		else
@@ -531,8 +522,8 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		*songLen = 0;
 
 	if (strcmp(fileName, "stdin") == 0) {
-		if (metadataFromProgram) {
-			if ((mdata = getMetadata(pezConfig->metadataProgram)) == NULL)
+		if (cfg_get_metadata_program()) {
+			if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
 				return (NULL);
 			if (setMetadata(shout, mdata, NULL) != SHOUTERR_SUCCESS) {
 				metadata_free(&mdata);
@@ -565,8 +556,8 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		return (filep);
 	}
 
-	if (metadataFromProgram) {
-		if ((mdata = getMetadata(pezConfig->metadataProgram)) == NULL)
+	if (cfg_get_metadata_program()) {
+		if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
 			return (NULL);
 	} else {
 		if ((mdata = getMetadata(fileName)) == NULL)
@@ -576,17 +567,18 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		*songLen = metadata_get_length(mdata);
 
 	*popenFlag = 0;
-	if (pezConfig->reencode) {
+	if (cfg_get_stream_encoder()) {
 		int	stderr_fd = -1;
 
-		pCommandString = buildCommandString(extension, fileName, mdata);
+		pCommandString = buildReencodeCommand(extension, fileName,
+		    mdata);
 		if (mdata_p != NULL)
 			*mdata_p = mdata;
 		else
 			metadata_free(&mdata);
 		log_info("running command: %s", pCommandString);
 
-		if (cfg_quiet_stderr()) {
+		if (cfg_get_program_quiet_stderr()) {
 			int fd;
 
 			stderr_fd = dup(fileno(stderr));
@@ -616,7 +608,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		}
 		xfree(pCommandString);
 
-		if (cfg_quiet_stderr())
+		if (cfg_get_program_quiet_stderr())
 			dup2(stderr_fd, fileno(stderr));
 
 		if (stderr_fd > 2)
@@ -644,16 +636,17 @@ reconnectServer(shout_t *shout, int closeConn)
 	unsigned int	i;
 	int		close_conn = closeConn;
 
-	log_warning("%s: connection lost", pezConfig->URL);
+	log_warning("%s: connection lost", cfg_get_server_hostname());
 
 	i = 0;
 	while (++i) {
-		if (pezConfig->reconnectAttempts > 0)
+		if (cfg_get_server_reconnect_attempts() > 0)
 			log_notice("reconnect: %s: attempt #%u/%u ...",
-			    pezConfig->URL, i, pezConfig->reconnectAttempts);
+			    cfg_get_server_hostname(), i,
+			    cfg_get_server_reconnect_attempts());
 		else
 			log_notice("reconnect: %s: attempt #%u ...",
-			    pezConfig->URL, i);
+			    cfg_get_server_hostname(), i);
 
 		if (close_conn == 0)
 			close_conn = 1;
@@ -661,15 +654,15 @@ reconnectServer(shout_t *shout, int closeConn)
 			shout_close(shout);
 		if (shout_open(shout) == SHOUTERR_SUCCESS) {
 			log_notice("reconnect: %s: success",
-			    pezConfig->URL);
+			    cfg_get_server_hostname());
 			return (1);
 		}
 
 		log_warning("reconnect failed: %s: %s",
-		    pezConfig->URL, shout_get_error(shout));
+		    cfg_get_server_hostname(), shout_get_error(shout));
 
-		if (pezConfig->reconnectAttempts > 0 &&
-		    i >= pezConfig->reconnectAttempts)
+		if (cfg_get_server_reconnect_attempts() > 0 &&
+		    i >= cfg_get_server_reconnect_attempts())
 			break;
 
 		if (quit)
@@ -742,7 +735,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			break;
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
-			if (!pezConfig->fileNameIsProgram)
+			if (CFG_MEDIA_PLAYLIST == cfg_get_media_type())
 				log_notice("HUP signal received: playlist re-read scheduled");
 		}
 		if (skipTrack) {
@@ -754,25 +747,24 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		ez_gettimeofday((void *)&currentTime);
 
 		if (queryMetadata ||
-		    (pezConfig->metadataRefreshInterval != -1
-			&& (currentTime.tv_sec - callTime.tv_sec
-			    >= pezConfig->metadataRefreshInterval)
-			)
-		    ) {
+		    (cfg_get_metadata_refresh_interval() &&
+			(currentTime.tv_sec - callTime.tv_sec >=
+			    cfg_get_metadata_refresh_interval()))) {
 			queryMetadata = 0;
-			if (metadataFromProgram) {
+			if (cfg_get_metadata_program()) {
 				ret = STREAM_UPDMDATA;
 				break;
 			}
 		}
 
 		total += bytes_read;
-		if (cfg_quiet_stderr() && cfg_verbosity()) {
+		if (cfg_get_program_quiet_stderr() &&
+		    cfg_get_program_verbosity()) {
 			double	oldTime, newTime;
 
 			if (!isStdin && playlistMode) {
-				if (pezConfig->fileNameIsProgram) {
-					char *tmp = xstrdup(pezConfig->fileName);
+				if (CFG_MEDIA_PROGRAM == cfg_get_media_type()) {
+					char *tmp = xstrdup(cfg_get_media_filename());
 					printf("  [%s]", basename(tmp));
 					xfree(tmp);
 				} else
@@ -858,7 +850,7 @@ streamFile(shout_t *shout, const char *fileName)
 		xfree(metaData);
 
 		/* MP3 streams are special, so set the metadata explicitly: */
-		if (strcmp(pezConfig->format, MP3_FORMAT) == 0)
+		if (CFG_STREAM_MP3 == cfg_get_stream_format())
 			setMetadata(shout, mdata, NULL);
 
 		metadata_free(&mdata);
@@ -892,15 +884,15 @@ streamFile(shout_t *shout, const char *fileName)
 			}
 			if (ret == STREAM_UPDMDATA || queryMetadata) {
 				queryMetadata = 0;
-				if (cfg_no_metadata_updates())
+				if (cfg_get_metadata_no_updates())
 					continue;
-				if (metadataFromProgram) {
+				if (cfg_get_metadata_program()) {
 					char		*mdataStr = NULL;
 					metadata_t	*prog_mdata;
 
 					log_info("running metadata program: %s",
-					    pezConfig->metadataProgram);
-					if ((prog_mdata = getMetadata(pezConfig->metadataProgram)) == NULL) {
+					    cfg_get_metadata_program());
+					if ((prog_mdata = getMetadata(cfg_get_metadata_program())) == NULL) {
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
@@ -935,20 +927,21 @@ streamFile(shout_t *shout, const char *fileName)
 }
 
 int
-streamPlaylist(shout_t *shout, const char *fileName)
+streamPlaylist(shout_t *shout)
 {
 	const char	*song;
 	char		 lastSong[PATH_MAX];
 
 	if (playlist == NULL) {
-		if (pezConfig->fileNameIsProgram) {
-			if ((playlist = playlist_program(fileName)) == NULL)
+		if (CFG_MEDIA_PROGRAM == cfg_get_media_type()) {
+			if ((playlist = playlist_program(cfg_get_media_filename())) == NULL)
 				return (0);
 		} else {
-			if ((playlist = playlist_read(fileName)) == NULL)
+			if ((playlist = playlist_read(cfg_get_media_filename())) == NULL)
 				return (0);
 			if (playlist_get_num_items(playlist) == 0)
-				log_notice("%s: playlist empty", fileName);
+				log_notice("%s: playlist empty",
+				    cfg_get_media_filename());
 		}
 	} else {
 		/*
@@ -959,7 +952,8 @@ streamPlaylist(shout_t *shout, const char *fileName)
 		playlist_rewind(playlist);
 	}
 
-	if (!pezConfig->fileNameIsProgram && pezConfig->shuffle)
+	if (CFG_MEDIA_PROGRAM != cfg_get_media_type() &&
+	    cfg_get_media_shuffle())
 		playlist_shuffle(playlist);
 
 	while ((song = playlist_get_next(playlist)) != NULL) {
@@ -970,12 +964,12 @@ streamPlaylist(shout_t *shout, const char *fileName)
 			break;
 		if (rereadPlaylist) {
 			rereadPlaylist = rereadPlaylist_notify = 0;
-			if (pezConfig->fileNameIsProgram)
+			if (CFG_MEDIA_PROGRAM == cfg_get_media_type())
 				continue;
 			log_notice("rereading playlist");
 			if (!playlist_reread(&playlist))
 				return (0);
-			if (pezConfig->shuffle)
+			if (cfg_get_media_shuffle())
 				playlist_shuffle(playlist);
 			else {
 				playlist_goto_entry(playlist, lastSong);
@@ -992,9 +986,12 @@ int
 ez_shutdown(int exitval)
 {
 	shout_shutdown();
-	playlist_shutdown();
-	freeConfig(pezConfig);
+
+	playlist_exit();
+	cfg_encoder_exit();
+	cfg_decoder_exit();
 	log_exit();
+	cfg_exit();
 
 	return (exitval);
 }
@@ -1003,12 +1000,6 @@ int
 main(int argc, char *argv[])
 {
 	int		 ret;
-
-	const char	*configFile;
-	const char	*playlistFile;
-	char		*host = NULL;
-	unsigned short	 port = 0;
-	char		*mount = NULL;
 	shout_t 	*shout;
 	extern char	*optarg;
 	extern int	 optind;
@@ -1017,38 +1008,15 @@ main(int argc, char *argv[])
 	unsigned int	 i;
 #endif
 	ret = 1;
-	if (0 > cfg_cmdline_parse(argc, argv, &ret))
+	if (0 > cmdline_parse(argc, argv, &ret) ||
+	    0 > log_init() ||
+	    0 > cfg_decoder_init() ||
+	    0 > cfg_encoder_init() ||
+	    0 > playlist_init() ||
+	    0 > cfg_reload())
 		return (ret);
-	log_init();
-
-	playlist_init();
 	shout_init();
 
-	pezConfig = getEZConfig();
-
-	playlistFile = cfg_shuffle_file();
-	if (playlistFile) {
-		playlist_t	*pl;
-		const char	*entry;
-
-		if (0 == strcmp(playlistFile, "-"))
-			pl = playlist_read(NULL);
-		else
-			pl = playlist_read(playlistFile);
-
-		if (pl == NULL)
-			return (ez_shutdown(1));
-
-		playlist_shuffle(pl);
-		while ((entry = playlist_get_next(pl)) != NULL)
-			printf("%s\n", entry);
-
-		playlist_free(&pl);
-
-		return (ez_shutdown(0));
-	}
-
-	configFile = cfg_config_file();
 	{
 		/*
 		 * Attempt to open configFile here for a more meaningful error
@@ -1058,23 +1026,25 @@ main(int argc, char *argv[])
 #ifdef HAVE_STAT
 		struct stat	st;
 
-		if (stat(configFile, &st) == -1) {
-			log_error("%s: %s", configFile, strerror(errno));
+		if (stat(cfg_get_program_config_file(), &st) == -1) {
+			log_error("%s: %s", cfg_get_program_config_file(),
+			    strerror(errno));
 			return (ez_shutdown(2));
 		}
-		if (cfg_verbosity() && (st.st_mode & (S_IRGRP | S_IROTH)))
+		if (cfg_get_program_verbosity() && (st.st_mode & (S_IRGRP | S_IROTH)))
 			log_warning("%s: group and/or world readable",
-			    configFile);
+			    cfg_get_program_config_file());
 		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
 			log_error("%s: group and/or world writeable",
-			    configFile);
+			    cfg_get_program_config_file());
 			return (ez_shutdown(2));
 		}
 #else
 		FILE		 *tmp;
 
-		if ((tmp = fopen(configFile, "r")) == NULL) {
-			log_error("%s: %s", configFile, strerror(errno));
+		if ((tmp = fopen(cfg_get_program_config_file(), "r")) == NULL) {
+			log_error("%s: %s", cfg_get_program_config_file(),
+			    strerror(errno));
 			usage();
 			return (ez_shutdown(2));
 		}
@@ -1082,38 +1052,34 @@ main(int argc, char *argv[])
 #endif /* HAVE_STAT */
 	}
 
-	if (!parseConfig(configFile))
+	if (0 > cfg_reload())
 		return (ez_shutdown(2));
 
-	if (pezConfig->URL == NULL) {
-		log_error("%s: missing <url>", configFile);
+	if (!cfg_get_server_hostname() ||
+	    !cfg_get_server_port()){
+		log_error("%s: missing server configuration",
+		    cfg_get_program_config_file());
 		return (ez_shutdown(2));
 	}
-	if (!urlParse(pezConfig->URL, &host, &port, &mount)) {
-		log_error("%s: <url>: must be of the form ``http://server:port/mountpoint''",
-		    configFile);
+	if (!cfg_get_server_password()) {
+		log_error("%s: <sourcepassword> missing",
+		    cfg_get_program_config_file());
 		return (ez_shutdown(2));
 	}
-	if (pezConfig->password == NULL) {
-		log_error("%s: <sourcepassword> missing", configFile);
+	if (!cfg_get_media_filename()) {
+		log_error("%s: <filename> missing",
+		    cfg_get_program_config_file());
 		return (ez_shutdown(2));
 	}
-	if (pezConfig->fileName == NULL) {
-		log_error("%s: <filename> missing", configFile);
-		return (ez_shutdown(2));
-	}
-	if (pezConfig->format == NULL) {
+	if (CFG_STREAM_INVALID == cfg_get_stream_format()) {
 		log_error("%s: <format> missing or unsupported value",
-		    configFile);
+		    cfg_get_program_config_file());
 	}
 
-	if ((shout = stream_setup(host, port, mount)) == NULL)
+	shout = stream_setup(cfg_get_server_hostname(),
+	    cfg_get_server_port(), cfg_get_stream_mountpoint());
+	if (shout == NULL)
 		return (ez_shutdown(1));
-
-	if (pezConfig->metadataProgram != NULL)
-		metadataFromProgram = 1;
-	else
-		metadataFromProgram = 0;
 
 #ifdef HAVE_SIGNALS
 	memset(&act, 0, sizeof(act));
@@ -1141,42 +1107,48 @@ main(int argc, char *argv[])
 	if (shout_open(shout) == SHOUTERR_SUCCESS) {
 		int	cont;
 
-		log_notice("connected: http://%s:%hu%s", host, port, mount);
+		log_notice("connected: %s://%s:%u%s",
+		    cfg_get_server_protocol_str(), cfg_get_server_hostname(),
+		    cfg_get_server_port(), cfg_get_stream_mountpoint());
 
-		if (pezConfig->fileNameIsProgram ||
-		    strrcasecmp(pezConfig->fileName, ".m3u") == 0 ||
-		    strrcasecmp(pezConfig->fileName, ".txt") == 0)
+		if (CFG_MEDIA_PROGRAM == cfg_get_media_type() ||
+		    CFG_MEDIA_PLAYLIST == cfg_get_media_type() ||
+                    (CFG_MEDIA_AUTODETECT == cfg_get_media_type() &&
+		    (strrcasecmp(cfg_get_media_filename(), ".m3u") == 0 ||
+			strrcasecmp(cfg_get_media_filename(), ".txt") == 0)))
 			playlistMode = 1;
 		else
 			playlistMode = 0;
 
 		do {
 			if (playlistMode) {
-				cont = streamPlaylist(shout, pezConfig->fileName);
+				cont = streamPlaylist(shout);
 			} else {
-				cont = streamFile(shout, pezConfig->fileName);
+				cont = streamFile(shout,
+				    cfg_get_media_filename());
 			}
 			if (quit)
 				break;
-			if (pezConfig->streamOnce)
+			if (cfg_get_media_stream_once())
 				break;
 		} while (cont);
 
 		shout_close(shout);
 	} else
-		log_error("connection failed: http://%s:%hu%s: %s",
-		    host, port, mount, shout_get_error(shout));
+		log_error("connection failed: %s://%s:%u%s: %s",
+		    cfg_get_server_protocol_str(), cfg_get_server_hostname(),
+		    cfg_get_server_port(), cfg_get_stream_mountpoint(),
+		    shout_get_error(shout));
 
 	if (quit) {
-		if (cfg_quiet_stderr() && cfg_verbosity())
+		if (cfg_get_program_quiet_stderr() &&
+		    cfg_get_program_verbosity())
 			printf("\r");
 		log_notice("INT or TERM signal received");
 	}
 
 	log_info("exiting");
 
-	xfree(host);
-	xfree(mount);
 	playlist_free(&playlist);
 
 	return (ez_shutdown(0));

@@ -36,7 +36,7 @@
 #endif
 #include <shout/shout.h>
 
-#include "configfile.h"
+#include "cfg.h"
 #include "log.h"
 #include "util.h"
 #include "xalloc.h"
@@ -44,8 +44,6 @@
 #ifndef BUFSIZ
 # define BUFSIZ 1024
 #endif
-
-extern EZCONFIG *pezConfig;
 
 char *	iconvert(const char *, const char *, const char *, int);
 
@@ -111,7 +109,7 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 		shout_free(shout);
 		return (NULL);
 	}
-	if (shout_set_password(shout, pezConfig->password) != SHOUTERR_SUCCESS) {
+	if (shout_set_password(shout, cfg_get_server_password()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_password: %s",
 		    shout_get_error(shout));
 		shout_free(shout);
@@ -130,15 +128,15 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 		return (NULL);
 	}
 
-	if (!strcmp(pezConfig->format, MP3_FORMAT) &&
+	if (CFG_STREAM_MP3 == cfg_get_stream_format() &&
 	    shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_format(MP3): %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if ((!strcmp(pezConfig->format, VORBIS_FORMAT) ||
-	     !strcmp(pezConfig->format, THEORA_FORMAT)) &&
+	if ((CFG_STREAM_VORBIS == cfg_get_stream_format() ||
+	    CFG_STREAM_THEORA == cfg_get_stream_format()) &&
 	    shout_set_format(shout, SHOUT_FORMAT_OGG) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_format(OGG): %s",
 		    shout_get_error(shout));
@@ -146,71 +144,70 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 		return (NULL);
 	}
 
-	if (pezConfig->username &&
-	    shout_set_user(shout, pezConfig->username) != SHOUTERR_SUCCESS) {
+	if (shout_set_user(shout, cfg_get_server_user()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_user: %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverName &&
-	    shout_set_name(shout, pezConfig->serverName) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_name() &&
+	    shout_set_name(shout, cfg_get_stream_name()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_name: %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverURL &&
-	    shout_set_url(shout, pezConfig->serverURL) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_url() &&
+	    shout_set_url(shout, cfg_get_stream_url()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_url: %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverGenre &&
-	    shout_set_genre(shout, pezConfig->serverGenre) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_genre() &&
+	    shout_set_genre(shout, cfg_get_stream_genre()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_genre: %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverDescription &&
-	    shout_set_description(shout, pezConfig->serverDescription) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_description() &&
+	    shout_set_description(shout, cfg_get_stream_description()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_description: %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverBitrate &&
-	    shout_set_audio_info(shout, SHOUT_AI_BITRATE, pezConfig->serverBitrate) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_bitrate() &&
+	    shout_set_audio_info(shout, SHOUT_AI_BITRATE, cfg_get_stream_bitrate()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_audio_info(AI_BITRATE): %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverChannels &&
-	    shout_set_audio_info(shout, SHOUT_AI_CHANNELS, pezConfig->serverChannels) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_channels() &&
+	    shout_set_audio_info(shout, SHOUT_AI_CHANNELS, cfg_get_stream_channels()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_audio_info(AI_CHANNELS): %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverSamplerate &&
-	    shout_set_audio_info(shout, SHOUT_AI_SAMPLERATE, pezConfig->serverSamplerate) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_samplerate() &&
+	    shout_set_audio_info(shout, SHOUT_AI_SAMPLERATE, cfg_get_stream_samplerate()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_audio_info(AI_SAMPLERATE): %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
-	if (pezConfig->serverQuality &&
-	    shout_set_audio_info(shout, SHOUT_AI_QUALITY, pezConfig->serverQuality) != SHOUTERR_SUCCESS) {
+	if (cfg_get_stream_quality() &&
+	    shout_set_audio_info(shout, SHOUT_AI_QUALITY, cfg_get_stream_quality()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_audio_info(AI_QUALITY): %s",
 		    shout_get_error(shout));
 		shout_free(shout);
 		return (NULL);
 	}
 
-	if (shout_set_public(shout, (unsigned int)pezConfig->serverPublic) != SHOUTERR_SUCCESS) {
+	if (shout_set_public(shout, (unsigned int)cfg_get_stream_server_public()) != SHOUTERR_SUCCESS) {
 		log_error("shout_set_public: %s",
 		    shout_get_error(shout));
 		shout_free(shout);

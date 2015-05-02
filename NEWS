@@ -5,6 +5,9 @@ Changes in X.X.X, released on XXXX-XX-XX:
  * The behaviour of the -s command line argument was changed:
    To shuffle lines from standard input, the special file name "-" needs
    to be provided.
+ * The command line options -m and -n have been removed, and new configuration
+   file settings have been added accordingly.
+ * The configuration file structure has changed.
 
 
 Changes in 0.6.0, released on 2015-01-18:

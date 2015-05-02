@@ -6,7 +6,11 @@ bin_SCRIPTS	 = ezstream-file.sh
 noinst_HEADERS	 = \
 	attributes.h \
 	cfg.h \
-	configfile.h \
+	cfg_decoder.h \
+	cfg_encoder.h \
+	cfg_private.h \
+	cfg_xmlfile.h \
+	cmdline.h \
 	ezstream.h \
 	log.h \
 	metadata.h \
@@ -15,7 +19,10 @@ noinst_HEADERS	 = \
 	xalloc.h
 ezstream_SOURCES = \
 	cfg.c \
-	configfile.c \
+	cfg_decoder.c \
+	cfg_encoder.c \
+	cfg_xmlfile.c \
+	cmdline.c \
 	ezstream.c \
 	log.c \
 	metadata.c \

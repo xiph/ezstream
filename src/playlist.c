@@ -156,7 +156,7 @@ playlist_run_program(playlist_t *pl)
 	return ((const char *)pl->prog_track);
 }
 
-void
+int
 playlist_init(void)
 {
 #ifdef HAVE_RANDOM
@@ -168,9 +168,10 @@ playlist_init(void)
 #else
 	srand((unsigned int)time(NULL));
 #endif /* HAVE_RANDOM */
+	return (0);
 }
 
-void playlist_shutdown(void) {}
+void playlist_exit(void) {}
 
 playlist_t *
 playlist_read(const char *filename)

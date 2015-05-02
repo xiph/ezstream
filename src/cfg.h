@@ -17,19 +17,170 @@
 #ifndef __CFG_H__
 #define __CFG_H__
 
-int	cfg_cmdline_parse(int, char *[], int *);
+#define CFG_SFMT_VORBIS 	"VORBIS"
+#define CFG_SFMT_MP3		"MP3"
+#define CFG_SFMT_THEORA 	"THEORA"
+
+#define PLACEHOLDER_TRACK	"@T@"
+#define PLACEHOLDER_METADATA	"@M@"
+#define PLACEHOLDER_ARTIST	"@a@"
+#define PLACEHOLDER_TITLE	"@t@"
+#define PLACEHOLDER_STRING	"@s@"
+
+enum cfg_config_type {
+	CFG_TYPE_XMLFILE = 0,
+	CFG_TYPE_MIN = CFG_TYPE_XMLFILE,
+	CFG_TYPE_MAX = CFG_TYPE_XMLFILE,
+};
+
+enum cfg_server_protocol {
+	CFG_PROTO_HTTP = 0,
+	CFG_PROTO_HTTPS,
+	CFG_PROTO_MIN = CFG_PROTO_HTTP,
+	CFG_PROTO_MAX = CFG_PROTO_HTTPS,
+};
+
+enum cfg_media_type {
+	CFG_MEDIA_AUTODETECT = 0,
+	CFG_MEDIA_FILE,
+	CFG_MEDIA_PLAYLIST,
+	CFG_MEDIA_PROGRAM,
+	CFG_MEDIA_STDIN,
+	CFG_MEDIA_MIN = CFG_MEDIA_AUTODETECT,
+	CFG_MEDIA_MAX = CFG_MEDIA_STDIN,
+};
+
+enum cfg_stream_format {
+	CFG_STREAM_INVALID = 0,
+	CFG_STREAM_VORBIS,
+	CFG_STREAM_MP3,
+	CFG_STREAM_THEORA,
+	CFG_STREAM_MIN = CFG_STREAM_VORBIS,
+	CFG_STREAM_MAX = CFG_STREAM_THEORA,
+};
+
+#include "cfg_decoder.h"
+#include "cfg_encoder.h"
+
+int	cfg_reload(void);
+void	cfg_exit(void);
+
+int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
+const char *
+	cfg_stream_fmt2str(enum cfg_stream_format);
+
+int	cfg_set_program_name(const char *, const char **);
+int	cfg_set_program_config_type(enum cfg_config_type, const char **);
+int	cfg_set_program_config_file(const char *, const char **);
+int	cfg_set_program_quiet_stderr(int, const char **);
+int	cfg_set_program_verbosity(unsigned int, const char **);
+
+int	cfg_set_server_protocol(const char *, const char **);
+int	cfg_set_server_hostname(const char *, const char **);
+int	cfg_set_server_port(const char *, const char **);
+int	cfg_set_server_user(const char *, const char **);
+int	cfg_set_server_password(const char *, const char **);
+int	cfg_set_server_ca_dir(const char *, const char **);
+int	cfg_set_server_ca_file(const char *, const char **);
+int	cfg_set_server_client_cert(const char *, const char **);
+int	cfg_set_server_client_key(const char *, const char **);
+int	cfg_set_server_reconnect_attempts(const char *, const char **);
+
+int	cfg_set_stream_mountpoint(const char *, const char **);
+int	cfg_set_stream_name(const char *, const char **);
+int	cfg_set_stream_url(const char *, const char **);
+int	cfg_set_stream_genre(const char *, const char **);
+int	cfg_set_stream_description(const char *, const char **);
+int	cfg_set_stream_quality(const char *, const char **);
+int	cfg_set_stream_bitrate(const char *, const char **);
+int	cfg_set_stream_samplerate(const char *, const char **);
+int	cfg_set_stream_channels(const char *, const char **);
+int	cfg_set_stream_server_public(const char *, const char **);
+int	cfg_set_stream_format(const char *, const char **);
+int	cfg_set_stream_encoder(const char *, const char **);
+
+int	cfg_set_media_type(const char *, const char **);
+int	cfg_set_media_filename(const char *, const char **);
+int	cfg_set_media_shuffle(const char *, const char **);
+int	cfg_set_media_stream_once(const char *, const char **);
+
+int	cfg_set_metadata_program(const char *, const char **);
+int	cfg_set_metadata_format_str(const char *, const char **);
+int	cfg_set_metadata_refresh_interval(const char *, const char **);
+int	cfg_set_metadata_normalize_strings(const char *, const char **);
+int	cfg_set_metadata_no_updates(const char *, const char **);
 
 const char *
-	cfg_progname(void);
-
+	cfg_get_program_name(void);
+enum cfg_config_type
+	cfg_get_program_config_type(void);
 const char *
-	cfg_config_file(void);
-int	cfg_no_metadata_updates(void);
-int	cfg_normalize_strings(void);
-int	cfg_quiet_stderr(void);
-const char *
-	cfg_shuffle_file(void);
+	cfg_get_program_config_file(void);
+int	cfg_get_program_quiet_stderr(void);
 unsigned int
-	cfg_verbosity(void);
+	cfg_get_program_verbosity(void);
+
+enum cfg_server_protocol
+	cfg_get_server_protocol(void);
+const char *
+	cfg_get_server_protocol_str(void);
+const char *
+	cfg_get_server_hostname(void);
+unsigned int
+	cfg_get_server_port(void);
+const char *
+	cfg_get_server_user(void);
+const char *
+	cfg_get_server_password(void);
+const char *
+	cfg_get_server_ca_dir(void);
+const char *
+	cfg_get_server_ca_file(void);
+const char *
+	cfg_get_server_client_cert(void);
+const char *
+	cfg_get_server_client_key(void);
+unsigned int
+	cfg_get_server_reconnect_attempts(void);
+
+const char *
+	cfg_get_stream_mountpoint(void);
+const char *
+	cfg_get_stream_name(void);
+const char *
+	cfg_get_stream_url(void);
+const char *
+	cfg_get_stream_genre(void);
+const char *
+	cfg_get_stream_description(void);
+const char *
+	cfg_get_stream_quality(void);
+const char *
+	cfg_get_stream_bitrate(void);
+const char *
+	cfg_get_stream_samplerate(void);
+const char *
+	cfg_get_stream_channels(void);
+int	cfg_get_stream_server_public(void);
+enum cfg_stream_format
+	cfg_get_stream_format(void);
+const char *
+	cfg_get_stream_encoder(void);
+
+enum cfg_media_type
+	cfg_get_media_type(void);
+const char *
+	cfg_get_media_filename(void);
+int	cfg_get_media_shuffle(void);
+int	cfg_get_media_stream_once(void);
+
+const char *
+	cfg_get_metadata_program(void);
+const char *
+	cfg_get_metadata_format_str(void);
+unsigned int
+	cfg_get_metadata_refresh_interval(void);
+int	cfg_get_metadata_normalize_strings(void);
+int	cfg_get_metadata_no_updates(void);
 
 #endif /* __CFG_H__ */

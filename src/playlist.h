@@ -23,12 +23,12 @@ typedef struct playlist playlist_t;
  * Initialize the playlist routines. Should be called before any of the other
  * playlist functions.
  */
-void		playlist_init(void);
+int		playlist_init(void);
 
 /*
  * Clean up for clean shutdowns. No-op at the moment.
  */
-void		playlist_shutdown(void);
+void		playlist_exit(void);
 
 /*
  * Read a playlist file (in .M3U format), and return a new playlist handler

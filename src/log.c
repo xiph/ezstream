@@ -62,18 +62,18 @@ _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 		p = LOG_WARNING;
 		break;
 	case NOTICE:
-		if (cfg_verbosity() < 1)
+		if (cfg_get_program_verbosity() < 1)
 			return;
 		p = LOG_NOTICE;
 		break;
 	case INFO:
-		if (cfg_verbosity() < 2)
+		if (cfg_get_program_verbosity() < 2)
 			return;
 		p = LOG_INFO;
 		break;
 	case DEBUG:
 	default:
-		if (cfg_verbosity() < 3)
+		if (cfg_get_program_verbosity() < 3)
 			return;
 		p = LOG_DEBUG;
 		break;
@@ -84,11 +84,13 @@ _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 	va_end(ap2);
 }
 
-void
+int
 log_init(void)
 {
-	openlog(cfg_progname(), LOG_PID|LOG_CONS|LOG_NDELAY|LOG_PERROR,
+	openlog(cfg_get_program_name(),
+	    LOG_PID|LOG_CONS|LOG_NDELAY|LOG_PERROR,
 	    LOG_USER);
+	return (0);
 }
 
 void

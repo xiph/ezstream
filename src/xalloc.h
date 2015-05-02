@@ -17,6 +17,8 @@
 #ifndef __XALLOC_H__
 #define __XALLOC_H__
 
+#include <stdlib.h>
+
 #define xmalloc(s)		xmalloc_c(s, __FILE__, __LINE__)
 #define xcalloc(n, s)		xcalloc_c(n, s, __FILE__, __LINE__)
 #define xreallocarray(p, n, s)	xreallocarray_c(p, n, s, __FILE__, __LINE__)

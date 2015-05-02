@@ -28,7 +28,7 @@ enum log_levels {
 	DEBUG
 };
 
-void	log_init(void);
+int	log_init(void);
 void	log_exit(void);
 
 void	log_syserr(enum log_levels, int, const char *);

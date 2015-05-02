@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ezstream>
+
+  <server>
+    <protocol></protocol>
+    <hostname></hostname>
+    <port></port>
+    <user></user>
+    <password></password>
+    <ca_dir></ca_dir>
+    <ca_file></ca_file>
+    <client_cert></client_cert>
+    <client_key></client_key>
+    <reconnect_attempts></reconnect_attempts>
+  </server>
+
+  <stream>
+    <mountpoint></mountpoint>
+    <name></name>
+    <url></url>
+    <genre></genre>
+    <description></description>
+    <quality></quality>
+    <bitrate></bitrate>
+    <samplerate></samplerate>
+    <channels></channels>
+    <server_public></server_public>
+    <format></format>
+    <encoder></encoder>
+  </stream>
+
+  <media>
+    <type></type>
+    <filename></filename>
+    <shuffle></shuffle>
+    <stream_once></stream_once>
+  </media>
+
+  <metadata>
+    <program></program>
+    <format_str></format_str>
+    <refresh_interval></refresh_interval>
+    <normalize_strings></normalize_strings>
+    <no_updates></no_updates>
+  </metadata>
+
+  <decoders>
+    <decoder>
+      <name></name>
+      <program></program>
+      <file_ext></file_ext>
+      <!-- ... -->
+    </decoder>
+    <!-- ... -->
+  </decoders>
+
+  <encoders>
+    <encoder>
+      <name></name>
+      <format></format>
+      <program></program>
+    </encoder>
+    <!-- ... -->
+  </encoders>
+
+</ezstream>
