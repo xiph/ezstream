@@ -20,8 +20,12 @@
 
 #include "compat.h"
 
+#include <sys/stat.h>
+
+#include <errno.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "cfg_private.h"
 #include "cfg_xmlfile.h"
@@ -159,6 +163,29 @@ cfg_stream_fmt2str(enum cfg_stream_format fmt)
 	default:
 		return (NULL);
 	}
+}
+
+int
+cfg_file_check(const char *file)
+{
+	struct stat	st;
+
+	if (0 > stat(file, &st)) {
+		log_error("%s: %s", file, strerror(errno));
+		return (-1);
+	}
+
+	if (st.st_mode & S_IROTH)
+		log_warning("%s: world readable", file);
+	else if (st.st_mode & S_IRGRP)
+		log_notice("%s: group readable", file);
+
+	if (st.st_mode & S_IWOTH) {
+		log_error("%s: world writeable", file);
+		return (-1);
+	}
+
+	return (0);
 }
 
 int

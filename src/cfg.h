@@ -69,6 +69,8 @@ int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
 const char *
 	cfg_stream_fmt2str(enum cfg_stream_format);
 
+int	cfg_file_check(const char *);
+
 int	cfg_set_program_name(const char *, const char **);
 int	cfg_set_program_config_type(enum cfg_config_type, const char **);
 int	cfg_set_program_config_file(const char *, const char **);

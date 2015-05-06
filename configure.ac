@@ -239,11 +239,7 @@ AC_CHECK_FUNCS([ \
 	popen \
 	random \
 	setlocale \
-	snprintf \
 	srandomdev \
-	stat \
-	strncasecmp \
-	strtoll \
 ])
 
 AC_REPLACE_FUNCS([ \

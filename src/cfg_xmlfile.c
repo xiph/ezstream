@@ -319,6 +319,9 @@ cfg_xmlfile_parse(const char *config_file)
 
 	xmlLineNumbersDefault(1);
 
+	if (0 > cfg_file_check(config_file))
+		goto error;
+
 	doc = xmlParseFile(config_file);
 	if (!doc) {
 		log_error("%s: not well-formed XML", config_file);

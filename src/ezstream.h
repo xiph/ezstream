@@ -28,9 +28,6 @@
 # include <sys/time.h>
 #endif /* HAVE_SYS_TIME_H */
 #include <time.h>
-#ifdef HAVE_SYS_STAT_H
-# include <sys/stat.h>
-#endif /* HAVE_SYS_STAT_H */
 
 #include <ctype.h>
 #include <errno.h>

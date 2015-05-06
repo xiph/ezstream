@@ -1014,46 +1014,8 @@ main(int argc, char *argv[])
 	    0 > cfg_encoder_init() ||
 	    0 > playlist_init() ||
 	    0 > cfg_reload())
-		return (ret);
+		return (ez_shutdown(ret));
 	shout_init();
-
-	{
-		/*
-		 * Attempt to open configFile here for a more meaningful error
-		 * message. Where possible, do it with stat() and check for
-		 * safe config file permissions.
-		 */
-#ifdef HAVE_STAT
-		struct stat	st;
-
-		if (stat(cfg_get_program_config_file(), &st) == -1) {
-			log_error("%s: %s", cfg_get_program_config_file(),
-			    strerror(errno));
-			return (ez_shutdown(2));
-		}
-		if (cfg_get_program_verbosity() && (st.st_mode & (S_IRGRP | S_IROTH)))
-			log_warning("%s: group and/or world readable",
-			    cfg_get_program_config_file());
-		if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-			log_error("%s: group and/or world writeable",
-			    cfg_get_program_config_file());
-			return (ez_shutdown(2));
-		}
-#else
-		FILE		 *tmp;
-
-		if ((tmp = fopen(cfg_get_program_config_file(), "r")) == NULL) {
-			log_error("%s: %s", cfg_get_program_config_file(),
-			    strerror(errno));
-			usage();
-			return (ez_shutdown(2));
-		}
-		fclose(tmp);
-#endif /* HAVE_STAT */
-	}
-
-	if (0 > cfg_reload())
-		return (ez_shutdown(2));
 
 	if (!cfg_get_server_hostname() ||
 	    !cfg_get_server_port()){
