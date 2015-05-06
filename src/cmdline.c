@@ -20,6 +20,7 @@
 
 #include "compat.h"
 
+#include <assert.h>
 #include <stdio.h>
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
@@ -105,8 +106,9 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 
 		switch (ch) {
 		case OPT_CONFIGFILE:
-			if (0 > cfg_set_program_config_file(optarg, &err_str) ||
-			    0 > cfg_set_program_config_type(CFG_TYPE_XMLFILE, NULL)) {
+			assert(0 == cfg_set_program_config_type(CFG_TYPE_XMLFILE,
+				   NULL));
+			if (0 > cfg_set_program_config_file(optarg, &err_str)) {
 				fprintf(stderr, "-%c: argument %s\n",
 				    OPT_CONFIGFILE, err_str);
 				_usage();

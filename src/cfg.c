@@ -171,7 +171,7 @@ cfg_set_program_name(const char *progname, const char **errstrp)
 int
 cfg_set_program_config_type(enum cfg_config_type type, const char **errstrp)
 {
-	if (type >= CFG_TYPE_MAX) {
+	if (CFG_TYPE_MIN > type || CFG_TYPE_MAX < type) {
 		if (NULL != errstrp)
 			*errstrp = "invalid";
 		return (-1);
