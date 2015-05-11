@@ -326,23 +326,7 @@ cfg_set_server_client_key(const char *client_key, const char **errstrp)
 int
 cfg_set_server_reconnect_attempts(const char *num_str, const char **errstrp)
 {
-	const char	*errstr;
-	unsigned int	 num;
-
-	if (!num_str || !num_str[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	num = strtonum(num_str, 0, UINT_MAX, &errstr);
-	if (errstr) {
-		if (errstrp)
-			*errstrp = errstr;
-		return (-1);
-	}
-	cfg.server.reconnect_attempts = num;
-
+	SET_UINTNUM(cfg.server.reconnect_attempts, num_str, errstrp);
 	return (0);
 }
 
@@ -525,23 +509,7 @@ cfg_set_metadata_format_str(const char *format_str, const char **errstrp)
 int
 cfg_set_metadata_refresh_interval(const char *num_str, const char **errstrp)
 {
-	const char	*errstr;
-	unsigned int	 num;
-
-	if (!num_str || !num_str[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	num = strtonum(num_str, 0, UINT_MAX, &errstr);
-	if (errstr) {
-		if (errstrp)
-			*errstrp = errstr;
-		return (-1);
-	}
-	cfg.metadata.refresh_interval = num;
-
+	SET_UINTNUM(cfg.metadata.refresh_interval, num_str, errstrp);
 	return (0);
 }
 
