@@ -233,7 +233,7 @@ cfg_set_program_verbosity(unsigned int verbosity, const char **not_used)
 int
 cfg_set_server_protocol(const char *protocol, const char **errstrp)
 {
-	if (!protocol) {
+	if (!protocol || !protocol[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
@@ -264,7 +264,7 @@ cfg_set_server_port(const char *port_str, const char **errstrp)
 	const char	*errstr;
 	unsigned int	 port;
 
-	if (!port_str) {
+	if (!port_str || !port_str[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
@@ -329,7 +329,7 @@ cfg_set_server_reconnect_attempts(const char *num_str, const char **errstrp)
 	const char	*errstr;
 	unsigned int	 num;
 
-	if (!num_str) {
+	if (!num_str || !num_str[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
@@ -349,144 +349,63 @@ cfg_set_server_reconnect_attempts(const char *num_str, const char **errstrp)
 int
 cfg_set_stream_mountpoint(const char *mountpoint, const char **errstrp)
 {
-	if (!mountpoint || !mountpoint[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.mountpoint)
-		xfree(cfg.stream.mountpoint);
-	cfg.stream.mountpoint = xstrdup(mountpoint);
-
+	SET_XSTRDUP(cfg.stream.mountpoint, mountpoint, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_name(const char *name, const char **errstrp)
 {
-	if (!name || !name[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.name)
-		xfree(cfg.stream.name);
-	cfg.stream.name = xstrdup(name);
-
+	SET_XSTRDUP(cfg.stream.name, name, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_url(const char *url, const char **errstrp)
 {
-	if (!url || !url[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.url)
-		xfree(cfg.stream.url);
-	cfg.stream.url = xstrdup(url);
-
+	SET_XSTRDUP(cfg.stream.url, url, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_genre(const char *genre, const char **errstrp)
 {
-	if (!genre || !genre[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.genre)
-		xfree(cfg.stream.genre);
-	cfg.stream.genre = xstrdup(genre);
-
+	SET_XSTRDUP(cfg.stream.genre, genre, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_description(const char *description, const char **errstrp)
 {
-	if (!description || !description[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.description)
-		xfree(cfg.stream.description);
-	cfg.stream.description = xstrdup(description);
-
+	SET_XSTRDUP(cfg.stream.description, description, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_quality(const char *quality, const char **errstrp)
 {
-	if (!quality || !quality[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.quality)
-		xfree(cfg.stream.quality);
-	cfg.stream.quality = xstrdup(quality);
-
+	SET_XSTRDUP(cfg.stream.quality, quality, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_bitrate(const char *bitrate, const char **errstrp)
 {
-	if (!bitrate || !bitrate[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.bitrate)
-		xfree(cfg.stream.bitrate);
-	cfg.stream.bitrate = xstrdup(bitrate);
-
+	SET_XSTRDUP(cfg.stream.bitrate, bitrate, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_samplerate(const char *samplerate, const char **errstrp)
 {
-	if (!samplerate || !samplerate[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.samplerate)
-		xfree(cfg.stream.samplerate);
-	cfg.stream.samplerate = xstrdup(samplerate);
-
+	SET_XSTRDUP(cfg.stream.samplerate, samplerate, errstrp);
 	return (0);
 }
 
 int
 cfg_set_stream_channels(const char *channels, const char **errstrp)
 {
-	if (!channels || !channels[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.channels)
-		xfree(cfg.stream.channels);
-	cfg.stream.channels = xstrdup(channels);
-
+	SET_XSTRDUP(cfg.stream.channels, channels, errstrp);
 	return (0);
 }
 
@@ -502,7 +421,7 @@ cfg_set_stream_format(const char *fmt_str, const char **errstrp)
 {
 	enum cfg_stream_format	fmt;
 
-	if (!fmt_str) {
+	if (!fmt_str || !fmt_str[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
@@ -522,23 +441,14 @@ cfg_set_stream_format(const char *fmt_str, const char **errstrp)
 int
 cfg_set_stream_encoder(const char *encoder, const char **errstrp)
 {
-	if (!encoder || !encoder[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (cfg.stream.encoder)
-		xfree(cfg.stream.encoder);
-	cfg.stream.encoder = xstrdup(encoder);
-
+	SET_XSTRDUP(cfg.stream.encoder, encoder, errstrp);
 	return (0);
 }
 
 int
 cfg_set_media_type(const char *type, const char **errstrp)
 {
-	if (!type) {
+	if (!type || !type[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
@@ -618,7 +528,7 @@ cfg_set_metadata_refresh_interval(const char *num_str, const char **errstrp)
 	const char	*errstr;
 	unsigned int	 num;
 
-	if (!num_str) {
+	if (!num_str || !num_str[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
