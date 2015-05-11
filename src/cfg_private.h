@@ -92,6 +92,17 @@ struct cfg {
 	}					\
 } while (0)
 
+#define SET_XSTRDUP(t, s, e)	do {		\
+	if (!(s) || !(s)[0]) {			\
+		if ((e))			\
+			*(e) = "empty"; 	\
+		return (-1);			\
+	}					\
+	if ((t))				\
+		xfree((t));			\
+	(t) = xstrdup((s));			\
+} while (0)
+
 #define SET_BOOLEAN(t, s, e)	do {			\
 	int	val;					\
 	if (!(s) || !(s)[0]) {				\
