@@ -42,4 +42,4 @@ AM_CPPFLAGS	 = @EZ_CPPFLAGS@ -I$(top_srcdir)/compat
 AM_CFLAGS	 = @EZ_CFLAGS@
 AM_LDFLAGS	 = @EZ_LDFLAGS@ -avoid-version
 
-CLEANFILES	 = core *.core *~ .*~
+CLEANFILES	 = core *.core *~ .*~ *.gcno *.gcda

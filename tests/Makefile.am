@@ -24,4 +24,4 @@ AM_LDFLAGS	 = @EZ_LDFLAGS@
 
 EXTRA_DIST	 = compat.h
 
-CLEANFILES	 = *~ *.core core
+CLEANFILES	 = *~ *.core core *.gcno *.gcda
