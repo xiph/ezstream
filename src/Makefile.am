@@ -26,8 +26,9 @@ libezstream_la_SOURCES = \
 	playlist.c \
 	util.c \
 	xalloc.c
-libezstream_la_DEPENDENCIES =
-libezstream_la_LIBADD = @LIBOBJS@ @EZ_LIBS@ \
+libezstream_la_DEPENDENCIES = \
+	$(top_builddir)/compat/libcompat.la
+libezstream_la_LIBADD = @EZ_LIBS@ \
 	$(libezstream_la_DEPENDENCIES)
 
 bin_SCRIPTS	 = ezstream-file.sh
