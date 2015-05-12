@@ -545,7 +545,7 @@ cfg_get_program_config_type(void)
 const char *
 cfg_get_program_config_file(void)
 {
-	return (cfg.program.config_file);
+	return (cfg.program.config_file[0] ? cfg.program.config_file : NULL);
 }
 
 int
