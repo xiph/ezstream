@@ -223,6 +223,14 @@ cfg_set_program_quiet_stderr(int quiet_stderr, const char **not_used)
 }
 
 int
+cfg_set_program_rtstatus_output(int rtstatus_output, const char **not_used)
+{
+	(void)not_used;
+	cfg.program.rtstatus_output = rtstatus_output ? 1 : 0;
+	return (0);
+}
+
+int
 cfg_set_program_verbosity(unsigned int verbosity, const char **not_used)
 {
 	(void)not_used;
@@ -552,6 +560,12 @@ int
 cfg_get_program_quiet_stderr(void)
 {
 	return (cfg.program.quiet_stderr);
+}
+
+int
+cfg_get_program_rtstatus_output(void)
+{
+	return (cfg.program.rtstatus_output);
 }
 
 unsigned int

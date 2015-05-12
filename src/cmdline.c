@@ -32,11 +32,12 @@
 #include "cmdline.h"
 #include "playlist.h"
 
-#define OPTSTRING	"c:hqs:Vv"
+#define OPTSTRING	"c:hqrs:Vv"
 enum opt_vals {
 	OPT_CONFIGFILE		= 'c',
 	OPT_HELP		= 'h',
 	OPT_QUIETSTDERR 	= 'q',
+	OPT_RTSTATUS		= 'r',
 	OPT_SHUFFLEFILE 	= 's',
 	OPT_VERSION		= 'V',
 	OPT_VERBOSE		= 'v',
@@ -50,9 +51,9 @@ static void	_set_program_name(const char *);
 static void
 _usage(void)
 {
-	fprintf(stderr, "usage: %s [-ghqVv] -c cfgfile\n",
+	fprintf(stderr, "usage: %s [-hqrVv] -c cfgfile\n",
 	    cfg_get_program_name());
-	fprintf(stderr, "       %s [-ghV] -s file\n",
+	fprintf(stderr, "       %s -s file\n",
 	    cfg_get_program_name());
 }
 
@@ -63,9 +64,10 @@ _usage_help(void)
 	fprintf(stderr, "    -c cfgfile  use XML configuration in cfgfile\n");
 	fprintf(stderr, "    -h          print this help and exit\n");
 	fprintf(stderr, "    -q          suppress STDERR output from external en-/decoders\n");
+	fprintf(stderr, "    -r          show real-time stream information on stdout\n");
 	fprintf(stderr, "    -s file     read lines from file, shuffle, print to STDOUT, then exit\n");
 	fprintf(stderr, "    -V          print the version number and exit\n");
-	fprintf(stderr, "    -v          verbose output (use twice for more effect)\n");
+	fprintf(stderr, "    -v          increase logging verbosity\n");
 }
 
 static void
@@ -121,6 +123,9 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 			_usage_help();
 			*ret_p = 0;
 			return (-1);
+		case OPT_RTSTATUS:
+			cfg_set_program_rtstatus_output(1, NULL);
+			/* FALLTHROUGH */
 		case OPT_QUIETSTDERR:
 			cfg_set_program_quiet_stderr(1, NULL);
 			break;

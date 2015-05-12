@@ -75,6 +75,7 @@ int	cfg_set_program_name(const char *, const char **);
 int	cfg_set_program_config_type(enum cfg_config_type, const char **);
 int	cfg_set_program_config_file(const char *, const char **);
 int	cfg_set_program_quiet_stderr(int, const char **);
+int	cfg_set_program_rtstatus_output(int, const char **);
 int	cfg_set_program_verbosity(unsigned int, const char **);
 
 int	cfg_set_server_protocol(const char *, const char **);
@@ -119,6 +120,7 @@ enum cfg_config_type
 const char *
 	cfg_get_program_config_file(void);
 int	cfg_get_program_quiet_stderr(void);
+int	cfg_get_program_rtstatus_output(void);
 unsigned int
 	cfg_get_program_verbosity(void);
 

@@ -7,6 +7,8 @@ Changes in X.X.X, released on XXXX-XX-XX:
    to be provided.
  * The command line options -m and -n have been removed, and new configuration
    file settings have been added accordingly.
+ * The real-time status information is now enabled explicitly with the new
+   command line option -r.
  * The configuration file structure has changed.
 
 

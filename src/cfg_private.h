@@ -35,6 +35,7 @@ struct cfg {
 		enum cfg_config_type	 config_type;
 		char			 config_file[PATH_MAX];
 		int			 quiet_stderr;
+		int			 rtstatus_output;
 		unsigned int		 verbosity;
 	} program;
 	struct server {

@@ -758,8 +758,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		}
 
 		total += bytes_read;
-		if (cfg_get_program_quiet_stderr() &&
-		    cfg_get_program_verbosity()) {
+		if (cfg_get_program_rtstatus_output()) {
 			double	oldTime, newTime;
 
 			if (!isStdin && playlistMode) {
