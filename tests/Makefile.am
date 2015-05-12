@@ -22,6 +22,4 @@ AM_CPPFLAGS	 = @EZ_CPPFLAGS@ \
 AM_CFLAGS	 = @EZ_CFLAGS@ @CHECK_CFLAGS@
 AM_LDFLAGS	 = @EZ_LDFLAGS@
 
-EXTRA_DIST	 = compat.h
-
 CLEANFILES	 = *~ *.core core *.gcno *.gcda
