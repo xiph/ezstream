@@ -366,7 +366,6 @@ After streaming all media input, exit.
 .Ss Metadata block
 .Bl -tag -width -Ds
 .It Sy \&<metadata\ /\&>
-.Pq Mandatory.
 This element contains the entire metadata configuration as child elements.
 Its parent is the
 .Sy \&<ezstream\ /\&>
