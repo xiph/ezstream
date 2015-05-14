@@ -56,6 +56,8 @@ _cfg_reset(struct cfg *c)
 	xfree(c->metadata.format_str);
 
 	memset(c, 0, sizeof(*c));
+
+	c->metadata.refresh_interval = -1;
 }
 
 static void
@@ -517,7 +519,7 @@ cfg_set_metadata_format_str(const char *format_str, const char **errstrp)
 int
 cfg_set_metadata_refresh_interval(const char *num_str, const char **errstrp)
 {
-	SET_UINTNUM(cfg.metadata.refresh_interval, num_str, errstrp);
+	SET_INTNUM(cfg.metadata.refresh_interval, num_str, errstrp);
 	return (0);
 }
 
@@ -756,7 +758,7 @@ cfg_get_metadata_format_str(void)
 	return (cfg.metadata.format_str);
 }
 
-unsigned int
+int
 cfg_get_metadata_refresh_interval(void)
 {
 	return (cfg.metadata.refresh_interval);

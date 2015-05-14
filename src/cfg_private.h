@@ -73,7 +73,7 @@ struct cfg {
 	struct metadata {
 		char			 program[PATH_MAX];
 		char			*format_str;
-		unsigned int		 refresh_interval;
+		int			 refresh_interval;
 		int			 normalize_strings;
 		int			 no_updates;
 	} metadata;
@@ -138,6 +138,25 @@ struct cfg {
 	}						\
 							\
 	num = strtonum((s), 0, UINT_MAX, &errstr);	\
+	if (errstr) {					\
+		if ((e))				\
+			*(e) = errstr;			\
+		return (-1);				\
+	}						\
+	(t) = num;					\
+} while (0)
+
+#define SET_INTNUM(t, s, e)	do {			\
+	const char	*errstr;			\
+	unsigned int	 num;				\
+							\
+	if (!(s) || !(s)[0]) {				\
+		if ((e))				\
+			*(e) = "empty"; 		\
+		return (-1);				\
+	}						\
+							\
+	num = strtonum((s), INT_MIN, INT_MAX, &errstr); \
 	if (errstr) {					\
 		if ((e))				\
 			*(e) = errstr;			\

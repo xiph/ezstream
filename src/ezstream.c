@@ -747,7 +747,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 		ez_gettimeofday((void *)&currentTime);
 
 		if (queryMetadata ||
-		    (cfg_get_metadata_refresh_interval() &&
+		    (0 <= cfg_get_metadata_refresh_interval() &&
 			(currentTime.tv_sec - callTime.tv_sec >=
 			    cfg_get_metadata_refresh_interval()))) {
 			queryMetadata = 0;

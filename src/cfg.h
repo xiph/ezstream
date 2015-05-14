@@ -182,8 +182,7 @@ const char *
 	cfg_get_metadata_program(void);
 const char *
 	cfg_get_metadata_format_str(void);
-unsigned int
-	cfg_get_metadata_refresh_interval(void);
+int	cfg_get_metadata_refresh_interval(void);
 int	cfg_get_metadata_normalize_strings(void);
 int	cfg_get_metadata_no_updates(void);
 
