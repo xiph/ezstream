@@ -62,8 +62,10 @@ enum cfg_stream_format {
 #include "cfg_decoder.h"
 #include "cfg_encoder.h"
 
-int	cfg_reload(void);
+int	cfg_init(void);
 void	cfg_exit(void);
+
+int	cfg_reload(void);
 
 int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
 const char *

@@ -1007,7 +1007,8 @@ main(int argc, char *argv[])
 	unsigned int	 i;
 #endif
 	ret = 1;
-	if (0 > cmdline_parse(argc, argv, &ret) ||
+	if (0 > cfg_init() ||
+	    0 > cmdline_parse(argc, argv, &ret) ||
 	    0 > log_init() ||
 	    0 > cfg_decoder_init() ||
 	    0 > cfg_encoder_init() ||

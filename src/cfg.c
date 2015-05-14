@@ -118,6 +118,18 @@ _cfg_load(void)
 }
 
 int
+cfg_init(void)
+{
+	_cfg_reset(&cfg);
+}
+
+void
+cfg_exit(void)
+{
+	_cfg_reset(&cfg);
+}
+
+int
 cfg_reload(void)
 {
 	_cfg_copy(&cfg_tmp, &cfg);
@@ -130,12 +142,6 @@ cfg_reload(void)
 	_cfg_reset(&cfg_tmp);
 
 	return (0);
-}
-
-void
-cfg_exit(void)
-{
-	_cfg_reset(&cfg);
 }
 
 int
