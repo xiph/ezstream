@@ -45,10 +45,17 @@ if test x"${ez_enable_debug}" = "xyes"; then
 fi
 AC_MSG_RESULT([$ez_enable_debug])
 
+AC_PROG_LIBTOOL
+AC_SUBST([LIBTOOL_DEPS])
+
 EZ_CFLAGS=""
 EZ_CPPFLAGS=""
 EZ_LDFLAGS=""
 EZ_LIBS=""
+
+AC_SYS_LARGEFILE
+
+PKG_CHECK_MODULES([CHECK], [check >= 0.9.4])
 
 
 dnl ##############
@@ -290,6 +297,7 @@ AC_CONFIG_FILES([
 	src/Makefile
 	src/attr_config.h
 	src/ezstream-file.sh
+	tests/Makefile
 ])
 
 AC_OUTPUT
