@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ezstream>
+
+  <server>
+    <protocol>https</protocol>
+    <hostname>127.0.0.1</hostname>
+    <port>8000</port>
+    <user>source</user>
+    <password>hackme</password>
+    <ca_dir>/tmp</ca_dir>
+    <ca_file>/tmp/ca.crt</ca_file>
+    <client_cert>client.crt</client_cert>
+    <client_key>client.key</client_key>
+    <reconnect_attempts>10</reconnect_attempts>
+  </server>
+
+  <stream>
+    <mountpoint>/stream.ogg</mountpoint>
+    <format>VORBIS</format>
+    <encoder>OggEnc-Q1.5</encoder>
+    <name>Test</name>
+    <url>http://localhost</url>
+    <genre>Test Tones</genre>
+    <description>A variation of test tones.</description>
+    <quality>6</quality>
+    <bitrate>24</bitrate>
+    <samplerate>96000</samplerate>
+    <channels>8</channels>
+    <server_public>False</server_public>
+  </stream>
+
+  <media>
+    <type>Playlist</type>
+    <filename>playlist.m3u</filename>
+    <shuffle>True</shuffle>
+    <stream_once>False</stream_once>
+  </media>
+
+  <metadata>
+    <program>metadata.sh</program>
+    <format_str>@A@ - @T@</format_str>
+    <refresh_interval>-1</refresh_interval>
+    <normalize_strings>True</normalize_strings>
+    <no_updates>False</no_updates>
+  </metadata>
+
+  <decoders>
+    <decoder>
+      <name>Universal</name>
+      <program>oggdec -R -o - @T@</program>
+      <file_ext>.ogg</file_ext>
+      <file_ext>.oga</file_ext>
+    </decoder>
+  </decoders>
+
+  <encoders>
+    <encoder>
+      <name>OggEnc-Q1.5</name>
+      <format>Vorbis</format>
+      <program>oggenc -r -q 1.5 -t @M@ -</program>
+    </encoder>
+  </encoders>
+
+</ezstream>

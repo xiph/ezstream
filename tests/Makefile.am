@@ -22,4 +22,11 @@ AM_CPPFLAGS	 = @EZ_CPPFLAGS@ \
 AM_CFLAGS	 = @EZ_CFLAGS@ @CHECK_CFLAGS@
 AM_LDFLAGS	 = @EZ_LDFLAGS@
 
+EXTRA_DIST	 = \
+	config-bad.xml \
+	config-bad2.xml \
+	config-bad3.xml \
+	config-bad4.xml \
+	config-ok.xml
+
 CLEANFILES	 = *~ *.core core *.gcno *.gcda

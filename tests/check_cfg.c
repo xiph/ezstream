@@ -78,7 +78,45 @@
 	ck_assert_uint_eq(g(), 20);				\
 } while (0)
 
+#define TEST_INTNUM(s, g)	do {				\
+	const char	*errstr2;				\
+								\
+	TEST_EMPTYSTR(s, g);					\
+								\
+	errstr2 = NULL; 					\
+	ck_assert_int_eq(s("-2147483649", &errstr2), -1);		\
+	ck_assert_ptr_ne(errstr2, NULL);			\
+								\
+	errstr2 = NULL; 					\
+	ck_assert_int_eq(s("2147483648", &errstr2), -1);	\
+	ck_assert_ptr_ne(errstr2, NULL);			\
+								\
+	ck_assert_int_eq(s("20", NULL), 0);			\
+	ck_assert_uint_eq(g(), 20);				\
+} while (0)
+
 Suite * cfg_suite(void);
+
+START_TEST(test_reload)
+{
+	ck_assert_int_eq(cfg_set_program_config_file("config-ok.xml", NULL),
+	    0);
+	ck_assert_int_eq(cfg_reload(), 0);
+	ck_assert_int_eq(cfg_reload(), 0);
+	ck_assert_int_eq(cfg_set_program_config_file("config-bad.xml", NULL),
+	    0);
+	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_set_program_config_file("config-bad2.xml", NULL),
+	    0);
+	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_set_program_config_file("config-bad3.xml", NULL),
+	    0);
+	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_set_program_config_file("config-bad4.xml", NULL),
+	    0);
+	ck_assert_int_eq(cfg_reload(), -1);
+}
+END_TEST
 
 START_TEST(test_stream_str2fmt)
 {
@@ -109,6 +147,7 @@ END_TEST
 START_TEST(test_file_check)
 {
 	ck_assert_int_eq(cfg_file_check(NULL), -1);
+	ck_assert_int_eq(cfg_file_check("check_cfg.c"), 0);
 }
 END_TEST
 
@@ -144,6 +183,13 @@ START_TEST(test_program_quiet_stderr)
 }
 END_TEST
 
+START_TEST(test_program_rtstatus_output)
+{
+	ck_assert_int_eq(cfg_set_program_rtstatus_output(-1, NULL), 0);
+	ck_assert_int_ne(cfg_get_program_rtstatus_output(), 0);
+}
+END_TEST
+
 START_TEST(test_program_verbosity)
 {
 	ck_assert_int_eq(cfg_set_program_verbosity(2000, NULL), 0);
@@ -163,8 +209,10 @@ START_TEST(test_server_protocol)
 
 	ck_assert_int_eq(cfg_set_server_protocol("hTtP", NULL), 0);
 	ck_assert_int_eq(cfg_get_server_protocol(), CFG_PROTO_HTTP);
+	ck_assert_str_eq(cfg_get_server_protocol_str(), "http");
 	ck_assert_int_eq(cfg_set_server_protocol("HtTpS", NULL), 0);
 	ck_assert_int_eq(cfg_get_server_protocol(), CFG_PROTO_HTTPS);
+	ck_assert_str_eq(cfg_get_server_protocol_str(), "https");
 }
 END_TEST
 
@@ -380,7 +428,9 @@ END_TEST
 
 START_TEST(test_metadata_refresh_interval)
 {
-	TEST_UINTNUM(cfg_set_metadata_refresh_interval,
+	ck_assert_int_eq(cfg_get_metadata_refresh_interval(), -1);
+
+	TEST_INTNUM(cfg_set_metadata_refresh_interval,
 	    cfg_get_metadata_refresh_interval);
 }
 END_TEST
@@ -408,6 +458,7 @@ cfg_suite(void)
 	s = suite_create("Config");
 
 	tc_core = tcase_create("Core");
+	tcase_add_test(tc_core, test_reload);
 	tcase_add_test(tc_core, test_stream_str2fmt);
 	tcase_add_test(tc_core, test_stream_fmt2str);
 	tcase_add_test(tc_core, test_file_check);
@@ -415,6 +466,7 @@ cfg_suite(void)
 	tcase_add_test(tc_core, test_program_config_type);
 	tcase_add_test(tc_core, test_program_config_file);
 	tcase_add_test(tc_core, test_program_quiet_stderr);
+	tcase_add_test(tc_core, test_program_rtstatus_output);
 	tcase_add_test(tc_core, test_program_verbosity);
 	tcase_add_test(tc_core, test_server_protocol);
 	tcase_add_test(tc_core, test_server_hostname);
@@ -459,6 +511,10 @@ main(void)
 	Suite           *s;
 	SRunner         *sr;
 
+	(void)cfg_init();
+	(void)cfg_decoder_init();
+	(void)cfg_encoder_init();
+
 	s = cfg_suite();
 	sr = srunner_create(s);
 
@@ -466,6 +522,8 @@ main(void)
 	num_failed = srunner_ntests_failed(sr);
 	srunner_free(sr);
 
+	cfg_encoder_exit();
+	cfg_decoder_exit();
 	cfg_exit();
 
 	if (num_failed)
