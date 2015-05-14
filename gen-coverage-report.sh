@@ -21,8 +21,8 @@ fi
 
 rm -rf "$DESTDIR"
 
+make distclean || :
 ./configure CFLAGS='-O0 -fprofile-arcs -ftest-coverage'
-make clean
 make check
 
 mkdir -p $DESTDIR
@@ -34,5 +34,7 @@ genhtml --prefix . --output-directory $DESTDIR \
 	--branch-coverage --function-coverage \
 	--rc lcov_branch_coverage=1 \
     --title "Ezstream $VERSION" --legend --show-detail $DESTDIR/coverage.tmp
+
+make distclean
 
 echo "Coverage report available under $DESTDIR"
