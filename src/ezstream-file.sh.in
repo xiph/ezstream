@@ -21,10 +21,10 @@
 _myname="$(basename $0)"
 _filename_placeholder="%FILENAME%"
 
-_opt_string="hmnqT:Vv"
+_opt_string="hqrT:Vv"
 print_usage()
 {
-	echo "usage: ${_myname} [-hmnqVv] [-T cfg_template] [file ...]" >&2
+	echo "usage: ${_myname} [-hqrVv] [-T cfg_template] [file ...]" >&2
 }
 
 print_usage_help()
@@ -32,23 +32,22 @@ print_usage_help()
 	cat << __EOT >&2
 
   -h           print this help and exit
-  -m           [ezstream] disable metadata updates
-  -n           [ezstream] normalize metadata strings
   -q           [ezstream] suppress STDERR output from external en-/decoders
+  -r           [ezstream] show real-time stream information on stdout
   -T template  run ezstream using template for configuration
   -V           print the version number and exit
   -v           [ezstream] verbose output (use twice for more effect)
 
 The configuration template must contain the configuration statement
         <filename>${_filename_placeholder}</filename>
+inside the <media /> block.
 
 See the ezstream-file.sh(1) manual for detailed information.
 __EOT
 }
 
-_metadisable=""
-_normalize=""
 _quiet=""
+_rtstatus=""
 _verbose=""
 _cfg_template="${EZSTREAM_TEMPLATE}"
 
@@ -66,12 +65,10 @@ do
 		print_usage_help
 		exit 0
 		;;
-	-m)
-		_metadisable="-m"; shift ;;
-	-n)
-		_normalize="-n"; shift ;;
 	-q)
 		_quiet="-q"; shift ;;
+	-r)
+		_rtstatus="-r"; shift ;;
 	-T)
 		_cfg_template="$2"; shift; shift ;;
 	-V)
@@ -144,6 +141,6 @@ else
 	done
 fi
 
-${EZSTREAM} ${_metadisable} ${_normalize} ${_quiet} ${_verbose} -c "${_cfg}"
+${EZSTREAM} ${_quiet} ${_rtstatus} ${_verbose} -c "${_cfg}"
 
 exit $?

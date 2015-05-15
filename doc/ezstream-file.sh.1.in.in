@@ -21,7 +21,7 @@
 .Sh SYNOPSIS
 .Nm
 .Bk -words
-.Op Fl hmnqVv
+.Op Fl hqrVv
 .Op Fl T Ar cfg_template
 .Op Ar
 .Ek
@@ -42,7 +42,7 @@ command line argument, or the
 environment variable.
 .Pp
 The configuration template must be a valid playlist configuration, and contain
-the follwing configuration statement:
+the follwing configuration statement inside the \&<media\ /\&> block:
 .Bd -literal -offset indent
 \&<filename\&>%FILENAME%\&</filename\&>
 .Ed
@@ -60,18 +60,6 @@ binary.
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
-.It Fl m
-.Po
-Passed to
-.Nm ezstream .
-.Pc
-Disable all metadata updates and keep existing metadata in streams untouched.
-.It Fl n
-.Po
-Passed to
-.Nm ezstream .
-.Pc
-Normalize metadata strings by removing excess whitespaces.
 .It Fl q
 .Po
 Passed to
@@ -79,6 +67,14 @@ Passed to
 .Pc
 Be more quiet.
 Suppress the output that external programs send to standard error.
+.It Fl r
+.Po
+Passed to
+.Nm ezstream .
+.Pc
+Show a real-time stream status information line on standard output.
+Implies
+.Fl q .
 .It Fl T Ar cfg_template
 Use the configuration in
 .Ar cfg_template ,
