@@ -99,21 +99,21 @@ Suite * cfg_suite(void);
 
 START_TEST(test_reload)
 {
-	ck_assert_int_eq(cfg_set_program_config_file("config-ok.xml", NULL),
-	    0);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-ok.xml",
+	    NULL), 0);
 	ck_assert_int_eq(cfg_reload(), 0);
 	ck_assert_int_eq(cfg_reload(), 0);
-	ck_assert_int_eq(cfg_set_program_config_file("config-bad.xml", NULL),
-	    0);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad.xml",
+	    NULL), 0);
 	ck_assert_int_eq(cfg_reload(), -1);
-	ck_assert_int_eq(cfg_set_program_config_file("config-bad2.xml", NULL),
-	    0);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad2.xml",
+	    NULL), 0);
 	ck_assert_int_eq(cfg_reload(), -1);
-	ck_assert_int_eq(cfg_set_program_config_file("config-bad3.xml", NULL),
-	    0);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad3.xml",
+	    NULL), 0);
 	ck_assert_int_eq(cfg_reload(), -1);
-	ck_assert_int_eq(cfg_set_program_config_file("config-bad4.xml", NULL),
-	    0);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad4.xml",
+	    NULL), 0);
 	ck_assert_int_eq(cfg_reload(), -1);
 }
 END_TEST
@@ -147,7 +147,7 @@ END_TEST
 START_TEST(test_file_check)
 {
 	ck_assert_int_eq(cfg_file_check(NULL), -1);
-	ck_assert_int_eq(cfg_file_check("check_cfg.c"), 0);
+	ck_assert_int_eq(cfg_file_check(SRCDIR "/check_cfg.c"), 0);
 }
 END_TEST
 

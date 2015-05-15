@@ -19,7 +19,7 @@ AM_CPPFLAGS	 = @EZ_CPPFLAGS@ \
 	-I$(top_srcdir)/compat \
 	-I$(top_srcdir)/src \
 	-I$(top_builddir)/src
-AM_CFLAGS	 = @EZ_CFLAGS@ @CHECK_CFLAGS@
+AM_CFLAGS	 = @EZ_CFLAGS@ @CHECK_CFLAGS@ -DSRCDIR="\"$(srcdir)\""
 AM_LDFLAGS	 = @EZ_LDFLAGS@
 
 EXTRA_DIST	 = \
