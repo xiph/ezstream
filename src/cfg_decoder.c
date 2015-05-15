@@ -87,6 +87,8 @@ cfg_decoder_get(const char *name)
 	d->name = xstrdup(name);
 	TAILQ_INIT(&d->exts);
 
+	TAILQ_INSERT_TAIL(&cfg_decoders, d, entry);
+
 	return (d);
 }
 

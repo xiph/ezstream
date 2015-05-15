@@ -449,11 +449,37 @@ START_TEST(test_metadata_no_updates)
 }
 END_TEST
 
+START_TEST(test_decoder_get)
+{
+	cfg_decoder_t	dec, dec2;
+
+	ck_assert_ptr_eq(cfg_decoder_get(NULL), NULL);
+	ck_assert_ptr_eq(cfg_decoder_get(""), NULL);
+
+	dec = cfg_decoder_get("TeSt");
+	dec2 = cfg_decoder_get("test");
+	ck_assert_ptr_eq(dec, dec2);
+}
+END_TEST
+
+START_TEST(test_encoder_get)
+{
+	cfg_encoder_t	enc, enc2;
+
+	ck_assert_ptr_eq(cfg_encoder_get(NULL), NULL);
+	ck_assert_ptr_eq(cfg_encoder_get(""), NULL);
+
+	enc = cfg_encoder_get("TeSt");
+	enc2 = cfg_encoder_get("test");
+	ck_assert_ptr_eq(enc, enc2);
+}
+END_TEST
+
 Suite *
 cfg_suite(void)
 {
 	Suite   *s;
-	TCase   *tc_core;
+	TCase   *tc_core, *tc_decoder, *tc_encoder;
 
 	s = suite_create("Config");
 
@@ -500,6 +526,14 @@ cfg_suite(void)
 	tcase_add_test(tc_core, test_metadata_normalize_strings);
 	tcase_add_test(tc_core, test_metadata_no_updates);
 	suite_add_tcase(s, tc_core);
+
+	tc_decoder = tcase_create("Decoder");
+	tcase_add_test(tc_decoder, test_decoder_get);
+	suite_add_tcase(s, tc_decoder);
+
+	tc_encoder = tcase_create("Encoder");
+	tcase_add_test(tc_encoder, test_encoder_get);
+	suite_add_tcase(s, tc_encoder);
 
 	return (s);
 }

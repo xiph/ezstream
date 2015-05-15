@@ -73,6 +73,8 @@ cfg_encoder_get(const char *name)
 	e = xcalloc(1UL, sizeof(*e));
 	e->name = xstrdup(name);
 
+	TAILQ_INSERT_TAIL(&cfg_encoders, e, entry);
+
 	return (e);
 }
 
