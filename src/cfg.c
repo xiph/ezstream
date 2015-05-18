@@ -137,6 +137,7 @@ cfg_reload(void)
 		/* roll back */
 		_cfg_reset(&cfg);
 		_cfg_copy(&cfg, &cfg_tmp);
+		_cfg_reset(&cfg_tmp);
 		return (-1);
 	}
 	_cfg_reset(&cfg_tmp);
