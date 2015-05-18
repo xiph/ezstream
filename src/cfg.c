@@ -121,6 +121,7 @@ int
 cfg_init(void)
 {
 	_cfg_reset(&cfg);
+	return (0);
 }
 
 void
