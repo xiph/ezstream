@@ -3,6 +3,7 @@
 #include <netdb.h>
 
 #include "cfg_private.h"
+#include "log.h"
 
 #define TEST_EMPTYSTR(s, g)     do {                    \
 	const char	*errstr;			\
@@ -462,6 +463,34 @@ START_TEST(test_decoder_get)
 }
 END_TEST
 
+#define TEST_DEC_XSTRDUP(s, g)	do {			\
+	cfg_decoder_t	 dec = cfg_decoder_get(#s);	\
+	const char	*errstr;			\
+							\
+	errstr = NULL;					\
+	ck_assert_int_ne(s(dec, NULL, &errstr), 0);	\
+	ck_assert_str_eq(errstr, "empty");		\
+	ck_assert_int_ne(s(dec, "", NULL), 0);		\
+							\
+	ck_assert_int_eq(s(dec, "test", NULL), 0);	\
+	ck_assert_str_eq(g(dec), "test");		\
+							\
+	ck_assert_int_eq(s(dec, #s, NULL), 0);		\
+	ck_assert_str_eq(g(dec), #s);			\
+} while (0)
+
+START_TEST(test_decoder_set_name)
+{
+	TEST_DEC_XSTRDUP(cfg_decoder_set_name, cfg_decoder_get_name);
+}
+END_TEST
+
+START_TEST(test_decoder_set_program)
+{
+	TEST_DEC_XSTRDUP(cfg_decoder_set_program, cfg_decoder_get_program);
+}
+END_TEST
+
 START_TEST(test_encoder_get)
 {
 	cfg_encoder_t	enc, enc2;
@@ -472,6 +501,34 @@ START_TEST(test_encoder_get)
 	enc = cfg_encoder_get("TeSt");
 	enc2 = cfg_encoder_get("test");
 	ck_assert_ptr_eq(enc, enc2);
+}
+END_TEST
+
+#define TEST_ENC_XSTRDUP(s, g)	do {			\
+	cfg_encoder_t	 dec = cfg_encoder_get(#s);	\
+	const char	*errstr;			\
+							\
+	errstr = NULL;					\
+	ck_assert_int_ne(s(dec, NULL, &errstr), 0);	\
+	ck_assert_str_eq(errstr, "empty");		\
+	ck_assert_int_ne(s(dec, "", NULL), 0);		\
+							\
+	ck_assert_int_eq(s(dec, "test", NULL), 0);	\
+	ck_assert_str_eq(g(dec), "test");		\
+							\
+	ck_assert_int_eq(s(dec, #s, NULL), 0);		\
+	ck_assert_str_eq(g(dec), #s);			\
+} while (0)
+
+START_TEST(test_encoder_set_name)
+{
+	TEST_ENC_XSTRDUP(cfg_encoder_set_name, cfg_encoder_get_name);
+}
+END_TEST
+
+START_TEST(test_encoder_set_program)
+{
+	TEST_ENC_XSTRDUP(cfg_encoder_set_program, cfg_encoder_get_program);
 }
 END_TEST
 
@@ -529,10 +586,14 @@ cfg_suite(void)
 
 	tc_decoder = tcase_create("Decoder");
 	tcase_add_test(tc_decoder, test_decoder_get);
+	tcase_add_test(tc_decoder, test_decoder_set_name);
+	tcase_add_test(tc_decoder, test_decoder_set_program);
 	suite_add_tcase(s, tc_decoder);
 
 	tc_encoder = tcase_create("Encoder");
 	tcase_add_test(tc_encoder, test_encoder_get);
+	tcase_add_test(tc_decoder, test_encoder_set_name);
+	tcase_add_test(tc_decoder, test_encoder_set_program);
 	suite_add_tcase(s, tc_encoder);
 
 	return (s);
@@ -548,6 +609,7 @@ main(void)
 	(void)cfg_init();
 	(void)cfg_decoder_init();
 	(void)cfg_encoder_init();
+	(void)log_init();
 
 	s = cfg_suite();
 	sr = srunner_create(s);
@@ -556,6 +618,7 @@ main(void)
 	num_failed = srunner_ntests_failed(sr);
 	srunner_free(sr);
 
+	log_exit();
 	cfg_encoder_exit();
 	cfg_decoder_exit();
 	cfg_exit();
