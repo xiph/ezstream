@@ -97,6 +97,8 @@
 } while (0)
 
 Suite * cfg_suite(void);
+void	setup_checked(void);
+void	teardown_checked(void);
 
 START_TEST(test_reload)
 {
@@ -535,68 +537,121 @@ END_TEST
 Suite *
 cfg_suite(void)
 {
-	Suite   *s;
-	TCase   *tc_core, *tc_decoder, *tc_encoder;
+	Suite	*s;
+	TCase	*tc_core;
+	TCase	*tc_program;
+	TCase	*tc_server;
+	TCase	*tc_stream;
+	TCase	*tc_media;
+	TCase	*tc_metadata;
+	TCase	*tc_decoder;
+	TCase	*tc_encoder;
 
 	s = suite_create("Config");
 
 	tc_core = tcase_create("Core");
+	tcase_add_checked_fixture(tc_core, setup_checked, teardown_checked);
 	tcase_add_test(tc_core, test_reload);
 	tcase_add_test(tc_core, test_stream_str2fmt);
 	tcase_add_test(tc_core, test_stream_fmt2str);
 	tcase_add_test(tc_core, test_file_check);
-	tcase_add_test(tc_core, test_program_name);
-	tcase_add_test(tc_core, test_program_config_type);
-	tcase_add_test(tc_core, test_program_config_file);
-	tcase_add_test(tc_core, test_program_quiet_stderr);
-	tcase_add_test(tc_core, test_program_rtstatus_output);
-	tcase_add_test(tc_core, test_program_verbosity);
-	tcase_add_test(tc_core, test_server_protocol);
-	tcase_add_test(tc_core, test_server_hostname);
-	tcase_add_test(tc_core, test_server_port);
-	tcase_add_test(tc_core, test_server_user);
-	tcase_add_test(tc_core, test_server_password);
-	tcase_add_test(tc_core, test_server_ca_dir);
-	tcase_add_test(tc_core, test_server_ca_file);
-	tcase_add_test(tc_core, test_server_client_cert);
-	tcase_add_test(tc_core, test_server_client_key);
-	tcase_add_test(tc_core, test_server_reconnect_attempts);
-	tcase_add_test(tc_core, test_stream_mountpoint);
-	tcase_add_test(tc_core, test_stream_name);
-	tcase_add_test(tc_core, test_stream_url);
-	tcase_add_test(tc_core, test_stream_genre);
-	tcase_add_test(tc_core, test_stream_description);
-	tcase_add_test(tc_core, test_stream_quality);
-	tcase_add_test(tc_core, test_stream_bitrate);
-	tcase_add_test(tc_core, test_stream_samplerate);
-	tcase_add_test(tc_core, test_stream_channels);
-	tcase_add_test(tc_core, test_stream_server_public);
-	tcase_add_test(tc_core, test_stream_format);
-	tcase_add_test(tc_core, test_stream_encoder);
-	tcase_add_test(tc_core, test_media_type);
-	tcase_add_test(tc_core, test_media_filename);
-	tcase_add_test(tc_core, test_media_shuffle);
-	tcase_add_test(tc_core, test_media_stream_once);
-	tcase_add_test(tc_core, test_metadata_program);
-	tcase_add_test(tc_core, test_metadata_format_str);
-	tcase_add_test(tc_core, test_metadata_refresh_interval);
-	tcase_add_test(tc_core, test_metadata_normalize_strings);
-	tcase_add_test(tc_core, test_metadata_no_updates);
 	suite_add_tcase(s, tc_core);
 
+	tc_program = tcase_create("Program");
+	tcase_add_checked_fixture(tc_program, setup_checked,
+	    teardown_checked);
+	tcase_add_test(tc_program, test_program_name);
+	tcase_add_test(tc_program, test_program_config_type);
+	tcase_add_test(tc_program, test_program_config_file);
+	tcase_add_test(tc_program, test_program_quiet_stderr);
+	tcase_add_test(tc_program, test_program_rtstatus_output);
+	tcase_add_test(tc_program, test_program_verbosity);
+	suite_add_tcase(s, tc_program);
+
+	tc_server = tcase_create("Server");
+	tcase_add_checked_fixture(tc_server, setup_checked, teardown_checked);
+	tcase_add_test(tc_server, test_server_protocol);
+	tcase_add_test(tc_server, test_server_hostname);
+	tcase_add_test(tc_server, test_server_port);
+	tcase_add_test(tc_server, test_server_user);
+	tcase_add_test(tc_server, test_server_password);
+	tcase_add_test(tc_server, test_server_ca_dir);
+	tcase_add_test(tc_server, test_server_ca_file);
+	tcase_add_test(tc_server, test_server_client_cert);
+	tcase_add_test(tc_server, test_server_client_key);
+	tcase_add_test(tc_server, test_server_reconnect_attempts);
+	suite_add_tcase(s, tc_server);
+
+	tc_stream = tcase_create("Stream");
+	tcase_add_checked_fixture(tc_stream, setup_checked, teardown_checked);
+	tcase_add_test(tc_stream, test_stream_mountpoint);
+	tcase_add_test(tc_stream, test_stream_name);
+	tcase_add_test(tc_stream, test_stream_url);
+	tcase_add_test(tc_stream, test_stream_genre);
+	tcase_add_test(tc_stream, test_stream_description);
+	tcase_add_test(tc_stream, test_stream_quality);
+	tcase_add_test(tc_stream, test_stream_bitrate);
+	tcase_add_test(tc_stream, test_stream_samplerate);
+	tcase_add_test(tc_stream, test_stream_channels);
+	tcase_add_test(tc_stream, test_stream_server_public);
+	tcase_add_test(tc_stream, test_stream_format);
+	tcase_add_test(tc_stream, test_stream_encoder);
+	suite_add_tcase(s, tc_stream);
+
+	tc_media = tcase_create("Media");
+	tcase_add_checked_fixture(tc_media, setup_checked, teardown_checked);
+	tcase_add_test(tc_media, test_media_type);
+	tcase_add_test(tc_media, test_media_filename);
+	tcase_add_test(tc_media, test_media_shuffle);
+	tcase_add_test(tc_media, test_media_stream_once);
+	suite_add_tcase(s, tc_media);
+
+	tc_metadata = tcase_create("Metadata");
+	tcase_add_checked_fixture(tc_metadata, setup_checked,
+	    teardown_checked);
+	tcase_add_test(tc_metadata, test_metadata_program);
+	tcase_add_test(tc_metadata, test_metadata_format_str);
+	tcase_add_test(tc_metadata, test_metadata_refresh_interval);
+	tcase_add_test(tc_metadata, test_metadata_normalize_strings);
+	tcase_add_test(tc_metadata, test_metadata_no_updates);
+	suite_add_tcase(s, tc_metadata);
+
 	tc_decoder = tcase_create("Decoder");
+	tcase_add_checked_fixture(tc_decoder, setup_checked,
+	    teardown_checked);
 	tcase_add_test(tc_decoder, test_decoder_get);
 	tcase_add_test(tc_decoder, test_decoder_set_name);
 	tcase_add_test(tc_decoder, test_decoder_set_program);
 	suite_add_tcase(s, tc_decoder);
 
 	tc_encoder = tcase_create("Encoder");
+	tcase_add_checked_fixture(tc_encoder, setup_checked,
+	    teardown_checked);
 	tcase_add_test(tc_encoder, test_encoder_get);
 	tcase_add_test(tc_decoder, test_encoder_set_name);
 	tcase_add_test(tc_decoder, test_encoder_set_program);
 	suite_add_tcase(s, tc_encoder);
 
 	return (s);
+}
+
+void
+setup_checked(void)
+{
+	if (0 < cfg_init() ||
+	    0 < cfg_decoder_init() ||
+	    0 < cfg_encoder_init() ||
+	    0 < log_init())
+		ck_abort_msg("setup_checked failed");
+}
+
+void
+teardown_checked(void)
+{
+	log_exit();
+	cfg_encoder_exit();
+	cfg_decoder_exit();
+	cfg_exit();
 }
 
 int
@@ -606,22 +661,12 @@ main(void)
 	Suite           *s;
 	SRunner         *sr;
 
-	(void)cfg_init();
-	(void)cfg_decoder_init();
-	(void)cfg_encoder_init();
-	(void)log_init();
-
 	s = cfg_suite();
 	sr = srunner_create(s);
 
 	srunner_run_all(sr, CK_NORMAL);
 	num_failed = srunner_ntests_failed(sr);
 	srunner_free(sr);
-
-	log_exit();
-	cfg_encoder_exit();
-	cfg_decoder_exit();
-	cfg_exit();
 
 	if (num_failed)
 		return (1);
