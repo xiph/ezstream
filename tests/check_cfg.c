@@ -149,7 +149,7 @@ END_TEST
 
 START_TEST(test_file_check)
 {
-	ck_assert_int_eq(cfg_file_check(NULL), -1);
+	ck_assert_int_eq(cfg_file_check(""), -1);
 	ck_assert_int_eq(cfg_file_check(SRCDIR "/check_cfg.c"), 0);
 }
 END_TEST
