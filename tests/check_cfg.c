@@ -507,19 +507,19 @@ START_TEST(test_encoder_get)
 END_TEST
 
 #define TEST_ENC_XSTRDUP(s, g)	do {			\
-	cfg_encoder_t	 dec = cfg_encoder_get(#s);	\
+	cfg_encoder_t	 enc = cfg_encoder_get(#s);	\
 	const char	*errstr;			\
 							\
 	errstr = NULL;					\
-	ck_assert_int_ne(s(dec, NULL, &errstr), 0);	\
+	ck_assert_int_ne(s(enc, NULL, &errstr), 0);	\
 	ck_assert_str_eq(errstr, "empty");		\
-	ck_assert_int_ne(s(dec, "", NULL), 0);		\
+	ck_assert_int_ne(s(enc, "", NULL), 0);		\
 							\
-	ck_assert_int_eq(s(dec, "test", NULL), 0);	\
-	ck_assert_str_eq(g(dec), "test");		\
+	ck_assert_int_eq(s(enc, "test", NULL), 0);	\
+	ck_assert_str_eq(g(enc), "test");		\
 							\
-	ck_assert_int_eq(s(dec, #s, NULL), 0);		\
-	ck_assert_str_eq(g(dec), #s);			\
+	ck_assert_int_eq(s(enc, #s, NULL), 0);		\
+	ck_assert_str_eq(g(enc), #s);			\
 } while (0)
 
 START_TEST(test_encoder_set_name)
