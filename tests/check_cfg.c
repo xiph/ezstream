@@ -422,10 +422,36 @@ END_TEST
 
 START_TEST(test_metadata_format_str)
 {
+	const char	*errstr2;
+
 	TEST_XSTRDUP(cfg_set_metadata_format_str,
 	    cfg_get_metadata_format_str);
 
-	/* XXX: Missing CHECKPH tests */
+	errstr2 = NULL;
+	ck_assert_int_eq(cfg_set_metadata_format_str(PLACEHOLDER_METADATA,
+	    &errstr2), -1);
+	ck_assert_str_eq(errstr2,
+	    "prohibited placeholder " PLACEHOLDER_METADATA);
+
+	errstr2 = NULL;
+	ck_assert_int_eq(cfg_set_metadata_format_str(
+	    PLACEHOLDER_TRACK PLACEHOLDER_TRACK, &errstr2), -1);
+	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_TRACK);
+
+	errstr2 = NULL;
+	ck_assert_int_eq(cfg_set_metadata_format_str(
+	    PLACEHOLDER_STRING PLACEHOLDER_STRING, &errstr2), -1);
+	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_STRING);
+
+	errstr2 = NULL;
+	ck_assert_int_eq(cfg_set_metadata_format_str(
+	    PLACEHOLDER_ARTIST PLACEHOLDER_ARTIST, &errstr2), -1);
+	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_ARTIST);
+
+	errstr2 = NULL;
+	ck_assert_int_eq(cfg_set_metadata_format_str(
+	    PLACEHOLDER_TITLE PLACEHOLDER_TITLE, &errstr2), -1);
+	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_TITLE);
 }
 END_TEST
 
@@ -493,6 +519,90 @@ START_TEST(test_decoder_set_program)
 }
 END_TEST
 
+START_TEST(test_decoder_add_match)
+{
+	cfg_decoder_t	 dec = cfg_decoder_get("test_decoder_add_match");
+	cfg_decoder_t	 dec2 = cfg_decoder_get("test_decoder_add_match_2");
+	const char	*errstr;
+
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_add_match(dec, NULL, &errstr), 0);
+	ck_assert_str_eq(errstr, "empty");
+	ck_assert_int_ne(cfg_decoder_add_match(dec, "", NULL), 0);
+
+	ck_assert_int_eq(cfg_decoder_add_match(dec, ".test", NULL), 0);
+	ck_assert_int_eq(cfg_decoder_add_match(dec, ".test2", NULL), 0);
+	ck_assert_ptr_eq(cfg_decoder_find(".test"), dec);
+	ck_assert_ptr_eq(cfg_decoder_find(".test2"), dec);
+
+	ck_assert_int_eq(cfg_decoder_add_match(dec2, ".test2", NULL), 0);
+	ck_assert_ptr_eq(cfg_decoder_find(".test"), dec);
+	ck_assert_ptr_eq(cfg_decoder_find(".test2"), dec2);
+}
+END_TEST
+
+START_TEST(test_decoder_validate)
+{
+	cfg_decoder_t	 dec = cfg_decoder_get("test_decoder_validate");
+	const char	*errstr;
+
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr, "program not set");
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec, "test", NULL), 0);
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr, "no file extensions registered");
+
+	ck_assert_int_eq(cfg_decoder_add_match(dec, ".test", NULL), 0);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec, PLACEHOLDER_STRING,
+	    NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "prohibited placeholder " PLACEHOLDER_STRING);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec,
+	    PLACEHOLDER_TRACK PLACEHOLDER_TRACK, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_TRACK);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec,
+	    PLACEHOLDER_METADATA PLACEHOLDER_METADATA, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_METADATA);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec,
+	    PLACEHOLDER_ARTIST PLACEHOLDER_ARTIST, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_ARTIST);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec,
+	    PLACEHOLDER_TITLE PLACEHOLDER_TITLE, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_TITLE);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec, "test", NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_decoder_validate(dec, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "missing placeholder " PLACEHOLDER_TRACK);
+
+	ck_assert_int_eq(cfg_decoder_set_program(dec, PLACEHOLDER_TRACK, NULL),
+	    0);
+	ck_assert_int_eq(cfg_decoder_validate(dec, &errstr), 0);
+}
+END_TEST
+
 START_TEST(test_encoder_get)
 {
 	cfg_encoder_t	enc, enc2;
@@ -531,6 +641,85 @@ END_TEST
 START_TEST(test_encoder_set_program)
 {
 	TEST_ENC_XSTRDUP(cfg_encoder_set_program, cfg_encoder_get_program);
+}
+END_TEST
+
+START_TEST(test_encoder_set_format_str)
+{
+	cfg_encoder_t	 enc = cfg_encoder_get("test_encoder_set_format_str");
+	const char	*errstr;
+
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_set_format_str(enc, NULL, &errstr), 0);
+	ck_assert_str_eq(errstr, "empty");
+	ck_assert_int_ne(cfg_encoder_set_format_str(enc, "", NULL), 0);
+
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_set_format_str(enc, "test", &errstr), 0);
+	ck_assert_str_eq(errstr, "unsupported stream format");
+
+	ck_assert_int_eq(cfg_encoder_set_format_str(enc, CFG_SFMT_VORBIS,
+	    NULL), 0);
+	ck_assert_int_eq(cfg_encoder_set_format_str(enc, CFG_SFMT_MP3,
+	    NULL), 0);
+	ck_assert_int_eq(cfg_encoder_set_format_str(enc, CFG_SFMT_THEORA,
+	    NULL), 0);
+	ck_assert_uint_eq(cfg_encoder_get_format(enc), CFG_STREAM_THEORA);
+}
+END_TEST
+
+START_TEST(test_encoder_validate)
+{
+	cfg_encoder_t	 enc = cfg_encoder_get("test_encoder_validate");
+	const char	*errstr;
+
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr, "program not set");
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc, "test", NULL), 0);
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr, "format not set");
+
+	ck_assert_int_eq(cfg_encoder_set_format(enc, CFG_STREAM_VORBIS, NULL),
+	    0);
+
+	ck_assert_int_eq(cfg_encoder_validate(enc, NULL), 0);
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc, PLACEHOLDER_TRACK,
+	    NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "prohibited placeholder " PLACEHOLDER_TRACK);
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc, PLACEHOLDER_STRING,
+	    NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "prohibited placeholder " PLACEHOLDER_STRING);
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc,
+	    PLACEHOLDER_METADATA PLACEHOLDER_METADATA, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_METADATA);
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc,
+	    PLACEHOLDER_ARTIST PLACEHOLDER_ARTIST, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_ARTIST);
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc,
+	    PLACEHOLDER_TITLE PLACEHOLDER_TITLE, NULL), 0);
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr,
+	    "duplicate placeholder " PLACEHOLDER_TITLE);
 }
 END_TEST
 
@@ -622,6 +811,8 @@ cfg_suite(void)
 	tcase_add_test(tc_decoder, test_decoder_get);
 	tcase_add_test(tc_decoder, test_decoder_set_name);
 	tcase_add_test(tc_decoder, test_decoder_set_program);
+	tcase_add_test(tc_decoder, test_decoder_add_match);
+	tcase_add_test(tc_decoder, test_decoder_validate);
 	suite_add_tcase(s, tc_decoder);
 
 	tc_encoder = tcase_create("Encoder");
@@ -630,6 +821,8 @@ cfg_suite(void)
 	tcase_add_test(tc_encoder, test_encoder_get);
 	tcase_add_test(tc_decoder, test_encoder_set_name);
 	tcase_add_test(tc_decoder, test_encoder_set_program);
+	tcase_add_test(tc_decoder, test_encoder_set_format_str);
+	tcase_add_test(tc_decoder, test_encoder_validate);
 	suite_add_tcase(s, tc_encoder);
 
 	return (s);
