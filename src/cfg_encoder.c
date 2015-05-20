@@ -110,7 +110,7 @@ cfg_encoder_set_format_str(struct cfg_encoder *e, const char *fmt_str,
 {
 	enum cfg_stream_format	fmt;
 
-	if (!fmt_str) {
+	if (!fmt_str || !fmt_str[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
