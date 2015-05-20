@@ -140,7 +140,8 @@ cfg_decoder_add_match(struct cfg_decoder *d, const char *ext,
 	d2 = cfg_decoder_find(ext);
 	e = NULL;
 	if (d2) {
-		while (NULL != (e2 = TAILQ_FIRST(&d2->exts))) {
+		e2 = TAILQ_FIRST(&d2->exts);
+		while (e2) {
 			if (0 == strcasecmp(e2->ext, ext)) {
 				log_notice("%s: relocating match from %s to %s",
 				    ext, d2->name, d->name);
@@ -148,6 +149,7 @@ cfg_decoder_add_match(struct cfg_decoder *d, const char *ext,
 				e = e2;
 				break;
 			}
+			e2 = TAILQ_NEXT(e2, entry);
 		}
 	}
 	if (!e) {
