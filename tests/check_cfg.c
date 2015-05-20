@@ -93,7 +93,7 @@
 	ck_assert_ptr_ne(errstr2, NULL);			\
 								\
 	ck_assert_int_eq(s("20", NULL), 0);			\
-	ck_assert_uint_eq(g(), 20);				\
+	ck_assert_int_eq(g(), 20);				\
 } while (0)
 
 Suite * cfg_suite(void);
