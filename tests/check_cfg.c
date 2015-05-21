@@ -645,7 +645,13 @@ END_TEST
 
 START_TEST(test_encoder_set_program)
 {
-	TEST_ENC_XSTRDUP(cfg_encoder_set_program, cfg_encoder_get_program);
+	cfg_encoder_t	 enc = cfg_encoder_get("test_encoder_set_program");
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc, NULL, NULL), 0);
+	ck_assert_ptr_eq(cfg_encoder_get_program(enc), NULL);
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc, "test", NULL), 0);
+	ck_assert_str_eq(cfg_encoder_get_program(enc), "test");
 }
 END_TEST
 
@@ -678,11 +684,6 @@ START_TEST(test_encoder_validate)
 	cfg_encoder_t	 enc = cfg_encoder_get("test_encoder_validate");
 	const char	*errstr;
 
-	errstr = NULL;
-	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
-	ck_assert_str_eq(errstr, "program not set");
-
-	ck_assert_int_eq(cfg_encoder_set_program(enc, "test", NULL), 0);
 	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
 	ck_assert_str_eq(errstr, "format not set");
 

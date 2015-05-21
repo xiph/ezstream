@@ -314,6 +314,9 @@ buildReencodeCommand(const char *extension, const char *fileName,
 		}
 	}
 
+	if (!cfg_encoder_get_program(encoder))
+		return (dec_str);
+
 	enc_str = replaceString(cfg_encoder_get_program(encoder),
 	    PLACEHOLDER_ARTIST, localArtist);
 	if (strstr(enc_str, PLACEHOLDER_TITLE) != NULL) {
