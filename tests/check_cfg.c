@@ -100,27 +100,6 @@ Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
-START_TEST(test_reload)
-{
-	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-ok.xml",
-	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
-	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad.xml",
-	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
-	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad2.xml",
-	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
-	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad3.xml",
-	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
-	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad4.xml",
-	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
-}
-END_TEST
-
 START_TEST(test_stream_str2fmt)
 {
 	enum cfg_stream_format	fmt;
@@ -746,7 +725,6 @@ cfg_suite(void)
 
 	tc_core = tcase_create("Core");
 	tcase_add_checked_fixture(tc_core, setup_checked, teardown_checked);
-	tcase_add_test(tc_core, test_reload);
 	tcase_add_test(tc_core, test_stream_str2fmt);
 	tcase_add_test(tc_core, test_stream_fmt2str);
 	tcase_add_test(tc_core, test_file_check);
