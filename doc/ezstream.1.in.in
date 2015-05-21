@@ -391,7 +391,7 @@ Set the format of the string that should be used for the
 placeholder, when quering for metadata from an executable.
 .Pp
 Default:
-.Em Li @A@ - @T@
+.Em Li @a@ - @t@
 .It Sy \&<refresh_interval\ /\&>
 Configure a time interval for additional metadata updates via a
 .Dq Metadata Program :
