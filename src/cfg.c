@@ -613,7 +613,7 @@ cfg_get_server_hostname(void)
 unsigned int
 cfg_get_server_port(void)
 {
-	return (cfg.server.port);
+	return (cfg.server.port ? cfg.server.port : DEFAULT_PORT);
 }
 
 const char *

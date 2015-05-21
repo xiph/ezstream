@@ -27,6 +27,7 @@
 #define EXTENSIONS_MAX		16
 #define UCREDS_SIZE		256
 
+#define DEFAULT_PORT		8000
 #define DEFAULT_USER		"source"
 
 struct cfg {

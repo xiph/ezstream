@@ -231,6 +231,8 @@ START_TEST(test_server_port)
 {
 	const char	*errstr2;
 
+	ck_assert_uint_eq(cfg_get_server_port(), DEFAULT_PORT);
+
 	TEST_EMPTYSTR(cfg_set_server_port, cfg_get_server_port);
 
 	errstr2 = NULL;
@@ -241,8 +243,8 @@ START_TEST(test_server_port)
 	ck_assert_int_eq(cfg_set_server_port("65536", &errstr2), -1);
 	ck_assert_ptr_ne(errstr2, NULL);
 
-	ck_assert_int_eq(cfg_set_server_port("8000", NULL), 0);
-	ck_assert_uint_eq(cfg_get_server_port(), 8000);
+	ck_assert_int_eq(cfg_set_server_port("8008", NULL), 0);
+	ck_assert_uint_eq(cfg_get_server_port(), 8008);
 }
 END_TEST
 
