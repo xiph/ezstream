@@ -1,14 +1,8 @@
 AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 
 TESTS		 = \
-	check_ezstream \
 	check_cfg
 check_PROGRAMS	 = $(TESTS)
-
-check_ezstream_SOURCES = \
-	check_ezstream.c
-check_ezstream_DEPENDENCIES = $(top_builddir)/src/libezstream.la
-check_ezstream_LDADD = $(check_ezstream_DEPENDENCIES) @CHECK_LIBS@
 
 check_cfg_SOURCES = \
 	check_cfg.c
