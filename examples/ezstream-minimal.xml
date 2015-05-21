@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  EXAMPLE: A valid configuration that contains the absolute minimum
+
+  This configuration streams Ogg Vorbis files as-is.
+  -->
+
+<ezstream>
+
+  <server>
+    <hostname>127.0.0.1</hostname>
+    <password>hackme</password>
+  </server>
+
+  <stream>
+    <mountpoint>/stream.ogg</mountpoint>
+    <format>Vorbis</format>
+  </stream>
+
+  <media>
+    <filename>playlist.m3u</filename>
+  </media>
+
+</ezstream>
