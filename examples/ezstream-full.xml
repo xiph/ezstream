@@ -1,67 +1,159 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<!--
+  EXAMPLE: A valid configuration that contains every configuration option
+  -->
+
+<!-- Ezstream configuration root element -->
 <ezstream>
 
+  <!--
+    Server configuration
+    -->
   <server>
-    <protocol></protocol>
-    <hostname></hostname>
-    <port></port>
-    <user></user>
-    <password></password>
-    <ca_dir></ca_dir>
-    <ca_file></ca_file>
-    <client_cert></client_cert>
-    <client_key></client_key>
-    <reconnect_attempts></reconnect_attempts>
+    <!-- Transport protocol: HTTP, HTTPS -->
+    <protocol>HTTP</protocol>
+    <!-- Server address -->
+    <hostname>127.0.0.1</hostname>
+    <!-- Server port -->
+    <port>8000</port>
+
+    <!-- Login user -->
+    <user>source</user>
+    <!-- Login password (check file permissions, or everyone can see this) -->
+    <password>hackme</password>
+
+    <!--
+      Directory to use for server certificate verification in "hash format".
+      See openssl(1)/verify(1) for details:
+      -->
+    <ca_dir>/etc/ssl/certs</ca_dir>
+
+    <!--
+      CA bundle for both server certificate verification and building the
+      client certificate chain.
+      -->
+    <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file>
+
+    <!-- Client certificate (with public key) for authentication -->
+    <client_cert>/etc/ssl/ezstream.crt</client_cert>
+
+    <!-- Client private key for authentication -->
+    <client_key>/etc/ssl/private/ezstream.key</client_key>
+
+    <!-- Number of reconnection attempts, before giving up: -->
+    <reconnect_attempts>0</reconnect_attempts>
   </server>
 
+  <!--
+    Stream configuration
+    -->
   <stream>
-    <mountpoint></mountpoint>
-    <name></name>
-    <url></url>
-    <genre></genre>
-    <description></description>
-    <quality></quality>
-    <bitrate></bitrate>
-    <samplerate></samplerate>
-    <channels></channels>
-    <server_public></server_public>
-    <format></format>
-    <encoder></encoder>
+    <!-- Mount point on server -->
+    <mountpoint>/stream.ogg</mountpoint>
+
+    <!-- Various informational settings -->
+    <name>Test Stream</name>
+    <url>http://localhost:8000/</url>
+    <genre>Beeps</genre>
+    <description>Test tones and noise</description>
+    <quality>1.5</quality>
+    <bitrate>16</bitrate>
+    <samplerate>44100</samplerate>
+    <channels>2</channels>
+
+    <!-- Setting to allow stream to be listed in public YP directory -->
+    <server_public>No</server_public>
+
+    <!-- Stream format: Vorbis, MP3, Theora -->
+    <format>Vorbis</format>
+
+    <!-- Encoder name (defined below) to use for (re)encoding -->
+    <encoder>OggEnc-Q1.5</encoder>
   </stream>
 
+  <!--
+    Media configuration
+    -->
   <media>
-    <type></type>
-    <filename></filename>
-    <shuffle></shuffle>
-    <stream_once></stream_once>
+    <!-- Media type: autodetect, file, playlist, program, stdin -->
+    <type>autodetect</type>
+
+    <!-- Input file or program name -->
+    <filename>playlist.m3u</filename>
+
+    <!-- Setting to shuffle playlists -->
+    <shuffle>Yes</shuffle>
+
+    <!-- Setting whether to stream input indefinitely or only once -->
+    <stream_once>No</stream_once>
   </media>
 
+  <!--
+    Metadata configuration
+    -->
   <metadata>
-    <program></program>
-    <format_str></format_str>
-    <refresh_interval></refresh_interval>
-    <normalize_strings></normalize_strings>
-    <no_updates></no_updates>
+    <!-- Program to query for metadata instead of from media files -->
+    <!-- <program>metadata.sh</program> -->
+
+    <!-- Metadata format -->
+    <format_str>@a@ - @t@</format_str>
+
+    <!-- Interval for additional metadata refreshes (-1 for none) -->
+    <refresh_interval>-1</refresh_interval>
+
+    <!-- Setting to clean up extraneous whitespace -->
+    <normalize_strings>Yes</normalize_strings>
+
+    <!-- Setting to suppress all metadata udpates -->
+    <no_updates>No</no_updates>
   </metadata>
 
+  <!--
+    Decoder configurations
+    -->
   <decoders>
     <decoder>
-      <name></name>
-      <program></program>
-      <file_ext></file_ext>
-      <!-- ... -->
+      <!-- Decoder name -->
+      <name>OggDec</name>
+      <!-- Program and options -->
+      <program>oggdec -R -b 16 -e 0 -s 1 -o - @T@</program>
+      <!-- File extensions to use this decoder for -->
+      <file_ext>.ogg</file_ext>
+      <file_ext>.oga</file_ext>
     </decoder>
-    <!-- ... -->
+
+    <decoder>
+      <name>MadPlay</name>
+      <program>madplay -b 16 -R 44100 -S -o raw:- @T@</program>
+      <file_ext>.mp3</file_ext>
+    </decoder>
+
+    <decoder>
+      <name>Flac</name>
+      <program>flac -s -d --force-raw-format --sign=signed --endian=little -o - @T@</program>
+      <file_ext>.flac</file_ext>
+    </decoder>
   </decoders>
 
+  <!--
+    Encoder configurations
+    -->
   <encoders>
     <encoder>
-      <name></name>
-      <format></format>
-      <program></program>
+      <!-- Encoder name -->
+      <name>OggEnc-Q1.5</name>
+      <!-- Output stream format -->
+      <format>Vorbis</format>
+      <!-- Program and options -->
+      <program>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t @M@ -</program>
     </encoder>
-    <!-- ... -->
+
+    <encoder>
+      <name>Lame-CBR128</name>
+      <format>MP3</format>
+      <program>lame --preset cbr 128 -r -s 44.1 --bitwidth 16 - -</program>
+    </encoder>
   </encoders>
 
 </ezstream>
