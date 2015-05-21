@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  EXAMPLE: A valid configuration for video streaming with Ogg Theora
+  -->
+
+<ezstream>
+
+  <server>
+    <hostname>127.0.0.1</hostname>
+    <password>hackme</password>
+  </server>
+
+  <stream>
+    <mountpoint>/video.ogg</mountpoint>
+    <format>Theora</format>
+    <encoder>PassThrough</encoder>
+  </stream>
+
+  <media>
+    <filename>playlist.m3u</filename>
+  </media>
+
+  <decoders>
+    <decoder>
+      <name>Theora-192x128</name>
+      <!-- Reencode into Ogg Theora directly -->
+      <program>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title @M@ -o - @T@</program>
+      <file_ext>.avi</file_ext>
+      <file_ext>.mpg</file_ext>
+    </decoder>
+  </decoders>
+
+  <encoders>
+    <encoder>
+      <name>PassThrough</name>
+      <format>Theora</format>
+      <!-- Do not set an encoder program to pass through data as-is -->
+    </encoder>
+  </encoders>
+
+</ezstream>
