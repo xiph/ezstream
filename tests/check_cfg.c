@@ -174,6 +174,7 @@ END_TEST
 
 START_TEST(test_program_config_file)
 {
+	ck_assert_ptr_eq(cfg_get_program_config_file(), NULL);
 	TEST_STRLCPY(cfg_set_program_config_file, cfg_get_program_config_file,
 	    PATH_MAX);
 }
@@ -247,6 +248,7 @@ END_TEST
 
 START_TEST(test_server_user)
 {
+	ck_assert_str_eq(cfg_get_server_user(), DEFAULT_USER);
 	TEST_STRLCPY(cfg_set_server_user, cfg_get_server_user, UCREDS_SIZE);
 }
 END_TEST
@@ -415,6 +417,7 @@ END_TEST
 
 START_TEST(test_metadata_program)
 {
+	ck_assert_ptr_eq(cfg_get_metadata_program(), NULL);
 	TEST_STRLCPY(cfg_set_metadata_program, cfg_get_metadata_program,
 	    PATH_MAX);
 }

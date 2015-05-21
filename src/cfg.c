@@ -757,7 +757,7 @@ cfg_get_media_stream_once(void)
 const char *
 cfg_get_metadata_program(void)
 {
-	return (cfg.metadata.program);
+	return (cfg.metadata.program[0] ? cfg.metadata.program : NULL);
 }
 
 const char *
