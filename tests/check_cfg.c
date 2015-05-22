@@ -411,6 +411,8 @@ START_TEST(test_metadata_format_str)
 	TEST_XSTRDUP(cfg_set_metadata_format_str,
 	    cfg_get_metadata_format_str);
 
+	ck_assert_int_eq(cfg_set_metadata_format_str("test", NULL), 0);
+
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_metadata_format_str(PLACEHOLDER_METADATA,
 	    &errstr2), -1);
