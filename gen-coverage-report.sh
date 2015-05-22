@@ -18,12 +18,16 @@ if [ -z "$(which genhtml)" ]; then
 	echo "genhtml is required" >&2
 	exit 1
 fi
+_pb=''
+if [ -n "$(which nproc)" ]; then
+	_pb="-j $(nproc)"
+fi
 
 rm -rf "$DESTDIR"
 
 make distclean || :
 ./configure CFLAGS='-O0 -fprofile-arcs -ftest-coverage -fstack-protector-all'
-make check
+make ${_pb} check
 
 mkdir -p $DESTDIR
 lcov --capture --output-file $DESTDIR/coverage.tmp \
