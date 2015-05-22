@@ -129,8 +129,10 @@ cfg_encoder_set_format_str(struct cfg_encoder *e, const char *fmt_str,
 
 int
 cfg_encoder_set_program(struct cfg_encoder *e, const char *program,
-    const char **errstrp)
+    const char **not_used)
 {
+	(void)not_used;
+
 	xfree(e->program);
 
 	if (!program || !program[0])
