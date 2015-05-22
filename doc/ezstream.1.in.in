@@ -153,8 +153,8 @@ Transport protocol used to stream to the server:
 .Bl -tag -width HTTPS -compact
 .It Ar HTTP
 Unencrypted HTTP (the default).
-.It Ar HTTPS
-HTTP over TLS.
+.\" .It Ar HTTPS
+.\" HTTP over TLS.
 .El
 .It Sy \&<hostname\ /\&>
 .Pq Mandatory.
@@ -172,33 +172,33 @@ Default:
 .It Sy \&<password\ /\&>
 .Pq Mandatory.
 Password to authenticate with on the server.
-.It Sy \&<ca_dir\ /\&>
-Directory in which OpenSSL finds root CA certificates for validating the
-.Ar HTTPS
-server identity.
-.Pp
-Default:
-.Em no server validation
-.It Sy \&<ca_file\ /\&>
-Path of a root CA bundle file for validating the
-.Ar HTTPS
-server identity.
-.Pp
-Default:
-.Em no server validation
-.It Sy \&<client_cert\ /\&>
-X.503 client certificate for authentication on an
-.Ar HTTPS
-server.
-.Pp
-Default:
-.Em no client certificate authentication
-.It Sy \&<client_key\ /\&>
-Private key that matches the public key and certificate in
-.Sy \&<client_cert\ /\&> .
-.Pp
-Default:
-.Em no client certificate authentication
+.\" .It Sy \&<ca_dir\ /\&>
+.\" Directory in which OpenSSL finds root CA certificates for validating the
+.\" .Ar HTTPS
+.\" server identity.
+.\" .Pp
+.\" Default:
+.\" .Em no server validation
+.\" .It Sy \&<ca_file\ /\&>
+.\" Path of a root CA bundle file for validating the
+.\" .Ar HTTPS
+.\" server identity.
+.\" .Pp
+.\" Default:
+.\" .Em no server validation
+.\" .It Sy \&<client_cert\ /\&>
+.\" X.503 client certificate for authentication on an
+.\" .Ar HTTPS
+.\" server.
+.\" .Pp
+.\" Default:
+.\" .Em no client certificate authentication
+.\" .It Sy \&<client_key\ /\&>
+.\" Private key that matches the public key and certificate in
+.\" .Sy \&<client_cert\ /\&> .
+.\" .Pp
+.\" Default:
+.\" .Em no client certificate authentication
 .It Sy \&<reconnect_attempts\ /\&>
 Number of reconnect attempts in case of connection issues with the server,
 or 0
