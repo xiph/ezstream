@@ -26,6 +26,24 @@
     <!-- Login password (check file permissions, or everyone can see this) -->
     <password>hackme</password>
 
+    <!--
+      Directory to use for server certificate verification in "hash format".
+      See openssl(1)/verify(1) for details:
+      -->
+    <ca_dir>/etc/ssl/certs</ca_dir>
+
+    <!--
+      CA bundle for both server certificate verification and building the
+      client certificate chain.
+      -->
+    <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file>
+
+    <!-- Client certificate (with public key) for authentication -->
+    <client_cert>/etc/ssl/ezstream.crt</client_cert>
+
+    <!-- Client private key for authentication -->
+    <client_key>/etc/ssl/private/ezstream.key</client_key>
+
     <!-- Number of reconnection attempts, before giving up: -->
     <reconnect_attempts>0</reconnect_attempts>
   </server>
