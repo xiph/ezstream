@@ -22,7 +22,6 @@
 
 #include <stdarg.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <syslog.h>
 
@@ -110,8 +109,9 @@ log_syserr(enum log_levels lvl, int error, const char *pfx)
 	char	errbuf[1024];
 	int	ret;
 
-	if (0 != strerror_r(error, errbuf, sizeof(errbuf)))
-		abort();
+	if (!error)
+		return (0);
+	(void)snprintf(errbuf, sizeof(errbuf), "%s", strerror(error));
 	ret = _log(lvl, "%s%s%s",
 	    pfx ? pfx : "",
 	    pfx ? ": " : "",
