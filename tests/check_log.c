@@ -48,14 +48,14 @@ Suite *
 log_suite(void)
 {
 	Suite	*s;
-	TCase	*tc_core;
+	TCase	*tc_log;
 
 	s = suite_create("Log");
 
-	tc_core = tcase_create("Core");
-	tcase_add_checked_fixture(tc_core, setup_checked, teardown_checked);
-	tcase_add_test(tc_core, test_log);
-	suite_add_tcase(s, tc_core);
+	tc_log = tcase_create("Log");
+	tcase_add_checked_fixture(tc_log, setup_checked, teardown_checked);
+	tcase_add_test(tc_log, test_log);
+	suite_add_tcase(s, tc_log);
 
 	return (s);
 }
