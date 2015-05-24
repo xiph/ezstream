@@ -29,23 +29,26 @@
 #include "cfg.h"
 #include "log.h"
 
-static void	_log(enum log_levels, const char *, ...)
+static int	_log(enum log_levels, const char *, ...)
     ATTRIBUTE_NONNULL(2)
     ATTRIBUTE_FORMAT(printf, 2, 3);
-static void	_vlog(enum log_levels, const char *, va_list)
+static int	_vlog(enum log_levels, const char *, va_list)
     ATTRIBUTE_NONNULL(2);
 
-static void
+static int
 _log(enum log_levels lvl, const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(lvl, fmt, ap);
+	ret = _vlog(lvl, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
 
-static void
+static int
 _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 {
 	va_list ap2;
@@ -63,18 +66,18 @@ _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 		break;
 	case NOTICE:
 		if (cfg_get_program_verbosity() < 1)
-			return;
+			return (0);
 		p = LOG_NOTICE;
 		break;
 	case INFO:
 		if (cfg_get_program_verbosity() < 2)
-			return;
+			return (0);
 		p = LOG_INFO;
 		break;
 	case DEBUG:
 	default:
 		if (cfg_get_program_verbosity() < 3)
-			return;
+			return (0);
 		p = LOG_DEBUG;
 		break;
 	};
@@ -82,6 +85,8 @@ _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 	va_copy(ap2, ap);
 	vsyslog(p, fmt, ap2);
 	va_end(ap2);
+
+	return (1);
 }
 
 int
@@ -99,75 +104,96 @@ log_exit(void)
 	closelog();
 }
 
-void
+int
 log_syserr(enum log_levels lvl, int error, const char *pfx)
 {
 	char	errbuf[1024];
+	int	ret;
 
 	if (0 != strerror_r(error, errbuf, sizeof(errbuf)))
 		abort();
-	_log(lvl, "%s%s%s",
+	ret = _log(lvl, "%s%s%s",
 	    pfx ? pfx : "",
 	    pfx ? ": " : "",
 	    errbuf);
+
+	return (ret);
 }
 
-void
+int
 log_alert(const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(ALERT, fmt, ap);
+	ret = _vlog(ALERT, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
 
-void
+int
 log_error(const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(ERROR, fmt, ap);
+	ret = _vlog(ERROR, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
 
-void
+int
 log_warning(const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(WARNING, fmt, ap);
+	ret = _vlog(WARNING, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
 
-void
+int
 log_notice(const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(NOTICE, fmt, ap);
+	ret = _vlog(NOTICE, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
 
-void
+int
 log_info(const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(INFO, fmt, ap);
+	ret = _vlog(INFO, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
 
-void
+int
 log_debug(const char *fmt, ...)
 {
 	va_list ap;
+	int	ret;
 
 	va_start(ap, fmt);
-	_vlog(DEBUG, fmt, ap);
+	ret = _vlog(DEBUG, fmt, ap);
 	va_end(ap);
+
+	return (ret);
 }
