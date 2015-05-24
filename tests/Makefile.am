@@ -3,6 +3,7 @@ AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 TESTS		 = \
 	check_cfg \
 	check_cfg_xmlfile \
+	check_cmdline \
 	check_log \
 	check_xalloc
 check_PROGRAMS	 = $(TESTS)
@@ -16,6 +17,11 @@ check_cfg_xmlfile_SOURCES = \
 	check_cfg_xmlfile.c
 check_cfg_xmlfile_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_cfg_xmlfile_LDADD = $(check_cfg_xmlfile_DEPENDENCIES) @CHECK_LIBS@
+
+check_cmdline_SOURCES = \
+	check_cmdline.c
+check_cmdline_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cmdline_LDADD = $(check_cmdline_DEPENDENCIES) @CHECK_LIBS@
 
 check_log_SOURCES = \
 	check_log.c
