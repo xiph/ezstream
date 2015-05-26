@@ -341,15 +341,6 @@ playlist_get_next(struct playlist *pl)
 	return ((const char *)pl->list[pl->index++]);
 }
 
-const char *
-playlist_peek_next(struct playlist *pl)
-{
-	if (pl->program || pl->num == 0)
-		return (NULL);
-
-	return ((const char *)pl->list[pl->index]);
-}
-
 void
 playlist_skip_next(struct playlist *pl)
 {
@@ -376,17 +367,6 @@ playlist_get_position(struct playlist *pl)
 		return (0);
 
 	return ((unsigned long)pl->index);
-}
-
-int
-playlist_set_position(struct playlist *pl, unsigned long idx)
-{
-	if (pl->program || idx > pl->num - 1)
-		return (0);
-
-	pl->index = (size_t)idx;
-
-	return (1);
 }
 
 int

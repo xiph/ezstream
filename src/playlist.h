@@ -61,13 +61,6 @@ const char *	playlist_get_next(playlist_t);
  */
 
 /*
- * Get the next item in the playlist without moving on to the following entry.
- * Returns a NUL-terminated string of the next playlist entry, or NULL if the
- * currently playing song is the last one in the list.
- */
-const char *	playlist_peek_next(playlist_t);
-
-/*
  * Skip the playlist item that would be played next.
  */
 void		playlist_skip_next(playlist_t);
@@ -81,11 +74,6 @@ unsigned long	playlist_get_num_items(playlist_t);
  * Get the current position in the playlist.
  */
 unsigned long	playlist_get_position(playlist_t);
-
-/*
- * Set a position in the playlist. Returns 1 on success, and 0 on failure.
- */
-int		playlist_set_position(playlist_t, unsigned long /* index */);
 
 /*
  * Search for a given entry in the playlist and reposition to it. Returns 1 on
