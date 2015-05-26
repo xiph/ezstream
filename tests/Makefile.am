@@ -46,6 +46,7 @@ EXTRA_DIST	 = \
 	config-bad.xml \
 	config-bad2.xml \
 	config-bad3.xml \
-	config-bad4.xml
+	config-bad4.xml \
+	playlist.txt
 
 CLEANFILES	 = *~ *.core core *.gcno *.gcda

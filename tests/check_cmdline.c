@@ -11,6 +11,16 @@ extern int	optind;
 
 START_TEST(test_configfile)
 {
+	char	*argv[] =
+	{
+		"check_cmdline", "-c", EXAMPLESDIR "/ezstream-full.xml" , NULL
+	};
+	int	 argc = (int)(sizeof(argv) / sizeof(argv[0])) - 1;
+	int	 ret;
+
+	ret = 0;
+	ck_assert_int_eq(cmdline_parse(argc, argv, &ret), 0);
+	ck_assert_int_eq(ret, 0);
 }
 END_TEST
 
@@ -55,6 +65,15 @@ END_TEST
 
 START_TEST(test_shuffle)
 {
+	char	*argv[] =
+	{
+		"check_cmdline", "-s", SRCDIR "/playlist.txt", NULL
+	};
+	int	 argc = (int)(sizeof(argv) / sizeof(argv[0])) - 1;
+	int	 ret;
+
+	ck_assert_int_ne(cmdline_parse(argc, argv, &ret), 0);
+	ck_assert_int_eq(ret, 0);
 }
 END_TEST
 
