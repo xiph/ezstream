@@ -10,10 +10,10 @@ START_TEST(test_malloc)
 {
 	void	*p;
 
-	p = xmalloc(0);
+	p = xmalloc(0UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xmalloc(1);
+	p = xmalloc(1UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
 }
@@ -23,16 +23,16 @@ START_TEST(test_calloc)
 {
 	void	*p;
 
-	p = xcalloc(0, 0);
+	p = xcalloc(0UL, 0UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xcalloc(1, 0);
+	p = xcalloc(1UL, 0UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xcalloc(0, 1);
+	p = xcalloc(0UL, 1UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xcalloc(1, 1);
+	p = xcalloc(1UL, 1UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
 }
@@ -42,20 +42,20 @@ START_TEST(test_reallocarray)
 {
 	void	*p;
 
-	p = xreallocarray(NULL, 0, 0);
+	p = xreallocarray(NULL, 0UL, 0UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xreallocarray(NULL, 1, 0);
+	p = xreallocarray(NULL, 1UL, 0UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xreallocarray(NULL, 0, 1);
+	p = xreallocarray(NULL, 0UL, 1UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
-	p = xreallocarray(NULL, 1, 1);
+	p = xreallocarray(NULL, 1UL, 1UL);
 	ck_assert_ptr_ne(p, NULL);
-	p = xreallocarray(p, 2, 2);
+	p = xreallocarray(p, 2UL, 2UL);
 	ck_assert_ptr_ne(p, NULL);
-	p = xreallocarray(p, 1, 1);
+	p = xreallocarray(p, 1UL, 1UL);
 	ck_assert_ptr_ne(p, NULL);
 	xfree(p);
 }
