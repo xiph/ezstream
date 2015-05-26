@@ -153,7 +153,7 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 	cfg_set_program_verbosity(verbosity, NULL);
 
 	if (playlistFile) {
-		playlist_t	*pl;
+		playlist_t	 pl;
 		const char	*entry;
 
 		if (0 > playlist_init()) {

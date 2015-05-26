@@ -41,26 +41,26 @@
 #define STREAM_SERVERR	3
 #define STREAM_UPDMDATA 4
 
-playlist_t		*playlist = NULL;
-int			 playlistMode = 0;
-unsigned int		 resource_errors = 0;
+playlist_t		 playlist;
+int			 playlistMode;
+unsigned int		 resource_errors;
 
 #ifdef HAVE_SIGNALS
 const int		 ezstream_signals[] = {
 	SIGTERM, SIGINT, SIGHUP, SIGUSR1, SIGUSR2
 };
 
-volatile sig_atomic_t	 rereadPlaylist = 0;
-volatile sig_atomic_t	 rereadPlaylist_notify = 0;
-volatile sig_atomic_t	 skipTrack = 0;
-volatile sig_atomic_t	 queryMetadata = 0;
-volatile sig_atomic_t	 quit = 0;
+volatile sig_atomic_t	 rereadPlaylist;
+volatile sig_atomic_t	 rereadPlaylist_notify;
+volatile sig_atomic_t	 skipTrack;
+volatile sig_atomic_t	 queryMetadata;
+volatile sig_atomic_t	 quit;
 #else
-int			 rereadPlaylist = 0;
-int			 rereadPlaylist_notify = 0;
-int			 skipTrack = 0;
-int			 queryMetadata = 0;
-int			 quit = 0;
+int			 rereadPlaylist;
+int			 rereadPlaylist_notify;
+int			 skipTrack;
+int			 queryMetadata;
+int			 quit;
 #endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {

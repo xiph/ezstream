@@ -17,7 +17,7 @@
 #ifndef __PLAYLIST_H__
 #define __PLAYLIST_H__
 
-typedef struct playlist playlist_t;
+typedef struct playlist *	playlist_t;
 
 /*
  * Initialize the playlist routines. Should be called before any of the other
@@ -34,26 +34,26 @@ void		playlist_exit(void);
  * Read a playlist file (in .M3U format), and return a new playlist handler
  * on success, or NULL on failure.
  */
-playlist_t *	playlist_read(const char * /* filename */);
+playlist_t	playlist_read(const char * /* filename */);
 
 /*
  * For each call to playlist_get_next(), the specified program is run. This
  * program is supposed to print one line to standard output, containing the
  * path and filename of a media file.
  */
-playlist_t *	playlist_program(const char * /* program name */);
+playlist_t	playlist_program(const char * /* program name */);
 
 /*
  * Free all memory used by a playlist handler that was created with
  * playlist_read().
  */
-void		playlist_free(playlist_t **);
+void		playlist_free(playlist_t *);
 
 /*
  * Get the next item in the playlist. Returns a NUL-terminated string of a
  * playlist entry, or NULL if the end of the list has been reached.
  */
-const char *	playlist_get_next(playlist_t *);
+const char *	playlist_get_next(playlist_t);
 
 /*
  * The functions below work on playlist handlers obtained with playlist_read()
@@ -65,40 +65,40 @@ const char *	playlist_get_next(playlist_t *);
  * Returns a NUL-terminated string of the next playlist entry, or NULL if the
  * currently playing song is the last one in the list.
  */
-const char *	playlist_peek_next(playlist_t *);
+const char *	playlist_peek_next(playlist_t);
 
 /*
  * Skip the playlist item that would be played next.
  */
-void		playlist_skip_next(playlist_t *);
+void		playlist_skip_next(playlist_t);
 
 /*
  * Get the number of items in the playlist.
  */
-unsigned long	playlist_get_num_items(playlist_t *);
+unsigned long	playlist_get_num_items(playlist_t);
 
 /*
  * Get the current position in the playlist.
  */
-unsigned long	playlist_get_position(playlist_t *);
+unsigned long	playlist_get_position(playlist_t);
 
 /*
  * Set a position in the playlist. Returns 1 on success, and 0 on failure.
  */
-int		playlist_set_position(playlist_t *, unsigned long /* index */);
+int		playlist_set_position(playlist_t, unsigned long /* index */);
 
 /*
  * Search for a given entry in the playlist and reposition to it. Returns 1 on
  * success and 0 on failure. A subsequent call to playlist_get_next() will
  * return this list item again.
  */
-int		playlist_goto_entry(playlist_t *, const char * /* name */);
+int		playlist_goto_entry(playlist_t, const char * /* name */);
 
 /*
  * Rewind the playlist to the beginning, so that it can be replayed. Does
  * not reread the playlist file.
  */
-void		playlist_rewind(playlist_t *);
+void		playlist_rewind(playlist_t);
 
 /*
  * Reread the playlist file and rewind to the beginning. Equivalent to calling
@@ -106,11 +106,11 @@ void		playlist_rewind(playlist_t *);
  * after calling this function.
  * Returns 1 on success, and 0 on error.
  */
-int		playlist_reread(playlist_t **);
+int		playlist_reread(playlist_t*);
 
 /*
  * Shuffle the entries of the playlist randomly.
  */
-void		playlist_shuffle(playlist_t *);
+void		playlist_shuffle(playlist_t);
 
 #endif /* __PLAYLIST_H__ */
