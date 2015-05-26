@@ -935,15 +935,22 @@ streamPlaylist(shout_t *shout)
 	char		 lastSong[PATH_MAX];
 
 	if (playlist == NULL) {
-		if (CFG_MEDIA_PROGRAM == cfg_get_media_type()) {
+		switch (cfg_get_media_type()) {
+		case CFG_MEDIA_PROGRAM:
 			if ((playlist = playlist_program(cfg_get_media_filename())) == NULL)
 				return (0);
-		} else {
+			break;
+		case CFG_MEDIA_STDIN:
+			if ((playlist = playlist_read(NULL)) == NULL)
+				return (0);
+			break;
+		default:
 			if ((playlist = playlist_read(cfg_get_media_filename())) == NULL)
 				return (0);
 			if (playlist_get_num_items(playlist) == 0)
-				log_notice("%s: playlist empty",
+				log_warning("%s: playlist empty",
 				    cfg_get_media_filename());
+			break;
 		}
 	} else {
 		/*
