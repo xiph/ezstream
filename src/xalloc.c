@@ -75,7 +75,7 @@ xstrdup_c(const char *str, const char *file, unsigned int line)
 	char	*ret = strdup(str);
 
 	if (NULL == ret) {
-		log_error("%s[%u]: cannot allocate %zu bytes",
+		log_alert("%s[%u]: cannot allocate %zu bytes",
 		    file, line, strlen(str) + 1);
 		exit(1);
 	}
