@@ -5,6 +5,7 @@ TESTS		 = \
 	check_cfg_xmlfile \
 	check_cmdline \
 	check_log \
+	check_playlist \
 	check_xalloc
 check_PROGRAMS	 = $(TESTS)
 
@@ -27,6 +28,11 @@ check_log_SOURCES = \
 	check_log.c
 check_log_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_log_LDADD	 = $(check_log_DEPENDENCIES) @CHECK_LIBS@
+
+check_playlist_SOURCES = \
+	check_playlist.c
+check_playlist_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_playlist_LDADD = $(check_playlist_DEPENDENCIES) @CHECK_LIBS@
 
 check_xalloc_SOURCES = \
 	check_xalloc.c
