@@ -85,7 +85,7 @@ FILE *		openResource(shout_t *, const char *, int *, metadata_t **,
 int		reconnectServer(shout_t *, int);
 const char *	getTimeString(long);
 int		sendStream(shout_t *, FILE *, const char *, int, const char *,
-			   struct timeval *);
+			   struct timespec *);
 int		streamFile(shout_t *, const char *);
 int		streamPlaylist(shout_t *);
 int		ez_shutdown(int);
@@ -699,19 +699,19 @@ getTimeString(long seconds)
 
 int
 sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
-	   int isStdin, const char *songLenStr, struct timeval *tv)
+	   int isStdin, const char *songLenStr, struct timespec *tv)
 {
 	unsigned char	 buff[4096];
 	size_t		 bytes_read, total, oldTotal;
 	int		 ret;
 	double		 kbps = -1.0;
-	struct timeval	 timeStamp, *startTime = tv;
-	struct timeval	 callTime, currentTime;
+	struct timespec	 timeStamp, *startTime = tv;
+	struct timespec	 callTime, currentTime;
 
-	ez_gettimeofday((void *)&callTime);
+	clock_gettime(CLOCK_MONOTONIC, &callTime);
 
 	timeStamp.tv_sec = startTime->tv_sec;
-	timeStamp.tv_usec = startTime->tv_usec;
+	timeStamp.tv_nsec = startTime->tv_nsec;
 
 	total = oldTotal = 0;
 	ret = STREAM_DONE;
@@ -747,7 +747,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			break;
 		}
 
-		ez_gettimeofday((void *)&currentTime);
+		clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
 		if (queryMetadata ||
 		    (0 <= cfg_get_metadata_refresh_interval() &&
@@ -776,9 +776,9 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			}
 
 			oldTime = (double)timeStamp.tv_sec
-			    + (double)timeStamp.tv_usec / 1000000.0;
+			    + (double)timeStamp.tv_nsec / 1000000000.0;
 			newTime = (double)currentTime.tv_sec
-			    + (double)currentTime.tv_usec / 1000000.0;
+			    + (double)currentTime.tv_nsec / 1000000000.0;
 			if (songLenStr == NULL)
 				printf("  [ %s]",
 				    getTimeString(currentTime.tv_sec -
@@ -792,7 +792,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 				kbps = (((double)(total - oldTotal)
 				    / (newTime - oldTime)) * 8.0) / 1000.0;
 				timeStamp.tv_sec = currentTime.tv_sec;
-				timeStamp.tv_usec = currentTime.tv_usec;
+				timeStamp.tv_nsec = currentTime.tv_nsec;
 				oldTotal = total;
 			}
 			if (kbps < 0)
@@ -828,7 +828,7 @@ streamFile(shout_t *shout, const char *fileName)
 	int		 ret, retval = 0;
 	long		 songLen;
 	metadata_t	*mdata;
-	struct timeval	 startTime;
+	struct timespec	 startTime;
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag, &mdata, &isStdin, &songLen))
 	    == NULL) {
@@ -861,7 +861,7 @@ streamFile(shout_t *shout, const char *fileName)
 
 	if (songLen > 0)
 		songLenStr = xstrdup(getTimeString(songLen));
-	ez_gettimeofday((void *)&startTime);
+	clock_gettime(CLOCK_MONOTONIC, &startTime);
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin,
 		    songLenStr, &startTime);

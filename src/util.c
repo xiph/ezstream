@@ -348,21 +348,3 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
 }
-
-int
-ez_gettimeofday(void *tp_arg)
-{
-	struct timeval	*tp = (struct timeval *)tp_arg;
-	int		 ret = -1;
-
-#ifdef HAVE_GETTIMEOFDAY
-	ret = gettimeofday(tp, NULL);
-#else /* HAVE_GETTIMEOFDAY */
-	/* Fallback to time(): */
-	tp->tv_sec = (long)time(NULL);
-	tp->tv_usec = 0;
-	ret = 0;
-#endif /* HAVE_GETTIMEOFDAY */
-
-	return (ret);
-}
