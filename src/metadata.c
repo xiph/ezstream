@@ -18,9 +18,20 @@
 # include "config.h"
 #endif
 
-#include "ezstream.h"
-
 #include "compat.h"
+
+#include <sys/stat.h>
+
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#if defined(HAVE_LIBGEN_H) && !defined(__linux__)
+# include <libgen.h>
+#endif /* HAVE_LIBGEN_H && !__linux__ */
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_TAGLIB
 # include <taglib/tag_c.h>
@@ -29,8 +40,6 @@
 # include <vorbis/vorbisfile.h>
 #endif /* HAVE_VORBISFILE */
 #include <shout/shout.h>
-
-#include <assert.h>
 
 #include "log.h"
 #include "metadata.h"
