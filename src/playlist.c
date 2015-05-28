@@ -132,13 +132,13 @@ _playlist_run_program(struct playlist *pl)
 	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
 		int	errnum = errno;
 
-		pclose(filep);
-
 		if (ferror(filep)) {
 			log_alert("%s: output read error: %s", pl->filename,
 			    strerror(errnum));
+			pclose(filep);
 			exit(1);
 		}
+		pclose(filep);
 
 		/* No output (end of playlist.) */
 		return (NULL);
