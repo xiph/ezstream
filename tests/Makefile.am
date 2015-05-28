@@ -49,6 +49,7 @@ AM_CFLAGS	 = @EZ_CFLAGS@ @CHECK_CFLAGS@ \
 AM_LDFLAGS	 = @EZ_LDFLAGS@
 
 EXTRA_DIST	 = \
+	bad-executable.sh \
 	config-bad.xml \
 	config-bad2.xml \
 	config-bad3.xml \

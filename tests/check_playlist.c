@@ -38,6 +38,7 @@ START_TEST(test_playlist_program)
 	playlist_t	p;
 
 	ck_assert_ptr_eq(playlist_program("nonexistent.sh"), NULL);
+	ck_assert_ptr_eq(playlist_program(SRCDIR "/playlist.txt"), NULL);
 	p = playlist_program(EXAMPLESDIR "/play.sh");
 	ck_assert_ptr_ne(p, NULL);
 	ck_assert_str_eq(playlist_get_next(p),
@@ -46,7 +47,11 @@ START_TEST(test_playlist_program)
 	ck_assert_uint_eq(playlist_get_position(p), 0);
 	ck_assert_int_eq(playlist_goto_entry(p,
 	    "Great_Artist_-_Great_Song.ogg"), 0);
-	ck_assert_int_eq(playlist_reread(p), 0);
+	ck_assert_int_eq(playlist_reread(&p), 0);
+	playlist_free(&p);
+	p = playlist_program(SRCDIR "/bad-executable.sh");
+	ck_assert_ptr_ne(p, NULL);
+	ck_assert_ptr_eq(playlist_get_next(p), NULL);
 	playlist_free(&p);
 }
 END_TEST
@@ -71,9 +76,7 @@ playlist_suite(void)
 void
 setup_checked(void)
 {
-	if (0 < cfg_init() ||
-	    0 < log_init() ||
-	    0 < playlist_init())
+	if (0 < playlist_init())
 		ck_abort_msg("setup_checked failed");
 }
 
@@ -81,8 +84,6 @@ void
 teardown_checked(void)
 {
 	playlist_exit();
-	log_exit();
-	cfg_exit();
 }
 
 int
