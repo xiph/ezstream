@@ -353,17 +353,12 @@ metadata_t *
 metadata_program(const char *program, int normalize)
 {
 	metadata_t	*md;
-#ifdef HAVE_STAT
 	struct stat	 st;
-#else
-	FILE		*filep;
-#endif
 
 	md = metadata_create(program);
 	md->program = 1;
 	md->string = xstrdup("");
 
-#ifdef HAVE_STAT
 	if (stat(program, &st) == -1) {
 		log_error("%s: %s", program, strerror(errno));
 		metadata_free(&md);
@@ -380,14 +375,6 @@ metadata_program(const char *program, int normalize)
 		metadata_free(&md);
 		return (NULL);
 	}
-#else
-	if ((filep = fopen(program, "r")) == NULL) {
-		log_error("%s: %s", program, strerror(errno));
-		metadata_free(&md);
-		return (NULL);
-	}
-	fclose(filep);
-#endif /* HAVE_STAT */
 
 	md->normalize = normalize;
 

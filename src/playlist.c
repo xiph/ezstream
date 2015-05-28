@@ -18,7 +18,15 @@
 # include "config.h"
 #endif
 
-#include "ezstream.h"
+#include <sys/stat.h>
+
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "playlist.h"
@@ -255,16 +263,11 @@ struct playlist *
 playlist_program(const char *filename)
 {
 	struct playlist *pl;
-#ifdef HAVE_STAT
 	struct stat	 st;
-#else
-	FILE		*filep;
-#endif
 
 	pl = _playlist_create(filename);
 	pl->program = 1;
 
-#ifdef HAVE_STAT
 	if (stat(filename, &st) == -1) {
 		log_error("%s: %s", filename, strerror(errno));
 		playlist_free(&pl);
@@ -281,14 +284,6 @@ playlist_program(const char *filename)
 		playlist_free(&pl);
 		return (NULL);
 	}
-#else
-	if ((filep = fopen(filename, "r")) == NULL) {
-		log_error("%s: %s", filename, strerror(errno));
-		playlist_free(&pl);
-		return (NULL);
-	}
-	fclose(filep);
-#endif /* HAVE_STAT */
 
 	return (pl);
 }
