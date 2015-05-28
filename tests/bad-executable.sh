@@ -1,1 +1,2 @@
-# This is not a proper executable
+#!/bin/sh
+exit 1
