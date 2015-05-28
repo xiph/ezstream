@@ -10,6 +10,7 @@ START_TEST(test_playlist_file)
 {
 	playlist_t	p;
 
+	ck_assert_ptr_eq(playlist_read("nonexistent.txt"), NULL);
 	p = playlist_read(SRCDIR "/playlist.txt");
 	ck_assert_ptr_ne(p, NULL);
 	ck_assert_uint_gt(playlist_get_num_items(p), 0);
@@ -36,10 +37,16 @@ START_TEST(test_playlist_program)
 {
 	playlist_t	p;
 
+	ck_assert_ptr_eq(playlist_program("nonexistent.sh"), NULL);
 	p = playlist_program(EXAMPLESDIR "/play.sh");
 	ck_assert_ptr_ne(p, NULL);
 	ck_assert_str_eq(playlist_get_next(p),
 	    "Great_Artist_-_Great_Song.ogg");
+	ck_assert_uint_eq(playlist_get_num_items(p), 0);
+	ck_assert_uint_eq(playlist_get_position(p), 0);
+	ck_assert_int_eq(playlist_goto_entry(p,
+	    "Great_Artist_-_Great_Song.ogg"), 0);
+	ck_assert_int_eq(playlist_reread(p), 0);
 	playlist_free(&p);
 }
 END_TEST
