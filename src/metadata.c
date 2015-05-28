@@ -364,9 +364,8 @@ metadata_program(const char *program, int normalize)
 		metadata_free(&md);
 		return (NULL);
 	}
-	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-		log_error("%s: group and/or world writeable",
-		    program);
+	if (st.st_mode & S_IWOTH) {
+		log_error("%s: world writeable", program);
 		metadata_free(&md);
 		return (NULL);
 	}

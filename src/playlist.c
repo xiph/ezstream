@@ -273,9 +273,8 @@ playlist_program(const char *filename)
 		playlist_free(&pl);
 		return (NULL);
 	}
-	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-		log_error("%s: group and/or world writeable",
-		    filename);
+	if (st.st_mode & S_IWOTH) {
+		log_error("%s: world writeable", filename);
 		playlist_free(&pl);
 		return (NULL);
 	}
