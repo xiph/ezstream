@@ -94,7 +94,7 @@ void		playlist_rewind(playlist_t);
  * after calling this function.
  * Returns 1 on success, and 0 on error.
  */
-int		playlist_reread(playlist_t*);
+int		playlist_reread(playlist_t *);
 
 /*
  * Shuffle the entries of the playlist randomly.
