@@ -111,10 +111,7 @@ static const char *
 _playlist_run_program(struct playlist *pl)
 {
 	FILE	*filep;
-	char	 buf[PATH_MAX];
-
-	if (!pl->program)
-		return (NULL);
+	char	 buf[PATH_MAX + 1];
 
 	fflush(NULL);
 	errno = 0;
@@ -129,21 +126,13 @@ _playlist_run_program(struct playlist *pl)
 		return (NULL);
 	}
 
-	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
-		int	errnum = errno;
-
-		if (ferror(filep)) {
-			log_alert("%s: output read error: %s", pl->filename,
-			    strerror(errnum));
-			pclose(filep);
-			exit(1);
-		}
+	fgets(buf, (int)sizeof(buf), filep);
+	if (ferror(filep)) {
+		log_error("%s: output read error: %s", pl->filename,
+		    strerror(ferror(filep)));
 		pclose(filep);
-
-		/* No output (end of playlist.) */
 		return (NULL);
 	}
-
 	pclose(filep);
 
 	if (strlen(buf) == sizeof(buf) - 1) {
@@ -157,8 +146,7 @@ _playlist_run_program(struct playlist *pl)
 		/* Empty line (end of playlist.) */
 		return (NULL);
 
-	if (pl->prog_track != NULL)
-		xfree(pl->prog_track);
+	xfree(pl->prog_track);
 	pl->prog_track = xstrdup(buf);
 
 	return ((const char *)pl->prog_track);
@@ -265,24 +253,21 @@ playlist_program(const char *filename)
 	struct playlist *pl;
 	struct stat	 st;
 
-	pl = _playlist_create(filename);
-	pl->program = 1;
-
 	if (stat(filename, &st) == -1) {
 		log_error("%s: %s", filename, strerror(errno));
-		playlist_free(&pl);
 		return (NULL);
 	}
 	if (st.st_mode & S_IWOTH) {
 		log_error("%s: world writeable", filename);
-		playlist_free(&pl);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		log_error("%s: not an executable program", filename);
-		playlist_free(&pl);
 		return (NULL);
 	}
+
+	pl = _playlist_create(filename);
+	pl->program = 1;
 
 	return (pl);
 }
@@ -321,6 +306,7 @@ playlist_free(struct playlist **pl_p)
 	}
 
 	xfree(*pl_p);
+	*pl_p = NULL;
 }
 
 const char *
