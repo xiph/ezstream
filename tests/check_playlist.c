@@ -28,7 +28,17 @@ START_TEST(test_playlist_file)
 	ck_assert_ptr_eq(playlist_get_next(p), NULL);
 	ck_assert_int_eq(playlist_reread(&p), 1);
 	ck_assert_str_eq(playlist_get_next(p), "1.ogg");
+	ck_assert_str_eq(playlist_get_next(p), "2.ogg");
+	ck_assert_str_eq(playlist_get_next(p), "3.ogg");
+	ck_assert_str_eq(playlist_get_next(p), "4.ogg");
+	ck_assert_str_eq(playlist_get_next(p), "5.ogg");
+	ck_assert_ptr_eq(playlist_get_next(p), NULL);
 	playlist_shuffle(p);
+	playlist_free(&p);
+
+	p = playlist_read(SRCDIR "/playlist-bad.txt");
+	ck_assert_ptr_ne(p, NULL);
+	ck_assert_ptr_eq(playlist_get_next(p), NULL);
 	playlist_free(&p);
 }
 END_TEST
@@ -39,6 +49,12 @@ START_TEST(test_playlist_program)
 
 	ck_assert_ptr_eq(playlist_program("nonexistent.sh"), NULL);
 	ck_assert_ptr_eq(playlist_program(SRCDIR "/playlist.txt"), NULL);
+
+	p = playlist_program(SRCDIR "/bad-executable.sh");
+	ck_assert_ptr_ne(p, NULL);
+	ck_assert_ptr_eq(playlist_get_next(p), NULL);
+	playlist_free(&p);
+
 	p = playlist_program(EXAMPLESDIR "/play.sh");
 	ck_assert_ptr_ne(p, NULL);
 	ck_assert_str_eq(playlist_get_next(p),
@@ -48,11 +64,37 @@ START_TEST(test_playlist_program)
 	ck_assert_int_eq(playlist_goto_entry(p,
 	    "Great_Artist_-_Great_Song.ogg"), 0);
 	ck_assert_int_eq(playlist_reread(&p), 0);
+	playlist_rewind(p);
+	playlist_shuffle(p);
 	playlist_free(&p);
-	p = playlist_program(SRCDIR "/bad-executable.sh");
+
+	p = playlist_program(SRCDIR "/play-bad.sh");
 	ck_assert_ptr_ne(p, NULL);
 	ck_assert_ptr_eq(playlist_get_next(p), NULL);
 	playlist_free(&p);
+
+	p = playlist_program(SRCDIR "/play-bad2.sh");
+	ck_assert_ptr_ne(p, NULL);
+	ck_assert_ptr_eq(playlist_get_next(p), NULL);
+	playlist_free(&p);
+
+	p = playlist_program(SRCDIR "/play-bad3.sh");
+	ck_assert_ptr_ne(p, NULL);
+	ck_assert_ptr_eq(playlist_get_next(p), NULL);
+	playlist_free(&p);
+}
+END_TEST
+
+START_TEST(test_playlist_free)
+{
+	playlist_t	p;
+
+	p = playlist_read(SRCDIR "/playlist.txt");
+	ck_assert_ptr_ne(p, NULL);
+	playlist_free(&p);
+	ck_assert_ptr_eq(p, NULL);
+	playlist_free(&p);
+	playlist_free(NULL);
 }
 END_TEST
 
@@ -68,6 +110,7 @@ playlist_suite(void)
 	tcase_add_checked_fixture(tc_playlist, setup_checked, teardown_checked);
 	tcase_add_test(tc_playlist, test_playlist_file);
 	tcase_add_test(tc_playlist, test_playlist_program);
+	tcase_add_test(tc_playlist, test_playlist_free);
 	suite_add_tcase(s, tc_playlist);
 
 	return (s);

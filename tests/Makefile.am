@@ -54,6 +54,10 @@ EXTRA_DIST	 = \
 	config-bad2.xml \
 	config-bad3.xml \
 	config-bad4.xml \
+	play-bad.sh \
+	play-bad2.sh \
+	play-bad3.sh \
+	playlist-bad.txt \
 	playlist.txt
 
 CLEANFILES	 = *~ *.core core *.gcno *.gcda
