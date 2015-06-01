@@ -364,26 +364,22 @@ metadata_program(const char *program, int normalize)
 	metadata_t	*md;
 	struct stat	 st;
 
-	md = metadata_create(program);
-	md->program = 1;
-	md->string = xstrdup("");
-
 	if (stat(program, &st) == -1) {
 		log_error("%s: %s", program, strerror(errno));
-		metadata_free(&md);
 		return (NULL);
 	}
 	if (st.st_mode & S_IWOTH) {
 		log_error("%s: world writeable", program);
-		metadata_free(&md);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		log_error("%s: not an executable program", program);
-		metadata_free(&md);
 		return (NULL);
 	}
 
+	md = metadata_create(program);
+	md->program = 1;
+	md->string = xstrdup("");
 	md->normalize = normalize;
 
 	return (md);
