@@ -58,6 +58,7 @@ EXTRA_DIST	 = \
 	play-bad2.sh \
 	play-bad3.sh \
 	playlist-bad.txt \
+	playlist-bad2.txt \
 	playlist.txt
 
 CLEANFILES	 = *~ *.core core *.gcno *.gcda

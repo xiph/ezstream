@@ -40,6 +40,11 @@ START_TEST(test_playlist_file)
 	ck_assert_ptr_ne(p, NULL);
 	ck_assert_ptr_eq(playlist_get_next(p), NULL);
 	playlist_free(&p);
+
+	p = playlist_read(SRCDIR "/playlist-bad2.txt");
+	ck_assert_ptr_ne(p, NULL);
+	ck_assert_str_eq(playlist_get_next(p), "1.ogg");
+	playlist_free(&p);
 }
 END_TEST
 
