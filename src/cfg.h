@@ -171,6 +171,8 @@ int	cfg_get_stream_server_public(void);
 enum cfg_stream_format
 	cfg_get_stream_format(void);
 const char *
+	cfg_get_stream_format_str(void);
+const char *
 	cfg_get_stream_encoder(void);
 
 enum cfg_media_type

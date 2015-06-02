@@ -725,6 +725,12 @@ cfg_get_stream_format(void)
 }
 
 const char *
+cfg_get_stream_format_str(void)
+{
+	return (cfg_stream_fmt2str(cfg.stream.format));
+}
+
+const char *
 cfg_get_stream_encoder(void)
 {
 	return (cfg.stream.encoder);

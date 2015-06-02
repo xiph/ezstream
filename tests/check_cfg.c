@@ -347,6 +347,8 @@ START_TEST(test_stream_format)
 
 	ck_assert_int_eq(cfg_set_stream_format(CFG_SFMT_VORBIS, NULL), 0);
 	ck_assert_int_eq(cfg_get_stream_format(), CFG_STREAM_VORBIS);
+	ck_assert_str_eq(cfg_get_stream_format_str(),
+	    cfg_stream_fmt2str(CFG_STREAM_VORBIS));
 }
 END_TEST
 
