@@ -1048,9 +1048,7 @@ main(int argc, char *argv[])
 		    cfg_get_program_config_file());
 	}
 
-	shout = stream_setup(cfg_get_server_hostname(),
-	    cfg_get_server_port(), cfg_get_stream_mountpoint());
-	if (shout == NULL)
+	if (NULL == (shout = stream_setup()))
 		return (ez_shutdown(1));
 
 #ifdef HAVE_SIGNALS

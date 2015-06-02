@@ -24,7 +24,7 @@
 
 int		strrcmp(const char *, const char *);
 int		strrcasecmp(const char *, const char *);
-shout_t *	stream_setup(const char *, unsigned short, const char *);
+shout_t *	stream_setup(void);
 char *		CHARtoUTF8(const char *, int);
 char *		UTF8toCHAR(const char *, int);
 
