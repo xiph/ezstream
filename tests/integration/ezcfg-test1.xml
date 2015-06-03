@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ezstream>
+
+  <server>
+    <hostname>127.0.0.1</hostname>
+    <port>34533</port>
+    <password>ezstream</password>
+  </server>
+
+  <stream>
+    <mountpoint>/test1.ogg</mountpoint>
+    <format>Vorbis</format>
+  </stream>
+
+  <media>
+    <filename>tests.m3u</filename>
+    <stream_once>Yes</stream_once>
+  </media>
+
+</ezstream>
