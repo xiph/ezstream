@@ -90,13 +90,6 @@ if [ -z "${_track_no}" ]; then
 	_track_no=1
 fi
 
-# Count number of tracks in the playlist:
-_num_tracks="$(wc -l < ${_playlist})"
-if [ ${_num_tracks} -eq 0 ]; then
-	# Nothing to do, really.
-	exit 0
-fi
-
 # Handle the end-of-playlist case:
 if [ ${_track_no} -gt ${_num_tracks} ]; then
 	if [ ${REPEAT} -ne 1 ]; then
