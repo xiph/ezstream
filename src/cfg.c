@@ -63,6 +63,8 @@ _cfg_reset(struct cfg *c)
 static void
 _cfg_copy(struct cfg *dst, struct cfg *src)
 {
+	dst->_master_cfg = src->_master_cfg;
+
 	memcpy(&dst->program, &src->program, sizeof(dst->program));
 
 	memcpy(&dst->server, &src->server, sizeof(dst->server));
@@ -121,6 +123,7 @@ int
 cfg_init(void)
 {
 	_cfg_reset(&cfg);
+	cfg._master_cfg = 1;
 	return (0);
 }
 
@@ -130,18 +133,38 @@ cfg_exit(void)
 	_cfg_reset(&cfg);
 }
 
+void
+cfg_save(void)
+{
+	_cfg_reset(&cfg_tmp);
+	_cfg_copy(&cfg_tmp, &cfg);
+}
+
+void
+cfg_pop(void)
+{
+	if (!cfg_tmp._master_cfg)
+		return;
+	_cfg_reset(&cfg);
+	_cfg_copy(&cfg, &cfg_tmp);
+	_cfg_reset(&cfg_tmp);
+}
+
+void
+cfg_clear(void)
+{
+	_cfg_reset(&cfg_tmp);
+}
+
 int
 cfg_reload(void)
 {
-	_cfg_copy(&cfg_tmp, &cfg);
+	cfg_save();
 	if (0 > _cfg_load()) {
-		/* roll back */
-		_cfg_reset(&cfg);
-		_cfg_copy(&cfg, &cfg_tmp);
-		_cfg_reset(&cfg_tmp);
+		cfg_pop();
 		return (-1);
 	}
-	_cfg_reset(&cfg_tmp);
+	cfg_clear();
 
 	return (0);
 }

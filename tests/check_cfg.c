@@ -100,6 +100,25 @@ Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
+START_TEST(test_stash)
+{
+	ck_assert_ptr_eq(cfg_get_stream_name(), NULL);
+	ck_assert_int_eq(cfg_set_stream_name("test_stash", NULL), 0);
+	ck_assert_str_eq(cfg_get_stream_name(), "test_stash");
+	cfg_save();
+	ck_assert_int_eq(cfg_set_stream_name("test_stash2", NULL), 0);
+	ck_assert_str_eq(cfg_get_stream_name(), "test_stash2");
+	cfg_pop();
+	ck_assert_str_eq(cfg_get_stream_name(), "test_stash");
+	cfg_pop();
+	ck_assert_str_eq(cfg_get_stream_name(), "test_stash");
+	cfg_save();
+	cfg_clear();
+	cfg_pop();
+	ck_assert_str_eq(cfg_get_stream_name(), "test_stash");
+}
+END_TEST
+
 START_TEST(test_stream_str2fmt)
 {
 	enum cfg_stream_format	fmt;
@@ -729,6 +748,7 @@ cfg_suite(void)
 
 	tc_core = tcase_create("Core");
 	tcase_add_checked_fixture(tc_core, setup_checked, teardown_checked);
+	tcase_add_test(tc_core, test_stash);
 	tcase_add_test(tc_core, test_stream_str2fmt);
 	tcase_add_test(tc_core, test_stream_fmt2str);
 	tcase_add_test(tc_core, test_file_check);
