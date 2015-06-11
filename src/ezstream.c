@@ -1009,6 +1009,7 @@ int
 main(int argc, char *argv[])
 {
 	int		 ret;
+	const char	*errstr;
 	shout_t 	*shout;
 	extern char	*optarg;
 	extern int	 optind;
@@ -1027,25 +1028,9 @@ main(int argc, char *argv[])
 		return (ez_shutdown(ret));
 	shout_init();
 
-	if (!cfg_get_server_hostname() ||
-	    !cfg_get_server_port()){
-		log_error("%s: missing server configuration",
-		    cfg_get_program_config_file());
+	if (0 > cfg_check(&errstr)) {
+		log_error("%s: %s", cfg_get_program_config_file(), errstr);
 		return (ez_shutdown(2));
-	}
-	if (!cfg_get_server_password()) {
-		log_error("%s: <sourcepassword> missing",
-		    cfg_get_program_config_file());
-		return (ez_shutdown(2));
-	}
-	if (!cfg_get_media_filename()) {
-		log_error("%s: <filename> missing",
-		    cfg_get_program_config_file());
-		return (ez_shutdown(2));
-	}
-	if (CFG_STREAM_INVALID == cfg_get_stream_format()) {
-		log_error("%s: <format> missing or unsupported value",
-		    cfg_get_program_config_file());
 	}
 
 	if (NULL == (shout = stream_setup()))

@@ -119,6 +119,35 @@ START_TEST(test_stash)
 }
 END_TEST
 
+START_TEST(test_check)
+{
+	const char	*errstr = NULL;
+
+	ck_assert_int_eq(cfg_check(NULL), -1);
+	ck_assert_int_eq(cfg_check(&errstr), -1);
+	ck_assert_str_eq(errstr, "server hostname missing");
+	ck_assert_int_eq(cfg_set_server_hostname("localhost", NULL), 0);
+
+	ck_assert_int_eq(cfg_check(NULL), -1);
+	ck_assert_int_eq(cfg_check(&errstr), -1);
+	ck_assert_str_eq(errstr, "server password missing");
+	ck_assert_int_eq(cfg_set_server_password("secret", NULL), 0);
+
+	ck_assert_int_eq(cfg_check(NULL), -1);
+	ck_assert_int_eq(cfg_check(&errstr), -1);
+	ck_assert_str_eq(errstr, "media filename missing");
+	ck_assert_int_eq(cfg_set_media_filename(SRCDIR "/playlist.txt", NULL),
+	    0);
+
+	ck_assert_int_eq(cfg_check(NULL), -1);
+	ck_assert_int_eq(cfg_check(&errstr), -1);
+	ck_assert_str_eq(errstr, "stream format missing or unsupported");
+	ck_assert_int_eq(cfg_set_stream_format(CFG_SFMT_VORBIS, NULL), 0);
+
+	ck_assert_int_eq(cfg_check(NULL), 0);
+}
+END_TEST
+
 START_TEST(test_stream_str2fmt)
 {
 	enum cfg_stream_format	fmt;
@@ -749,6 +778,7 @@ cfg_suite(void)
 	tc_core = tcase_create("Core");
 	tcase_add_checked_fixture(tc_core, setup_checked, teardown_checked);
 	tcase_add_test(tc_core, test_stash);
+	tcase_add_test(tc_core, test_check);
 	tcase_add_test(tc_core, test_stream_str2fmt);
 	tcase_add_test(tc_core, test_stream_fmt2str);
 	tcase_add_test(tc_core, test_file_check);

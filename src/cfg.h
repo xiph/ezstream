@@ -69,6 +69,8 @@ void	cfg_save(void);
 void	cfg_pop(void);
 void	cfg_clear(void);
 
+int	cfg_check(const char **);
+
 int	cfg_reload(void);
 
 int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);

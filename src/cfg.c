@@ -170,6 +170,36 @@ cfg_reload(void)
 }
 
 int
+cfg_check(const char **errstrp)
+{
+	if (!cfg_get_server_hostname()) {
+		if (NULL != errstrp)
+			*errstrp = "server hostname missing";
+		return (-1);
+	}
+
+	if (!cfg_get_server_password()) {
+		if (NULL != errstrp)
+			*errstrp = "server password missing";
+		return (-1);
+	}
+
+	if (!cfg_get_media_filename()) {
+		if (NULL != errstrp)
+			*errstrp = "media filename missing";
+		return (-1);
+	}
+
+	if (CFG_STREAM_INVALID == cfg_get_stream_format()) {
+		if (NULL != errstrp)
+			*errstrp = "stream format missing or unsupported";
+		return (-1);
+	}
+
+	return (0);
+}
+
+int
 cfg_stream_str2fmt(const char *str, enum cfg_stream_format *fmt_p)
 {
 	if (0 == strcasecmp(str, CFG_SFMT_VORBIS)) {
@@ -630,7 +660,7 @@ cfg_get_server_protocol_str(void)
 const char *
 cfg_get_server_hostname(void)
 {
-	return (cfg.server.hostname);
+	return (cfg.server.hostname[0] ? cfg.server.hostname : NULL);
 }
 
 unsigned int
@@ -648,31 +678,31 @@ cfg_get_server_user(void)
 const char *
 cfg_get_server_password(void)
 {
-	return (cfg.server.password);
+	return (cfg.server.password[0] ? cfg.server.password : NULL);
 }
 
 const char *
 cfg_get_server_ca_dir(void)
 {
-	return (cfg.server.ca_dir);
+	return (cfg.server.ca_dir[0] ? cfg.server.ca_dir : NULL);
 }
 
 const char *
 cfg_get_server_ca_file(void)
 {
-	return (cfg.server.ca_file);
+	return (cfg.server.ca_file[0] ? cfg.server.ca_file : NULL);
 }
 
 const char *
 cfg_get_server_client_cert(void)
 {
-	return (cfg.server.client_cert);
+	return (cfg.server.client_cert[0] ? cfg.server.client_cert : NULL);
 }
 
 const char *
 cfg_get_server_client_key(void)
 {
-	return (cfg.server.client_key);
+	return (cfg.server.client_key[0] ? cfg.server.client_key : NULL);
 }
 
 unsigned int
@@ -768,7 +798,7 @@ cfg_get_media_type(void)
 const char *
 cfg_get_media_filename(void)
 {
-	return (cfg.media.filename);
+	return (cfg.media.filename[0] ? cfg.media.filename : NULL);
 }
 
 int
