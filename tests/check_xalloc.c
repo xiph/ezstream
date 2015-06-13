@@ -3,8 +3,6 @@
 #include "xalloc.h"
 
 Suite * xalloc_suite(void);
-void	setup_checked(void);
-void	teardown_checked(void);
 
 START_TEST(test_malloc)
 {
