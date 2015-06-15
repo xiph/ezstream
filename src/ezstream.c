@@ -32,6 +32,7 @@
 #include "log.h"
 #include "metadata.h"
 #include "playlist.h"
+#include "stream.h"
 #include "util.h"
 #include "xalloc.h"
 
@@ -994,8 +995,7 @@ streamPlaylist(shout_t *shout)
 int
 ez_shutdown(int exitval)
 {
-	shout_shutdown();
-
+	stream_exit();
 	playlist_exit();
 	cfg_encoder_exit();
 	cfg_decoder_exit();
@@ -1017,6 +1017,7 @@ main(int argc, char *argv[])
 	struct sigaction act;
 	unsigned int	 i;
 #endif
+
 	ret = 1;
 	if (0 > cfg_init() ||
 	    0 > cmdline_parse(argc, argv, &ret) ||
@@ -1024,9 +1025,9 @@ main(int argc, char *argv[])
 	    0 > cfg_decoder_init() ||
 	    0 > cfg_encoder_init() ||
 	    0 > playlist_init() ||
-	    0 > cfg_reload())
+	    0 > cfg_reload() ||
+	    0 > stream_init())
 		return (ez_shutdown(ret));
-	shout_init();
 
 	if (0 > cfg_check(&errstr)) {
 		log_error("%s: %s", cfg_get_program_config_file(), errstr);
