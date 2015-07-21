@@ -135,6 +135,11 @@ stream_setup(const char *host, unsigned short port, const char *mount)
 		return (NULL);
 	}
 
+	if (NULL == pezConfig->format) {
+		printf("%s: stream format is missing\n", __progname);
+		shout_free(shout);
+		return (NULL);
+	}
 	if (!strcmp(pezConfig->format, MP3_FORMAT) &&
 	    shout_set_format(shout, SHOUT_FORMAT_MP3) != SHOUTERR_SUCCESS) {
 		printf("%s: shout_set_format(MP3): %s\n",
