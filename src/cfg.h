@@ -65,6 +65,12 @@ enum cfg_stream_format {
 int	cfg_init(void);
 void	cfg_exit(void);
 
+void	cfg_save(void);
+void	cfg_pop(void);
+void	cfg_clear(void);
+
+int	cfg_check(const char **);
+
 int	cfg_reload(void);
 
 int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
@@ -170,6 +176,8 @@ const char *
 int	cfg_get_stream_server_public(void);
 enum cfg_stream_format
 	cfg_get_stream_format(void);
+const char *
+	cfg_get_stream_format_str(void);
 const char *
 	cfg_get_stream_encoder(void);
 

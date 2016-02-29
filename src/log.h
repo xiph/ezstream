@@ -31,24 +31,24 @@ enum log_levels {
 int	log_init(void);
 void	log_exit(void);
 
-void	log_syserr(enum log_levels, int, const char *);
+int	log_syserr(enum log_levels, int, const char *);
 
-void	log_alert(const char *, ...)
+int	log_alert(const char *, ...)
     ATTRIBUTE_NONNULL(1)
     ATTRIBUTE_FORMAT(printf, 1, 2);
-void	log_error(const char *, ...)
+int	log_error(const char *, ...)
     ATTRIBUTE_NONNULL(1)
     ATTRIBUTE_FORMAT(printf, 1, 2);
-void	log_warning(const char *, ...)
+int	log_warning(const char *, ...)
     ATTRIBUTE_NONNULL(1)
     ATTRIBUTE_FORMAT(printf, 1, 2);
-void	log_notice(const char *, ...)
+int	log_notice(const char *, ...)
     ATTRIBUTE_NONNULL(1)
     ATTRIBUTE_FORMAT(printf, 1, 2);
-void	log_info(const char *, ...)
+int	log_info(const char *, ...)
     ATTRIBUTE_NONNULL(1)
     ATTRIBUTE_FORMAT(printf, 1, 2);
-void	log_debug(const char *, ...)
+int	log_debug(const char *, ...)
     ATTRIBUTE_NONNULL(1)
     ATTRIBUTE_FORMAT(printf, 1, 2);
 

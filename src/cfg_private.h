@@ -31,6 +31,7 @@
 #define DEFAULT_USER		"source"
 
 struct cfg {
+	int				 _master_cfg;
 	struct program {
 		char			 name[PATH_MAX];
 		enum cfg_config_type	 config_type;

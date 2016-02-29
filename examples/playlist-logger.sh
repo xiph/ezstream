@@ -49,6 +49,10 @@ LOGFILE="ezstream.log"
 
 _myname="$(basename $0)"
 
+# Ignore SIGHUP, and exit 1 on SIGINT and SIGTERM
+trap '' 1
+trap 'exit 1' 2 15
+
 # Check configuration above:
 if [ -z "${STATE_DIR}" -o ! -d "${STATE_DIR}" ]; then
 	echo "${_myname}: STATE_DIR is not configured, does not exist or is not a directory." >&2
@@ -67,8 +71,8 @@ if [ $? -ne 0 ]; then
 	echo "${_myname}: Unable to create temporary file." >&2
 	exit 1
 fi
+# Delete temporary file on exit
 trap 'rm -f ${_playlist}' 0
-trap 'rm -f ${_playlist}; exit 1' 2 15
 
 # Strip comments and empty lines from PLAYLIST, to support .m3u:
 sed -e 's,#.*,,g' < ${PLAYLIST} | grep -v '^[[:space:]]*$' >> ${_playlist}
@@ -88,13 +92,6 @@ fi
 read _track_no < "${_state}"
 if [ -z "${_track_no}" ]; then
 	_track_no=1
-fi
-
-# Count number of tracks in the playlist:
-_num_tracks="$(wc -l < ${_playlist})"
-if [ ${_num_tracks} -eq 0 ]; then
-	# Nothing to do, really.
-	exit 0
 fi
 
 # Handle the end-of-playlist case:

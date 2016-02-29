@@ -18,9 +18,20 @@
 # include "config.h"
 #endif
 
-#include "ezstream.h"
-
 #include "compat.h"
+
+#include <sys/stat.h>
+
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#if defined(HAVE_LIBGEN_H) && !defined(__linux__)
+# include <libgen.h>
+#endif /* HAVE_LIBGEN_H && !__linux__ */
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef HAVE_TAGLIB
 # include <taglib/tag_c.h>
@@ -29,8 +40,6 @@
 # include <vorbis/vorbisfile.h>
 #endif /* HAVE_VORBISFILE */
 #include <shout/shout.h>
-
-#include <assert.h>
 
 #include "log.h"
 #include "metadata.h"
@@ -353,42 +362,24 @@ metadata_t *
 metadata_program(const char *program, int normalize)
 {
 	metadata_t	*md;
-#ifdef HAVE_STAT
 	struct stat	 st;
-#else
-	FILE		*filep;
-#endif
 
-	md = metadata_create(program);
-	md->program = 1;
-	md->string = xstrdup("");
-
-#ifdef HAVE_STAT
 	if (stat(program, &st) == -1) {
 		log_error("%s: %s", program, strerror(errno));
-		metadata_free(&md);
 		return (NULL);
 	}
-	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-		log_error("%s: group and/or world writeable",
-		    program);
-		metadata_free(&md);
+	if (st.st_mode & S_IWOTH) {
+		log_error("%s: world writeable", program);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		log_error("%s: not an executable program", program);
-		metadata_free(&md);
 		return (NULL);
 	}
-#else
-	if ((filep = fopen(program, "r")) == NULL) {
-		log_error("%s: %s", program, strerror(errno));
-		metadata_free(&md);
-		return (NULL);
-	}
-	fclose(filep);
-#endif /* HAVE_STAT */
 
+	md = metadata_create(program);
+	md->program = 1;
+	md->string = xstrdup("");
 	md->normalize = normalize;
 
 	return (md);

@@ -43,9 +43,9 @@ cfg_xmlfile_suite(void)
 	Suite	*s;
 	TCase	*tc_xmlcfg;
 
-	s = suite_create("XmlConfig");
+	s = suite_create("Config");
 
-	tc_xmlcfg = tcase_create("Reload");
+	tc_xmlcfg = tcase_create("XmlConfigFile");
 	tcase_add_checked_fixture(tc_xmlcfg, setup_checked, teardown_checked);
 	tcase_add_test(tc_xmlcfg, test_reload);
 	suite_add_tcase(s, tc_xmlcfg);

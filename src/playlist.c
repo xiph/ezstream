@@ -18,7 +18,15 @@
 # include "config.h"
 #endif
 
-#include "ezstream.h"
+#include <sys/stat.h>
+
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
 
 #include "log.h"
 #include "playlist.h"
@@ -39,24 +47,24 @@ struct playlist {
 	char	 *prog_track;
 };
 
-static playlist_t *	playlist_create(const char *);
-static int		playlist_add(playlist_t *, const char *);
-static unsigned int	playlist_random(void);
-static const char *	playlist_run_program(playlist_t *);
+static struct playlist * _playlist_create(const char *);
+static int		_playlist_add(struct playlist *, const char *);
+static unsigned int	_playlist_random(void);
+static const char *	_playlist_run_program(struct playlist *);
 
-static playlist_t *
-playlist_create(const char *filename)
+static struct playlist *
+_playlist_create(const char *filename)
 {
-	playlist_t	*pl;
+	struct playlist *pl;
 
-	pl = xcalloc(1UL, sizeof(playlist_t));
+	pl = xcalloc(1UL, sizeof(*pl));
 	pl->filename = xstrdup(filename);
 
 	return (pl);
 }
 
 static int
-playlist_add(playlist_t *pl, const char *entry)
+_playlist_add(struct playlist *pl, const char *entry)
 {
 	size_t	num;
 
@@ -84,7 +92,7 @@ playlist_add(playlist_t *pl, const char *entry)
 }
 
 static unsigned int
-playlist_random(void)
+_playlist_random(void)
 {
 	unsigned int	ret = 0;
 
@@ -100,13 +108,10 @@ playlist_random(void)
 }
 
 static const char *
-playlist_run_program(playlist_t *pl)
+_playlist_run_program(struct playlist *pl)
 {
 	FILE	*filep;
-	char	 buf[PATH_MAX];
-
-	if (!pl->program)
-		return (NULL);
+	char	 buf[PATH_MAX + 1];
 
 	fflush(NULL);
 	errno = 0;
@@ -121,21 +126,13 @@ playlist_run_program(playlist_t *pl)
 		return (NULL);
 	}
 
-	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
-		int	errnum = errno;
-
+	fgets(buf, (int)sizeof(buf), filep);
+	if (ferror(filep)) {
+		log_error("%s: output read error: %s", pl->filename,
+		    strerror(ferror(filep)));
 		pclose(filep);
-
-		if (ferror(filep)) {
-			log_alert("%s: output read error: %s", pl->filename,
-			    strerror(errnum));
-			exit(1);
-		}
-
-		/* No output (end of playlist.) */
 		return (NULL);
 	}
-
 	pclose(filep);
 
 	if (strlen(buf) == sizeof(buf) - 1) {
@@ -149,8 +146,7 @@ playlist_run_program(playlist_t *pl)
 		/* Empty line (end of playlist.) */
 		return (NULL);
 
-	if (pl->prog_track != NULL)
-		xfree(pl->prog_track);
+	xfree(pl->prog_track);
 	pl->prog_track = xstrdup(buf);
 
 	return ((const char *)pl->prog_track);
@@ -173,16 +169,16 @@ playlist_init(void)
 
 void playlist_exit(void) {}
 
-playlist_t *
+struct playlist *
 playlist_read(const char *filename)
 {
-	playlist_t	*pl;
+	struct playlist *pl;
 	unsigned long	 line;
 	FILE		*filep;
 	char		 buf[PATH_MAX];
 
 	if (filename != NULL) {
-		pl = playlist_create(filename);
+		pl = _playlist_create(filename);
 
 		if ((filep = fopen(filename, "r")) == NULL) {
 			log_error("%s: %s", filename, strerror(errno));
@@ -190,7 +186,7 @@ playlist_read(const char *filename)
 			return (NULL);
 		}
 	} else {
-		pl = playlist_create("stdin");
+		pl = _playlist_create("stdin");
 
 		if ((filep = fdopen(STDIN_FILENO, "r")) == NULL) {
 			log_error("stdin: %s", strerror(errno));
@@ -233,7 +229,7 @@ playlist_read(const char *filename)
 			continue;
 
 		/* We got one. */
-		if (!playlist_add(pl, buf)) {
+		if (!_playlist_add(pl, buf)) {
 			fclose(filep);
 			playlist_free(&pl);
 			return (NULL);
@@ -251,53 +247,36 @@ playlist_read(const char *filename)
 	return (pl);
 }
 
-playlist_t *
+struct playlist *
 playlist_program(const char *filename)
 {
-	playlist_t	*pl;
-#ifdef HAVE_STAT
+	struct playlist *pl;
 	struct stat	 st;
-#else
-	FILE		*filep;
-#endif
 
-	pl = playlist_create(filename);
-	pl->program = 1;
-
-#ifdef HAVE_STAT
 	if (stat(filename, &st) == -1) {
 		log_error("%s: %s", filename, strerror(errno));
-		playlist_free(&pl);
 		return (NULL);
 	}
-	if (st.st_mode & (S_IWGRP | S_IWOTH)) {
-		log_error("%s: group and/or world writeable",
-		    filename);
-		playlist_free(&pl);
+	if (st.st_mode & S_IWOTH) {
+		log_error("%s: world writeable", filename);
 		return (NULL);
 	}
 	if (!(st.st_mode & (S_IEXEC | S_IXGRP | S_IXOTH))) {
 		log_error("%s: not an executable program", filename);
-		playlist_free(&pl);
 		return (NULL);
 	}
-#else
-	if ((filep = fopen(filename, "r")) == NULL) {
-		log_error("%s: %s", filename, strerror(errno));
-		playlist_free(&pl);
-		return (NULL);
-	}
-	fclose(filep);
-#endif /* HAVE_STAT */
+
+	pl = _playlist_create(filename);
+	pl->program = 1;
 
 	return (pl);
 }
 
 void
-playlist_free(playlist_t **pl_p)
+playlist_free(struct playlist **pl_p)
 {
 	size_t		 i;
-	playlist_t	*pl;
+	struct playlist *pl;
 
 	if (pl_p == NULL || (pl = *pl_p) == NULL)
 		return;
@@ -327,13 +306,14 @@ playlist_free(playlist_t **pl_p)
 	}
 
 	xfree(*pl_p);
+	*pl_p = NULL;
 }
 
 const char *
-playlist_get_next(playlist_t *pl)
+playlist_get_next(struct playlist *pl)
 {
 	if (pl->program)
-		return (playlist_run_program(pl));
+		return (_playlist_run_program(pl));
 
 	if (pl->num == 0)
 		return (NULL);
@@ -341,17 +321,8 @@ playlist_get_next(playlist_t *pl)
 	return ((const char *)pl->list[pl->index++]);
 }
 
-const char *
-playlist_peek_next(playlist_t *pl)
-{
-	if (pl->program || pl->num == 0)
-		return (NULL);
-
-	return ((const char *)pl->list[pl->index]);
-}
-
 void
-playlist_skip_next(playlist_t *pl)
+playlist_skip_next(struct playlist *pl)
 {
 	if (pl->program || pl->num == 0)
 		return;
@@ -361,7 +332,7 @@ playlist_skip_next(playlist_t *pl)
 }
 
 unsigned long
-playlist_get_num_items(playlist_t *pl)
+playlist_get_num_items(struct playlist *pl)
 {
 	if (pl->program)
 		return (0);
@@ -370,7 +341,7 @@ playlist_get_num_items(playlist_t *pl)
 }
 
 unsigned long
-playlist_get_position(playlist_t *pl)
+playlist_get_position(struct playlist *pl)
 {
 	if (pl->program)
 		return (0);
@@ -379,18 +350,7 @@ playlist_get_position(playlist_t *pl)
 }
 
 int
-playlist_set_position(playlist_t *pl, unsigned long idx)
-{
-	if (pl->program || idx > pl->num - 1)
-		return (0);
-
-	pl->index = (size_t)idx;
-
-	return (1);
-}
-
-int
-playlist_goto_entry(playlist_t *pl, const char *entry)
+playlist_goto_entry(struct playlist *pl, const char *entry)
 {
 	unsigned long	i;
 
@@ -408,7 +368,7 @@ playlist_goto_entry(playlist_t *pl, const char *entry)
 }
 
 void
-playlist_rewind(playlist_t *pl)
+playlist_rewind(struct playlist *pl)
 {
 	if (pl->program)
 		return;
@@ -417,9 +377,9 @@ playlist_rewind(playlist_t *pl)
 }
 
 int
-playlist_reread(playlist_t **plist)
+playlist_reread(struct playlist **plist)
 {
-	playlist_t	*new_pl, *pl;
+	struct playlist *new_pl, *pl;
 
 	pl = *plist;
 
@@ -439,7 +399,7 @@ playlist_reread(playlist_t **plist)
  * Yet another implementation of the "Knuth Shuffle":
  */
 void
-playlist_shuffle(playlist_t *pl)
+playlist_shuffle(struct playlist *pl)
 {
 	size_t	 d, i, range;
 	char	*temp;
@@ -455,7 +415,7 @@ playlist_shuffle(playlist_t *pl)
 		 * largest multiple of our range. This reduces PRNG bias.
 		 */
 		do {
-			d = (unsigned long)playlist_random();
+			d = (unsigned long)_playlist_random();
 		} while (d > RAND_MAX - (RAND_MAX % range));
 
 		/*

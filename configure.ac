@@ -240,7 +240,6 @@ dnl #######################
 AC_CHECK_FUNCS([ \
 	arc4random \
 	basename \
-	gettimeofday \
 	nl_langinfo \
 	pclose \
 	popen \

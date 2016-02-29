@@ -41,26 +41,26 @@
 #define STREAM_SERVERR	3
 #define STREAM_UPDMDATA 4
 
-playlist_t		*playlist = NULL;
-int			 playlistMode = 0;
-unsigned int		 resource_errors = 0;
+playlist_t		 playlist;
+int			 playlistMode;
+unsigned int		 resource_errors;
 
 #ifdef HAVE_SIGNALS
 const int		 ezstream_signals[] = {
 	SIGTERM, SIGINT, SIGHUP, SIGUSR1, SIGUSR2
 };
 
-volatile sig_atomic_t	 rereadPlaylist = 0;
-volatile sig_atomic_t	 rereadPlaylist_notify = 0;
-volatile sig_atomic_t	 skipTrack = 0;
-volatile sig_atomic_t	 queryMetadata = 0;
-volatile sig_atomic_t	 quit = 0;
+volatile sig_atomic_t	 rereadPlaylist;
+volatile sig_atomic_t	 rereadPlaylist_notify;
+volatile sig_atomic_t	 skipTrack;
+volatile sig_atomic_t	 queryMetadata;
+volatile sig_atomic_t	 quit;
 #else
-int			 rereadPlaylist = 0;
-int			 rereadPlaylist_notify = 0;
-int			 skipTrack = 0;
-int			 queryMetadata = 0;
-int			 quit = 0;
+int			 rereadPlaylist;
+int			 rereadPlaylist_notify;
+int			 skipTrack;
+int			 queryMetadata;
+int			 quit;
 #endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
@@ -85,7 +85,7 @@ FILE *		openResource(shout_t *, const char *, int *, metadata_t **,
 int		reconnectServer(shout_t *, int);
 const char *	getTimeString(long);
 int		sendStream(shout_t *, FILE *, const char *, int, const char *,
-			   struct timeval *);
+			   struct timespec *);
 int		streamFile(shout_t *, const char *);
 int		streamPlaylist(shout_t *);
 int		ez_shutdown(int);
@@ -699,19 +699,19 @@ getTimeString(long seconds)
 
 int
 sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
-	   int isStdin, const char *songLenStr, struct timeval *tv)
+	   int isStdin, const char *songLenStr, struct timespec *tv)
 {
 	unsigned char	 buff[4096];
 	size_t		 bytes_read, total, oldTotal;
 	int		 ret;
 	double		 kbps = -1.0;
-	struct timeval	 timeStamp, *startTime = tv;
-	struct timeval	 callTime, currentTime;
+	struct timespec	 timeStamp, *startTime = tv;
+	struct timespec	 callTime, currentTime;
 
-	ez_gettimeofday((void *)&callTime);
+	clock_gettime(CLOCK_MONOTONIC, &callTime);
 
 	timeStamp.tv_sec = startTime->tv_sec;
-	timeStamp.tv_usec = startTime->tv_usec;
+	timeStamp.tv_nsec = startTime->tv_nsec;
 
 	total = oldTotal = 0;
 	ret = STREAM_DONE;
@@ -747,7 +747,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			break;
 		}
 
-		ez_gettimeofday((void *)&currentTime);
+		clock_gettime(CLOCK_MONOTONIC, &currentTime);
 
 		if (queryMetadata ||
 		    (0 <= cfg_get_metadata_refresh_interval() &&
@@ -776,9 +776,9 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 			}
 
 			oldTime = (double)timeStamp.tv_sec
-			    + (double)timeStamp.tv_usec / 1000000.0;
+			    + (double)timeStamp.tv_nsec / 1000000000.0;
 			newTime = (double)currentTime.tv_sec
-			    + (double)currentTime.tv_usec / 1000000.0;
+			    + (double)currentTime.tv_nsec / 1000000000.0;
 			if (songLenStr == NULL)
 				printf("  [ %s]",
 				    getTimeString(currentTime.tv_sec -
@@ -792,7 +792,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 				kbps = (((double)(total - oldTotal)
 				    / (newTime - oldTime)) * 8.0) / 1000.0;
 				timeStamp.tv_sec = currentTime.tv_sec;
-				timeStamp.tv_usec = currentTime.tv_usec;
+				timeStamp.tv_nsec = currentTime.tv_nsec;
 				oldTotal = total;
 			}
 			if (kbps < 0)
@@ -828,7 +828,7 @@ streamFile(shout_t *shout, const char *fileName)
 	int		 ret, retval = 0;
 	long		 songLen;
 	metadata_t	*mdata;
-	struct timeval	 startTime;
+	struct timespec	 startTime;
 
 	if ((filepstream = openResource(shout, fileName, &popenFlag, &mdata, &isStdin, &songLen))
 	    == NULL) {
@@ -861,7 +861,7 @@ streamFile(shout_t *shout, const char *fileName)
 
 	if (songLen > 0)
 		songLenStr = xstrdup(getTimeString(songLen));
-	ez_gettimeofday((void *)&startTime);
+	clock_gettime(CLOCK_MONOTONIC, &startTime);
 	do {
 		ret = sendStream(shout, filepstream, fileName, isStdin,
 		    songLenStr, &startTime);
@@ -935,15 +935,22 @@ streamPlaylist(shout_t *shout)
 	char		 lastSong[PATH_MAX];
 
 	if (playlist == NULL) {
-		if (CFG_MEDIA_PROGRAM == cfg_get_media_type()) {
+		switch (cfg_get_media_type()) {
+		case CFG_MEDIA_PROGRAM:
 			if ((playlist = playlist_program(cfg_get_media_filename())) == NULL)
 				return (0);
-		} else {
+			break;
+		case CFG_MEDIA_STDIN:
+			if ((playlist = playlist_read(NULL)) == NULL)
+				return (0);
+			break;
+		default:
 			if ((playlist = playlist_read(cfg_get_media_filename())) == NULL)
 				return (0);
 			if (playlist_get_num_items(playlist) == 0)
-				log_notice("%s: playlist empty",
+				log_warning("%s: playlist empty",
 				    cfg_get_media_filename());
+			break;
 		}
 	} else {
 		/*
@@ -1002,6 +1009,7 @@ int
 main(int argc, char *argv[])
 {
 	int		 ret;
+	const char	*errstr;
 	shout_t 	*shout;
 	extern char	*optarg;
 	extern int	 optind;
@@ -1020,30 +1028,12 @@ main(int argc, char *argv[])
 		return (ez_shutdown(ret));
 	shout_init();
 
-	if (!cfg_get_server_hostname() ||
-	    !cfg_get_server_port()){
-		log_error("%s: missing server configuration",
-		    cfg_get_program_config_file());
+	if (0 > cfg_check(&errstr)) {
+		log_error("%s: %s", cfg_get_program_config_file(), errstr);
 		return (ez_shutdown(2));
-	}
-	if (!cfg_get_server_password()) {
-		log_error("%s: <sourcepassword> missing",
-		    cfg_get_program_config_file());
-		return (ez_shutdown(2));
-	}
-	if (!cfg_get_media_filename()) {
-		log_error("%s: <filename> missing",
-		    cfg_get_program_config_file());
-		return (ez_shutdown(2));
-	}
-	if (CFG_STREAM_INVALID == cfg_get_stream_format()) {
-		log_error("%s: <format> missing or unsupported value",
-		    cfg_get_program_config_file());
 	}
 
-	shout = stream_setup(cfg_get_server_hostname(),
-	    cfg_get_server_port(), cfg_get_stream_mountpoint());
-	if (shout == NULL)
+	if (NULL == (shout = stream_setup()))
 		return (ez_shutdown(1));
 
 #ifdef HAVE_SIGNALS

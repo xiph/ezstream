@@ -63,6 +63,8 @@ _cfg_reset(struct cfg *c)
 static void
 _cfg_copy(struct cfg *dst, struct cfg *src)
 {
+	dst->_master_cfg = src->_master_cfg;
+
 	memcpy(&dst->program, &src->program, sizeof(dst->program));
 
 	memcpy(&dst->server, &src->server, sizeof(dst->server));
@@ -121,6 +123,7 @@ int
 cfg_init(void)
 {
 	_cfg_reset(&cfg);
+	cfg._master_cfg = 1;
 	return (0);
 }
 
@@ -130,18 +133,68 @@ cfg_exit(void)
 	_cfg_reset(&cfg);
 }
 
+void
+cfg_save(void)
+{
+	_cfg_reset(&cfg_tmp);
+	_cfg_copy(&cfg_tmp, &cfg);
+}
+
+void
+cfg_pop(void)
+{
+	if (!cfg_tmp._master_cfg)
+		return;
+	_cfg_reset(&cfg);
+	_cfg_copy(&cfg, &cfg_tmp);
+	_cfg_reset(&cfg_tmp);
+}
+
+void
+cfg_clear(void)
+{
+	_cfg_reset(&cfg_tmp);
+}
+
 int
 cfg_reload(void)
 {
-	_cfg_copy(&cfg_tmp, &cfg);
+	cfg_save();
 	if (0 > _cfg_load()) {
-		/* roll back */
-		_cfg_reset(&cfg);
-		_cfg_copy(&cfg, &cfg_tmp);
-		_cfg_reset(&cfg_tmp);
+		cfg_pop();
 		return (-1);
 	}
-	_cfg_reset(&cfg_tmp);
+	cfg_clear();
+
+	return (0);
+}
+
+int
+cfg_check(const char **errstrp)
+{
+	if (!cfg_get_server_hostname()) {
+		if (NULL != errstrp)
+			*errstrp = "server hostname missing";
+		return (-1);
+	}
+
+	if (!cfg_get_server_password()) {
+		if (NULL != errstrp)
+			*errstrp = "server password missing";
+		return (-1);
+	}
+
+	if (!cfg_get_media_filename()) {
+		if (NULL != errstrp)
+			*errstrp = "media filename missing";
+		return (-1);
+	}
+
+	if (CFG_STREAM_INVALID == cfg_get_stream_format()) {
+		if (NULL != errstrp)
+			*errstrp = "stream format missing or unsupported";
+		return (-1);
+	}
 
 	return (0);
 }
@@ -607,7 +660,7 @@ cfg_get_server_protocol_str(void)
 const char *
 cfg_get_server_hostname(void)
 {
-	return (cfg.server.hostname);
+	return (cfg.server.hostname[0] ? cfg.server.hostname : NULL);
 }
 
 unsigned int
@@ -625,31 +678,31 @@ cfg_get_server_user(void)
 const char *
 cfg_get_server_password(void)
 {
-	return (cfg.server.password);
+	return (cfg.server.password[0] ? cfg.server.password : NULL);
 }
 
 const char *
 cfg_get_server_ca_dir(void)
 {
-	return (cfg.server.ca_dir);
+	return (cfg.server.ca_dir[0] ? cfg.server.ca_dir : NULL);
 }
 
 const char *
 cfg_get_server_ca_file(void)
 {
-	return (cfg.server.ca_file);
+	return (cfg.server.ca_file[0] ? cfg.server.ca_file : NULL);
 }
 
 const char *
 cfg_get_server_client_cert(void)
 {
-	return (cfg.server.client_cert);
+	return (cfg.server.client_cert[0] ? cfg.server.client_cert : NULL);
 }
 
 const char *
 cfg_get_server_client_key(void)
 {
-	return (cfg.server.client_key);
+	return (cfg.server.client_key[0] ? cfg.server.client_key : NULL);
 }
 
 unsigned int
@@ -725,6 +778,12 @@ cfg_get_stream_format(void)
 }
 
 const char *
+cfg_get_stream_format_str(void)
+{
+	return (cfg_stream_fmt2str(cfg.stream.format));
+}
+
+const char *
 cfg_get_stream_encoder(void)
 {
 	return (cfg.stream.encoder);
@@ -739,7 +798,7 @@ cfg_get_media_type(void)
 const char *
 cfg_get_media_filename(void)
 {
-	return (cfg.media.filename);
+	return (cfg.media.filename[0] ? cfg.media.filename : NULL);
 }
 
 int
