@@ -295,6 +295,31 @@ START_TEST(test_server_ca_dir)
 }
 END_TEST
 
+START_TEST(test_server_tls)
+{
+	const char	*errstr = NULL;
+
+	ck_assert_int_eq(cfg_set_server_tls("", &errstr), -1);
+	ck_assert_str_eq(errstr, "empty");
+	ck_assert_int_eq(cfg_set_server_tls("test", &errstr), -1);
+	ck_assert_str_eq(errstr, "invalid");
+	ck_assert_int_eq(cfg_get_server_tls(), CFG_TLS_MAY);
+	ck_assert_int_eq(cfg_set_server_tls("None", NULL), 0);
+	ck_assert_int_eq(cfg_get_server_tls(), CFG_TLS_NONE);
+	ck_assert_int_eq(cfg_set_server_tls("Required", NULL), 0);
+	ck_assert_int_eq(cfg_get_server_tls(), CFG_TLS_REQUIRED);
+	ck_assert_int_eq(cfg_set_server_tls("May", NULL), 0);
+	ck_assert_int_eq(cfg_get_server_tls(), CFG_TLS_MAY);
+}
+END_TEST
+
+START_TEST(test_server_tls_cipher_suite)
+{
+	TEST_STRLCPY(cfg_set_server_tls_cipher_suite,
+	    cfg_get_server_tls_cipher_suite, CSUITE_SIZE);
+}
+END_TEST
+
 START_TEST(test_server_ca_file)
 {
 	TEST_STRLCPY(cfg_set_server_ca_file, cfg_get_server_ca_file, PATH_MAX);
@@ -304,13 +329,6 @@ END_TEST
 START_TEST(test_server_client_cert)
 {
 	TEST_STRLCPY(cfg_set_server_client_cert, cfg_get_server_client_cert,
-	    PATH_MAX);
-}
-END_TEST
-
-START_TEST(test_server_client_key)
-{
-	TEST_STRLCPY(cfg_set_server_client_key, cfg_get_server_client_key,
 	    PATH_MAX);
 }
 END_TEST
@@ -802,10 +820,11 @@ cfg_suite(void)
 	tcase_add_test(tc_server, test_server_port);
 	tcase_add_test(tc_server, test_server_user);
 	tcase_add_test(tc_server, test_server_password);
+	tcase_add_test(tc_server, test_server_tls);
+	tcase_add_test(tc_server, test_server_tls_cipher_suite);
 	tcase_add_test(tc_server, test_server_ca_dir);
 	tcase_add_test(tc_server, test_server_ca_file);
 	tcase_add_test(tc_server, test_server_client_cert);
-	tcase_add_test(tc_server, test_server_client_key);
 	tcase_add_test(tc_server, test_server_reconnect_attempts);
 	suite_add_tcase(s, tc_server);
 

@@ -172,30 +172,49 @@ Default:
 .It Sy \&<password\ /\&>
 .Pq Mandatory.
 Password to authenticate with on the server.
+.It Sy \&<tls\ /\&>
+Configure the TLS encryption requirement for the server connection.
+Possible values are:
+.Pp
+.Bl -tag -width 0|NO|FALSE -compact
+.It Ar None
+No TLS encryption will be attempted.
+.It Ar May
+Opportunistic TLS encryption may be used, if the server supports it
+.Pq the default .
+.It Ar Required
+TLS encryption is required.
+This is the only setting that is providing security against both passive and
+active attackers.
+.El
+.It Sy \&<tls_cipher_suite\ /\&>
+Configure allowed cipher suites for TLS.
+.Pp
+For example (modern cipher suites, PFS, no deprecated algorithms):
+.Sy HIGH:!kRSA:!kECDH:!DH:!PKS:!aNULL:!eNULL:!3DES:!MD5:!SHA:!TLSv1 .
+.Pp
+Default:
+.Em libshout default cipher suite
 .It Sy \&<ca_dir\ /\&>
 Directory in which OpenSSL finds root CA certificates for validating the
 .Ar HTTPS
 server identity.
 .Pp
 Default:
-.Em no server validation
+.Em system default
 .It Sy \&<ca_file\ /\&>
 Path of a root CA bundle file for validating the
 .Ar HTTPS
 server identity.
 .Pp
 Default:
-.Em no server validation
+.Em system default
 .It Sy \&<client_cert\ /\&>
-X.503 client certificate for authentication on an
+X.503 client certificate and key
+.Pq in PEM format containing both certificate and key in the same file
+for authentication on an
 .Ar HTTPS
 server.
-.Pp
-Default:
-.Em no client certificate authentication
-.It Sy \&<client_key\ /\&>
-Private key that matches the public key and certificate in
-.Sy \&<client_cert\ /\&> .
 .Pp
 Default:
 .Em no client certificate authentication

@@ -367,6 +367,36 @@ cfg_set_server_password(const char *password, const char **errstrp)
 }
 
 int
+cfg_set_server_tls(const char *tls, const char **errstrp)
+{
+	if (!tls || !tls[0]) {
+		if (errstrp)
+			*errstrp = "empty";
+		return (-1);
+	}
+
+	if (0 == strcasecmp("may", tls))
+		cfg.server.tls = CFG_TLS_MAY;
+	else if (0 == strcasecmp("none", tls))
+		cfg.server.tls = CFG_TLS_NONE;
+	else if (0 == strcasecmp("required", tls))
+		cfg.server.tls = CFG_TLS_REQUIRED;
+	else {
+		if (NULL != errstrp)
+			*errstrp = "invalid";
+		return (-1);
+	}
+	return (0);
+}
+
+int
+cfg_set_server_tls_cipher_suite(const char *suite, const char **errstrp)
+{
+	SET_STRLCPY(cfg.server.tls_cipher_suite, suite, errstrp);
+	return (0);
+}
+
+int
 cfg_set_server_ca_dir(const char *ca_dir, const char **errstrp)
 {
 	SET_STRLCPY(cfg.server.ca_dir, ca_dir, errstrp);
@@ -384,13 +414,6 @@ int
 cfg_set_server_client_cert(const char *client_cert, const char **errstrp)
 {
 	SET_STRLCPY(cfg.server.client_cert, client_cert, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_client_key(const char *client_key, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.client_key, client_key, errstrp);
 	return (0);
 }
 
@@ -681,6 +704,20 @@ cfg_get_server_password(void)
 	return (cfg.server.password[0] ? cfg.server.password : NULL);
 }
 
+enum cfg_server_tls
+cfg_get_server_tls(void)
+{
+	return (cfg.server.tls);
+}
+
+const char *
+cfg_get_server_tls_cipher_suite(void)
+{
+	return (cfg.server.tls_cipher_suite[0]
+	    ? cfg.server.tls_cipher_suite
+	    : NULL);
+}
+
 const char *
 cfg_get_server_ca_dir(void)
 {
@@ -697,12 +734,6 @@ const char *
 cfg_get_server_client_cert(void)
 {
 	return (cfg.server.client_cert[0] ? cfg.server.client_cert : NULL);
-}
-
-const char *
-cfg_get_server_client_key(void)
-{
-	return (cfg.server.client_key[0] ? cfg.server.client_key : NULL);
 }
 
 unsigned int

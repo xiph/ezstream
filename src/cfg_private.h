@@ -26,6 +26,7 @@
 
 #define EXTENSIONS_MAX		16
 #define UCREDS_SIZE		256
+#define CSUITE_SIZE		2048
 
 #define DEFAULT_PORT		8000
 #define DEFAULT_USER		"source"
@@ -46,10 +47,11 @@ struct cfg {
 		unsigned int		 port;
 		char			 user[UCREDS_SIZE];
 		char			 password[UCREDS_SIZE];
+		enum cfg_server_tls	 tls;
+		char			 tls_cipher_suite[CSUITE_SIZE];
 		char			 ca_dir[PATH_MAX];
 		char			 ca_file[PATH_MAX];
 		char			 client_cert[PATH_MAX];
-		char			 client_key[PATH_MAX];
 		unsigned int		 reconnect_attempts;
 	} server;
 	struct stream {

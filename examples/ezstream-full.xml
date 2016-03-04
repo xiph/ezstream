@@ -27,8 +27,19 @@
     <password>hackme</password>
 
     <!--
+      Configure TLS encryption requirement: none, may (default), required
+      -->
+    <tls>Required</tls>
+
+    <!--
+      Configure allowed cipher suites for TLS other than the libshout default.
+      See openssl(1)/ciphers(1) for details.
+      -->
+    <tls_cipher_suite>HIGH:!kRSA:!kECDH:!DH:!PKS:!aNULL:!eNULL:!3DES:!MD5:!SHA:!TLSv1</tls_cipher_suite>
+
+    <!--
       Directory to use for server certificate verification in "hash format".
-      See openssl(1)/verify(1) for details:
+      See openssl(1)/verify(1) for details.
       -->
     <ca_dir>/etc/ssl/certs</ca_dir>
 
@@ -38,11 +49,11 @@
       -->
     <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file>
 
-    <!-- Client certificate (with public key) for authentication -->
+    <!-- 
+      X.503 client certificate, in PEM format, containing both certificate
+      (with public key) and private key in the same file, for authentication.
+      -->
     <client_cert>/etc/ssl/ezstream.crt</client_cert>
-
-    <!-- Client private key for authentication -->
-    <client_key>/etc/ssl/private/ezstream.key</client_key>
 
     <!-- Number of reconnection attempts, before giving up: -->
     <reconnect_attempts>0</reconnect_attempts>

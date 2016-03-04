@@ -64,9 +64,11 @@ _cfg_xmlfile_parse_server(xmlDocPtr doc, xmlNodePtr cur)
 		XML_STRCONFIG("server", cfg_set_server_port,        "port");
 		XML_STRCONFIG("server", cfg_set_server_user,        "user");
 		XML_STRCONFIG("server", cfg_set_server_password,    "password");
+		XML_STRCONFIG("server", cfg_set_server_tls,         "tls");
+		XML_STRCONFIG("server", cfg_set_server_tls_cipher_suite,
+								    "tls_cipher_suite");
 		XML_STRCONFIG("server", cfg_set_server_ca_dir,      "ca_dir");
 		XML_STRCONFIG("server", cfg_set_server_ca_file,     "ca_file");
-		XML_STRCONFIG("server", cfg_set_server_client_key,  "client_key");
 		XML_STRCONFIG("server", cfg_set_server_client_cert, "client_cert");
 		XML_STRCONFIG("server", cfg_set_server_reconnect_attempts,
 								    "reconnect_attempts");
@@ -267,10 +269,11 @@ _cfg_xmlfile_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
  *         port
  *         user
  *         password
+ *         tls
+ *         tls_cipher_suite
  *         ca_dir
  *         ca_file
  *         client_cert
- *         client_key
  *         reconnect_attempts
  *     stream
  *         mountpoint

@@ -8,10 +8,11 @@
     <port></port>
     <user></user>
     <password></password>
+    <tls></tls>
+    <tls_cipher_suite></tls_cipher_suite>
     <ca_dir></ca_dir>
     <ca_file></ca_file>
     <client_cert></client_cert>
-    <client_key></client_key>
     <reconnect_attempts></reconnect_attempts>
   </server>
 

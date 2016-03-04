@@ -40,6 +40,14 @@ enum cfg_server_protocol {
 	CFG_PROTO_MAX = CFG_PROTO_HTTPS,
 };
 
+enum cfg_server_tls {
+	CFG_TLS_MAY = 0,
+	CFG_TLS_NONE,
+	CFG_TLS_REQUIRED,
+	CFG_TLS_MIN = CFG_TLS_MAY,
+	CFG_TLS_MAX = CFG_TLS_REQUIRED,
+};
+
 enum cfg_media_type {
 	CFG_MEDIA_AUTODETECT = 0,
 	CFG_MEDIA_FILE,
@@ -91,10 +99,11 @@ int	cfg_set_server_hostname(const char *, const char **);
 int	cfg_set_server_port(const char *, const char **);
 int	cfg_set_server_user(const char *, const char **);
 int	cfg_set_server_password(const char *, const char **);
+int	cfg_set_server_tls(const char *, const char **);
+int	cfg_set_server_tls_cipher_suite(const char *, const char **);
 int	cfg_set_server_ca_dir(const char *, const char **);
 int	cfg_set_server_ca_file(const char *, const char **);
 int	cfg_set_server_client_cert(const char *, const char **);
-int	cfg_set_server_client_key(const char *, const char **);
 int	cfg_set_server_reconnect_attempts(const char *, const char **);
 
 int	cfg_set_stream_mountpoint(const char *, const char **);
@@ -144,14 +153,16 @@ const char *
 	cfg_get_server_user(void);
 const char *
 	cfg_get_server_password(void);
+enum cfg_server_tls
+	cfg_get_server_tls(void);
+const char *
+	cfg_get_server_tls_cipher_suite(void);
 const char *
 	cfg_get_server_ca_dir(void);
 const char *
 	cfg_get_server_ca_file(void);
 const char *
 	cfg_get_server_client_cert(void);
-const char *
-	cfg_get_server_client_key(void);
 unsigned int
 	cfg_get_server_reconnect_attempts(void);
 
