@@ -13,6 +13,7 @@ noinst_HEADERS	 = \
 	log.h \
 	metadata.h \
 	playlist.h \
+	stream.h \
 	util.h \
 	xalloc.h
 libezstream_la_SOURCES = \
@@ -24,6 +25,7 @@ libezstream_la_SOURCES = \
 	log.c \
 	metadata.c \
 	playlist.c \
+	stream.c \
 	util.c \
 	xalloc.c
 libezstream_la_DEPENDENCIES = \
