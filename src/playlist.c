@@ -126,10 +126,12 @@ _playlist_run_program(struct playlist *pl)
 		return (NULL);
 	}
 
-	fgets(buf, (int)sizeof(buf), filep);
-	if (ferror(filep)) {
-		log_error("%s: output read error: %s", pl->filename,
-		    strerror(ferror(filep)));
+	if (NULL == fgets(buf, (int)sizeof(buf), filep)) {
+		if (ferror(filep))
+			log_error("%s: output read error: %s", pl->filename,
+			    strerror(ferror(filep)));
+		else
+			log_error("%s: output read error: EOF", pl->filename);
 		pclose(filep);
 		return (NULL);
 	}
