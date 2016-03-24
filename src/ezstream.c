@@ -75,20 +75,16 @@ typedef struct tag_ID3Tag {
 } ID3Tag;
 
 int		urlParse(const char *, char **, unsigned short *, char **);
-char *		shellQuote(const char *);
-char *		replaceString(const char *, const char *, const char *);
-char *		buildReencodeCommand(const char *, const char *, metadata_t *);
-char *		getMetadataString(const char *, metadata_t *);
-metadata_t *	getMetadata(const char *);
-int		setMetadata(shout_t *, metadata_t *, char **);
-FILE *		openResource(shout_t *, const char *, int *, metadata_t **,
+char *		buildReencodeCommand(const char *, const char *, metadata_t);
+metadata_t	getMetadata(const char *);
+FILE *		openResource(stream_t, const char *, int *, metadata_t *,
 			     int *, long *);
 int		reconnectServer(shout_t *, int);
 const char *	getTimeString(long);
-int		sendStream(shout_t *, FILE *, const char *, int, const char *,
+int		sendStream(stream_t, FILE *, const char *, int, const char *,
 			   struct timespec *);
-int		streamFile(shout_t *, const char *);
-int		streamPlaylist(shout_t *);
+int		streamFile(stream_t, const char *);
+int		streamPlaylist(stream_t);
 int		ez_shutdown(int);
 
 #ifdef HAVE_SIGNALS
@@ -173,72 +169,9 @@ urlParse(const char *url, char **hostname, unsigned short *port,
 	return (1);
 }
 
-#define SHELLQUOTE_INLEN_MAX	8191UL
-
-char *
-shellQuote(const char *in)
-{
-	char		*out, *out_p;
-	size_t		 out_len;
-	const char	*in_p;
-
-	out_len = (strlen(in) > SHELLQUOTE_INLEN_MAX)
-	    ? SHELLQUOTE_INLEN_MAX
-	    : strlen(in);
-	out_len = out_len * 2 + 2;
-	out = xcalloc(out_len + 1, sizeof(char));
-
-	out_p = out;
-	in_p = in;
-
-	*out_p++ = '\'';
-	out_len--;
-	while (*in_p && out_len > 2) {
-		switch (*in_p) {
-		case '\'':
-		case '\\':
-			*out_p++ = '\\';
-			out_len--;
-			break;
-		default:
-			break;
-		}
-		*out_p++ = *in_p++;
-		out_len--;
-	}
-	*out_p++ = '\'';
-
-	return (out);
-}
-
-char *
-replaceString(const char *source, const char *from, const char *to)
-{
-	char		*to_quoted, *dest;
-	size_t		 dest_size;
-	const char	*p1, *p2;
-
-	to_quoted = shellQuote(to);
-	dest_size = strlen(source) + strlen(to_quoted) + 1;
-	dest = xcalloc(dest_size, sizeof(char));
-
-	p1 = source;
-	p2 = strstr(p1, from);
-	if (p2 != NULL) {
-		strncat(dest, p1, (size_t)(p2 - p1));
-		strlcat(dest, to_quoted, dest_size);
-		p1 = p2 + strlen(from);
-	}
-	strlcat(dest, p1, dest_size);
-
-	xfree(to_quoted);
-
-	return (dest);
-}
-
 char *
 buildReencodeCommand(const char *extension, const char *fileName,
-    metadata_t *mdata)
+    metadata_t mdata)
 {
 	cfg_decoder_t	 decoder;
 	cfg_encoder_t	 encoder;
@@ -292,7 +225,7 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	if (strstr(dec_str, PLACEHOLDER_METADATA) != NULL) {
 		if (cfg_get_metadata_program() &&
 		    cfg_get_metadata_format_str()) {
-			char *mdataString = getMetadataString(cfg_get_metadata_format_str(),
+			char *mdataString = stream_get_metadata_str(cfg_get_metadata_format_str(),
 			    mdata);
 			char *tmpStr = replaceString(dec_str,
 			    PLACEHOLDER_METADATA, mdataString);
@@ -329,7 +262,7 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	if (strstr(enc_str, PLACEHOLDER_METADATA) != NULL) {
 		if (cfg_get_metadata_program() &&
 		    cfg_get_metadata_format_str()) {
-			char *mdataString = getMetadataString(cfg_get_metadata_format_str(),
+			char *mdataString = stream_get_metadata_str(cfg_get_metadata_format_str(),
 			    mdata);
 			char *tmpStr = replaceString(enc_str,
 			    PLACEHOLDER_METADATA, mdataString);
@@ -367,48 +300,10 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	return (commandString);
 }
 
-char *
-getMetadataString(const char *format, metadata_t *mdata)
-{
-	char	*tmp, *str;
-
-	if (format == NULL)
-		return (NULL);
-
-	str = xstrdup(format);
-
-	if (strstr(format, PLACEHOLDER_ARTIST) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_ARTIST,
-		    metadata_get_artist(mdata));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_TITLE) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_TITLE,
-		    metadata_get_title(mdata));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_STRING) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_STRING,
-		    metadata_get_string(mdata));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_TRACK) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_TRACK,
-		    metadata_get_filename(mdata));
-		xfree(str);
-		str = tmp;
-	}
-
-	return (str);
-}
-
-metadata_t *
+metadata_t
 getMetadata(const char *fileName)
 {
-	metadata_t	*mdata;
+	metadata_t	mdata;
 
 	if (cfg_get_metadata_program()) {
 		if (NULL == (mdata = metadata_program(fileName,
@@ -433,92 +328,15 @@ getMetadata(const char *fileName)
 	return (mdata);
 }
 
-int
-setMetadata(shout_t *shout, metadata_t *mdata, char **mdata_copy)
-{
-	shout_metadata_t	*shout_mdata = NULL;
-	char			*songInfo;
-	const char		*artist, *title;
-	int			 ret = SHOUTERR_SUCCESS;
-
-	if (cfg_get_metadata_no_updates())
-		return (SHOUTERR_SUCCESS);
-
-	if (mdata == NULL)
-		return 1;
-
-	if ((shout_mdata = shout_metadata_new()) == NULL) {
-		log_syserr(ALERT, ENOMEM, "shout_metadata_new");
-		exit(1);
-	}
-
-	artist = metadata_get_artist(mdata);
-	title = metadata_get_title(mdata);
-
-	/*
-	 * We can do this, because we know how libshout works. This adds
-	 * "charset=UTF-8" to the HTTP metadata update request and has the
-	 * desired effect of letting newer-than-2.3.1 versions of Icecast know
-	 * which encoding we're using.
-	 */
-	if (shout_metadata_add(shout_mdata, "charset", "UTF-8") != SHOUTERR_SUCCESS) {
-		/* Assume SHOUTERR_MALLOC */
-		log_syserr(ALERT, ENOMEM, "shout_metadata_add");
-		exit(1);
-	}
-
-	songInfo = getMetadataString(cfg_get_metadata_format_str(), mdata);
-	if (songInfo == NULL) {
-		if (artist[0] == '\0' && title[0] == '\0')
-			songInfo = xstrdup(metadata_get_string(mdata));
-		else
-			songInfo = metadata_assemble_string(mdata);
-		if (artist[0] != '\0' && title[0] != '\0') {
-			if (shout_metadata_add(shout_mdata, "artist", artist) != SHOUTERR_SUCCESS) {
-				log_syserr(ALERT, ENOMEM,
-				    "shout_metadata_add");
-				exit(1);
-			}
-			if (shout_metadata_add(shout_mdata, "title", title) != SHOUTERR_SUCCESS) {
-				log_syserr(ALERT, ENOMEM,
-				    "shout_metadata_add");
-				exit(1);
-			}
-		} else {
-			if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
-				log_syserr(ALERT, ENOMEM,
-				    "shout_metadata_add");
-				exit(1);
-			}
-		}
-	} else if (shout_metadata_add(shout_mdata, "song", songInfo) != SHOUTERR_SUCCESS) {
-		log_syserr(ALERT, ENOMEM, "shout_metadata_add");
-		exit(1);
-	}
-
-	if ((ret = shout_set_metadata(shout, shout_mdata)) != SHOUTERR_SUCCESS)
-		log_warning("shout_set_metadata: %s", shout_get_error(shout));
-
-	shout_metadata_free(shout_mdata);
-
-	if (ret == SHOUTERR_SUCCESS) {
-		if (mdata_copy != NULL && *mdata_copy == NULL)
-			*mdata_copy = xstrdup(songInfo);
-	}
-
-	xfree(songInfo);
-	return (ret);
-}
-
 FILE *
-openResource(shout_t *shout, const char *fileName, int *popenFlag,
-	     metadata_t **mdata_p, int *isStdin, long *songLen)
+openResource(stream_t stream, const char *fileName, int *popenFlag,
+	     metadata_t *mdata_p, int *isStdin, long *songLen)
 {
 	FILE		*filep = NULL;
 	char		 extension[25];
 	char		*p = NULL;
 	char		*pCommandString = NULL;
-	metadata_t	*mdata;
+	metadata_t	 mdata;
 
 	if (mdata_p != NULL)
 		*mdata_p = NULL;
@@ -529,7 +347,7 @@ openResource(shout_t *shout, const char *fileName, int *popenFlag,
 		if (cfg_get_metadata_program()) {
 			if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
 				return (NULL);
-			if (setMetadata(shout, mdata, NULL) != SHOUTERR_SUCCESS) {
+			if (stream_set_metadata(stream, mdata, NULL) != SHOUTERR_SUCCESS) {
 				metadata_free(&mdata);
 				return (NULL);
 			}
@@ -699,15 +517,16 @@ getTimeString(long seconds)
 }
 
 int
-sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
+sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 	   int isStdin, const char *songLenStr, struct timespec *tv)
 {
-	unsigned char	 buff[4096];
-	size_t		 bytes_read, total, oldTotal;
-	int		 ret;
-	double		 kbps = -1.0;
-	struct timespec	 timeStamp, *startTime = tv;
-	struct timespec	 callTime, currentTime;
+	unsigned char	  buff[4096];
+	size_t		  bytes_read, total, oldTotal;
+	int		  ret;
+	double		  kbps = -1.0;
+	struct timespec	  timeStamp, *startTime = tv;
+	struct timespec	  callTime, currentTime;
+	shout_t 	 *shout = stream_get_shout(stream);
 
 	clock_gettime(CLOCK_MONOTONIC, &callTime);
 
@@ -820,7 +639,7 @@ sendStream(shout_t *shout, FILE *filepstream, const char *fileName,
 }
 
 int
-streamFile(shout_t *shout, const char *fileName)
+streamFile(stream_t stream, const char *fileName)
 {
 	FILE		*filepstream = NULL;
 	int		 popenFlag = 0;
@@ -828,10 +647,10 @@ streamFile(shout_t *shout, const char *fileName)
 	int		 isStdin = 0;
 	int		 ret, retval = 0;
 	long		 songLen;
-	metadata_t	*mdata;
+	metadata_t	 mdata;
 	struct timespec	 startTime;
 
-	if ((filepstream = openResource(shout, fileName, &popenFlag, &mdata, &isStdin, &songLen))
+	if ((filepstream = openResource(stream, fileName, &popenFlag, &mdata, &isStdin, &songLen))
 	    == NULL) {
 		if (++resource_errors > 100) {
 			log_error("too many errors; giving up");
@@ -854,7 +673,7 @@ streamFile(shout_t *shout, const char *fileName)
 
 		/* MP3 streams are special, so set the metadata explicitly: */
 		if (CFG_STREAM_MP3 == cfg_get_stream_format())
-			setMetadata(shout, mdata, NULL);
+			stream_set_metadata(stream, mdata, NULL);
 
 		metadata_free(&mdata);
 	} else if (isStdin)
@@ -864,7 +683,7 @@ streamFile(shout_t *shout, const char *fileName)
 		songLenStr = xstrdup(getTimeString(songLen));
 	clock_gettime(CLOCK_MONOTONIC, &startTime);
 	do {
-		ret = sendStream(shout, filepstream, fileName, isStdin,
+		ret = sendStream(stream, filepstream, fileName, isStdin,
 		    songLenStr, &startTime);
 		if (quit)
 			break;
@@ -891,7 +710,7 @@ streamFile(shout_t *shout, const char *fileName)
 					continue;
 				if (cfg_get_metadata_program()) {
 					char		*mdataStr = NULL;
-					metadata_t	*prog_mdata;
+					metadata_t	 prog_mdata;
 
 					log_info("running metadata program: %s",
 					    cfg_get_metadata_program());
@@ -900,7 +719,7 @@ streamFile(shout_t *shout, const char *fileName)
 						ret = STREAM_DONE;
 						continue;
 					}
-					if (setMetadata(shout, prog_mdata, &mdataStr) != SHOUTERR_SUCCESS) {
+					if (stream_set_metadata(stream, prog_mdata, &mdataStr) != SHOUTERR_SUCCESS) {
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
@@ -930,7 +749,7 @@ streamFile(shout_t *shout, const char *fileName)
 }
 
 int
-streamPlaylist(shout_t *shout)
+streamPlaylist(stream_t stream)
 {
 	const char	*song;
 	char		 lastSong[PATH_MAX];
@@ -968,7 +787,7 @@ streamPlaylist(shout_t *shout)
 
 	while ((song = playlist_get_next(playlist)) != NULL) {
 		strlcpy(lastSong, song, sizeof(lastSong));
-		if (!streamFile(shout, song))
+		if (!streamFile(stream, song))
 			return (0);
 		if (quit)
 			break;
@@ -1010,6 +829,7 @@ main(int argc, char *argv[])
 {
 	int		 ret;
 	const char	*errstr;
+	stream_t	 stream;
 	shout_t 	*shout;
 	extern char	*optarg;
 	extern int	 optind;
@@ -1034,8 +854,10 @@ main(int argc, char *argv[])
 		return (ez_shutdown(2));
 	}
 
-	if (NULL == (shout = stream_setup()))
+	stream = stream_get(STREAM_DEFAULT);
+	if (0 > stream_setup(stream))
 		return (ez_shutdown(1));
+	shout = stream_get_shout(stream);
 
 #ifdef HAVE_SIGNALS
 	memset(&act, 0, sizeof(act));
@@ -1078,9 +900,9 @@ main(int argc, char *argv[])
 
 		do {
 			if (playlistMode) {
-				cont = streamPlaylist(shout);
+				cont = streamPlaylist(stream);
 			} else {
-				cont = streamFile(shout,
+				cont = streamFile(stream,
 				    cfg_get_media_filename());
 			}
 			if (quit)

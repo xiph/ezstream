@@ -50,10 +50,6 @@
 #include "cfg.h"
 #include "log.h"
 
-#ifndef STDIN_FILENO
-# define STDIN_FILENO		0
-#endif /* !STDIN_FILENO */
-
 #ifndef _PATH_DEVNULL
 # define _PATH_DEVNULL		"/dev/null"
 #endif /* !_PATH_DEVNULL */

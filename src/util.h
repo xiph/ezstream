@@ -16,16 +16,15 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include <shout/shout.h>
-
 #define ICONV_REPLACE		0
 #define ICONV_TRANSLIT		1
 #define ICONV_IGNORE		2
 
 int		strrcmp(const char *, const char *);
 int		strrcasecmp(const char *, const char *);
-shout_t *	stream_setup(void);
 char *		CHARtoUTF8(const char *, int);
 char *		UTF8toCHAR(const char *, int);
+char *		replaceString(const char *, const char *, const char *);
+char *		shellQuote(const char *);
 
 #endif /* __UTIL_H__ */

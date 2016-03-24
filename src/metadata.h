@@ -26,14 +26,14 @@ enum metadata_request {
 	METADATA_TITLE
 };
 
-typedef struct metadata metadata_t;
+typedef struct metadata * metadata_t;
 
 /*
  * Read the metadata of a media file and return a new metadata handle on
  * success, or NULL on failure. The returned handle is "branded" for reading
  * metadata from media files.
  */
-metadata_t *	metadata_file(const char * /* filename */,
+metadata_t	metadata_file(const char * /* filename */,
 			      int /* normalize strings */);
 
 /*
@@ -53,26 +53,26 @@ metadata_t *	metadata_file(const char * /* filename */,
  *     metadata, or an empty string if no artist information is available.
  *   - Return at most METADATA_MAX characters, or the result will be truncated.
  */
-metadata_t *	metadata_program(const char * /* program name */,
+metadata_t	metadata_program(const char * /* program name */,
 				 int /* normalize strings */);
 
 /*
  * Free all memory used by a metadata handle that has been created with
  * metadata_file() or metadata_program().
  */
-void		metadata_free(metadata_t **);
+void		metadata_free(metadata_t *);
 
 /*
  * Update/read the metadata for the given handle. Returns 1 on success, and 0
  * on failure.
  */
-int		metadata_file_update(metadata_t *);
+int		metadata_file_update(metadata_t);
 
 /*
  * Update/read the specified metadata for the given program-handle. Returns 1
  * on success, and 0 on failure.
  */
-int		metadata_program_update(metadata_t *, enum metadata_request);
+int		metadata_program_update(metadata_t, enum metadata_request);
 
 /*
  * Returns a pointer to a metadata string ``artist - title'', or just
@@ -81,34 +81,34 @@ int		metadata_program_update(metadata_t *, enum metadata_request);
  * is returned for metadata_program() handles that didn't supply any generic
  * information.
  */
-const char *	metadata_get_string(metadata_t *);
+const char *	metadata_get_string(metadata_t);
 
 /*
  * Returns a pointer to the artist string, which may be empty.
  */
-const char *	metadata_get_artist(metadata_t *);
+const char *	metadata_get_artist(metadata_t);
 
 /*
  * Returns a pointer to the title string, which may be empty.
  */
-const char *	metadata_get_title(metadata_t *);
+const char *	metadata_get_title(metadata_t);
 
 /*
  * Returns a pointer to the filename used in the metadata handle.
  */
-const char *	metadata_get_filename(metadata_t *);
+const char *	metadata_get_filename(metadata_t);
 
 /*
  * Returns the length of the song, in seconds, or -1 if the information is not
  * available.
  */
-int		metadata_get_length(metadata_t *);
+int		metadata_get_length(metadata_t);
 
 /*
  * Allocates and returns a meaningful string based on a metadata handle's
  * content. The result is what metadata_get_string() defaults to if an external
  * program is not used.
  */
-char *		metadata_assemble_string(metadata_t *);
+char *		metadata_assemble_string(metadata_t);
 
 #endif /* __METADATA_H__ */

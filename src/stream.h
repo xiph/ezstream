@@ -17,7 +17,24 @@
 #ifndef __STREAM_H__
 #define __STREAM_H__
 
+#include <shout/shout.h>
+
+#include "metadata.h"
+
+#define STREAM_DEFAULT	"default"
+
+typedef struct stream *	stream_t;
+
 int	stream_init(void);
 void	stream_exit(void);
+
+stream_t
+	stream_get(const char *);
+int	stream_setup(stream_t);
+int	stream_set_metadata(stream_t, metadata_t, char **);
+char *	stream_get_metadata_str(const char *, metadata_t);
+
+shout_t *
+	stream_get_shout(stream_t);
 
 #endif /* __STREAM_H__ */

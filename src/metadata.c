@@ -73,21 +73,22 @@ struct ID3Tag {
 	char genre;
 };
 
-static metadata_t *	metadata_create(const char *);
-static void		metadata_use_taglib(metadata_t *, FILE **);
-static void		metadata_use_self(metadata_t *, FILE **);
-static void		metadata_clean_md(metadata_t *);
-static void		metadata_get_extension(char *, size_t, const char *);
-static char *		metadata_get_name(const char *);
-static void		metadata_process_md(metadata_t *);
-static void		metadata_normalize_string(char **);
+static struct metadata *
+		metadata_create(const char *);
+static void	metadata_use_taglib(struct metadata *, FILE **);
+static void	metadata_use_self(struct metadata *, FILE **);
+static void	metadata_clean_md(struct metadata *);
+static void	metadata_get_extension(char *, size_t, const char *);
+static char *	metadata_get_name(const char *);
+static void	metadata_process_md(struct metadata *);
+static void	metadata_normalize_string(char **);
 
-static metadata_t *
+static struct metadata *
 metadata_create(const char *filename)
 {
-	metadata_t	*md;
+	metadata_t	md;
 
-	md = xcalloc(1UL, sizeof(metadata_t));
+	md = xcalloc(1UL, sizeof(*md));
 	md->filename = xstrdup(filename);
 	md->songLen = -1;
 
@@ -95,7 +96,7 @@ metadata_create(const char *filename)
 }
 
 static void
-metadata_use_taglib(metadata_t *md, FILE **filep)
+metadata_use_taglib(struct metadata *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
 	TagLib_File			*tf;
@@ -156,7 +157,7 @@ metadata_use_taglib(metadata_t *md, FILE **filep)
 #endif /* HAVE_TAGLIB */
 
 static void
-metadata_use_self(metadata_t *md, FILE **filep)
+metadata_use_self(struct metadata *md, FILE **filep)
 #ifdef HAVE_TAGLIB
 {
 	(void)md;
@@ -245,7 +246,7 @@ metadata_use_self(metadata_t *md, FILE **filep)
 #endif /* HAVE_TAGLIB */
 
 static void
-metadata_clean_md(metadata_t *md)
+metadata_clean_md(struct metadata *md)
 {
 	if (md->string != NULL) {
 		xfree(md->string);
@@ -299,7 +300,7 @@ metadata_get_name(const char *file)
 }
 
 static void
-metadata_process_md(metadata_t *md)
+metadata_process_md(struct metadata *md)
 {
 	if (md->string == NULL)
 		md->string = metadata_assemble_string(md);
@@ -342,10 +343,10 @@ metadata_normalize_string(char **s)
 	*s = xreallocarray(tmpstr, strlen(tmpstr) + 1, sizeof(char));
 }
 
-metadata_t *
+struct metadata *
 metadata_file(const char *filename, int normalize)
 {
-	metadata_t	*md;
+	struct metadata *md;
 
 	md = metadata_create(filename);
 	if (!metadata_file_update(md)) {
@@ -358,10 +359,10 @@ metadata_file(const char *filename, int normalize)
 	return (md);
 }
 
-metadata_t *
+struct metadata *
 metadata_program(const char *program, int normalize)
 {
-	metadata_t	*md;
+	struct metadata *md;
 	struct stat	 st;
 
 	if (stat(program, &st) == -1) {
@@ -386,9 +387,9 @@ metadata_program(const char *program, int normalize)
 }
 
 void
-metadata_free(metadata_t **md_p)
+metadata_free(struct metadata **md_p)
 {
-	metadata_t	*md;
+	struct metadata *md;
 
 	if (md_p == NULL || (md = *md_p) == NULL)
 		return;
@@ -404,7 +405,7 @@ metadata_free(metadata_t **md_p)
 
 
 int
-metadata_file_update(metadata_t *md)
+metadata_file_update(struct metadata *md)
 {
 	FILE	*filep;
 
@@ -427,7 +428,7 @@ metadata_file_update(metadata_t *md)
 }
 
 int
-metadata_program_update(metadata_t *md, enum metadata_request md_req)
+metadata_program_update(struct metadata *md, enum metadata_request md_req)
 {
 	FILE	*filep;
 	char	 buf[METADATA_MAX + 1];
@@ -534,14 +535,14 @@ metadata_program_update(metadata_t *md, enum metadata_request md_req)
 }
 
 const char *
-metadata_get_string(metadata_t *md)
+metadata_get_string(struct metadata *md)
 {
 	assert(md->string);
 	return (md->string);
 }
 
 const char *
-metadata_get_artist(metadata_t *md)
+metadata_get_artist(struct metadata *md)
 {
 	if (md->artist == NULL)
 		return (blankString);
@@ -550,7 +551,7 @@ metadata_get_artist(metadata_t *md)
 }
 
 const char *
-metadata_get_title(metadata_t *md)
+metadata_get_title(struct metadata *md)
 {
 	if (md->title == NULL)
 		return (blankString);
@@ -559,7 +560,7 @@ metadata_get_title(metadata_t *md)
 }
 
 const char *
-metadata_get_filename(metadata_t *md)
+metadata_get_filename(struct metadata *md)
 {
 	if (md->filename == NULL)
 		/* Should never happen: */
@@ -569,13 +570,13 @@ metadata_get_filename(metadata_t *md)
 }
 
 int
-metadata_get_length(metadata_t *md)
+metadata_get_length(struct metadata *md)
 {
 	return (md->songLen);
 }
 
 char *
-metadata_assemble_string(metadata_t *md)
+metadata_assemble_string(struct metadata *md)
 {
 	size_t	  len;
 	char	 *str;

@@ -22,14 +22,18 @@
 # include "config.h"
 #endif
 
-#include "ezstream.h"
+#include "compat.h"
 
+#include <ctype.h>
+#include <errno.h>
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif
+#include <stdio.h>
+#include <string.h>
 
 #ifdef HAVE_ICONV
 # include <iconv.h>
@@ -79,152 +83,6 @@ strrcasecmp(const char *s, const char *sub)
 	xfree(sub_cpy);
 
 	return (ret);
-}
-
-shout_t *
-stream_setup(void)
-{
-	shout_t *shout;
-
-	if ((shout = shout_new()) == NULL) {
-		log_syserr(ERROR, ENOMEM, "shout_new");
-		return (NULL);
-	}
-
-	switch (cfg_get_server_protocol()) {
-	case CFG_PROTO_HTTP:
-		if (SHOUTERR_SUCCESS !=
-		    shout_set_protocol(shout, SHOUT_PROTOCOL_HTTP)) {
-			log_error("shout_set_protocol: %s",
-			    shout_get_error(shout));
-			goto error;
-		}
-		break;
-	default:
-		log_error("unsupported protocol: %s",
-		    cfg_get_server_protocol_str());
-		goto error;
-	}
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_host(shout, cfg_get_server_hostname())) {
-		log_error("shout_set_host: %s", shout_get_error(shout));
-		goto error;
-	}
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_port(shout, (unsigned short)cfg_get_server_port())) {
-		log_error("shout_set_port: %s", shout_get_error(shout));
-		goto error;
-	}
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_user(shout, cfg_get_server_user())) {
-		log_error("shout_set_user: %s", shout_get_error(shout));
-		goto error;
-	}
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_password(shout, cfg_get_server_password())) {
-		log_error("shout_set_password: %s", shout_get_error(shout));
-		goto error;
-	}
-
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_mount(shout, cfg_get_stream_mountpoint())) {
-		log_error("shout_set_mount: %s", shout_get_error(shout));
-		goto error;
-	}
-
-	switch (cfg_get_stream_format()) {
-	case CFG_STREAM_VORBIS:
-	case CFG_STREAM_THEORA:
-		if (SHOUTERR_SUCCESS !=
-		    shout_set_format(shout, SHOUT_FORMAT_OGG)) {
-			log_error("shout_set_format: OGG: %s",
-			    shout_get_error(shout));
-			goto error;
-		}
-		break;
-	case CFG_STREAM_MP3:
-		if (SHOUTERR_SUCCESS !=
-		    shout_set_format(shout, SHOUT_FORMAT_MP3)) {
-			log_error("shout_set_format: MP3: %s",
-			    shout_get_error(shout));
-			goto error;
-		}
-		break;
-	default:
-		log_error("unsupported stream format: %s",
-		    cfg_get_stream_format_str());
-		goto error;
-	}
-
-	if (cfg_get_stream_name() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_name(shout, cfg_get_stream_name())) {
-		log_error("shout_set_name: %s", shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_url() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_url(shout, cfg_get_stream_url())) {
-		log_error("shout_set_url: %s", shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_genre() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_genre(shout, cfg_get_stream_genre())) {
-		log_error("shout_set_genre: %s", shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_description() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_description(shout, cfg_get_stream_description())) {
-		log_error("shout_set_description: %s",
-		    shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_quality() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(shout, SHOUT_AI_QUALITY,
-				 cfg_get_stream_quality())) {
-		log_error("shout_set_audio_info: QUALITY: %s",
-		    shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_bitrate() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(shout, SHOUT_AI_BITRATE,
-				 cfg_get_stream_bitrate())) {
-		log_error("shout_set_audio_info: BITRATE: %s",
-		    shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_samplerate() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(shout, SHOUT_AI_SAMPLERATE,
-				 cfg_get_stream_samplerate())) {
-		log_error("shout_set_audio_info: SAMPLERATE: %s",
-		    shout_get_error(shout));
-		goto error;
-	}
-	if (cfg_get_stream_channels() &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(shout, SHOUT_AI_CHANNELS,
-				 cfg_get_stream_channels())) {
-		log_error("shout_set_audio_info: CHANNELS: %s",
-		    shout_get_error(shout));
-		goto error;
-	}
-
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_public(shout, (unsigned int)cfg_get_stream_server_public())) {
-		log_error("shout_set_public: %s", shout_get_error(shout));
-		goto error;
-	}
-
-	return (shout);
-
-error:
-	shout_free(shout);
-	return (NULL);
 }
 
 char *
@@ -357,4 +215,67 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 
 	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
+}
+
+char *
+replaceString(const char *source, const char *from, const char *to)
+{
+	char		*to_quoted, *dest;
+	size_t		 dest_size;
+	const char	*p1, *p2;
+
+	to_quoted = shellQuote(to);
+	dest_size = strlen(source) + strlen(to_quoted) + 1;
+	dest = xcalloc(dest_size, sizeof(char));
+
+	p1 = source;
+	p2 = strstr(p1, from);
+	if (p2 != NULL) {
+		strncat(dest, p1, (size_t)(p2 - p1));
+		strlcat(dest, to_quoted, dest_size);
+		p1 = p2 + strlen(from);
+	}
+	strlcat(dest, p1, dest_size);
+
+	xfree(to_quoted);
+
+	return (dest);
+}
+
+#define SHELLQUOTE_INLEN_MAX	8191UL
+
+char *
+shellQuote(const char *in)
+{
+	char		*out, *out_p;
+	size_t		 out_len;
+	const char	*in_p;
+
+	out_len = (strlen(in) > SHELLQUOTE_INLEN_MAX)
+	    ? SHELLQUOTE_INLEN_MAX
+	    : strlen(in);
+	out_len = out_len * 2 + 2;
+	out = xcalloc(out_len + 1, sizeof(char));
+
+	out_p = out;
+	in_p = in;
+
+	*out_p++ = '\'';
+	out_len--;
+	while (*in_p && out_len > 2) {
+		switch (*in_p) {
+		case '\'':
+		case '\\':
+			*out_p++ = '\\';
+			out_len--;
+			break;
+		default:
+			break;
+		}
+		*out_p++ = *in_p++;
+		out_len--;
+	}
+	*out_p++ = '\'';
+
+	return (out);
 }
