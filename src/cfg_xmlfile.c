@@ -37,13 +37,15 @@ static int	_cfg_xmlfile_parse_encoder(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_encoders(xmlDocPtr, xmlNodePtr);
 
 #define XML_CHAR(s)		(const xmlChar *)(s)
+#define STD_CHAR(s)		(const char *)(s)
+
 #define XML_STRCONFIG(s, f, e)	do {					\
 	if (0 == xmlStrcasecmp(cur->name, XML_CHAR((e)))) {		\
 		xmlChar 	*val;					\
 		const char	*err_str;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)(val, &err_str)) {				\
+		if (0 > (f)(STD_CHAR(val), &err_str)) {			\
 			log_error("%s[%ld]: %s: %s: %s", doc->name,	\
 			    xmlGetLineNo(cur), (s), (e), err_str);	\
 			error = 1;					\
@@ -152,7 +154,7 @@ _cfg_xmlfile_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
 		int		 error = 0;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)((c), val, &err_str)) {			\
+		if (0 > (f)((c), STD_CHAR(val), &err_str)) {		\
 			log_error("%s[%ld]: decoder: %s: %s: %s",	\
 			    doc->name, xmlGetLineNo(cur),		\
 			    cfg_decoder_get_name((c)), (e), err_str);	\
@@ -209,7 +211,7 @@ _cfg_xmlfile_parse_decoders(xmlDocPtr doc, xmlNodePtr cur)
 		int		 error = 0;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)((c), val, &err_str)) {			\
+		if (0 > (f)((c), STD_CHAR(val), &err_str)) {		\
 			log_error("%s[%ld]: encoder: %s: %s: %s",	\
 			    doc->name, xmlGetLineNo(cur),		\
 			    cfg_encoder_get_name((c)), (e), err_str);	\
@@ -331,7 +333,7 @@ cfg_xmlfile_parse(const char *config_file)
 		goto error;
 	}
 	if (!doc->name)
-		doc->name = xmlStrdup(config_file);
+		doc->name = (char *)xmlStrdup(XML_CHAR(config_file));
 	cur = xmlDocGetRootElement(doc);
 	if (!cur) {
 		log_error("%s: empty document", config_file);
