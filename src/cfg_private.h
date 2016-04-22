@@ -152,7 +152,7 @@ struct cfg {
 
 #define SET_INTNUM(t, s, e)	do {			\
 	const char	*errstr;			\
-	unsigned int	 num;				\
+	int		 num;				\
 							\
 	if (!(s) || !(s)[0]) {				\
 		if ((e))				\
