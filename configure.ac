@@ -159,27 +159,12 @@ AX_UNIQVAR_APPEND([EZ_CFLAGS], [${LIBXML2_CFLAGS}])
 AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${LIBXML2_LDFLAGS}])
 AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBXML2_LIBS}])
 
-use_metadata="No"
-AX_CHECK_TAGLIB_C([], [
-	AC_DEFINE([HAVE_TAGLIB], [1],
-		[Define to 1 if you have the libtag_c library.]
-	)
-	AX_UNIQVAR_APPEND([EZ_CFLAGS], [${TAGLIB_CFLAGS}])
-	AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${TAGLIB_CPPFLAGS}])
-	AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${TAGLIB_LDFLAGS}])
-	AX_UNIQVAR_PREPEND([EZ_LIBS], [${TAGLIB_C_LIBS}])
-	use_metadata="TagLib"
-], [
-	AX_CHECK_LIBVORBISFILE([], [
-		AC_DEFINE([HAVE_VORBISFILE], [1],
-			[Define to 1 if you have the libvorbisfile library.])
-		AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${VORBIS_CPPFLAGS}])
-		AX_UNIQVAR_APPEND([EZ_CFLAGS], [${VORBIS_CFLAGS}])
-		AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${VORBIS_LDFLAGS}])
-		AX_UNIQVAR_PREPEND([EZ_LIBS], [${LIBVORBISFILE_LIBS}])
-		use_metadata="libvorbis"
-	], [])
-])
+AX_CHECK_TAGLIB_C([], [],
+	[AC_MSG_ERROR([libtag_c is required.], [1])])
+AX_UNIQVAR_APPEND([EZ_CFLAGS], [${TAGLIB_CFLAGS}])
+AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${TAGLIB_CPPFLAGS}])
+AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${TAGLIB_LDFLAGS}])
+AX_UNIQVAR_PREPEND([EZ_LIBS], [${TAGLIB_C_LIBS}])
 
 # Not using AM_ICONV to check for iconv(), with or without libiconv(),
 # is not a viable option. Something in the past went horribly wrong;
@@ -306,7 +291,6 @@ cat << __EOT
 ${PACKAGE_STRING} has been configured successfully.
 
 Configuration:
-    Ogg Vorbis metadata support ... : ${use_metadata}
     Charset conversion support .... : ${use_iconv}
     Prefix ........................ : ${prefix}
 

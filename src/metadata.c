@@ -33,12 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef HAVE_TAGLIB
-# include <taglib/tag_c.h>
-#endif /* HAVE_TAGLIB */
-#ifdef HAVE_VORBISFILE
-# include <vorbis/vorbisfile.h>
-#endif /* HAVE_VORBISFILE */
+#include <taglib/tag_c.h>
 #include <shout/shout.h>
 
 #include "log.h"
@@ -75,10 +70,8 @@ struct ID3Tag {
 
 static struct metadata *
 		metadata_create(const char *);
-static void	metadata_use_taglib(struct metadata *, FILE **);
-static void	metadata_use_self(struct metadata *, FILE **);
+static void	metadata_get(struct metadata *, FILE **);
 static void	metadata_clean_md(struct metadata *);
-static void	metadata_get_extension(char *, size_t, const char *);
 static char *	metadata_get_name(const char *);
 static void	metadata_process_md(struct metadata *);
 static void	metadata_normalize_string(char **);
@@ -96,8 +89,7 @@ metadata_create(const char *filename)
 }
 
 static void
-metadata_use_taglib(struct metadata *md, FILE **filep)
-#ifdef HAVE_TAGLIB
+metadata_get(struct metadata *md, FILE **filep)
 {
 	TagLib_File			*tf;
 	TagLib_Tag			*tt;
@@ -146,104 +138,6 @@ metadata_use_taglib(struct metadata *md, FILE **filep)
 
 	taglib_file_free(tf);
 }
-#else
-{
-	(void)md;
-	(void)filep;
-
-	log_alert("metadata_use_taglib() called without TagLib support");
-	abort();
-}
-#endif /* HAVE_TAGLIB */
-
-static void
-metadata_use_self(struct metadata *md, FILE **filep)
-#ifdef HAVE_TAGLIB
-{
-	(void)md;
-	(void)filep;
-
-	log_alert("metadata_use_self() called with TagLib support");
-	abort();
-}
-#else
-{
-	char		extension[25];
-	struct ID3Tag	id3tag;
-
-	metadata_clean_md(md);
-	metadata_get_extension(extension, sizeof(extension), md->filename);
-
-	if (strcmp(extension, ".mp3") == 0) {
-		memset(&id3tag, 0, sizeof(id3tag));
-		fseek(*filep, -128L, SEEK_END);
-		fread(&id3tag, 1UL, sizeof(struct ID3Tag), *filep);
-		if (memcmp(id3tag.tag, "TAG", 3UL) == 0) {
-			if (strlen(id3tag.artistName) > 0)
-				md->artist = CHARtoUTF8(id3tag.artistName, ICONV_REPLACE);
-			if (strlen(id3tag.trackName) > 0)
-				md->title = CHARtoUTF8(id3tag.trackName, ICONV_REPLACE);
-		}
-#ifdef HAVE_VORBISFILE
-	} else if (strcmp(extension, ".ogg") == 0) {
-		OggVorbis_File	vf;
-		int		ret;
-
-		if ((ret = ov_open(*filep, &vf, NULL, 0L)) != 0) {
-			switch (ret) {
-			case OV_EREAD:
-				log_error("%s: media read error",
-				    md->filename);
-				break;
-			case OV_ENOTVORBIS:
-				log_error("%s: invalid Vorbis bitstream",
-				    md->filename);
-				break;
-			case OV_EVERSION:
-				log_error("%s: Vorbis version mismatch",
-				    md->filename);
-				break;
-			case OV_EBADHEADER:
-				log_error("%s: invalid Vorbis bitstream header",
-				    md->filename);
-				break;
-			case OV_EFAULT:
-				log_alert("libvorbisfile fault");
-				abort();
-			default:
-				log_error("%s: unknown error",
-				    md->filename);
-				break;
-			}
-		} else {
-			char	**ptr;
-
-			for (ptr = ov_comment(&vf, -1)->user_comments; *ptr != NULL; ptr++) {
-				if (md->artist == NULL &&
-				    strncasecmp(*ptr, "ARTIST", strlen("ARTIST")) == 0) {
-					if (strlen(*ptr + strlen("ARTIST=")) > 0)
-						md->artist = xstrdup(*ptr + strlen("ARTIST="));
-				}
-				if (md->title == NULL &&
-				    strncasecmp(*ptr, "TITLE", strlen("TITLE")) == 0) {
-					if (strlen(*ptr + strlen("TITLE=")) > 0)
-						md->title = xstrdup(*ptr + strlen("TITLE="));
-				}
-			}
-
-			ov_clear(&vf);
-			*filep = NULL;
-		}
-#endif /* HAVE_VORBISFILE */
-	}
-
-	if (*filep != NULL)
-		fclose(*filep);
-
-	if (md->artist == NULL && md->title == NULL)
-		md->string = metadata_get_name(md->filename);
-}
-#endif /* HAVE_TAGLIB */
 
 static void
 metadata_clean_md(struct metadata *md)
@@ -260,19 +154,6 @@ metadata_clean_md(struct metadata *md)
 		xfree(md->title);
 		md->title = NULL;
 	}
-}
-
-static void
-metadata_get_extension(char *buf, size_t siz, const char *filename)
-{
-	char	 *p;
-
-	if ((p = strrchr(filename, '.')) != NULL)
-		strlcpy(buf, p, siz);
-	else
-		buf[0] = '\0';
-	for (p = buf; *p != '\0'; p++)
-		*p = tolower((int)*p);
 }
 
 static char *
@@ -416,12 +297,7 @@ metadata_file_update(struct metadata *md)
 		return (0);
 	}
 
-#ifdef HAVE_TAGLIB
-	metadata_use_taglib(md, &filep);
-#else
-	metadata_use_self(md, &filep);
-#endif /* HAVE_TAGLIB */
-
+	metadata_get(md, &filep);
 	metadata_process_md(md);
 
 	return (1);

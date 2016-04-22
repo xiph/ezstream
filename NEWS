@@ -10,6 +10,7 @@ Changes in X.X.X, released on XXXX-XX-XX:
  * The real-time status information is now enabled explicitly with the new
    command line option -r.
  * The configuration file structure has changed.
+ * TagLib (its C wrapper library) is now a mandatory dependency
 
 
 Changes in 0.6.0, released on 2015-01-18:
