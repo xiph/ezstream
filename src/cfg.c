@@ -341,7 +341,7 @@ cfg_set_server_port(const char *port_str, const char **errstrp)
 		return (-1);
 	}
 
-	port = strtonum(port_str, 1, UINT16_MAX, &errstr);
+	port = (unsigned int)strtonum(port_str, 1, UINT16_MAX, &errstr);
 	if (errstr) {
 		if (errstrp)
 			*errstrp = errstr;

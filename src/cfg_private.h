@@ -141,7 +141,7 @@ struct cfg {
 		return (-1);				\
 	}						\
 							\
-	num = strtonum((s), 0, UINT_MAX, &errstr);	\
+	num = (unsigned int)strtonum((s), 0, UINT_MAX, &errstr); \
 	if (errstr) {					\
 		if ((e))				\
 			*(e) = errstr;			\
@@ -160,7 +160,7 @@ struct cfg {
 		return (-1);				\
 	}						\
 							\
-	num = strtonum((s), INT_MIN, INT_MAX, &errstr); \
+	num = (int)strtonum((s), INT_MIN, INT_MAX, &errstr); \
 	if (errstr) {					\
 		if ((e))				\
 			*(e) = errstr;			\
