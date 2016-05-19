@@ -338,10 +338,10 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 	int			 ret = SHOUTERR_SUCCESS;
 
 	if (cfg_get_metadata_no_updates())
-		return (SHOUTERR_SUCCESS);
+		return (0);
 
 	if (md == NULL)
-		return 1;
+		return (-1);
 
 	if ((shout_md = shout_metadata_new()) == NULL) {
 		log_syserr(ALERT, ENOMEM, "shout_metadata_new");
@@ -403,7 +403,7 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 	}
 
 	xfree(songInfo);
-	return (ret);
+	return (ret == SHOUTERR_SUCCESS ? 0 : -1);
 }
 
 char *

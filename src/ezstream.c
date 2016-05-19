@@ -295,7 +295,7 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 		if (cfg_get_metadata_program()) {
 			if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
 				return (NULL);
-			if (stream_set_metadata(stream, mdata, NULL) != SHOUTERR_SUCCESS) {
+			if (0 > stream_set_metadata(stream, mdata, NULL)) {
 				metadata_free(&mdata);
 				return (NULL);
 			}
@@ -667,7 +667,7 @@ streamFile(stream_t stream, const char *fileName)
 						ret = STREAM_DONE;
 						continue;
 					}
-					if (stream_set_metadata(stream, prog_mdata, &mdataStr) != SHOUTERR_SUCCESS) {
+					if (0> stream_set_metadata(stream, prog_mdata, &mdataStr)) {
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
