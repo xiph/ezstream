@@ -33,8 +33,11 @@ stream_t
 int	stream_setup(stream_t);
 int	stream_set_metadata(stream_t, metadata_t, char **);
 char *	stream_get_metadata_str(const char *, metadata_t);
+int	stream_get_connected(stream_t);
 
-shout_t *
-	stream_get_shout(stream_t);
+int	stream_connect(stream_t);
+void	stream_disconnect(stream_t);
+void	stream_sync(stream_t);
+int	stream_send(stream_t, const char *, size_t);
 
 #endif /* __STREAM_H__ */

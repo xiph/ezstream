@@ -34,7 +34,6 @@
 #include <string.h>
 
 #include <taglib/tag_c.h>
-#include <shout/shout.h>
 
 #include "log.h"
 #include "metadata.h"

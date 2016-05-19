@@ -39,7 +39,6 @@
 #ifdef HAVE_ICONV
 # include <iconv.h>
 #endif
-#include <shout/shout.h>
 
 #include "cfg.h"
 #include "log.h"

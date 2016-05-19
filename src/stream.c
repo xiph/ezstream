@@ -444,8 +444,51 @@ stream_get_metadata_str(const char *format, metadata_t mdata)
 	return (str);
 }
 
-shout_t *
-stream_get_shout(struct stream *s)
+int
+stream_get_connected(struct stream *s)
 {
-	return (s->shout);
+	return (shout_get_connected(s->shout) == SHOUTERR_CONNECTED ? 1 : 0);
+}
+
+int
+stream_connect(struct stream *s)
+{
+	if (shout_open(s->shout) == SHOUTERR_SUCCESS)
+		return (0);
+
+	log_warning("%s: connect: %s: error %d: %s", s->name,
+	    shout_get_host(s->shout), shout_get_errno(s->shout),
+	    shout_get_error(s->shout));
+
+	return (-1);
+}
+
+void
+stream_disconnect(struct stream *s)
+{
+	if (!stream_get_connected(s))
+		return;
+	shout_close(s->shout);
+}
+
+void
+stream_sync(struct stream *s)
+{
+	shout_sync(s->shout);
+}
+
+int
+stream_send(struct stream *s, const char *data, size_t len)
+{
+	if (shout_send(s->shout, (const unsigned char *)data, len)
+	    == SHOUTERR_SUCCESS)
+		return (0);
+
+	log_warning("%s: send: %s: error %d: %s", s->name,
+	    shout_get_host(s->shout), shout_get_errno(s->shout),
+	    shout_get_error(s->shout));
+
+	stream_disconnect(s);
+
+	return (-1);
 }

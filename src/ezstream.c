@@ -25,8 +25,6 @@
 # include <signal.h>
 #endif
 
-#include <shout/shout.h>
-
 #include "cfg.h"
 #include "cmdline.h"
 #include "log.h"
@@ -78,7 +76,7 @@ char *		buildReencodeCommand(const char *, const char *, metadata_t);
 metadata_t	getMetadata(const char *);
 FILE *		openResource(stream_t, const char *, int *, metadata_t *,
 			     int *, long *);
-int		reconnectServer(shout_t *, int);
+int		reconnect(stream_t);
 const char *	getTimeString(long);
 int		sendStream(stream_t, FILE *, const char *, int, const char *,
 			   struct timespec *);
@@ -401,12 +399,9 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 }
 
 int
-reconnectServer(shout_t *shout, int closeConn)
+reconnect(stream_t stream)
 {
 	unsigned int	i;
-	int		close_conn = closeConn;
-
-	log_warning("%s: connection lost", cfg_get_server_hostname());
 
 	i = 0;
 	while (++i) {
@@ -418,31 +413,26 @@ reconnectServer(shout_t *shout, int closeConn)
 			log_notice("reconnect: %s: attempt #%u ...",
 			    cfg_get_server_hostname(), i);
 
-		if (close_conn == 0)
-			close_conn = 1;
-		else
-			shout_close(shout);
-		if (shout_open(shout) == SHOUTERR_SUCCESS) {
+		stream_disconnect(stream);
+		if (0 == stream_connect(stream)) {
 			log_notice("reconnect: %s: success",
 			    cfg_get_server_hostname());
-			return (1);
+			return (0);
 		}
-
-		log_warning("reconnect failed: %s: %s",
-		    cfg_get_server_hostname(), shout_get_error(shout));
 
 		if (cfg_get_server_reconnect_attempts() > 0 &&
 		    i >= cfg_get_server_reconnect_attempts())
 			break;
 
 		if (quit)
-			return (0);
+			return (-1);
 		else
 			sleep(5);
 	};
 
 	log_warning("reconnect failed: giving up");
-	return (0);
+
+	return (-1);
 }
 
 const char *
@@ -468,13 +458,12 @@ int
 sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 	   int isStdin, const char *songLenStr, struct timespec *tv)
 {
-	unsigned char	  buff[4096];
+	char		  buff[4096];
 	size_t		  bytes_read, total, oldTotal;
 	int		  ret;
 	double		  kbps = -1.0;
 	struct timespec	  timeStamp, *startTime = tv;
 	struct timespec	  callTime, currentTime;
-	shout_t 	 *shout = stream_get_shout(stream);
 
 	clock_gettime(CLOCK_MONOTONIC, &callTime);
 
@@ -483,23 +472,22 @@ sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 
 	total = oldTotal = 0;
 	ret = STREAM_DONE;
-	while ((bytes_read = fread(buff, 1UL, sizeof(buff), filepstream)) > 0) {
-		if (shout_get_connected(shout) != SHOUTERR_CONNECTED &&
-		    reconnectServer(shout, 0) == 0) {
-			ret = STREAM_SERVERR;
-			break;
-		}
-
-		shout_sync(shout);
-
-		if (shout_send(shout, buff, bytes_read) != SHOUTERR_SUCCESS) {
-			log_error("shout_send: %s", shout_get_error(shout));
-			if (reconnectServer(shout, 1))
-				break;
-			else {
+	while ((bytes_read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
+		if (!stream_get_connected(stream)) {
+			log_warning("%s: connection lost",
+			    cfg_get_server_hostname());
+			if (0 > reconnect(stream)) {
 				ret = STREAM_SERVERR;
 				break;
 			}
+		}
+
+		stream_sync(stream);
+
+		if (0 > stream_send(stream, buff, bytes_read)) {
+			if (0 > reconnect(stream))
+				ret = STREAM_SERVERR;
+			break;
 		}
 
 		if (quit)
@@ -775,10 +763,9 @@ ez_shutdown(int exitval)
 int
 main(int argc, char *argv[])
 {
-	int		 ret;
+	int		 ret, cont;
 	const char	*errstr;
 	stream_t	 stream;
-	shout_t 	*shout;
 	extern char	*optarg;
 	extern int	 optind;
 #ifdef HAVE_SIGNALS
@@ -805,7 +792,6 @@ main(int argc, char *argv[])
 	stream = stream_get(STREAM_DEFAULT);
 	if (0 > stream_setup(stream))
 		return (ez_shutdown(1));
-	shout = stream_get_shout(stream);
 
 #ifdef HAVE_SIGNALS
 	memset(&act, 0, sizeof(act));
@@ -830,41 +816,37 @@ main(int argc, char *argv[])
 	}
 #endif /* HAVE_SIGNALS */
 
-	if (shout_open(shout) == SHOUTERR_SUCCESS) {
-		int	cont;
+	if (0 > stream_connect(stream)) {
+		log_error("initial server connection failed");
+		return (ez_shutdown(1));
+	}
+	log_notice("connected: %s://%s:%u%s",
+	    cfg_get_server_protocol_str(), cfg_get_server_hostname(),
+	    cfg_get_server_port(), cfg_get_stream_mountpoint());
 
-		log_notice("connected: %s://%s:%u%s",
-		    cfg_get_server_protocol_str(), cfg_get_server_hostname(),
-		    cfg_get_server_port(), cfg_get_stream_mountpoint());
+	if (CFG_MEDIA_PROGRAM == cfg_get_media_type() ||
+	    CFG_MEDIA_PLAYLIST == cfg_get_media_type() ||
+	    (CFG_MEDIA_AUTODETECT == cfg_get_media_type() &&
+		(strrcasecmp(cfg_get_media_filename(), ".m3u") == 0 ||
+		    strrcasecmp(cfg_get_media_filename(), ".txt") == 0)))
+		playlistMode = 1;
+	else
+		playlistMode = 0;
 
-		if (CFG_MEDIA_PROGRAM == cfg_get_media_type() ||
-		    CFG_MEDIA_PLAYLIST == cfg_get_media_type() ||
-                    (CFG_MEDIA_AUTODETECT == cfg_get_media_type() &&
-		    (strrcasecmp(cfg_get_media_filename(), ".m3u") == 0 ||
-			strrcasecmp(cfg_get_media_filename(), ".txt") == 0)))
-			playlistMode = 1;
-		else
-			playlistMode = 0;
+	do {
+		if (playlistMode) {
+			cont = streamPlaylist(stream);
+		} else {
+			cont = streamFile(stream,
+			    cfg_get_media_filename());
+		}
+		if (quit)
+			break;
+		if (cfg_get_media_stream_once())
+			break;
+	} while (cont);
 
-		do {
-			if (playlistMode) {
-				cont = streamPlaylist(stream);
-			} else {
-				cont = streamFile(stream,
-				    cfg_get_media_filename());
-			}
-			if (quit)
-				break;
-			if (cfg_get_media_stream_once())
-				break;
-		} while (cont);
-
-		shout_close(shout);
-	} else
-		log_error("connection failed: %s://%s:%u%s: %s",
-		    cfg_get_server_protocol_str(), cfg_get_server_hostname(),
-		    cfg_get_server_port(), cfg_get_stream_mountpoint(),
-		    shout_get_error(shout));
+	stream_disconnect(stream);
 
 	if (quit) {
 		if (cfg_get_program_quiet_stderr() &&
