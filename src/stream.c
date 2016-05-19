@@ -152,7 +152,7 @@ _stream_cfg_tls(struct stream *s)
 		    s->name);
 		break;
 	case CFG_TLS_REQUIRED:
-		log_error("%s: TLS required by not supported by libshout",
+		log_error("%s: TLS required but not supported by libshout",
 		    s->name);
 		return (-1);
 	default:
