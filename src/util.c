@@ -29,6 +29,7 @@
 #ifdef HAVE_LANGINFO_H
 # include <langinfo.h>
 #endif
+#include <limits.h>
 #ifdef HAVE_LOCALE_H
 # include <locale.h>
 #endif
@@ -278,4 +279,55 @@ shellQuote(const char *in)
 	*out_p++ = '\'';
 
 	return (out);
+}
+
+int
+urlParse(const char *url, char **hostname, unsigned short *port,
+	 char **mountname)
+{
+	const char	*p1, *p2, *p3;
+	char		 tmpPort[6] = "";
+	size_t		 hostsiz, mountsiz;
+	const char	*errstr;
+
+	if (strncmp(url, "http://", strlen("http://")) != 0) {
+		log_error("invalid <url>: not an HTTP address");
+		return (0);
+	}
+
+	p1 = url + strlen("http://");
+	p2 = strchr(p1, ':');
+	if (p2 == NULL) {
+		log_error("invalid <url>: missing port");
+		return (0);
+	}
+	hostsiz = (p2 - p1) + 1;
+	if (hostsiz <= 1) {
+		log_error("invalid <url>: missing host");
+		return (0);
+	}
+	*hostname = xmalloc(hostsiz);
+	strlcpy(*hostname, p1, hostsiz);
+
+	p2++;
+	p3 = strchr(p2, '/');
+	if (p3 == NULL || p3 - p2 >= (int)sizeof(tmpPort)) {
+		log_error("invalid <url>: mountpoint missing, or port number too long");
+		xfree(*hostname);
+		return (0);
+	}
+
+	strlcpy(tmpPort, p2, (p3 - p2) + 1UL);
+	*port = (unsigned short)strtonum(tmpPort, 1LL, (long long)USHRT_MAX, &errstr);
+	if (errstr) {
+		log_error("invalid <url>: port: %s is %s", tmpPort, errstr);
+		xfree(*hostname);
+		return (0);
+	}
+
+	mountsiz = strlen(p3) + 1;
+	*mountname = xmalloc(mountsiz);
+	strlcpy(*mountname, p3, mountsiz);
+
+	return (1);
 }

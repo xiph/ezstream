@@ -26,5 +26,6 @@ char *		CHARtoUTF8(const char *, int);
 char *		UTF8toCHAR(const char *, int);
 char *		replaceString(const char *, const char *, const char *);
 char *		shellQuote(const char *);
+int		urlParse(const char *, char **, unsigned short *, char **);
 
 #endif /* __UTIL_H__ */
