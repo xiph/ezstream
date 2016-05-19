@@ -32,7 +32,6 @@ stream_t
 	stream_get(const char *);
 int	stream_setup(stream_t);
 int	stream_set_metadata(stream_t, metadata_t, char **);
-char *	stream_get_metadata_str(const char *, metadata_t);
 int	stream_get_connected(stream_t);
 
 int	stream_connect(stream_t);

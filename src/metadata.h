@@ -111,4 +111,9 @@ int		metadata_get_length(metadata_t);
  */
 char *		metadata_assemble_string(metadata_t);
 
+/*
+ * Allocates and returns a metadata string based on a template/format string.
+ */
+char *		metadata_format_string(metadata_t, const char * /* format */);
+
 #endif /* __METADATA_H__ */

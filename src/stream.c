@@ -29,6 +29,7 @@
 
 #include "cfg.h"
 #include "log.h"
+#include "metadata.h"
 #include "stream.h"
 #include "util.h"
 #include "xalloc.h"
@@ -363,7 +364,7 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 		exit(1);
 	}
 
-	songInfo = stream_get_metadata_str(cfg_get_metadata_format_str(), md);
+	songInfo = metadata_format_string(md, cfg_get_metadata_format_str());
 	if (songInfo == NULL) {
 		if (artist[0] == '\0' && title[0] == '\0')
 			songInfo = xstrdup(metadata_get_string(md));
@@ -404,44 +405,6 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 
 	xfree(songInfo);
 	return (ret == SHOUTERR_SUCCESS ? 0 : -1);
-}
-
-char *
-stream_get_metadata_str(const char *format, metadata_t mdata)
-{
-	char	*tmp, *str;
-
-	if (format == NULL)
-		return (NULL);
-
-	str = xstrdup(format);
-
-	if (strstr(format, PLACEHOLDER_ARTIST) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_ARTIST,
-		    metadata_get_artist(mdata));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_TITLE) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_TITLE,
-		    metadata_get_title(mdata));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_STRING) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_STRING,
-		    metadata_get_string(mdata));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_TRACK) != NULL) {
-		tmp = replaceString(str, PLACEHOLDER_TRACK,
-		    metadata_get_filename(mdata));
-		xfree(str);
-		str = tmp;
-	}
-
-	return (str);
 }
 
 int

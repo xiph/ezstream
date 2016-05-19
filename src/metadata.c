@@ -35,6 +35,7 @@
 
 #include <taglib/tag_c.h>
 
+#include "cfg.h"
 #include "log.h"
 #include "metadata.h"
 #include "util.h"
@@ -476,6 +477,44 @@ metadata_assemble_string(struct metadata *md)
 		if (md->artist != NULL)
 			strlcat(str, " - ", len);
 		strlcat(str, md->title, len);
+	}
+
+	return (str);
+}
+
+char *
+metadata_format_string(struct metadata *md, const char *format)
+{
+	char	*tmp, *str;
+
+	if (format == NULL)
+		return (NULL);
+
+	str = xstrdup(format);
+
+	if (strstr(format, PLACEHOLDER_ARTIST) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_ARTIST,
+		    metadata_get_artist(md));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, PLACEHOLDER_TITLE) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_TITLE,
+		    metadata_get_title(md));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, PLACEHOLDER_STRING) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_STRING,
+		    metadata_get_string(md));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, PLACEHOLDER_TRACK) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_TRACK,
+		    metadata_get_filename(md));
+		xfree(str);
+		str = tmp;
 	}
 
 	return (str);

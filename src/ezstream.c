@@ -171,8 +171,8 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	if (strstr(dec_str, PLACEHOLDER_METADATA) != NULL) {
 		if (cfg_get_metadata_program() &&
 		    cfg_get_metadata_format_str()) {
-			char *mdataString = stream_get_metadata_str(cfg_get_metadata_format_str(),
-			    mdata);
+			char *mdataString = metadata_format_string(mdata,
+			    cfg_get_metadata_format_str());
 			char *tmpStr = replaceString(dec_str,
 			    PLACEHOLDER_METADATA, mdataString);
 			xfree(dec_str);
@@ -208,8 +208,8 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	if (strstr(enc_str, PLACEHOLDER_METADATA) != NULL) {
 		if (cfg_get_metadata_program() &&
 		    cfg_get_metadata_format_str()) {
-			char *mdataString = stream_get_metadata_str(cfg_get_metadata_format_str(),
-			    mdata);
+			char *mdataString = metadata_format_string(mdata,
+			    cfg_get_metadata_format_str());
 			char *tmpStr = replaceString(enc_str,
 			    PLACEHOLDER_METADATA, mdataString);
 			xfree(enc_str);
