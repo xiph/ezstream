@@ -31,7 +31,7 @@ PREREQUISITES
 
 
 Ezstream depends on:
- * libshout 2.2.x
+ * libshout 2.x
    (http://www.icecast.org/)
  * libxml 2.x
    (http://xmlsoft.org/)
