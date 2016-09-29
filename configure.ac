@@ -241,8 +241,6 @@ AC_REPLACE_FUNCS([ \
 	strtonum \
 ])
 
-AX_FUNC_VA_COPY
-
 AC_CHECK_FUNCS([sigaction], [
 	AC_DEFINE([HAVE_SIGNALS], [1],
 		[Define to 1 if we have BSD signals.])
