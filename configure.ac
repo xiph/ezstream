@@ -30,21 +30,6 @@ AC_ARG_ENABLE([examplesdir],
 esac], [])
 AC_SUBST([EXAMPLES_DIR])
 
-ez_enable_debug=no
-AC_ARG_ENABLE([debug],
-	[AS_HELP_STRING([--enable-debug],
-		[enable memory debugging (default: no)])],
-[case "$enableval" in
-	no) ;;
-	*) ez_enable_debug=yes ;;
-esac], [])
-AC_MSG_CHECKING([whether to enable debugging])
-if test x"${ez_enable_debug}" = "xyes"; then
-	AC_DEFINE([XALLOC_DEBUG], [1],
-		[Define whether to build with XALLOC debugging])
-fi
-AC_MSG_RESULT([$ez_enable_debug])
-
 AC_PROG_LIBTOOL
 AC_SUBST([LIBTOOL_DEPS])
 
