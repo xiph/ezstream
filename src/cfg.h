@@ -74,7 +74,7 @@ int	cfg_init(void);
 void	cfg_exit(void);
 
 void	cfg_save(void);
-void	cfg_pop(void);
+void	cfg_restore(void);
 void	cfg_clear(void);
 
 int	cfg_check(const char **);

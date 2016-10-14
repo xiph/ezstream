@@ -136,18 +136,18 @@ cfg_exit(void)
 void
 cfg_save(void)
 {
-	_cfg_reset(&cfg_tmp);
+	cfg_clear();
 	_cfg_copy(&cfg_tmp, &cfg);
 }
 
 void
-cfg_pop(void)
+cfg_restore(void)
 {
 	if (!cfg_tmp._master_cfg)
 		return;
 	_cfg_reset(&cfg);
 	_cfg_copy(&cfg, &cfg_tmp);
-	_cfg_reset(&cfg_tmp);
+	cfg_clear();
 }
 
 void
@@ -161,7 +161,7 @@ cfg_file_reload(void)
 {
 	cfg_save();
 	if (0 > _cfg_load()) {
-		cfg_pop();
+		cfg_restore();
 		return (-1);
 	}
 	cfg_clear();
