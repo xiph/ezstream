@@ -11,29 +11,29 @@ START_TEST(test_reload)
 {
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-file_template.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-full.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-minimal.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-video.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
-	ck_assert_int_eq(cfg_reload(), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_file_reload(), -1);
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad2.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_file_reload(), -1);
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad3.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_file_reload(), -1);
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad4.xml",
 	    NULL), 0);
-	ck_assert_int_eq(cfg_reload(), -1);
+	ck_assert_int_eq(cfg_file_reload(), -1);
 }
 END_TEST
 

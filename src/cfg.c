@@ -157,7 +157,7 @@ cfg_clear(void)
 }
 
 int
-cfg_reload(void)
+cfg_file_reload(void)
 {
 	cfg_save();
 	if (0 > _cfg_load()) {

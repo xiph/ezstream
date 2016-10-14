@@ -780,7 +780,7 @@ main(int argc, char *argv[])
 	    0 > cfg_decoder_init() ||
 	    0 > cfg_encoder_init() ||
 	    0 > playlist_init() ||
-	    0 > cfg_reload() ||
+	    0 > cfg_file_reload() ||
 	    0 > stream_init())
 		return (ez_shutdown(ret));
 
