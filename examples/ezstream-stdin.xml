@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  EXAMPLE: A valid configuration that streams Vorbis input from STDIN as-is
+
+  This configuration streams Ogg Vorbis from standard input as-is.
+  -->
+
+<ezstream>
+
+  <server>
+    <hostname>127.0.0.1</hostname>
+    <password>hackme</password>
+  </server>
+
+  <stream>
+    <mountpoint>/stream.ogg</mountpoint>
+    <format>Vorbis</format>
+  </stream>
+
+  <media>
+    <type>stdin</type>
+  </media>
+
+</ezstream>

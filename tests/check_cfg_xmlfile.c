@@ -18,6 +18,9 @@ START_TEST(test_reload)
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-minimal.xml",
 	    NULL), 0);
 	ck_assert_int_eq(cfg_file_reload(), 0);
+	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-stdin.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-video.xml",
 	    NULL), 0);
 	ck_assert_int_eq(cfg_file_reload(), 0);
