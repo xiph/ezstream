@@ -38,6 +38,8 @@ Ezstream depends on:
  * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
    wrapper)
    (https://taglib.github.io/)
+ * Check Unit testing framework for C
+   (https://libcheck.github.io/check)
 
 Ezstream optionally uses:
  - For basic non-ASCII charset support in metadata and filenames:
@@ -114,6 +116,9 @@ installed, take note of the more verbose error messages in config.log. If
 necessary, it is possible to further customize many build flags through
 environment variables. See the "influential environment variables" list
 in the --help output.
+
+To bootstrap a fresh checkout from source control, run the `autogen.sh`
+script.
 
 
 
