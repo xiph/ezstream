@@ -111,11 +111,12 @@
     <!-- <program>metadata.sh</program> -->
 
     <!-- 
-		Metadata format 
-		@a@ = Artist
-		@t@ = Title
-		@b@ = Album
-	-->
+        Metadata format 
+        ---------------
+        @a@ = Artist
+        @t@ = Title
+        @b@ = Album
+    -->
     <format_str>@a@ - @t@</format_str>
 
     <!-- Interval for additional metadata refreshes (-1 for none) -->
