@@ -25,6 +25,7 @@
 #define PLACEHOLDER_METADATA	"@M@"
 #define PLACEHOLDER_ARTIST	"@a@"
 #define PLACEHOLDER_TITLE	"@t@"
+#define PLACEHOLDER_ALBUM	"@b@"
 #define PLACEHOLDER_STRING	"@s@"
 
 enum cfg_config_type {

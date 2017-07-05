@@ -124,7 +124,7 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	char		*dec_str, *enc_str;
 	char		*commandString;
 	size_t		 commandStringLen;
-	char		*localTitle, *localArtist, *localMetaString;
+	char		*localTitle, *localArtist, *localMetaString, *localAlbum;
 
 	decoder = cfg_decoder_find(extension);
 	if (!decoder) {
@@ -141,6 +141,7 @@ buildReencodeCommand(const char *extension, const char *fileName,
 
 	localTitle = UTF8toCHAR(metadata_get_title(mdata), ICONV_REPLACE);
 	localArtist = UTF8toCHAR(metadata_get_artist(mdata), ICONV_REPLACE);
+	localAlbum = UTF8toCHAR(metadata_get_album(mdata), ICONV_REPLACE);
 	localMetaString = UTF8toCHAR(metadata_get_string(mdata),
 	    ICONV_REPLACE);
 
@@ -155,6 +156,12 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	if (strstr(dec_str, PLACEHOLDER_TITLE) != NULL) {
 		char *tmpStr = replaceString(dec_str, PLACEHOLDER_TITLE,
 		    localTitle);
+		xfree(dec_str);
+		dec_str = tmpStr;
+	}
+	if (strstr(dec_str, PLACEHOLDER_ALBUM) != NULL) {
+		char *tmpStr = replaceString(dec_str, PLACEHOLDER_ARTIST,
+		    localAlbum);
 		xfree(dec_str);
 		dec_str = tmpStr;
 	}
@@ -202,6 +209,12 @@ buildReencodeCommand(const char *extension, const char *fileName,
 	if (strstr(enc_str, PLACEHOLDER_TITLE) != NULL) {
 		char *tmpStr = replaceString(enc_str, PLACEHOLDER_TITLE,
 		    localTitle);
+		xfree(enc_str);
+		enc_str = tmpStr;
+	}
+	if (strstr(enc_str, PLACEHOLDER_ALBUM) != NULL) {
+		char *tmpStr = replaceString(enc_str, PLACEHOLDER_ALBUM,
+		    localAlbum);
 		xfree(enc_str);
 		enc_str = tmpStr;
 	}
