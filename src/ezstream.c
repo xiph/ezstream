@@ -160,7 +160,7 @@ buildReencodeCommand(const char *extension, const char *fileName,
 		dec_str = tmpStr;
 	}
 	if (strstr(dec_str, PLACEHOLDER_ALBUM) != NULL) {
-		char *tmpStr = replaceString(dec_str, PLACEHOLDER_ARTIST,
+		char *tmpStr = replaceString(dec_str, PLACEHOLDER_ALBUM,
 		    localAlbum);
 		xfree(dec_str);
 		dec_str = tmpStr;
