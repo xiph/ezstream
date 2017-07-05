@@ -635,6 +635,13 @@ Available in
 .Li /ezstream/encoders/encoder/program
 and
 .Li /ezstream/metadata/format_str .
+.It Sy @b@
+Replaced with the album information.
+Available in
+.Li /ezstream/decoders/decoder/program ,
+.Li /ezstream/encoders/encoder/program
+and
+.Li /ezstream/metadata/format_str .
 .It Sy @s@
 Replaced with the string returned by
 .Li /ezstream/metadata/program
