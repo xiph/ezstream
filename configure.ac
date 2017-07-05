@@ -7,6 +7,7 @@ AC_INIT([ezstream], [0.99.0],
 AC_PREREQ([2.61])
 AC_CONFIG_SRCDIR([src/ezstream.c])
 AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIRS([m4])
 AM_INIT_AUTOMAKE
 AC_CONFIG_HEADERS([src/config.h])
 AC_CONFIG_LIBOBJ_DIR([compat])
