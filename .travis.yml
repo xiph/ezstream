@@ -1,0 +1,19 @@
+language: c
+
+compiler:
+  - clang
+  - gcc
+
+addons:
+  apt:
+    packages:
+      - check
+      - libxml2-dev
+      - libshout-dev
+      - libtagc0-dev
+
+script:
+  - ./autogen.sh
+  - ./configure
+  - make
+  - make distcheck
