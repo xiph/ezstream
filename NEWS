@@ -11,6 +11,7 @@ Changes in 1.0.0, released on XXXX-XX-XX:
    command line option -r.
  * The configuration file structure has changed.
  * TagLib (its C wrapper library) is now a mandatory dependency
+ * Support the new '@b@' placeholder for separate album metadata.
 
 
 Changes in 0.6.0, released on 2015-01-18:
