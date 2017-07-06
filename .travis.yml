@@ -4,6 +4,8 @@ compiler:
   - clang
   - gcc
 
+dist: trusty
+sudo: required
 addons:
   apt:
     packages:
