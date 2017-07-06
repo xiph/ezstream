@@ -235,6 +235,13 @@ AC_CHECK_FUNCS([sigaction], [
 	  #endif
 	])
 
+AC_CHECK_FUNC([clock_gettime], [], [
+	AC_CHECK_LIB([rt], [clock_gettime], [
+		AX_UNIQVAR_PREPEND([EZ_LIBS], [-lrt])
+	])
+])
+
+
 
 dnl ##################
 dnl ## MISCELLANEOUS ###################################################
