@@ -23,7 +23,8 @@ enum metadata_request {
 	METADATA_ALL = 0,
 	METADATA_STRING,
 	METADATA_ARTIST,
-	METADATA_TITLE
+	METADATA_TITLE,
+	METADATA_ALBUM
 };
 
 typedef struct metadata * metadata_t;
@@ -87,6 +88,11 @@ const char *	metadata_get_string(metadata_t);
  * Returns a pointer to the artist string, which may be empty.
  */
 const char *	metadata_get_artist(metadata_t);
+
+/*
+ * Returns a pointer to the album string, which may be empty.
+ */
+const char *	metadata_get_album(metadata_t);
 
 /*
  * Returns a pointer to the title string, which may be empty.

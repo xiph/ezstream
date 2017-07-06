@@ -53,6 +53,7 @@ struct metadata {
 	char	*string;
 	char	*artist;
 	char	*title;
+	char	*album;
 	int	 songLen;
 	int	 normalize;
 	int	 program;
@@ -134,6 +135,13 @@ metadata_get(struct metadata *md, FILE **filep)
 		free(str);
 	}
 
+	str = taglib_tag_album(tt);
+	if (str != NULL) {
+		if (strlen(str) > 0)
+			md->album = xstrdup(str);
+		free(str);
+	}
+
 	md->songLen = taglib_audioproperties_length(ta);
 
 	taglib_file_free(tf);
@@ -153,6 +161,10 @@ metadata_clean_md(struct metadata *md)
 	if (md->title != NULL) {
 		xfree(md->title);
 		md->title = NULL;
+	}
+	if (md->album != NULL) {
+		xfree(md->title);
+		md->album = NULL;
 	}
 }
 
@@ -190,6 +202,7 @@ metadata_process_md(struct metadata *md)
 		metadata_normalize_string(&md->string);
 		metadata_normalize_string(&md->artist);
 		metadata_normalize_string(&md->title);
+		metadata_normalize_string(&md->album);
 	}
 }
 
@@ -317,7 +330,8 @@ metadata_program_update(struct metadata *md, enum metadata_request md_req)
 		metadata_clean_md(md);
 		if (!metadata_program_update(md, METADATA_STRING) ||
 		    !metadata_program_update(md, METADATA_ARTIST) ||
-		    !metadata_program_update(md, METADATA_TITLE))
+		    !metadata_program_update(md, METADATA_TITLE)  ||
+		    !metadata_program_update(md, METADATA_ALBUM))
 			return (0);
 		else
 			return (1);
@@ -340,6 +354,13 @@ metadata_program_update(struct metadata *md, enum metadata_request md_req)
 		if (md->title != NULL) {
 			xfree(md->title);
 			md->title = NULL;
+		}
+		break;
+	case METADATA_ALBUM:
+		snprintf(command, sizeof(command), "%s album", md->filename);
+		if (md->album != NULL) {
+			xfree(md->album);
+			md->album = NULL;
 		}
 		break;
 	default:
@@ -395,6 +416,10 @@ metadata_program_update(struct metadata *md, enum metadata_request md_req)
 		if (strlen(buf) > 0)
 			md->title = xstrdup(buf);
 		break;
+	case METADATA_ALBUM:
+		if (strlen(buf) > 0)
+			md->album = xstrdup(buf);
+		break;
 	case METADATA_ALL:
 	default:
 		log_alert("metadata_program_update: METADATA_ALL in code unreachable by METADATA_ALL");
@@ -405,6 +430,7 @@ metadata_program_update(struct metadata *md, enum metadata_request md_req)
 		metadata_normalize_string(&md->string);
 		metadata_normalize_string(&md->artist);
 		metadata_normalize_string(&md->title);
+		metadata_normalize_string(&md->album);
 	}
 
 	return (1);
@@ -424,6 +450,15 @@ metadata_get_artist(struct metadata *md)
 		return (blankString);
 	else
 		return (md->artist);
+}
+
+const char *
+metadata_get_album(struct metadata *md)
+{
+	if (md->album == NULL)
+		return (blankString);
+	else
+		return (md->album);
 }
 
 const char *
@@ -457,7 +492,7 @@ metadata_assemble_string(struct metadata *md)
 	size_t	  len;
 	char	 *str;
 
-	if (md->artist == NULL && md->title == NULL && md->program == 0)
+	if (md->artist == NULL && md->title == NULL && md->album && md->program == 0)
 		return (metadata_get_name(md->filename));
 
 	len = 0;
@@ -468,6 +503,11 @@ metadata_assemble_string(struct metadata *md)
 			len += strlen(" - ");
 		len += strlen(md->title);
 	}
+	if (md->album != NULL) {
+		if (len > 0)
+			len += strlen(" - ");
+		len += strlen(md->album);
+	}
 	len++;
 	str = xcalloc(len, sizeof(char));
 
@@ -477,6 +517,11 @@ metadata_assemble_string(struct metadata *md)
 		if (md->artist != NULL)
 			strlcat(str, " - ", len);
 		strlcat(str, md->title, len);
+	}
+	if (md->album != NULL) {
+		if (md->artist != NULL || md->title != NULL)
+			strlcat(str, " - ", len);
+		strlcat(str, md->album, len);
 	}
 
 	return (str);
@@ -513,6 +558,12 @@ metadata_format_string(struct metadata *md, const char *format)
 	if (strstr(format, PLACEHOLDER_TRACK) != NULL) {
 		tmp = replaceString(str, PLACEHOLDER_TRACK,
 		    metadata_get_filename(md));
+		xfree(str);
+		str = tmp;
+	}
+	if (strstr(format, PLACEHOLDER_ALBUM) != NULL) {
+		tmp = replaceString(str, PLACEHOLDER_ALBUM,
+		    metadata_get_album(md));
 		xfree(str);
 		str = tmp;
 	}
