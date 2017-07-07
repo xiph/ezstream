@@ -175,3 +175,19 @@ These are also used in the example configuration files:
 
  * Ogg Theora:
    - Decoder/Encoder: ffmpeg2theora (http://v2v.cc/~j/ffmpeg2theora/)
+
+
+
+DEVELOPMENT
+:::::::::::::
+
+
+ * GitHub mirror: https://github.com/xiph/ezstream
+
+ * Travis CI: https://travis-ci.org/xiph/ezstream
+
+ * CircleCI: https://circleci.com/gh/xiph/ezstream
+
+ * Codecov: https://codecov.io/gh/xiph/ezstream
+
+ * Codacy: https://www.codacy.com/app/mgrimm/ezstream
