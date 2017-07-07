@@ -94,7 +94,6 @@ _set_program_name(const char *argv0)
 int
 cmdline_parse(int argc, char *argv[], int *ret_p)
 {
-	int		 ch;
 	const char	*playlistFile = NULL;
 	unsigned int	 verbosity = 0;
 	const char	*err_str;
@@ -103,6 +102,8 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 
 	optind = 1;
 	for (;;) {
+		int	 ch;
+
 		ch = getopt(argc, argv, OPTSTRING);
 		if (0 > ch)
 			break;
@@ -155,7 +156,6 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 
 	if (playlistFile) {
 		playlist_t	 pl;
-		const char	*entry;
 
 		if (0 > playlist_init()) {
 			*ret_p = 1;
@@ -169,6 +169,8 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 		if (pl == NULL) {
 			*ret_p = 1;
 		} else {
+			const char	*entry;
+
 			playlist_shuffle(pl);
 			while (NULL != (entry = playlist_get_next(pl)))
 				printf("%s\n", entry);

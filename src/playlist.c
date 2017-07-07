@@ -277,7 +277,6 @@ playlist_program(const char *filename)
 void
 playlist_free(struct playlist **pl_p)
 {
-	size_t		 i;
 	struct playlist *pl;
 
 	if (pl_p == NULL || (pl = *pl_p) == NULL)
@@ -290,6 +289,8 @@ playlist_free(struct playlist **pl_p)
 
 	if (pl->list != NULL) {
 		if (pl->size > 0) {
+			size_t	i;
+
 			for (i = 0; i < pl->size / sizeof(char *); i++) {
 				if (pl->list[i] != NULL) {
 					xfree(pl->list[i]);
@@ -403,13 +404,15 @@ playlist_reread(struct playlist **plist)
 void
 playlist_shuffle(struct playlist *pl)
 {
-	size_t	 d, i, range;
+	size_t	 d, i;
 	char	*temp;
 
 	if (pl->program || pl->num < 2)
 		return;
 
 	for (i = 0; i < pl->num; i++) {
+		size_t	range;
+
 		range = pl->num - i;
 
 		/*
