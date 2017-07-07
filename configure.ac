@@ -226,15 +226,6 @@ AC_REPLACE_FUNCS([ \
 	strtonum \
 ])
 
-AC_CHECK_FUNCS([sigaction], [
-	AC_DEFINE([HAVE_SIGNALS], [1],
-		[Define to 1 if we have BSD signals.])
-	], [], [
-	  #ifdef HAVE_SIGNAL_H
-	  # include <signal.h>
-	  #endif
-	])
-
 AC_CHECK_FUNC([clock_gettime], [], [
 	AC_CHECK_LIB([rt], [clock_gettime], [
 		AX_UNIQVAR_PREPEND([EZ_LIBS], [-lrt])

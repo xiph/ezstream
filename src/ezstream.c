@@ -21,9 +21,7 @@
 
 #include "ezstream.h"
 
-#ifdef HAVE_SIGNAL_H
-# include <signal.h>
-#endif
+#include <signal.h>
 
 #include "cfg.h"
 #include "cmdline.h"
@@ -44,7 +42,6 @@ playlist_t		 playlist;
 int			 playlistMode;
 unsigned int		 resource_errors;
 
-#ifdef HAVE_SIGNALS
 const int		 ezstream_signals[] = {
 	SIGTERM, SIGINT, SIGHUP, SIGUSR1, SIGUSR2
 };
@@ -54,13 +51,6 @@ volatile sig_atomic_t	 rereadPlaylist_notify;
 volatile sig_atomic_t	 skipTrack;
 volatile sig_atomic_t	 queryMetadata;
 volatile sig_atomic_t	 quit;
-#else
-int			 rereadPlaylist;
-int			 rereadPlaylist_notify;
-int			 skipTrack;
-int			 queryMetadata;
-int			 quit;
-#endif /* HAVE_SIGNALS */
 
 typedef struct tag_ID3Tag {
 	char	tag[3];
@@ -72,6 +62,7 @@ typedef struct tag_ID3Tag {
 	char	genre;
 } ID3Tag;
 
+void		sig_handler(int);
 char *		buildReencodeCommand(const char *, const char *, metadata_t);
 metadata_t	getMetadata(const char *);
 FILE *		openResource(stream_t, const char *, int *, metadata_t *,
@@ -83,13 +74,6 @@ int		sendStream(stream_t, FILE *, const char *, int, const char *,
 int		streamFile(stream_t, const char *);
 int		streamPlaylist(stream_t);
 int		ez_shutdown(int);
-
-#ifdef HAVE_SIGNALS
-void		sig_handler(int);
-
-# ifndef SIG_IGN
-#  define SIG_IGN	 (void (*)(int))1
-# endif /* !SIG_IGN */
 
 void
 sig_handler(int sig)
@@ -113,7 +97,6 @@ sig_handler(int sig)
 		break;
 	}
 }
-#endif /* HAVE_SIGNALS */
 
 char *
 buildReencodeCommand(const char *extension, const char *fileName,
@@ -781,10 +764,8 @@ main(int argc, char *argv[])
 	stream_t	 stream;
 	extern char	*optarg;
 	extern int	 optind;
-#ifdef HAVE_SIGNALS
 	struct sigaction act;
 	unsigned int	 i;
-#endif
 
 	ret = 1;
 	if (0 > cfg_init() ||
@@ -806,12 +787,11 @@ main(int argc, char *argv[])
 	if (0 > stream_setup(stream))
 		return (ez_shutdown(1));
 
-#ifdef HAVE_SIGNALS
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = sig_handler;
-# ifdef SA_RESTART
+#ifdef SA_RESTART
 	act.sa_flags = SA_RESTART;
-# endif
+#endif
 	for (i = 0; i < sizeof(ezstream_signals) / sizeof(int); i++) {
 		if (sigaction(ezstream_signals[i], &act, NULL) == -1) {
 			log_syserr(ERROR, errno, "sigaction");
@@ -822,12 +802,14 @@ main(int argc, char *argv[])
 	 * Ignore SIGPIPE, which has been seen to give a long-running ezstream
 	 * process trouble. EOF and/or EPIPE are also easier to handle.
 	 */
+#ifndef SIG_IGN
+# define SIG_IGN	 (void (*)(int))1
+#endif /* !SIG_IGN */
 	act.sa_handler = SIG_IGN;
 	if (sigaction(SIGPIPE, &act, NULL) == -1) {
 		log_syserr(ERROR, errno, "sigaction");
 		return (ez_shutdown(1));
 	}
-#endif /* HAVE_SIGNALS */
 
 	if (0 > stream_connect(stream)) {
 		log_error("initial server connection failed");
