@@ -101,6 +101,7 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 
 	_set_program_name(argv[0]);
 
+	optind = 1;
 	for (;;) {
 		ch = getopt(argc, argv, OPTSTRING);
 		if (0 > ch)

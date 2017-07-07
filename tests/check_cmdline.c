@@ -7,8 +7,6 @@ Suite * cmdline_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
-extern int	optind;
-
 START_TEST(test_configfile)
 {
 	char	*argv[] =
@@ -102,11 +100,9 @@ START_TEST(test_verbose)
 	ck_assert_int_ne(cmdline_parse(argc, argv, &ret), 0);
 	ck_assert_uint_eq(cfg_get_program_verbosity(), 1);
 
-	optind = 1;
 	ck_assert_int_ne(cmdline_parse(argc2, argv2, &ret), 0);
 	ck_assert_uint_eq(cfg_get_program_verbosity(), 2);
 
-	optind = 1;
 	ck_assert_int_ne(cmdline_parse(argc3, argv3, &ret), 0);
 	ck_assert_uint_eq(cfg_get_program_verbosity(), 3);
 
@@ -153,7 +149,6 @@ setup_checked(void)
 {
 	if (0 < cfg_init())
 		ck_abort_msg("setup_checked failed");
-	optind = 1;
 }
 
 void
