@@ -52,16 +52,6 @@ volatile sig_atomic_t	 skipTrack;
 volatile sig_atomic_t	 queryMetadata;
 volatile sig_atomic_t	 quit;
 
-typedef struct tag_ID3Tag {
-	char	tag[3];
-	char	trackName[30];
-	char	artistName[30];
-	char	albumName[30];
-	char	year[3];
-	char	comment[30];
-	char	genre;
-} ID3Tag;
-
 void		sig_handler(int);
 char *		buildReencodeCommand(const char *, const char *, metadata_t);
 metadata_t	getMetadata(const char *);

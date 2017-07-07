@@ -59,16 +59,6 @@ struct metadata {
 	int	 program;
 };
 
-struct ID3Tag {
-	char tag[3];
-	char trackName[30];
-	char artistName[30];
-	char albumName[30];
-	char year[4];
-	char comment[30];
-	char genre;
-};
-
 static struct metadata *
 		metadata_create(const char *);
 static void	metadata_get(struct metadata *, FILE **);
