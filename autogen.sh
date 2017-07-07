@@ -5,8 +5,8 @@ PATH="/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin:/usr/pkg/bin:
 _ac_version="2.69"
 _am_version="1.14"
 
-if [ ! -f "./`basename $0`" ]; then
-	echo "Please chdir into `basename $0`'s directory first."
+if [ ! -f "./$(basename $0)" ]; then
+	echo "Please chdir into $(basename $0)'s directory first."
 	exit 1
 fi
 

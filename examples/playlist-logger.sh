@@ -66,7 +66,7 @@ test -n "${REPEAT}" || REPEAT=0
 
 # Set up helper files:
 _state="${STATE_DIR}/${_myname}.state"
-_playlist="`mktemp "${STATE_DIR}/${_myname}.XXXXXXXXXX"`"
+_playlist="$(mktemp "${STATE_DIR}/${_myname}.XXXXXXXXXX")"
 if [ $? -ne 0 ]; then
 	echo "${_myname}: Unable to create temporary file." >&2
 	exit 1
