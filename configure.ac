@@ -106,7 +106,7 @@ dnl ## HEADERS #########################################################
 dnl #############
 
 AC_CHECK_HEADERS([ \
-	sys/time.h signal.h langinfo.h libgen.h locale.h paths.h \
+	sys/time.h libgen.h paths.h \
 ], [], [],
 [
 #ifdef HAVE_SYS_TYPES_H
@@ -210,11 +210,9 @@ dnl #######################
 AC_CHECK_FUNCS([ \
 	arc4random \
 	basename \
-	nl_langinfo \
 	pclose \
 	popen \
 	random \
-	setlocale \
 	srandomdev \
 ])
 

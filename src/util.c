@@ -26,13 +26,9 @@
 
 #include <ctype.h>
 #include <errno.h>
-#ifdef HAVE_LANGINFO_H
-# include <langinfo.h>
-#endif
+#include <langinfo.h>
 #include <limits.h>
-#ifdef HAVE_LOCALE_H
-# include <locale.h>
-#endif
+#include <locale.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -90,13 +86,9 @@ CHARtoUTF8(const char *in_str, int mode)
 {
 	char	*codeset;
 
-#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
-#else
-	codeset = (char *)"";
-#endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 
 	return (iconvert(in_str, codeset, "UTF-8", mode));
 }
@@ -106,13 +98,9 @@ UTF8toCHAR(const char *in_str, int mode)
 {
 	char	*codeset;
 
-#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE) && defined(CODESET)
 	setlocale(LC_CTYPE, "");
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
-#else
-	codeset = (char *)"";
-#endif /* HAVE_NL_LANGINFO && HAVE_SETLOCALE && CODESET */
 
 	return (iconvert(in_str, "UTF-8", codeset, mode));
 }
