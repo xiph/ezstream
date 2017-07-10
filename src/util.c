@@ -56,64 +56,6 @@ static unsigned int	 pidfile_numlocks;
 static char *	iconvert(const char *, const char *, const char *, int);
 static void	cleanupPidfile(void);
 
-int
-strrcmp(const char *s, const char *sub)
-{
-	size_t	slen = strlen(s);
-	size_t	sublen = strlen(sub);
-
-	if (sublen > slen)
-		return (1);
-
-	return (memcmp(s + slen - sublen, sub, sublen));
-}
-
-int
-strrcasecmp(const char *s, const char *sub)
-{
-	char	*s_cpy = xstrdup(s);
-	char	*sub_cpy = xstrdup(sub);
-	char	*p;
-	int	 ret;
-
-	for (p = s_cpy; *p != '\0'; p++)
-		*p = tolower((int)*p);
-
-	for (p = sub_cpy; *p != '\0'; p++)
-		*p = tolower((int)*p);
-
-	ret = strrcmp(s_cpy, sub_cpy);
-
-	xfree(s_cpy);
-	xfree(sub_cpy);
-
-	return (ret);
-}
-
-char *
-CHARtoUTF8(const char *in_str, int mode)
-{
-	char	*codeset;
-
-	setlocale(LC_CTYPE, "");
-	codeset = nl_langinfo((nl_item)CODESET);
-	setlocale(LC_CTYPE, "C");
-
-	return (iconvert(in_str, codeset, "UTF-8", mode));
-}
-
-char *
-UTF8toCHAR(const char *in_str, int mode)
-{
-	char	*codeset;
-
-	setlocale(LC_CTYPE, "");
-	codeset = nl_langinfo((nl_item)CODESET);
-	setlocale(LC_CTYPE, "C");
-
-	return (iconvert(in_str, "UTF-8", codeset, mode));
-}
-
 static char *
 iconvert(const char *in_str, const char *from, const char *to, int mode)
 {
@@ -270,6 +212,64 @@ error:
 	errno = save_errno;
 
 	return (-1);
+}
+
+int
+strrcmp(const char *s, const char *sub)
+{
+	size_t	slen = strlen(s);
+	size_t	sublen = strlen(sub);
+
+	if (sublen > slen)
+		return (1);
+
+	return (memcmp(s + slen - sublen, sub, sublen));
+}
+
+int
+strrcasecmp(const char *s, const char *sub)
+{
+	char	*s_cpy = xstrdup(s);
+	char	*sub_cpy = xstrdup(sub);
+	char	*p;
+	int	 ret;
+
+	for (p = s_cpy; *p != '\0'; p++)
+		*p = tolower((int)*p);
+
+	for (p = sub_cpy; *p != '\0'; p++)
+		*p = tolower((int)*p);
+
+	ret = strrcmp(s_cpy, sub_cpy);
+
+	xfree(s_cpy);
+	xfree(sub_cpy);
+
+	return (ret);
+}
+
+char *
+CHARtoUTF8(const char *in_str, int mode)
+{
+	char	*codeset;
+
+	setlocale(LC_CTYPE, "");
+	codeset = nl_langinfo((nl_item)CODESET);
+	setlocale(LC_CTYPE, "C");
+
+	return (iconvert(in_str, codeset, "UTF-8", mode));
+}
+
+char *
+UTF8toCHAR(const char *in_str, int mode)
+{
+	char	*codeset;
+
+	setlocale(LC_CTYPE, "");
+	codeset = nl_langinfo((nl_item)CODESET);
+	setlocale(LC_CTYPE, "C");
+
+	return (iconvert(in_str, "UTF-8", codeset, mode));
 }
 
 char *
