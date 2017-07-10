@@ -1,4 +1,4 @@
-.\" Copyright (c) 2007, 2009, 2015 Moritz Grimm <mgrimm@mrsserver.net>
+.\" Copyright (c) 2007, 2009, 2015, 2017 Moritz Grimm <mgrimm@mrsserver.net>
 .\"
 .\" This program is free software; you can redistribute it and/or modify
 .\" it under the terms of the GNU General Public License version 2 as
@@ -410,7 +410,7 @@ Set the format of the string that should be used for the
 placeholder, when quering for metadata from an executable.
 .Pp
 Default:
-.Em Li @a@ - @t@
+.Li @a@ - @t@
 .It Sy \&<refresh_interval\ /\&>
 Configure a time interval for additional metadata updates via a
 .Dq Metadata Program :
@@ -605,7 +605,7 @@ content during runtime.
 All placeholders are replaced with content enclosed in single quotes, with
 escaped single quote and backslash characters in between, so that
 interpretation by the shell does not occur.
-.Em Do not add any additional quoting!
+.Em \&Do not add any additional quoting!
 .Ss Metadata Placeholders
 .Bl -tag -width -Ds
 .It Sy @T@
