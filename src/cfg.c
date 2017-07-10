@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Moritz Grimm <mgrimm@mrsserver.net>
+ * Copyright (c) 2015, 2017 Moritz Grimm <mgrimm@mrsserver.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -274,6 +274,13 @@ int
 cfg_set_program_config_file(const char *file, const char **errstrp)
 {
 	SET_STRLCPY(cfg.program.config_file, file, errstrp);
+	return (0);
+}
+
+int
+cfg_set_program_pid_file(const char *file, const char **errstrp)
+{
+	SET_STRLCPY(cfg.program.pid_file, file, errstrp);
 	return (0);
 }
 
@@ -640,6 +647,12 @@ const char *
 cfg_get_program_config_file(void)
 {
 	return (cfg.program.config_file[0] ? cfg.program.config_file : NULL);
+}
+
+const char *
+cfg_get_program_pid_file(void)
+{
+	return (cfg.program.pid_file[0] ? cfg.program.pid_file : NULL);
 }
 
 int

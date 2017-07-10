@@ -20,6 +20,7 @@
 .Bk -words
 .Op Fl hqrVv
 .Fl c Ar configfile
+.Op Fl p Ar pidfile
 .Ek
 .Nm
 .Bk -words
@@ -45,6 +46,20 @@ Use the XML configuration in
 .It Fl h
 Print a summary of available command line arguments with short descriptions
 and exit.
+.It Fl p Ar pidfile
+Write the
+.Nm
+process ID
+.Pq a single number
+to
+.Ar pidfile .
+The file will be written even when it already exists.
+A file lock is maintained until the main
+.Nm
+process terminates.
+If the file cannot be written for any reason,
+.Nm
+will log this, but not consider it a fatal error.
 .It Fl q
 Be more quiet.
 Suppress the output that external programs send to standard error.

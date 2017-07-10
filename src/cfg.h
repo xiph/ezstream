@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Moritz Grimm <mgrimm@mrsserver.net>
+ * Copyright (c) 2015, 2017 Moritz Grimm <mgrimm@mrsserver.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -91,6 +91,7 @@ int	cfg_file_check(const char *);
 int	cfg_set_program_name(const char *, const char **);
 int	cfg_set_program_config_type(enum cfg_config_type, const char **);
 int	cfg_set_program_config_file(const char *, const char **);
+int	cfg_set_program_pid_file(const char *, const char **);
 int	cfg_set_program_quiet_stderr(int, const char **);
 int	cfg_set_program_rtstatus_output(int, const char **);
 int	cfg_set_program_verbosity(unsigned int, const char **);
@@ -137,6 +138,8 @@ enum cfg_config_type
 	cfg_get_program_config_type(void);
 const char *
 	cfg_get_program_config_file(void);
+const char *
+	cfg_get_program_pid_file(void);
 int	cfg_get_program_quiet_stderr(void);
 int	cfg_get_program_rtstatus_output(void);
 unsigned int

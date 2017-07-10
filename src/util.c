@@ -1,7 +1,7 @@
 /*
  *  ezstream - source client for Icecast with external en-/decoder support
  *  Copyright (C) 2003, 2004, 2005, 2006  Ed Zaleski <oddsock@oddsock.org>
- *  Copyright (C) 2007, 2009              Moritz Grimm <mgrimm@mrsserver.net>
+ *  Copyright (C) 2007, 2009, 2017        Moritz Grimm <mgrimm@mrsserver.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
@@ -24,6 +24,9 @@
 
 #include "compat.h"
 
+#include <sys/types.h>
+#include <sys/file.h>
+
 #include <ctype.h>
 #include <errno.h>
 #include <langinfo.h>
@@ -31,12 +34,12 @@
 #include <locale.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 
 #ifdef HAVE_ICONV
 # include <iconv.h>
 #endif
 
-#include "cfg.h"
 #include "log.h"
 #include "util.h"
 #include "xalloc.h"
@@ -45,7 +48,13 @@
 # define BUFSIZ 1024
 #endif
 
-char *	iconvert(const char *, const char *, const char *, int);
+static char		*pidfile_path;
+static FILE		*pidfile_file;
+static pid_t		 pidfile_pid;
+static unsigned int	 pidfile_numlocks;
+
+static char *	iconvert(const char *, const char *, const char *, int);
+static void	cleanupPidfile(void);
 
 int
 strrcmp(const char *s, const char *sub)
@@ -105,7 +114,7 @@ UTF8toCHAR(const char *in_str, int mode)
 	return (iconvert(in_str, "UTF-8", codeset, mode));
 }
 
-char *
+static char *
 iconvert(const char *in_str, const char *from, const char *to, int mode)
 {
 #ifdef HAVE_ICONV
@@ -203,6 +212,64 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 
 	return (xstrdup(in_str));
 #endif /* HAVE_ICONV */
+}
+
+static void
+cleanupPidfile(void)
+{
+	if (NULL != pidfile_path && getpid() == pidfile_pid) {
+		(void)unlink(pidfile_path);
+		(void)fclose(pidfile_file);
+	}
+}
+
+int
+writePidfile(const char *path)
+{
+	int	 save_errno = 0;
+	pid_t	 pid;
+
+	if (NULL == path)
+		return (0);
+
+	xfree(pidfile_path);
+	pidfile_path = xstrdup(path);
+
+	if (NULL != pidfile_file)
+		fclose(pidfile_file);
+	if (NULL == (pidfile_file = fopen(pidfile_path, "w"))) {
+		save_errno = errno;
+		xfree(pidfile_path);
+		pidfile_path = NULL;
+		return (-1);
+	}
+
+	pid = getpid();
+	if (0 >= fprintf(pidfile_file, "%ld\n", (long)pid) ||
+	    0 > fflush(pidfile_file) ||
+	    0 > flock(fileno(pidfile_file), LOCK_EX))
+		goto error;
+
+	if (0 == pidfile_numlocks) {
+		pidfile_pid = pid;
+		if (0 != atexit(cleanupPidfile))
+			goto error;
+		pidfile_numlocks++;
+	}
+
+	return (0);
+
+error:
+	save_errno = errno;
+	(void)unlink(pidfile_path);
+	xfree(pidfile_path);
+	pidfile_path = NULL;
+	(void)fclose(pidfile_file);
+	pidfile_file = NULL;
+	pidfile_pid = 0;
+	errno = save_errno;
+
+	return (-1);
 }
 
 char *

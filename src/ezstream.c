@@ -1,7 +1,7 @@
 /*
  *  ezstream - source client for Icecast with external en-/decoder support
  *  Copyright (C) 2003, 2004, 2005, 2006  Ed Zaleski <oddsock@oddsock.org>
- *  Copyright (C) 2007, 2009, 2015        Moritz Grimm <mgrimm@mrsserver.net>
+ *  Copyright (C) 2007, 2009, 2015, 2017  Moritz Grimm <mgrimm@mrsserver.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
@@ -800,6 +800,9 @@ main(int argc, char *argv[])
 		log_syserr(ERROR, errno, "sigaction");
 		return (ez_shutdown(1));
 	}
+
+	if (0 > writePidfile(cfg_get_program_pid_file()))
+		log_syserr(WARNING, errno, cfg_get_program_pid_file());
 
 	if (0 > stream_connect(stream)) {
 		log_error("initial server connection failed");

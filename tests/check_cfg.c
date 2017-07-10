@@ -207,6 +207,14 @@ START_TEST(test_program_config_file)
 }
 END_TEST
 
+START_TEST(test_program_pid_file)
+{
+	ck_assert_ptr_eq(cfg_get_program_pid_file(), NULL);
+	TEST_STRLCPY(cfg_set_program_pid_file, cfg_get_program_pid_file,
+	    PATH_MAX);
+}
+END_TEST
+
 START_TEST(test_program_quiet_stderr)
 {
 	ck_assert_int_eq(cfg_set_program_quiet_stderr(-1, NULL), 0);
@@ -808,6 +816,7 @@ cfg_suite(void)
 	tcase_add_test(tc_program, test_program_name);
 	tcase_add_test(tc_program, test_program_config_type);
 	tcase_add_test(tc_program, test_program_config_file);
+	tcase_add_test(tc_program, test_program_pid_file);
 	tcase_add_test(tc_program, test_program_quiet_stderr);
 	tcase_add_test(tc_program, test_program_rtstatus_output);
 	tcase_add_test(tc_program, test_program_verbosity);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Moritz Grimm <mgrimm@mrsserver.net>
+ * Copyright (c) 2015, 2017 Moritz Grimm <mgrimm@mrsserver.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -32,10 +32,11 @@
 #include "cmdline.h"
 #include "playlist.h"
 
-#define OPTSTRING	"c:hqrs:Vv"
+#define OPTSTRING	"c:hp:qrs:Vv"
 enum opt_vals {
 	OPT_CONFIGFILE		= 'c',
 	OPT_HELP		= 'h',
+	OPT_PIDFILE		= 'p',
 	OPT_QUIETSTDERR 	= 'q',
 	OPT_RTSTATUS		= 'r',
 	OPT_SHUFFLEFILE 	= 's',
@@ -51,7 +52,7 @@ static void	_set_program_name(const char *);
 static void
 _usage(void)
 {
-	fprintf(stderr, "usage: %s [-hqrVv] -c cfgfile\n",
+	fprintf(stderr, "usage: %s [-hqrVv] -c cfgfile [-p pidfile]\n",
 	    cfg_get_program_name());
 	fprintf(stderr, "       %s -s file\n",
 	    cfg_get_program_name());
@@ -63,6 +64,7 @@ _usage_help(void)
 	fprintf(stderr, "\n");
 	fprintf(stderr, "    -c cfgfile  use XML configuration in cfgfile\n");
 	fprintf(stderr, "    -h          print this help and exit\n");
+	fprintf(stderr, "    -p pidfile  write PID to pidfile\n");
 	fprintf(stderr, "    -q          suppress STDERR output from external en-/decoders\n");
 	fprintf(stderr, "    -r          show real-time stream information on stdout\n");
 	fprintf(stderr, "    -s file     read lines from file, shuffle, print to STDOUT, then exit\n");
@@ -125,6 +127,15 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 			_usage_help();
 			*ret_p = 0;
 			return (-1);
+		case OPT_PIDFILE:
+			if (0 > cfg_set_program_pid_file(optarg, &err_str)) {
+				fprintf(stderr, "-%c: argument %s\n",
+				    OPT_PIDFILE, err_str);
+				_usage();
+				*ret_p = 2;
+				return (-1);
+			}
+			break;
 		case OPT_RTSTATUS:
 			cfg_set_program_rtstatus_output(1, NULL);
 			/* FALLTHROUGH */

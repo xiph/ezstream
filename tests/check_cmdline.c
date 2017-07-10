@@ -33,6 +33,22 @@ START_TEST(test_help)
 }
 END_TEST
 
+START_TEST(test_pidfile)
+{
+	char	*argv[] =
+	{
+		"check_cmdline", "-p", "PIDFILE-TEST" , NULL
+	};
+	int	 argc = (int)(sizeof(argv) / sizeof(argv[0])) - 1;
+	int	 ret;
+
+	ck_assert_ptr_eq(cfg_get_program_pid_file(), NULL);
+	ck_assert_int_ne(cmdline_parse(argc, argv, &ret), 0);
+	ck_assert_int_eq(ret, 2);
+	ck_assert_str_eq(cfg_get_program_pid_file(), "PIDFILE-TEST");
+}
+END_TEST
+
 START_TEST(test_quiet_stderr)
 {
 	char	*argv[] = { "check_cmdline", "-q", NULL };
@@ -133,6 +149,7 @@ cmdline_suite(void)
 	tcase_add_checked_fixture(tc_cmdline, setup_checked, teardown_checked);
 	tcase_add_test(tc_cmdline, test_configfile);
 	tcase_add_test(tc_cmdline, test_help);
+	tcase_add_test(tc_cmdline, test_pidfile);
 	tcase_add_test(tc_cmdline, test_quiet_stderr);
 	tcase_add_test(tc_cmdline, test_rtstatus_output);
 	tcase_add_test(tc_cmdline, test_shuffle);

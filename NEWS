@@ -12,6 +12,8 @@ Changes in 1.0.0, released on XXXX-XX-XX:
  * The configuration file structure has changed.
  * TagLib (its C wrapper library) is now a mandatory dependency
  * Support the new '@b@' placeholder for separate album metadata.
+ * The command line option -p has been added, causing ezstream to write a
+   locked PID file to a given location
 
 
 Changes in 0.6.0, released on 2015-01-18:
