@@ -53,11 +53,11 @@ static FILE		*pidfile_file;
 static pid_t		 pidfile_pid;
 static unsigned int	 pidfile_numlocks;
 
-static char *	iconvert(const char *, const char *, const char *, int);
-static void	cleanupPidfile(void);
+static char *	_iconvert(const char *, const char *, const char *, int);
+static void	_cleanup_pidfile(void);
 
 static char *
-iconvert(const char *in_str, const char *from, const char *to, int mode)
+_iconvert(const char *in_str, const char *from, const char *to, int mode)
 {
 #ifdef HAVE_ICONV
 	iconv_t 		 cd;
@@ -157,7 +157,7 @@ iconvert(const char *in_str, const char *from, const char *to, int mode)
 }
 
 static void
-cleanupPidfile(void)
+_cleanup_pidfile(void)
 {
 	if (NULL != pidfile_path && getpid() == pidfile_pid) {
 		(void)unlink(pidfile_path);
@@ -166,7 +166,7 @@ cleanupPidfile(void)
 }
 
 int
-writePidfile(const char *path)
+util_write_pid_file(const char *path)
 {
 	int	 save_errno = 0;
 	pid_t	 pid;
@@ -194,7 +194,7 @@ writePidfile(const char *path)
 
 	if (0 == pidfile_numlocks) {
 		pidfile_pid = pid;
-		if (0 != atexit(cleanupPidfile))
+		if (0 != atexit(_cleanup_pidfile))
 			goto error;
 		pidfile_numlocks++;
 	}
@@ -215,7 +215,7 @@ error:
 }
 
 int
-strrcmp(const char *s, const char *sub)
+util_strrcmp(const char *s, const char *sub)
 {
 	size_t	slen = strlen(s);
 	size_t	sublen = strlen(sub);
@@ -227,7 +227,7 @@ strrcmp(const char *s, const char *sub)
 }
 
 int
-strrcasecmp(const char *s, const char *sub)
+util_strrcasecmp(const char *s, const char *sub)
 {
 	char	*s_cpy = xstrdup(s);
 	char	*sub_cpy = xstrdup(sub);
@@ -240,7 +240,7 @@ strrcasecmp(const char *s, const char *sub)
 	for (p = sub_cpy; *p != '\0'; p++)
 		*p = tolower((int)*p);
 
-	ret = strrcmp(s_cpy, sub_cpy);
+	ret = util_strrcmp(s_cpy, sub_cpy);
 
 	xfree(s_cpy);
 	xfree(sub_cpy);
@@ -249,7 +249,7 @@ strrcasecmp(const char *s, const char *sub)
 }
 
 char *
-CHARtoUTF8(const char *in_str, int mode)
+util_char2utf8(const char *in_str, int mode)
 {
 	char	*codeset;
 
@@ -257,11 +257,11 @@ CHARtoUTF8(const char *in_str, int mode)
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 
-	return (iconvert(in_str, codeset, "UTF-8", mode));
+	return (_iconvert(in_str, codeset, "UTF-8", mode));
 }
 
 char *
-UTF8toCHAR(const char *in_str, int mode)
+util_utf82char(const char *in_str, int mode)
 {
 	char	*codeset;
 
@@ -269,17 +269,17 @@ UTF8toCHAR(const char *in_str, int mode)
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 
-	return (iconvert(in_str, "UTF-8", codeset, mode));
+	return (_iconvert(in_str, "UTF-8", codeset, mode));
 }
 
 char *
-replaceString(const char *source, const char *from, const char *to)
+util_replacestring(const char *source, const char *from, const char *to)
 {
 	char		*to_quoted, *dest;
 	size_t		 dest_size;
 	const char	*p1, *p2;
 
-	to_quoted = shellQuote(to);
+	to_quoted = util_shellquote(to);
 	dest_size = strlen(source) + strlen(to_quoted) + 1;
 	dest = xcalloc(dest_size, sizeof(char));
 
@@ -300,7 +300,7 @@ replaceString(const char *source, const char *from, const char *to)
 #define SHELLQUOTE_INLEN_MAX	8191UL
 
 char *
-shellQuote(const char *in)
+util_shellquote(const char *in)
 {
 	char		*out, *out_p;
 	size_t		 out_len;
@@ -336,7 +336,7 @@ shellQuote(const char *in)
 }
 
 int
-urlParse(const char *url, char **hostname, unsigned short *port,
+util_urlparse(const char *url, char **hostname, unsigned short *port,
 	 char **mountname)
 {
 	const char	*p1, *p2, *p3;

@@ -20,13 +20,13 @@
 #define ICONV_TRANSLIT		1
 #define ICONV_IGNORE		2
 
-int	writePidfile(const char *);
-int	strrcmp(const char *, const char *);
-int	strrcasecmp(const char *, const char *);
-char *	CHARtoUTF8(const char *, int);
-char *	UTF8toCHAR(const char *, int);
-char *	replaceString(const char *, const char *, const char *);
-char *	shellQuote(const char *);
-int	urlParse(const char *, char **, unsigned short *, char **);
+int	util_write_pid_file(const char *);
+int	util_strrcmp(const char *, const char *);
+int	util_strrcasecmp(const char *, const char *);
+char *	util_char2utf8(const char *, int);
+char *	util_utf82char(const char *, int);
+char *	util_replacestring(const char *, const char *, const char *);
+char *	util_shellquote(const char *);
+int	util_urlparse(const char *, char **, unsigned short *, char **);
 
 #endif /* __UTIL_H__ */
