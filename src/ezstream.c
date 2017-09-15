@@ -613,9 +613,10 @@ streamFile(stream_t stream, const char *fileName)
 						ret = STREAM_DONE;
 						continue;
 					}
-					if (0> stream_set_metadata(stream, prog_mdata, &mdataStr)) {
+					if (0 > stream_set_metadata(stream, prog_mdata, &mdataStr)) {
 						retval = 0;
 						ret = STREAM_DONE;
+						metadata_free(&prog_mdata);
 						continue;
 					}
 					metadata_free(&prog_mdata);
