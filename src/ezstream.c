@@ -162,6 +162,7 @@ _build_reencode_cmd(const char *extension, const char *fileName,
 			custom_songinfo = xstrdup(songinfo);
 		}
 	}
+	xfree(songinfo);
 
 	memset(dicts, 0, sizeof(dicts));
 	dicts[0].from = PLACEHOLDER_ARTIST;
