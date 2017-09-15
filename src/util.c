@@ -235,10 +235,10 @@ util_strrcasecmp(const char *s, const char *sub)
 	int	 ret;
 
 	for (p = s_cpy; *p != '\0'; p++)
-		*p = tolower((int)*p);
+		*p = (char)tolower((int)*p);
 
 	for (p = sub_cpy; *p != '\0'; p++)
-		*p = tolower((int)*p);
+		*p = (char)tolower((int)*p);
 
 	ret = util_strrcmp(s_cpy, sub_cpy);
 

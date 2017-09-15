@@ -304,7 +304,7 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 	if (p != NULL)
 		strlcpy(extension, p, sizeof(extension));
 	for (p = extension; *p != '\0'; p++)
-		*p = tolower((int)*p);
+		*p = (char)tolower((int)*p);
 
 	if (strlen(extension) == 0) {
 		log_error("%s: cannot determine file type", fileName);
