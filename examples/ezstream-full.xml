@@ -93,7 +93,7 @@
     <!-- Media type: autodetect, file, playlist, program, stdin -->
     <type>autodetect</type>
 
-    <!-- Input file or program name -->
+    <!-- Input file, program name, or "stdin" keyword -->
     <filename>playlist.m3u</filename>
 
     <!-- Setting to shuffle playlists -->
