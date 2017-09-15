@@ -136,13 +136,21 @@ START_TEST(test_check)
 	ck_assert_int_eq(cfg_check(NULL), -1);
 	ck_assert_int_eq(cfg_check(&errstr), -1);
 	ck_assert_str_eq(errstr, "media filename missing");
-	ck_assert_int_eq(cfg_set_media_filename(SRCDIR "/playlist.txt", NULL),
-	    0);
+	ck_assert_int_eq(cfg_set_media_type("stdin", NULL), 0);
 
 	ck_assert_int_eq(cfg_check(NULL), -1);
 	ck_assert_int_eq(cfg_check(&errstr), -1);
 	ck_assert_str_eq(errstr, "stream format missing or unsupported");
 	ck_assert_int_eq(cfg_set_stream_format(CFG_SFMT_VORBIS, NULL), 0);
+
+	ck_assert_int_eq(cfg_check(NULL), 0);
+
+	ck_assert_int_eq(cfg_set_media_type("autodetect", NULL), 0);
+	ck_assert_int_eq(cfg_check(NULL), -1);
+	ck_assert_int_eq(cfg_check(&errstr), -1);
+	ck_assert_str_eq(errstr, "media filename missing");
+	ck_assert_int_eq(cfg_set_media_filename(SRCDIR "/playlist.txt", NULL),
+	    0);
 
 	ck_assert_int_eq(cfg_check(NULL), 0);
 }

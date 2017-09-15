@@ -275,7 +275,8 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 	if (songLen != NULL)
 		*songLen = 0;
 
-	if (strcmp(fileName, "stdin") == 0) {
+	if ((isStdin && *isStdin) ||
+	    strcasecmp(fileName, "stdin") == 0) {
 		if (cfg_get_metadata_program()) {
 			if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
 				return (NULL);
@@ -566,7 +567,7 @@ streamFile(stream_t stream, const char *fileName)
 	FILE		*filepstream = NULL;
 	int		 popenFlag = 0;
 	char		*songLenStr = NULL;
-	int		 isStdin = 0;
+	int		 isStdin = cfg_get_media_type() == CFG_MEDIA_STDIN;
 	int		 ret, retval = 0;
 	long		 songLen;
 	metadata_t	 mdata;
@@ -590,7 +591,8 @@ streamFile(stream_t stream, const char *fileName)
 		if ((metaData = util_utf82char(tmp, ICONV_REPLACE)) == NULL)
 			metaData = xstrdup("(unknown title)");
 		xfree(tmp);
-		log_notice("streaming: %s (%s)", metaData, fileName);
+		log_notice("streaming: %s (%s)", metaData,
+		    isStdin ? "stdin" : fileName);
 		xfree(metaData);
 
 		/* MP3 streams are special, so set the metadata explicitly: */

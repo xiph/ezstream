@@ -184,7 +184,8 @@ cfg_check(const char **errstrp)
 		return (-1);
 	}
 
-	if (!cfg_get_media_filename()) {
+	if (!cfg_get_media_filename() &&
+	    CFG_MEDIA_STDIN != cfg_get_media_type()) {
 		if (NULL != errstrp)
 			*errstrp = "media filename missing";
 		return (-1);
