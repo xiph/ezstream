@@ -108,7 +108,7 @@
     -->
   <metadata>
     <!-- Program to query for metadata instead of from media files -->
-    <!-- <program>metadata.sh</program> -->
+    <!-- <program>meta.sh</program> -->
 
     <!-- Metadata format -->
     <format_str>@a@ - @t@</format_str>
