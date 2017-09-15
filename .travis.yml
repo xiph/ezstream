@@ -1,5 +1,9 @@
 language: c
 
+env:
+  global:
+    - secure: "G6H+Z07yB+YsW3leWwhjIwfFB2A0RxG3Lv/kyQFacm88qQ5KlWct/Z3KRgRXVZtMSpi0guJ9Y3mVddBi9ytTgkygRca6eEITYjfb76aiPrj+ng7Zh31OYOw6p4UESF87Mxc6GYgbhJjRcnytoVxibSH1BIY1WNxgoOVIZQhxhTY="
+
 compiler:
   - clang
   - gcc
@@ -13,6 +17,14 @@ addons:
       - libxml2-dev
       - libshout-dev
       - libtagc0-dev
+  coverity_scan:
+    project:
+      name: "xiph/ezstream"
+      description: "Icecast streaming source client"
+    notification_email: mgrimm@mrsserver.net
+    build_command_prepend: "./autogen.sh && ./configure"
+    build_command: "make check"
+    branch_pattern: develop
 
 script:
   - ./autogen.sh
