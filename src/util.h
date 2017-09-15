@@ -16,16 +16,17 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#define ICONV_REPLACE		0
-#define ICONV_TRANSLIT		1
-#define ICONV_IGNORE		2
+struct util_dict {
+	const char	*from;
+	const char	*to;
+};
 
 int	util_write_pid_file(const char *);
 int	util_strrcmp(const char *, const char *);
 int	util_strrcasecmp(const char *, const char *);
-char *	util_char2utf8(const char *, int);
-char *	util_utf82char(const char *, int);
-char *	util_replacestring(const char *, const char *, const char *);
+char *	util_char2utf8(const char *);
+char *	util_utf82char(const char *);
+char *	util_expand_words(const char *, struct util_dict[]);
 char *	util_shellquote(const char *);
 int	util_urlparse(const char *, char **, unsigned short *, char **);
 

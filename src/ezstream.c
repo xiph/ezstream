@@ -53,7 +53,7 @@ volatile sig_atomic_t	 queryMetadata;
 volatile sig_atomic_t	 quit;
 
 void		sig_handler(int);
-char *		buildReencodeCommand(const char *, const char *, metadata_t);
+char *		_build_reencode_cmd(const char *, const char *, metadata_t);
 metadata_t	getMetadata(const char *);
 FILE *		openResource(stream_t, const char *, int *, metadata_t *,
 			     int *, long *);
@@ -89,15 +89,19 @@ sig_handler(int sig)
 }
 
 char *
-buildReencodeCommand(const char *extension, const char *fileName,
+_build_reencode_cmd(const char *extension, const char *fileName,
     metadata_t mdata)
 {
-	cfg_decoder_t	 decoder;
-	cfg_encoder_t	 encoder;
-	char		*dec_str, *enc_str;
-	char		*commandString;
-	size_t		 commandStringLen;
-	char		*localTitle, *localArtist, *localMetaString, *localAlbum;
+	cfg_decoder_t		 decoder;
+	cfg_encoder_t		 encoder;
+	char			*artist, *album, *title, *songinfo, *tmp;
+	char			*filename_quoted;
+	char			*custom_songinfo;
+	struct util_dict	 dicts[6];
+	char			*dec_str;
+	char			*enc_str;
+	char			*cmd_str;
+	size_t			 cmd_str_size;
 
 	decoder = cfg_decoder_find(extension);
 	if (!decoder) {
@@ -112,124 +116,89 @@ buildReencodeCommand(const char *extension, const char *fileName,
 		return (NULL);
 	}
 
-	localTitle = util_utf82char(metadata_get_title(mdata), ICONV_REPLACE);
-	localArtist = util_utf82char(metadata_get_artist(mdata), ICONV_REPLACE);
-	localAlbum = util_utf82char(metadata_get_album(mdata), ICONV_REPLACE);
-	localMetaString = util_utf82char(metadata_get_string(mdata),
-	    ICONV_REPLACE);
+	tmp = util_utf82char(metadata_get_artist(mdata));
+	artist = util_shellquote(tmp);
+	xfree(tmp);
 
-	dec_str = util_replacestring(cfg_decoder_get_program(decoder),
-	    PLACEHOLDER_TRACK, fileName);
-	if (strstr(dec_str, PLACEHOLDER_ARTIST) != NULL) {
-		char *tmpStr = util_replacestring(dec_str, PLACEHOLDER_ARTIST,
-		    localArtist);
-		xfree(dec_str);
-		dec_str = tmpStr;
-	}
-	if (strstr(dec_str, PLACEHOLDER_TITLE) != NULL) {
-		char *tmpStr = util_replacestring(dec_str, PLACEHOLDER_TITLE,
-		    localTitle);
-		xfree(dec_str);
-		dec_str = tmpStr;
-	}
-	if (strstr(dec_str, PLACEHOLDER_ALBUM) != NULL) {
-		char *tmpStr = util_replacestring(dec_str, PLACEHOLDER_ALBUM,
-		    localAlbum);
-		xfree(dec_str);
-		dec_str = tmpStr;
-	}
+	tmp = util_utf82char(metadata_get_album(mdata));
+	album = util_shellquote(tmp);
+	xfree(tmp);
+
+	tmp = util_utf82char(metadata_get_title(mdata));
+	title = util_shellquote(tmp);
+	xfree(tmp);
+
+	tmp = util_utf82char(metadata_get_string(mdata));
+	songinfo = util_shellquote(tmp);
+	xfree(tmp);
+
+	filename_quoted = util_shellquote(fileName);
+
 	/*
-	 * if meta
-	 *   if (prog && format)
-	 *      metatoformat
+	 * if (prog && format)
+	 *    metatoformat
+	 * else
+	 *   if (!prog && title)
+	 *     emptymeta
 	 *   else
-	 *     if (!prog && title)
-	 *       emptymeta
-	 *     else
-	 *       replacemeta
+	 *     replacemeta
 	 */
-	if (strstr(dec_str, PLACEHOLDER_METADATA) != NULL) {
-		if (cfg_get_metadata_program() &&
-		    cfg_get_metadata_format_str()) {
-			char *mdataString = metadata_format_string(mdata,
-			    cfg_get_metadata_format_str());
-			char *tmpStr = util_replacestring(dec_str,
-			    PLACEHOLDER_METADATA, mdataString);
-			xfree(dec_str);
-			xfree(mdataString);
-			dec_str = tmpStr;
+	if (cfg_get_metadata_program() &&
+	    cfg_get_metadata_format_str()) {
+		char	*utf8, *unquoted;
+
+		utf8 = metadata_format_string(mdata,
+		    cfg_get_metadata_format_str());
+		unquoted = util_utf82char(utf8);
+		xfree(utf8);
+		custom_songinfo = util_shellquote(unquoted);
+		xfree(unquoted);
+	} else {
+		if (!cfg_get_metadata_program() &&
+		    strstr(cfg_decoder_get_program(decoder),
+			PLACEHOLDER_TITLE) != NULL) {
+			custom_songinfo = xstrdup("");
 		} else {
-			if (!cfg_get_metadata_program() &&
-			    strstr(dec_str, PLACEHOLDER_TITLE) != NULL) {
-				char *tmpStr = util_replacestring(dec_str,
-				    PLACEHOLDER_METADATA, "");
-				xfree(dec_str);
-				dec_str = tmpStr;
-			} else {
-				char *tmpStr = util_replacestring(dec_str,
-				    PLACEHOLDER_METADATA, localMetaString);
-				xfree(dec_str);
-				dec_str = tmpStr;
-			}
+			custom_songinfo = xstrdup(songinfo);
 		}
 	}
 
-	if (!cfg_encoder_get_program(encoder))
-		return (dec_str);
+	memset(dicts, 0, sizeof(dicts));
+	dicts[0].from = PLACEHOLDER_ARTIST;
+	dicts[0].to = artist;
+	dicts[1].from = PLACEHOLDER_ALBUM;
+	dicts[1].to = album;
+	dicts[2].from = PLACEHOLDER_TITLE;
+	dicts[2].to = title;
+	dicts[3].from = PLACEHOLDER_TRACK;
+	dicts[3].to = filename_quoted;
+	dicts[4].from = PLACEHOLDER_METADATA;
+	dicts[4].to = custom_songinfo;
 
-	enc_str = util_replacestring(cfg_encoder_get_program(encoder),
-	    PLACEHOLDER_ARTIST, localArtist);
-	if (strstr(enc_str, PLACEHOLDER_TITLE) != NULL) {
-		char *tmpStr = util_replacestring(enc_str, PLACEHOLDER_TITLE,
-		    localTitle);
-		xfree(enc_str);
-		enc_str = tmpStr;
-	}
-	if (strstr(enc_str, PLACEHOLDER_ALBUM) != NULL) {
-		char *tmpStr = util_replacestring(enc_str, PLACEHOLDER_ALBUM,
-		    localAlbum);
-		xfree(enc_str);
-		enc_str = tmpStr;
-	}
-	if (strstr(enc_str, PLACEHOLDER_METADATA) != NULL) {
-		if (cfg_get_metadata_program() &&
-		    cfg_get_metadata_format_str()) {
-			char *mdataString = metadata_format_string(mdata,
-			    cfg_get_metadata_format_str());
-			char *tmpStr = util_replacestring(enc_str,
-			    PLACEHOLDER_METADATA, mdataString);
-			xfree(enc_str);
-			xfree(mdataString);
-			enc_str = tmpStr;
-		} else {
-			if (!cfg_get_metadata_program() &&
-			    strstr(enc_str, PLACEHOLDER_TITLE) != NULL) {
-				char *tmpStr = util_replacestring(enc_str,
-				    PLACEHOLDER_METADATA, "");
-				xfree(enc_str);
-				enc_str = tmpStr;
-			} else {
-				char *tmpStr = util_replacestring(enc_str,
-				    PLACEHOLDER_METADATA, localMetaString);
-				xfree(enc_str);
-				enc_str = tmpStr;
-			}
-		}
+	dec_str = util_expand_words(cfg_decoder_get_program(decoder), dicts);
+
+	if (!cfg_get_metadata_program() &&
+	    strstr(cfg_encoder_get_program(encoder),
+		PLACEHOLDER_TITLE) != NULL) {
+		xfree(custom_songinfo);
+		dicts[4].to = custom_songinfo = xstrdup("");
 	}
 
-	commandStringLen = strlen(dec_str) + strlen(" | ") +
-	    strlen(enc_str) + 1;
-	commandString = xcalloc(commandStringLen, sizeof(char));
-	snprintf(commandString, commandStringLen, "%s | %s", dec_str,
-	    enc_str);
+	enc_str = util_expand_words(cfg_encoder_get_program(encoder), dicts);
 
-	xfree(localTitle);
-	xfree(localArtist);
-	xfree(localMetaString);
+	cmd_str_size = strlen(dec_str) + strlen(" | ") + strlen(enc_str) + 1;
+	cmd_str = xcalloc(cmd_str_size, sizeof(char));
+	snprintf(cmd_str, cmd_str_size, "%s | %s", dec_str, enc_str);
 	xfree(dec_str);
 	xfree(enc_str);
 
-	return (commandString);
+	xfree(artist);
+	xfree(album);
+	xfree(title);
+	xfree(filename_quoted);
+	xfree(custom_songinfo);
+
+	return (cmd_str);
 }
 
 metadata_t
@@ -325,7 +294,7 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 	if (cfg_get_stream_encoder()) {
 		int	stderr_fd = -1;
 
-		pCommandString = buildReencodeCommand(extension, fileName,
+		pCommandString = _build_reencode_cmd(extension, fileName,
 		    mdata);
 		if (mdata_p != NULL)
 			*mdata_p = mdata;
@@ -588,7 +557,7 @@ streamFile(stream_t stream, const char *fileName)
 		char	*tmp, *metaData;
 
 		tmp = metadata_assemble_string(mdata);
-		if ((metaData = util_utf82char(tmp, ICONV_REPLACE)) == NULL)
+		if ((metaData = util_utf82char(tmp)) == NULL)
 			metaData = xstrdup("(unknown title)");
 		xfree(tmp);
 		log_notice("streaming: %s (%s)", metaData,

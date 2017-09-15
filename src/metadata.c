@@ -176,7 +176,7 @@ metadata_get_name(const char *file)
 	if (strlen(p1) == 0)
 		name = xstrdup("[unknown]");
 	else
-		name = util_char2utf8(p1, ICONV_REPLACE);
+		name = util_char2utf8(p1);
 
 	xfree(filename);
 	return (name);
@@ -371,16 +371,14 @@ metadata_program_update(struct metadata *md, enum metadata_request md_req)
 		return (0);
 	}
 
-	if (fgets(buf, (int)sizeof(buf), filep) == NULL) {
-		if (ferror(filep))
-			log_error("%s: output read error: %s", md->filename,
-			    strerror(errno));
+	memset(buf, 0, sizeof(buf));
+	if (fgets(buf, (int)sizeof(buf), filep) == NULL &&
+	    ferror(filep)) {
+		log_alert("%s: output read error: %s", md->filename,
+		    strerror(errno));
 		pclose(filep);
-		log_alert("program not (or no longer) usable: %s",
-		    md->filename);
 		exit(1);
 	}
-
 	pclose(filep);
 
 	if (strlen(buf) == sizeof(buf) - 1)
@@ -520,43 +518,22 @@ metadata_assemble_string(struct metadata *md)
 char *
 metadata_format_string(struct metadata *md, const char *format)
 {
-	char	*tmp, *str;
+	struct util_dict	 dicts[6];
 
 	if (format == NULL)
 		return (NULL);
 
-	str = xstrdup(format);
+	memset(dicts, 0, sizeof(dicts));
+	dicts[0].from = PLACEHOLDER_ARTIST;
+	dicts[0].to = metadata_get_artist(md);
+	dicts[1].from = PLACEHOLDER_ALBUM;
+	dicts[1].to = metadata_get_album(md);
+	dicts[2].from = PLACEHOLDER_TITLE;
+	dicts[2].to = metadata_get_title(md);
+	dicts[3].from = PLACEHOLDER_TRACK;
+	dicts[3].to = metadata_get_filename(md);
+	dicts[4].from = PLACEHOLDER_STRING;
+	dicts[4].to = metadata_get_string(md);
 
-	if (strstr(format, PLACEHOLDER_ARTIST) != NULL) {
-		tmp = util_replacestring(str, PLACEHOLDER_ARTIST,
-		    metadata_get_artist(md));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_TITLE) != NULL) {
-		tmp = util_replacestring(str, PLACEHOLDER_TITLE,
-		    metadata_get_title(md));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_STRING) != NULL) {
-		tmp = util_replacestring(str, PLACEHOLDER_STRING,
-		    metadata_get_string(md));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_TRACK) != NULL) {
-		tmp = util_replacestring(str, PLACEHOLDER_TRACK,
-		    metadata_get_filename(md));
-		xfree(str);
-		str = tmp;
-	}
-	if (strstr(format, PLACEHOLDER_ALBUM) != NULL) {
-		tmp = util_replacestring(str, PLACEHOLDER_ALBUM,
-		    metadata_get_album(md));
-		xfree(str);
-		str = tmp;
-	}
-
-	return (str);
+	return (util_expand_words(format, dicts));
 }

@@ -53,11 +53,11 @@ static FILE		*pidfile_file;
 static pid_t		 pidfile_pid;
 static unsigned int	 pidfile_numlocks;
 
-static char *	_iconvert(const char *, const char *, const char *, int);
+static char *	_iconvert(const char *, const char *, const char *);
 static void	_cleanup_pidfile(void);
 
 static char *
-_iconvert(const char *in_str, const char *from, const char *to, int mode)
+_iconvert(const char *in_str, const char *from, const char *to)
 {
 #ifdef HAVE_ICONV
 	iconv_t 		 cd;
@@ -73,26 +73,7 @@ _iconvert(const char *in_str, const char *from, const char *to, int mode)
 	if (NULL == in_str)
 		return (xstrdup(""));
 
-	switch (mode) {
-		size_t	siz;
-
-	case ICONV_TRANSLIT:
-		siz = strlen(to) + strlen("//TRANSLIT") + 1;
-		tocode = xcalloc(siz, sizeof(char));
-		snprintf(tocode, siz, "%s//TRANSLIT", to);
-		break;
-	case ICONV_IGNORE:
-		siz = strlen(to) + strlen("//IGNORE") + 1;
-		tocode = xcalloc(siz, sizeof(char));
-		snprintf(tocode, siz, "%s//IGNORE", to);
-		break;
-	case ICONV_REPLACE:
-		/* FALLTHROUGH */
-	default:
-		tocode = xstrdup(to);
-		break;
-	}
-
+	tocode = xstrdup(to);
 	if ((cd = iconv_open(tocode, from)) == (iconv_t)-1 &&
 	    (cd = iconv_open("", from)) == (iconv_t)-1 &&
 	    (cd = iconv_open(tocode, "")) == (iconv_t)-1) {
@@ -147,7 +128,6 @@ _iconvert(const char *in_str, const char *from, const char *to, int mode)
 #else
 	(void)from;
 	(void)to;
-	(void)mode;
 
 	if (NULL == in_str)
 		return (xstrdup(""));
@@ -249,7 +229,7 @@ util_strrcasecmp(const char *s, const char *sub)
 }
 
 char *
-util_char2utf8(const char *in_str, int mode)
+util_char2utf8(const char *in_str)
 {
 	char	*codeset;
 
@@ -257,11 +237,11 @@ util_char2utf8(const char *in_str, int mode)
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 
-	return (_iconvert(in_str, codeset, "UTF-8", mode));
+	return (_iconvert(in_str, codeset, "UTF-8"));
 }
 
 char *
-util_utf82char(const char *in_str, int mode)
+util_utf82char(const char *in_str)
 {
 	char	*codeset;
 
@@ -269,32 +249,51 @@ util_utf82char(const char *in_str, int mode)
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 
-	return (_iconvert(in_str, "UTF-8", codeset, mode));
+	return (_iconvert(in_str, "UTF-8", codeset));
 }
 
 char *
-util_replacestring(const char *source, const char *from, const char *to)
+util_expand_words(const char *in, struct util_dict dicts[])
 {
-	char		*to_quoted, *dest;
-	size_t		 dest_size;
-	const char	*p1, *p2;
+	size_t	 i;
+	char	*out;
+	size_t	 out_size = strlen(in) + 1;
 
-	to_quoted = util_shellquote(to);
-	dest_size = strlen(source) + strlen(to_quoted) + 1;
-	dest = xcalloc(dest_size, sizeof(char));
+	/* empty input string? */
+	if (1 == out_size)
+		return (NULL);
 
-	p1 = source;
-	p2 = strstr(p1, from);
-	if (p2 != NULL) {
-		strncat(dest, p1, (size_t)(p2 - p1));
-		strlcat(dest, to_quoted, dest_size);
-		p1 = p2 + strlen(from);
+	out = xstrdup(in);
+	i = out_size - 1;
+	while (i--) {
+		struct util_dict *d = dicts;
+
+		while (d && d->from) {
+			if (0 == strncmp(&out[i], d->from, strlen(d->from))) {
+				char	*buf, *tmp;
+				size_t	 buf_len;
+
+				buf_len = strlen(&out[i]) + strlen(d->to)
+				    - strlen(d->from);
+				buf = xcalloc(buf_len + 1, sizeof(*buf));
+				snprintf(buf, buf_len + 1, "%s%s",
+				    d->to, &out[i + strlen(d->from)]);
+
+				out_size += buf_len;
+				tmp = xcalloc(out_size, sizeof(*tmp));
+				snprintf(tmp, i + 1, "%s", out);
+				snprintf(tmp + i, out_size - i, "%s", buf);
+				free(buf);
+				free(out);
+				out = tmp;
+
+				break;
+			}
+			d++;
+		}
 	}
-	strlcat(dest, p1, dest_size);
 
-	xfree(to_quoted);
-
-	return (dest);
+	return (out);
 }
 
 #define SHELLQUOTE_INLEN_MAX	8191UL
