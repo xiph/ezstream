@@ -10,3 +10,5 @@ test -z "${1}" && cat metadata.txt 2> /dev/null
 test x"${1}" = "xartist" && cat artist.txt 2> /dev/null
 test x"${1}" = "xtitle" && cat title.txt 2> /dev/null
 test x"${1}" = "xalbum" && cat album.txt 2> /dev/null
+
+exit 0
