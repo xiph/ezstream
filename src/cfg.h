@@ -21,11 +21,11 @@
 #define CFG_SFMT_MP3		"MP3"
 #define CFG_SFMT_THEORA 	"THEORA"
 
-#define PLACEHOLDER_TRACK	"@T@"
 #define PLACEHOLDER_METADATA	"@M@"
 #define PLACEHOLDER_ARTIST	"@a@"
-#define PLACEHOLDER_TITLE	"@t@"
 #define PLACEHOLDER_ALBUM	"@b@"
+#define PLACEHOLDER_TITLE	"@t@"
+#define PLACEHOLDER_TRACK	"@T@"
 #define PLACEHOLDER_STRING	"@s@"
 
 enum cfg_config_type {
