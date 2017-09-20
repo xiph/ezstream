@@ -294,8 +294,7 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 			}
 
 			dup2(fd, fileno(stderr));
-			if (fd > 2)
-				close(fd);
+			close(fd);
 		}
 
 		fflush(NULL);
@@ -316,7 +315,7 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 		if (cfg_get_program_quiet_stderr())
 			dup2(stderr_fd, fileno(stderr));
 
-		if (stderr_fd > 2)
+		if (stderr_fd != -1)
 			close(stderr_fd);
 
 		return (filep);
