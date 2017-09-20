@@ -209,10 +209,6 @@ dnl #######################
 
 AC_CHECK_FUNCS([ \
 	arc4random \
-	basename \
-	pclose \
-	popen \
-	random \
 	srandomdev \
 ])
 
