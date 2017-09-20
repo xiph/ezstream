@@ -19,6 +19,9 @@
 #endif
 
 #include <sys/stat.h>
+#ifdef HAVE_SYS_RANDOM_H
+# include <sys/random.h>
+#endif
 
 #include <errno.h>
 #include <limits.h>
@@ -98,10 +101,14 @@ _playlist_random(void)
 
 #ifdef HAVE_ARC4RANDOM
 	ret = arc4random();
-#elif HAVE_RANDOM
-	ret = (unsigned int)random();
+#elif HAVE_GETRANDOM
+	if (sizeof(ret) != getrandom(&ret, sizeof(ret), 0)) {
+		log_alert("getrandom: %s", strerror(errno));
+		exit(1);
+	}
 #else
-	ret = (unsigned int)rand();
+# warning "using deterministic randomness for shuffling playlists"
+	ret = (unsigned int)random();
 #endif
 
 	return (ret);
@@ -157,15 +164,8 @@ _playlist_run_program(struct playlist *pl)
 int
 playlist_init(void)
 {
-#ifdef HAVE_RANDOM
-# ifdef HAVE_SRANDOMDEV
-	srandomdev();
-# else
 	srandom((unsigned int)time(NULL));
-# endif /* HAVE_SRANDOMDEV */
-#else
-	srand((unsigned int)time(NULL));
-#endif /* HAVE_RANDOM */
+
 	return (0);
 }
 
