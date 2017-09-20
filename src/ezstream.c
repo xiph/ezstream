@@ -94,7 +94,7 @@ _build_reencode_cmd(const char *extension, const char *filename,
 {
 	cfg_decoder_t		 decoder;
 	cfg_encoder_t		 encoder;
-	char			*artist, *album, *title, *songinfo;
+	char			*artist, *album, *title, *songinfo, *tmp;
 	char			*filename_quoted;
 	char			*custom_songinfo;
 	struct util_dict	 dicts[6];
@@ -116,10 +116,21 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		return (NULL);
 	}
 
-	artist = util_shellquote(util_utf82char(mdata_get_artist(md)));
-	album = util_shellquote(util_utf82char(mdata_get_album(md)));
-	title = util_shellquote(util_utf82char(mdata_get_title(md)));
-	songinfo = util_shellquote(util_utf82char(mdata_get_songinfo(md)));
+	tmp = util_utf82char(mdata_get_artist(md));
+	artist = util_shellquote(tmp);
+	xfree(tmp);
+
+	tmp = util_utf82char(mdata_get_album(md));
+	album = util_shellquote(tmp);
+	xfree(tmp);
+
+	tmp = util_utf82char(mdata_get_title(md));
+	title = util_shellquote(tmp);
+	xfree(tmp);
+
+	tmp = util_utf82char(mdata_get_songinfo(md));
+	songinfo = util_shellquote(tmp);
+	xfree(tmp);
 
 	filename_quoted = util_shellquote(filename);
 
