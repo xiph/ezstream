@@ -54,7 +54,6 @@ volatile sig_atomic_t	 quit;
 
 void		sig_handler(int);
 char *		_build_reencode_cmd(const char *, const char *, mdata_t);
-mdata_t 	getMetadata(const char *);
 FILE *		openResource(stream_t, const char *, int *, mdata_t *,
 			     int *, long *);
 int		reconnect(stream_t);
@@ -202,22 +201,6 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	return (cmd_str);
 }
 
-mdata_t
-getMetadata(const char *filename)
-{
-	mdata_t md = mdata_create();
-
-	if (cfg_get_metadata_program()) {
-		if (0 > mdata_run_program(md, filename))
-			mdata_destroy(&md);
-	} else {
-		if (0 > mdata_parse_file(md, filename))
-			mdata_destroy(&md);
-	}
-
-	return (md);
-}
-
 FILE *
 openResource(stream_t stream, const char *filename, int *popenFlag,
 	     mdata_t *md_p, int *isStdin, long *songLen)
@@ -236,12 +219,14 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 	if ((isStdin && *isStdin) ||
 	    strcasecmp(filename, "stdin") == 0) {
 		if (cfg_get_metadata_program()) {
-			if ((md = getMetadata(cfg_get_metadata_program())) == NULL)
-				return (NULL);
-			if (0 > stream_set_metadata(stream, md, NULL)) {
+			md = mdata_create();
+
+			if (0 > mdata_run_program(md, cfg_get_metadata_program()) ||
+			    0 > stream_set_metadata(stream, md, NULL)) {
 				mdata_destroy(&md);
 				return (NULL);
 			}
+
 			if (md_p != NULL)
 				*md_p = md;
 			else
@@ -269,13 +254,16 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 		return (filep);
 	}
 
+	md = mdata_create();
 	if (cfg_get_metadata_program()) {
-		if ((md = getMetadata(cfg_get_metadata_program())) == NULL)
-			return (NULL);
+		if (0 > mdata_run_program(md, cfg_get_metadata_program()))
+			mdata_destroy(&md);
 	} else {
-		if ((md = getMetadata(filename)) == NULL)
-			return (NULL);
+		if (0 > mdata_parse_file(md, filename))
+			mdata_destroy(&md);
 	}
+	if (NULL == md)
+		return (NULL);
 	if (songLen != NULL)
 		*songLen = mdata_get_length(md);
 
@@ -601,15 +589,12 @@ streamFile(stream_t stream, const char *fileName)
 
 					log_info("running metadata program: %s",
 					    cfg_get_metadata_program());
-					if ((prog_md = getMetadata(cfg_get_metadata_program())) == NULL) {
-						retval = 0;
-						ret = STREAM_DONE;
-						continue;
-					}
-					if (0 > stream_set_metadata(stream, prog_md, &mdataStr)) {
-						retval = 0;
-						ret = STREAM_DONE;
+					prog_md = mdata_create();
+					if (0 > mdata_run_program(md, cfg_get_metadata_program()) ||
+					    0 > stream_set_metadata(stream, prog_md, &mdataStr)) {
 						mdata_destroy(&prog_md);
+						retval = 0;
+						ret = STREAM_DONE;
 						continue;
 					}
 					mdata_destroy(&prog_md);
