@@ -5,6 +5,7 @@ TESTS		 = \
 	check_cfg_xmlfile \
 	check_cmdline \
 	check_log \
+	check_mdata \
 	check_playlist \
 	check_stream \
 	check_xalloc
@@ -29,6 +30,11 @@ check_log_SOURCES = \
 	check_log.c
 check_log_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_log_LDADD	 = $(check_log_DEPENDENCIES) @CHECK_LIBS@
+
+check_mdata_SOURCES = \
+	check_mdata.c
+check_mdata_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_mdata_LDADD = $(check_mdata_DEPENDENCIES) @CHECK_LIBS@
 
 check_playlist_SOURCES = \
 	check_playlist.c
@@ -65,6 +71,31 @@ EXTRA_DIST	 = \
 	play-bad3.sh \
 	playlist-bad.txt \
 	playlist-bad2.txt \
-	playlist.txt
+	playlist.txt \
+	null.raw \
+	test01-artist+album+title.ogg \
+	test02-whitespace.ogg \
+	test03-apostrophe.ogg \
+	test04-backticks.ogg \
+	test05-spawnshell.ogg \
+	test06-shellvar.ogg \
+	test07-japanese.ogg \
+	test08-arabic.ogg \
+	test09-apostrophe+spawnshell.ogg \
+	test10-apostrophe+backticks.ogg \
+	test11-artist+album.ogg \
+	test12-artist.ogg \
+	test13-album+title.ogg \
+	test14-album.ogg \
+	test15-title.ogg \
+	test16-nometa.ogg \
+	.test17ogg \
+	test18-emptymeta.ogg \
+	test19-onlywhitespace.ogg \
+	test-meta01.sh \
+	test-meta02-error.sh \
+	test-meta03-huge.sh \
+	test-meta04-kill.sh \
+	test-meta05-empty.sh
 
 CLEANFILES	 = *~ *.core core *.gcno *.gcda

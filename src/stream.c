@@ -21,6 +21,7 @@
 #include <sys/queue.h>
 
 #include <errno.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
@@ -29,7 +30,7 @@
 
 #include "cfg.h"
 #include "log.h"
-#include "metadata.h"
+#include "mdata.h"
 #include "stream.h"
 #include "util.h"
 #include "xalloc.h"
@@ -331,12 +332,10 @@ stream_setup(struct stream *s)
 }
 
 int
-stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
+stream_set_metadata(struct stream *s, mdata_t md, char **md_str)
 {
 	shout_metadata_t	*shout_md = NULL;
-	char			*songInfo;
-	const char		*artist, *title;
-	int			 ret = SHOUTERR_SUCCESS;
+	int			 ret;
 
 	if (cfg_get_metadata_no_updates())
 		return (0);
@@ -348,9 +347,6 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 		log_syserr(ALERT, ENOMEM, "shout_metadata_new");
 		exit(1);
 	}
-
-	artist = metadata_get_artist(md);
-	title = metadata_get_title(md);
 
 	/*
 	 * We can do this, because we know how libshout works. This adds
@@ -364,33 +360,49 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 		exit(1);
 	}
 
-	songInfo = metadata_format_string(md, cfg_get_metadata_format_str());
-	if (songInfo == NULL) {
-		if (artist[0] == '\0' && title[0] == '\0')
-			songInfo = xstrdup(metadata_get_string(md));
-		else
-			songInfo = metadata_assemble_string(md);
-		if (artist[0] != '\0' && title[0] != '\0') {
-			if (shout_metadata_add(shout_md, "artist", artist) != SHOUTERR_SUCCESS) {
-				log_syserr(ALERT, ENOMEM,
-				    "shout_metadata_add");
-				exit(1);
-			}
-			if (shout_metadata_add(shout_md, "title", title) != SHOUTERR_SUCCESS) {
-				log_syserr(ALERT, ENOMEM,
-				    "shout_metadata_add");
-				exit(1);
-			}
-		} else {
-			if (shout_metadata_add(shout_md, "song", songInfo) != SHOUTERR_SUCCESS) {
-				log_syserr(ALERT, ENOMEM,
-				    "shout_metadata_add");
-				exit(1);
-			}
+	if (cfg_get_metadata_format_str()) {
+		char	buf[BUFSIZ];
+
+		mdata_strformat(md, buf, sizeof(buf),
+		    cfg_get_metadata_format_str());
+		if (SHOUTERR_SUCCESS !=
+		    shout_metadata_add(shout_md, "song", buf)) {
+			log_syserr(ALERT, ENOMEM, "shout_metadata_add");
+			exit(1);
 		}
-	} else if (shout_metadata_add(shout_md, "song", songInfo) != SHOUTERR_SUCCESS) {
-		log_syserr(ALERT, ENOMEM, "shout_metadata_add");
-		exit(1);
+		log_info("stream metadata: formatted: %s", buf);
+	} else {
+		if (mdata_get_artist(md) && mdata_get_title(md)) {
+			if (SHOUTERR_SUCCESS != shout_metadata_add(shout_md,
+				"artist", mdata_get_artist(md)) ||
+			    SHOUTERR_SUCCESS != shout_metadata_add(shout_md,
+				"title", mdata_get_title(md))) {
+				log_syserr(ALERT, ENOMEM,
+				    "shout_metadata_add");
+				exit(1);
+			}
+			log_info("stream metadata: artist=\"%s\" title=\"%s\"",
+			    mdata_get_artist(md),
+			    mdata_get_title(md));
+		} else if (mdata_get_songinfo(md)) {
+			if (SHOUTERR_SUCCESS != shout_metadata_add(shout_md,
+			        "song", mdata_get_songinfo(md))) {
+				log_syserr(ALERT, ENOMEM,
+				    "shout_metadata_add");
+				exit(1);
+			}
+			log_info("stream metadata: songinfo: %s",
+			    mdata_get_songinfo(md));
+		} else {
+			if (SHOUTERR_SUCCESS != shout_metadata_add(shout_md,
+			        "song", mdata_get_name(md))) {
+				log_syserr(ALERT, ENOMEM,
+				    "shout_metadata_add");
+				exit(1);
+			}
+			log_info("stream metadata: name: %s",
+			    mdata_get_name(md));
+		}
 	}
 
 	if ((ret = shout_set_metadata(s->shout, shout_md)) != SHOUTERR_SUCCESS)
@@ -400,10 +412,11 @@ stream_set_metadata(struct stream *s, metadata_t md, char **md_str)
 
 	if (ret == SHOUTERR_SUCCESS) {
 		if (md_str != NULL && *md_str == NULL)
-			*md_str = xstrdup(songInfo);
+			*md_str = mdata_get_songinfo(md) ?
+			    xstrdup(mdata_get_songinfo(md)) :
+			    xstrdup(mdata_get_name(md));
 	}
 
-	xfree(songInfo);
 	return (ret == SHOUTERR_SUCCESS ? 0 : -1);
 }
 

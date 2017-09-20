@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015 Moritz Grimm <mgrimm@mrsserver.net>
+ * Copyright (c) 2017 Moritz Grimm <mgrimm@mrsserver.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
@@ -14,29 +14,36 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __STREAM_H__
-#define __STREAM_H__
+#ifndef __MDATA_H__
+#define __MDATA_H__
 
-#include <shout/shout.h>
+typedef struct mdata * mdata_t;
 
-#include "mdata.h"
+mdata_t mdata_create(void);
+void	mdata_destroy(mdata_t *);
 
-#define STREAM_DEFAULT	"default"
+void	mdata_set_normalize_strings(mdata_t, int);
 
-typedef struct stream *	stream_t;
+int	mdata_parse_file(mdata_t, const char *);
+int	mdata_run_program(mdata_t, const char *);
 
-int	stream_init(void);
-void	stream_exit(void);
+int	mdata_refresh(mdata_t);
 
-stream_t
-	stream_get(const char *);
-int	stream_setup(stream_t);
-int	stream_set_metadata(stream_t, mdata_t, char **);
-int	stream_get_connected(stream_t);
+const char *
+	mdata_get_filename(mdata_t);
+const char *
+	mdata_get_name(mdata_t);
+const char *
+	mdata_get_artist(mdata_t);
+const char *
+	mdata_get_album(mdata_t);
+const char *
+	mdata_get_title(mdata_t);
+const char *
+	mdata_get_songinfo(mdata_t);
 
-int	stream_connect(stream_t);
-void	stream_disconnect(stream_t);
-void	stream_sync(stream_t);
-int	stream_send(stream_t, const char *, size_t);
+int	mdata_get_length(mdata_t);
 
-#endif /* __STREAM_H__ */
+int	mdata_strformat(mdata_t, char *, size_t, const char *);
+
+#endif /* __MDATA_H__ */

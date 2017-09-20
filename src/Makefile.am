@@ -11,7 +11,7 @@ noinst_HEADERS	 = \
 	cmdline.h \
 	ezstream.h \
 	log.h \
-	metadata.h \
+	mdata.h \
 	playlist.h \
 	stream.h \
 	util.h \
@@ -23,7 +23,7 @@ libezstream_la_SOURCES = \
 	cfg_xmlfile.c \
 	cmdline.c \
 	log.c \
-	metadata.c \
+	mdata.c \
 	playlist.c \
 	stream.c \
 	util.c \

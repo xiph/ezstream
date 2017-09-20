@@ -26,7 +26,7 @@
 #include "cfg.h"
 #include "cmdline.h"
 #include "log.h"
-#include "metadata.h"
+#include "mdata.h"
 #include "playlist.h"
 #include "stream.h"
 #include "util.h"
@@ -53,9 +53,9 @@ volatile sig_atomic_t	 queryMetadata;
 volatile sig_atomic_t	 quit;
 
 void		sig_handler(int);
-char *		_build_reencode_cmd(const char *, const char *, metadata_t);
-metadata_t	getMetadata(const char *);
-FILE *		openResource(stream_t, const char *, int *, metadata_t *,
+char *		_build_reencode_cmd(const char *, const char *, mdata_t);
+mdata_t 	getMetadata(const char *);
+FILE *		openResource(stream_t, const char *, int *, mdata_t *,
 			     int *, long *);
 int		reconnect(stream_t);
 const char *	getTimeString(long);
@@ -89,12 +89,12 @@ sig_handler(int sig)
 }
 
 char *
-_build_reencode_cmd(const char *extension, const char *fileName,
-    metadata_t mdata)
+_build_reencode_cmd(const char *extension, const char *filename,
+    mdata_t md)
 {
 	cfg_decoder_t		 decoder;
 	cfg_encoder_t		 encoder;
-	char			*artist, *album, *title, *songinfo, *tmp;
+	char			*artist, *album, *title, *songinfo;
 	char			*filename_quoted;
 	char			*custom_songinfo;
 	struct util_dict	 dicts[6];
@@ -106,7 +106,7 @@ _build_reencode_cmd(const char *extension, const char *fileName,
 	decoder = cfg_decoder_find(extension);
 	if (!decoder) {
 		log_error("cannot decode: %s: unsupported file extension %s",
-		    fileName, extension);
+		    filename, extension);
 		return (NULL);
 	}
 	encoder = cfg_encoder_get(cfg_get_stream_encoder());
@@ -116,23 +116,12 @@ _build_reencode_cmd(const char *extension, const char *fileName,
 		return (NULL);
 	}
 
-	tmp = util_utf82char(metadata_get_artist(mdata));
-	artist = util_shellquote(tmp);
-	xfree(tmp);
+	artist = util_shellquote(util_utf82char(mdata_get_artist(md)));
+	album = util_shellquote(util_utf82char(mdata_get_album(md)));
+	title = util_shellquote(util_utf82char(mdata_get_title(md)));
+	songinfo = util_shellquote(util_utf82char(mdata_get_songinfo(md)));
 
-	tmp = util_utf82char(metadata_get_album(mdata));
-	album = util_shellquote(tmp);
-	xfree(tmp);
-
-	tmp = util_utf82char(metadata_get_title(mdata));
-	title = util_shellquote(tmp);
-	xfree(tmp);
-
-	tmp = util_utf82char(metadata_get_string(mdata));
-	songinfo = util_shellquote(tmp);
-	xfree(tmp);
-
-	filename_quoted = util_shellquote(fileName);
+	filename_quoted = util_shellquote(filename);
 
 	/*
 	 * if (prog && format)
@@ -145,12 +134,12 @@ _build_reencode_cmd(const char *extension, const char *fileName,
 	 */
 	if (cfg_get_metadata_program() &&
 	    cfg_get_metadata_format_str()) {
-		char	*utf8, *unquoted;
+		char	 buf[BUFSIZ];
+		char	*unquoted;
 
-		utf8 = metadata_format_string(mdata,
+		mdata_strformat(md, buf, sizeof(buf),
 		    cfg_get_metadata_format_str());
-		unquoted = util_utf82char(utf8);
-		xfree(utf8);
+		unquoted = util_utf82char(buf);
 		custom_songinfo = util_shellquote(unquoted);
 		xfree(unquoted);
 	} else {
@@ -202,62 +191,50 @@ _build_reencode_cmd(const char *extension, const char *fileName,
 	return (cmd_str);
 }
 
-metadata_t
-getMetadata(const char *fileName)
+mdata_t
+getMetadata(const char *filename)
 {
-	metadata_t	mdata;
+	mdata_t md = mdata_create();
 
 	if (cfg_get_metadata_program()) {
-		if (NULL == (mdata = metadata_program(fileName,
-		    cfg_get_metadata_normalize_strings())))
-			return (NULL);
-
-		if (!metadata_program_update(mdata, METADATA_ALL)) {
-			metadata_free(&mdata);
-			return (NULL);
-		}
+		if (0 > mdata_run_program(md, filename))
+			mdata_destroy(&md);
 	} else {
-		if (NULL == (mdata = metadata_file(fileName,
-		    cfg_get_metadata_normalize_strings())))
-			return (NULL);
-
-		if (!metadata_file_update(mdata)) {
-			metadata_free(&mdata);
-			return (NULL);
-		}
+		if (0 > mdata_parse_file(md, filename))
+			mdata_destroy(&md);
 	}
 
-	return (mdata);
+	return (md);
 }
 
 FILE *
-openResource(stream_t stream, const char *fileName, int *popenFlag,
-	     metadata_t *mdata_p, int *isStdin, long *songLen)
+openResource(stream_t stream, const char *filename, int *popenFlag,
+	     mdata_t *md_p, int *isStdin, long *songLen)
 {
 	FILE		*filep = NULL;
 	char		 extension[25];
 	char		*p = NULL;
 	char		*pCommandString = NULL;
-	metadata_t	 mdata;
+	mdata_t 	 md;
 
-	if (mdata_p != NULL)
-		*mdata_p = NULL;
+	if (md_p != NULL)
+		*md_p = NULL;
 	if (songLen != NULL)
 		*songLen = 0;
 
 	if ((isStdin && *isStdin) ||
-	    strcasecmp(fileName, "stdin") == 0) {
+	    strcasecmp(filename, "stdin") == 0) {
 		if (cfg_get_metadata_program()) {
-			if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
+			if ((md = getMetadata(cfg_get_metadata_program())) == NULL)
 				return (NULL);
-			if (0 > stream_set_metadata(stream, mdata, NULL)) {
-				metadata_free(&mdata);
+			if (0 > stream_set_metadata(stream, md, NULL)) {
+				mdata_destroy(&md);
 				return (NULL);
 			}
-			if (mdata_p != NULL)
-				*mdata_p = mdata;
+			if (md_p != NULL)
+				*md_p = md;
 			else
-				metadata_free(&mdata);
+				mdata_destroy(&md);
 		}
 
 		if (isStdin != NULL)
@@ -270,37 +247,37 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 		*isStdin = 0;
 
 	extension[0] = '\0';
-	p = strrchr(fileName, '.');
+	p = strrchr(filename, '.');
 	if (p != NULL)
 		strlcpy(extension, p, sizeof(extension));
 	for (p = extension; *p != '\0'; p++)
 		*p = (char)tolower((int)*p);
 
 	if (strlen(extension) == 0) {
-		log_error("%s: cannot determine file type", fileName);
+		log_error("%s: cannot determine file type", filename);
 		return (filep);
 	}
 
 	if (cfg_get_metadata_program()) {
-		if ((mdata = getMetadata(cfg_get_metadata_program())) == NULL)
+		if ((md = getMetadata(cfg_get_metadata_program())) == NULL)
 			return (NULL);
 	} else {
-		if ((mdata = getMetadata(fileName)) == NULL)
+		if ((md = getMetadata(filename)) == NULL)
 			return (NULL);
 	}
 	if (songLen != NULL)
-		*songLen = metadata_get_length(mdata);
+		*songLen = mdata_get_length(md);
 
 	*popenFlag = 0;
 	if (cfg_get_stream_encoder()) {
 		int	stderr_fd = -1;
 
-		pCommandString = _build_reencode_cmd(extension, fileName,
-		    mdata);
-		if (mdata_p != NULL)
-			*mdata_p = mdata;
+		pCommandString = _build_reencode_cmd(extension, filename,
+		    md);
+		if (md_p != NULL)
+			*md_p = md;
 		else
-			metadata_free(&mdata);
+			mdata_destroy(&md);
 		log_info("running command: %s", pCommandString);
 
 		if (cfg_get_program_quiet_stderr()) {
@@ -346,13 +323,13 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 		return (filep);
 	}
 
-	if (mdata_p != NULL)
-		*mdata_p = mdata;
+	if (md_p != NULL)
+		*md_p = md;
 	else
-		metadata_free(&mdata);
+		mdata_destroy(&md);
 
-	if ((filep = fopen(fileName, "rb")) == NULL) {
-		log_error("%s: %s", fileName, strerror(errno));
+	if ((filep = fopen(filename, "rb")) == NULL) {
+		log_error("%s: %s", filename, strerror(errno));
 		return (NULL);
 	}
 
@@ -544,11 +521,12 @@ streamFile(stream_t stream, const char *fileName)
 	int		 isStdin = cfg_get_media_type() == CFG_MEDIA_STDIN;
 	int		 ret, retval = 0;
 	long		 songLen;
-	metadata_t	 mdata;
+	mdata_t 	 md = NULL;
 	struct timespec	 startTime;
 
-	if ((filepstream = openResource(stream, fileName, &popenFlag, &mdata, &isStdin, &songLen))
+	if ((filepstream = openResource(stream, fileName, &popenFlag, &md, &isStdin, &songLen))
 	    == NULL) {
+		mdata_destroy(&md);
 		if (++resource_errors > 100) {
 			log_error("too many errors; giving up");
 			return (0);
@@ -558,22 +536,22 @@ streamFile(stream_t stream, const char *fileName)
 	}
 	resource_errors = 0;
 
-	if (mdata != NULL) {
-		char	*tmp, *metaData;
+	if (md != NULL) {
+		const char	*tmp;
+		char		*metaData;
 
-		tmp = metadata_assemble_string(mdata);
-		if ((metaData = util_utf82char(tmp)) == NULL)
-			metaData = xstrdup("(unknown title)");
-		xfree(tmp);
+		tmp = mdata_get_songinfo(md) ?
+		    mdata_get_songinfo(md) : mdata_get_name(md);
+		metaData = util_utf82char(tmp);
 		log_notice("streaming: %s (%s)", metaData,
 		    isStdin ? "stdin" : fileName);
 		xfree(metaData);
 
 		/* MP3 streams are special, so set the metadata explicitly: */
 		if (CFG_STREAM_MP3 == cfg_get_stream_format())
-			stream_set_metadata(stream, mdata, NULL);
+			stream_set_metadata(stream, md, NULL);
 
-		metadata_free(&mdata);
+		mdata_destroy(&md);
 	} else if (isStdin)
 		log_notice("streaming: standard input");
 
@@ -608,22 +586,22 @@ streamFile(stream_t stream, const char *fileName)
 					continue;
 				if (cfg_get_metadata_program()) {
 					char		*mdataStr = NULL;
-					metadata_t	 prog_mdata;
+					mdata_t 	 prog_md;
 
 					log_info("running metadata program: %s",
 					    cfg_get_metadata_program());
-					if ((prog_mdata = getMetadata(cfg_get_metadata_program())) == NULL) {
+					if ((prog_md = getMetadata(cfg_get_metadata_program())) == NULL) {
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
 					}
-					if (0 > stream_set_metadata(stream, prog_mdata, &mdataStr)) {
+					if (0 > stream_set_metadata(stream, prog_md, &mdataStr)) {
 						retval = 0;
 						ret = STREAM_DONE;
-						metadata_free(&prog_mdata);
+						mdata_destroy(&prog_md);
 						continue;
 					}
-					metadata_free(&prog_mdata);
+					mdata_destroy(&prog_md);
 					log_info("new metadata: %s", mdataStr);
 					xfree(mdataStr);
 				}
