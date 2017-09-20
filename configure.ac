@@ -151,51 +151,14 @@ AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [${TAGLIB_CPPFLAGS}])
 AX_UNIQVAR_APPEND([EZ_LDFLAGS], [${TAGLIB_LDFLAGS}])
 AX_UNIQVAR_PREPEND([EZ_LIBS], [${TAGLIB_C_LIBS}])
 
-# Not using AM_ICONV to check for iconv(), with or without libiconv(),
-# is not a viable option. Something in the past went horribly wrong;
-# the whole topic is extremely complex and not worth rewriting.
-# Instead, work around the buggy no-op that is --with-libiconv-prefix,
-# and at least try to find it in --prefix. Thankfully, it is and will
-# remain optional in ezstream.
-
-INCICONV=""
-LDICONV=""
-LIBICONV=""
-LTLIBICONV=""
 EZ_LIBICONV=""
 AM_ICONV
-if test x"${am_cv_func_iconv}" != "xyes"; then
-	unset am_cv_func_iconv
-	unset am_cv_lib_iconv
-	if test x"${prefix}" = "xNONE"; then
-		libiconv_prefix="/usr/local"
-	else
-		libiconv_prefix="${prefix}"
-	fi
-	AC_MSG_NOTICE([Looking for libiconv in ${libiconv_prefix} ...])
-	libiconv_save_CPPFLAGS="${CPPFLAGS}"
-	libiconv_save_LDFLAGS="${LDFLAGS}"
-	libiconv_save_LIBS="${LIBS}"
-	CPPFLAGS="${CPPFLAGS} -I${libiconv_prefix}/include"
-	LDFLAGS="${LDFLAGS} -L${libiconv_prefix}/lib"
-	LIBS="-liconv"
-	AM_ICONV
-	if test x"${am_cv_func_iconv}" = "xyes"; then
-		INCICONV="-I${libiconv_prefix}/include"
-		LDICONV="-L${libiconv_prefix}/lib"
-		LIBICONV="-liconv"
-	fi
-	CPPFLAGS="${libiconv_save_CPPFLAGS}"
-	LDFLAGS="${libiconv_save_LDFLAGS}"
-	LIBS="${libiconv_save_LIBS}"
-fi
 if test -n "${LTLIBICONV}"; then
 	EZ_LIBICONV="${LTLIBICONV}"
 else
 	EZ_LIBICONV="${LIBICONV}"
 fi
 AX_UNIQVAR_APPEND([EZ_CPPFLAGS], [$INCICONV])
-AX_UNIQVAR_APPEND([EZ_LDFLAGS], [$LDICONV])
 AX_UNIQVAR_PREPEND([EZ_LIBS], [$EZ_LIBICONV])
 use_iconv="No"
 if test x"${am_cv_func_iconv}" = "xyes"; then
