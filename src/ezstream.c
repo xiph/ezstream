@@ -307,6 +307,10 @@ openResource(stream_t stream, const char *fileName, int *popenFlag,
 			int fd;
 
 			stderr_fd = dup(fileno(stderr));
+			if (0 > stderr_fd) {
+				log_alert("dup: %s", strerror(errno));
+				exit(1);
+			}
 			if ((fd = open(_PATH_DEVNULL, O_RDWR, 0)) == -1) {
 				log_alert("%s: %s", _PATH_DEVNULL,
 				    strerror(errno));
