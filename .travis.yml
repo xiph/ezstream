@@ -5,7 +5,6 @@ env:
     - secure: "G6H+Z07yB+YsW3leWwhjIwfFB2A0RxG3Lv/kyQFacm88qQ5KlWct/Z3KRgRXVZtMSpi0guJ9Y3mVddBi9ytTgkygRca6eEITYjfb76aiPrj+ng7Zh31OYOw6p4UESF87Mxc6GYgbhJjRcnytoVxibSH1BIY1WNxgoOVIZQhxhTY="
 
 compiler:
-  - clang
   - gcc
 
 dist: trusty
