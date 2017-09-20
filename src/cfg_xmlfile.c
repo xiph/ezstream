@@ -36,8 +36,8 @@ static int	_cfg_xmlfile_parse_decoders(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_encoder(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_encoders(xmlDocPtr, xmlNodePtr);
 
-#define XML_CHAR(s)		(const xmlChar *)(s)
-#define STD_CHAR(s)		(const char *)(s)
+#define XML_CHAR(s)	(const xmlChar *)(s)
+#define STD_CHAR(s)	(const char *)(s)
 
 #define XML_STRCONFIG(s, f, e)	do {					\
 	if (0 == xmlStrcasecmp(cur->name, XML_CHAR((e)))) {		\
@@ -51,7 +51,6 @@ static int	_cfg_xmlfile_parse_encoders(xmlDocPtr, xmlNodePtr);
 			error = 1;					\
 		}							\
 		xmlFree(val);						\
-		continue;						\
 	}								\
 } while (0)
 
