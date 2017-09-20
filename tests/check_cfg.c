@@ -252,6 +252,7 @@ START_TEST(test_server_protocol)
 
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_server_protocol("invalid", &errstr2), -1);
+	ck_assert_ptr_ne(errstr2, NULL);
 	ck_assert_str_eq(errstr2, "unsupported");
 
 	ck_assert_int_eq(cfg_set_server_protocol("hTtP", NULL), 0);
@@ -500,27 +501,32 @@ START_TEST(test_metadata_format_str)
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_metadata_format_str(PLACEHOLDER_METADATA,
 	    &errstr2), -1);
+	ck_assert_ptr_ne(errstr2, NULL);
 	ck_assert_str_eq(errstr2,
 	    "prohibited placeholder " PLACEHOLDER_METADATA);
 
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_metadata_format_str(
 	    PLACEHOLDER_TRACK PLACEHOLDER_TRACK, &errstr2), -1);
+	ck_assert_ptr_ne(errstr2, NULL);
 	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_TRACK);
 
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_metadata_format_str(
 	    PLACEHOLDER_STRING PLACEHOLDER_STRING, &errstr2), -1);
+	ck_assert_ptr_ne(errstr2, NULL);
 	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_STRING);
 
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_metadata_format_str(
 	    PLACEHOLDER_ARTIST PLACEHOLDER_ARTIST, &errstr2), -1);
+	ck_assert_ptr_ne(errstr2, NULL);
 	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_ARTIST);
 
 	errstr2 = NULL;
 	ck_assert_int_eq(cfg_set_metadata_format_str(
 	    PLACEHOLDER_TITLE PLACEHOLDER_TITLE, &errstr2), -1);
+	ck_assert_ptr_ne(errstr2, NULL);
 	ck_assert_str_eq(errstr2, "duplicate placeholder " PLACEHOLDER_TITLE);
 }
 END_TEST
