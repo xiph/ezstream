@@ -162,7 +162,6 @@ _cfg_xmlfile_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
 		xmlFree(val);						\
 		if (error)						\
 			return (-1);					\
-		continue;						\
 	}								\
 } while (0)
 
@@ -219,7 +218,6 @@ _cfg_xmlfile_parse_decoders(xmlDocPtr doc, xmlNodePtr cur)
 		xmlFree(val);						\
 		if (error)						\
 			return (-1);					\
-		continue;						\
 	}								\
 } while (0)
 
