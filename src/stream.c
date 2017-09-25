@@ -289,11 +289,6 @@ stream_get(const char *name)
 {
 	struct stream	*e;
 
-	if (!name || !name[0]) {
-		log_alert("stream_get: empty name");
-		exit(1);
-	}
-
 	TAILQ_FOREACH(e, &streams, entry) {
 		if (0 == strcasecmp(e->name, name))
 			return (e);
