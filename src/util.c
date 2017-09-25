@@ -168,7 +168,7 @@ util_write_pid_file(const char *path)
 	pid = getpid();
 	if (0 >= fprintf(pidfile_file, "%ld\n", (long)pid) ||
 	    0 > fflush(pidfile_file) ||
-	    0 > flock(fileno(pidfile_file), LOCK_EX))
+	    0 > flock(fileno(pidfile_file), LOCK_EX | LOCK_NB))
 		goto error;
 
 	if (0 == pidfile_numlocks) {
