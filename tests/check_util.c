@@ -25,9 +25,7 @@ START_TEST(test_util_write_pid_file)
 	ck_assert_int_eq(fclose(pidfile_2), 0);
 
 	unlink(BUILDDIR "/check_util-write_pid_file.pid");
-	ck_assert_int_ne(access(BUILDDIR "/check_util-write_pid_file.pid", F_OK), 0);
 	ck_assert_int_eq(util_write_pid_file(BUILDDIR "/check_util-write_pid_file.pid"), 0);
-	ck_assert_int_eq(access(BUILDDIR "/check_util-write_pid_file.pid", F_OK), 0);
 	ck_assert_int_eq(util_write_pid_file(BUILDDIR "/check_util-write_pid_file.pid"), 0);
 	ck_assert_int_eq(unlink(BUILDDIR "/check_util-write_pid_file.pid"), 0);
 	ck_assert_int_ne(access(BUILDDIR "/check_util-write_pid_file.pid", F_OK), 0);
