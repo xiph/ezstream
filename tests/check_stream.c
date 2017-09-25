@@ -68,15 +68,18 @@ START_TEST(test_stream)
 	ck_assert_int_ne(stream_set_metadata(s1, NULL, NULL), 0);
 
 	m_str = NULL;
-
 	ck_assert_int_ne(stream_set_metadata(s1, m, &m_str), 0);
+	ck_assert_ptr_eq(m_str, NULL);
 	ck_assert_int_eq(mdata_parse_file(m, SRCDIR "/test15-title.ogg"), 0);
 	ck_assert_int_ne(stream_set_metadata(s1, m, &m_str), 0);
+	ck_assert_ptr_eq(m_str, NULL);
 	ck_assert_int_eq(mdata_parse_file(m, SRCDIR "/test16-nometa.ogg"), 0);
 	ck_assert_int_ne(stream_set_metadata(s1, m, &m_str), 0);
+	ck_assert_ptr_eq(m_str, NULL);
 	cfg_set_metadata_format_str("test", NULL);
 	ck_assert_int_eq(mdata_parse_file(m, SRCDIR "/test01-artist+album+title.ogg"), 0);
 	ck_assert_int_ne(stream_set_metadata(s1, m, &m_str), 0);
+	ck_assert_ptr_eq(m_str, NULL);
 
 	mdata_destroy(&m);
 }
