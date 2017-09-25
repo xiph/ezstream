@@ -8,6 +8,7 @@ TESTS		 = \
 	check_mdata \
 	check_playlist \
 	check_stream \
+	check_util \
 	check_xalloc
 check_PROGRAMS	 = $(TESTS)
 
@@ -46,6 +47,11 @@ check_stream_SOURCES = \
 check_stream_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_stream_LDADD = $(check_stream_DEPENDENCIES) @CHECK_LIBS@
 
+check_util_SOURCES = \
+	check_util.c
+check_util_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_util_LDADD = $(check_util_DEPENDENCIES) @CHECK_LIBS@
+
 check_xalloc_SOURCES = \
 	check_xalloc.c
 check_xalloc_DEPENDENCIES = $(top_builddir)/src/libezstream.la
@@ -57,6 +63,7 @@ AM_CPPFLAGS	 = @EZ_CPPFLAGS@ \
 	-I$(top_builddir)/src
 AM_CFLAGS	 = @EZ_CFLAGS@ @CHECK_CFLAGS@ \
 	-DSRCDIR="\"$(srcdir)\"" \
+	-DBUILDDIR="\"$(builddir)\"" \
 	-DEXAMPLESDIR="\"$(top_srcdir)/examples\""
 AM_LDFLAGS	 = @EZ_LDFLAGS@
 
