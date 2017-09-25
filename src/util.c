@@ -160,7 +160,6 @@ util_write_pid_file(const char *path)
 	if (NULL != pidfile_file)
 		fclose(pidfile_file);
 	if (NULL == (pidfile_file = fopen(pidfile_path, "w"))) {
-		save_errno = errno;
 		xfree(pidfile_path);
 		pidfile_path = NULL;
 		return (-1);
