@@ -200,9 +200,9 @@ util_strrcmp(const char *s, const char *sub)
 	size_t	sublen = strlen(sub);
 
 	if (sublen > slen)
-		return (1);
+		return (!0);
 
-	return (memcmp(s + slen - sublen, sub, sublen));
+	return (!!memcmp(s + slen - sublen, sub, sublen));
 }
 
 int
