@@ -116,22 +116,22 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	}
 
 	tmp = util_utf82char(mdata_get_artist(md));
-	artist = util_shellquote(tmp);
+	artist = util_shellquote(tmp, 0);
 	xfree(tmp);
 
 	tmp = util_utf82char(mdata_get_album(md));
-	album = util_shellquote(tmp);
+	album = util_shellquote(tmp, 0);
 	xfree(tmp);
 
 	tmp = util_utf82char(mdata_get_title(md));
-	title = util_shellquote(tmp);
+	title = util_shellquote(tmp, 0);
 	xfree(tmp);
 
 	tmp = util_utf82char(mdata_get_songinfo(md));
-	songinfo = util_shellquote(tmp);
+	songinfo = util_shellquote(tmp, 0);
 	xfree(tmp);
 
-	filename_quoted = util_shellquote(filename);
+	filename_quoted = util_shellquote(filename, 0);
 
 	/*
 	 * if (prog && format)
@@ -150,7 +150,7 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		mdata_strformat(md, buf, sizeof(buf),
 		    cfg_get_metadata_format_str());
 		unquoted = util_utf82char(buf);
-		custom_songinfo = util_shellquote(unquoted);
+		custom_songinfo = util_shellquote(unquoted, 0);
 		xfree(unquoted);
 	} else {
 		if (!cfg_get_metadata_program() &&

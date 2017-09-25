@@ -27,7 +27,7 @@ int	util_strrcasecmp(const char *, const char *);
 char *	util_char2utf8(const char *);
 char *	util_utf82char(const char *);
 char *	util_expand_words(const char *, struct util_dict[]);
-char *	util_shellquote(const char *);
+char *	util_shellquote(const char *, size_t);
 int	util_urlparse(const char *, char **, unsigned short *, char **);
 
 #endif /* __UTIL_H__ */

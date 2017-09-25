@@ -295,19 +295,20 @@ util_expand_words(const char *in, struct util_dict dicts[])
 	return (out);
 }
 
-#define SHELLQUOTE_INLEN_MAX	8191UL
+#define SHELLQUOTE_OUTLEN_MAX	8191UL
 
 char *
-util_shellquote(const char *in)
+util_shellquote(const char *in, size_t outlen_max)
 {
 	char		*out, *out_p;
-	size_t		 out_len;
+	ssize_t 	 out_len;
+	size_t		 out_siz;
 	const char	*in_p;
 
-	out_len = (strlen(in) > SHELLQUOTE_INLEN_MAX)
-	    ? SHELLQUOTE_INLEN_MAX
-	    : strlen(in);
-	out_len = out_len * 2 + 2;
+	if (!outlen_max || outlen_max > SHELLQUOTE_OUTLEN_MAX)
+		outlen_max = SHELLQUOTE_OUTLEN_MAX;
+	out_len = outlen_max;
+
 	out = xcalloc(out_len + 1, sizeof(char));
 
 	out_p = out;
@@ -315,16 +316,24 @@ util_shellquote(const char *in)
 
 	*out_p++ = '\'';
 	out_len--;
-	while (*in_p && out_len > 2) {
+	while (*in_p && 1 < out_len) {
+		int	stop = 0;
+
 		switch (*in_p) {
 		case '\'':
-		case '\\':
-			*out_p++ = '\\';
-			out_len--;
+			if (out_len > 4) {
+				*out_p++ = '\'';
+				*out_p++ = '\\';
+				*out_p++ = '\'';
+				out_len -= 3;
+			} else
+				stop = 1;
 			break;
 		default:
 			break;
 		}
+		if (stop)
+			break;
 		*out_p++ = *in_p++;
 		out_len--;
 	}
