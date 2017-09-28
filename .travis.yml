@@ -23,7 +23,7 @@ addons:
     notification_email: mgrimm@mrsserver.net
     build_command_prepend: "./autogen.sh && ./configure"
     build_command: "make check"
-    branch_pattern: develop
+    branch_pattern: coverity_scan
 
 script:
   - ./autogen.sh
