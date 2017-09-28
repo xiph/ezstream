@@ -301,8 +301,7 @@ char *
 util_shellquote(const char *in, size_t outlen_max)
 {
 	char		*out, *out_p;
-	ssize_t 	 out_len;
-	size_t		 out_siz;
+	size_t		 out_len;
 	const char	*in_p;
 
 	if (!outlen_max || outlen_max > SHELLQUOTE_OUTLEN_MAX)
@@ -321,7 +320,7 @@ util_shellquote(const char *in, size_t outlen_max)
 
 		switch (*in_p) {
 		case '\'':
-			if (out_len > 4) {
+			if (4 < out_len) {
 				*out_p++ = '\'';
 				*out_p++ = '\\';
 				*out_p++ = '\'';
@@ -338,6 +337,7 @@ util_shellquote(const char *in, size_t outlen_max)
 		out_len--;
 	}
 	*out_p++ = '\'';
+	out_len--;
 
 	return (out);
 }
