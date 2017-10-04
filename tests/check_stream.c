@@ -57,7 +57,7 @@ START_TEST(test_stream)
 	cfg_set_stream_server_public("test", NULL);
 	ck_assert_int_eq(stream_setup(s1), 0);
 
-	ck_assert_int_eq(stream_get_connected(s1), NULL);
+	ck_assert_int_eq(stream_get_connected(s1), 0);
 
 	m = mdata_create();
 
