@@ -150,7 +150,7 @@ START_TEST(test_mdata_strformat)
 	ck_assert_int_lt(mdata_strformat(md, buf, sizeof(buf), NULL), 0);
 
 	ret = mdata_strformat(md, buf, sizeof(buf), "@a@/@b@/@t@/@T@/@s@");
-	ck_assert_int_eq(ret, strlen(buf));
+	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_str_eq(buf,
 	    "test artist/test album/test title"
 	    "/" SRCDIR "/test01-artist+album+title.ogg"
@@ -199,9 +199,9 @@ teardown_checked(void)
 int
 main(void)
 {
-	unsigned int	 num_failed;
-	Suite           *s;
-	SRunner         *sr;
+	int	 num_failed;
+	Suite	*s;
+	SRunner *sr;
 
 	s = mdata_suite();
 	sr = srunner_create(s);

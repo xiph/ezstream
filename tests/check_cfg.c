@@ -930,9 +930,9 @@ teardown_checked(void)
 int
 main(void)
 {
-	unsigned int	 num_failed;
-	Suite           *s;
-	SRunner         *sr;
+	int	 num_failed;
+	Suite	*s;
+	SRunner *sr;
 
 	s = cfg_suite();
 	sr = srunner_create(s);

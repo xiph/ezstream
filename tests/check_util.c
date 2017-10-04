@@ -129,9 +129,9 @@ util_suite(void)
 int
 main(void)
 {
-	unsigned int	 num_failed;
-	Suite           *s;
-	SRunner         *sr;
+	int	 num_failed;
+	Suite	*s;
+	SRunner *sr;
 
 	s = util_suite();
 	sr = srunner_create(s);
