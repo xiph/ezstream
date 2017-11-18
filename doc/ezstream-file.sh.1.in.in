@@ -22,6 +22,7 @@
 .Nm
 .Bk -words
 .Op Fl hqrVv
+.Op Fl p Ar pidfile
 .Op Fl T Ar cfg_template
 .Op Ar
 .Ek
@@ -60,6 +61,17 @@ binary.
 .It Fl h
 Print a summary of available command line parameters with short descriptions
 and exit.
+.It Fl p Ar pidfile
+.Po
+Passed to
+.Nm ezstream .
+.Pc
+Write the
+.Nm
+process ID
+.Pq a single number
+to
+.Ar pidfile .
 .It Fl q
 .Po
 Passed to
