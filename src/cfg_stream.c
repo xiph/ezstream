@@ -20,7 +20,6 @@
 
 #include <sys/queue.h>
 
-#include <assert.h>
 #include <string.h>
 
 #include "cfg_private.h"

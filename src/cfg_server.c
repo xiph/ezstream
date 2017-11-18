@@ -22,7 +22,7 @@
 
 #include <sys/queue.h>
 
-#include <assert.h>
+#include <stdint.h>
 #include <string.h>
 
 #include "cfg_private.h"
