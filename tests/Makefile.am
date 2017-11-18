@@ -2,6 +2,10 @@ AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 
 TESTS		 = \
 	check_cfg \
+	check_cfg_decoder \
+	check_cfg_encoder \
+	check_cfg_server \
+	check_cfg_stream \
 	check_cfg_xmlfile \
 	check_cmdline \
 	check_log \
@@ -12,48 +16,57 @@ TESTS		 = \
 	check_xalloc
 check_PROGRAMS	 = $(TESTS)
 
-check_cfg_SOURCES = \
-	check_cfg.c
+noinst_HEADERS = check_cfg.h
+
+check_cfg_SOURCES = check_cfg.c
 check_cfg_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_cfg_LDADD  = $(check_cfg_DEPENDENCIES) @CHECK_LIBS@
 
-check_cfg_xmlfile_SOURCES = \
-	check_cfg_xmlfile.c
+check_cfg_decoder_SOURCES = check_cfg_decoder.c
+check_cfg_decoder_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cfg_decoder_LDADD = $(check_cfg_decoder_DEPENDENCIES) @CHECK_LIBS@
+
+check_cfg_encoder_SOURCES = check_cfg_encoder.c
+check_cfg_encoder_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cfg_encoder_LDADD = $(check_cfg_encoder_DEPENDENCIES) @CHECK_LIBS@
+
+check_cfg_server_SOURCES = check_cfg_server.c
+check_cfg_server_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cfg_server_LDADD = $(check_cfg_server_DEPENDENCIES) @CHECK_LIBS@
+
+check_cfg_stream_SOURCES = check_cfg_stream.c
+check_cfg_stream_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cfg_stream_LDADD = $(check_cfg_stream_DEPENDENCIES) @CHECK_LIBS@
+
+check_cfg_xmlfile_SOURCES = check_cfg_xmlfile.c
 check_cfg_xmlfile_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_cfg_xmlfile_LDADD = $(check_cfg_xmlfile_DEPENDENCIES) @CHECK_LIBS@
 
-check_cmdline_SOURCES = \
-	check_cmdline.c
+check_cmdline_SOURCES = check_cmdline.c
 check_cmdline_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_cmdline_LDADD = $(check_cmdline_DEPENDENCIES) @CHECK_LIBS@
 
-check_log_SOURCES = \
-	check_log.c
+check_log_SOURCES = check_log.c
 check_log_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_log_LDADD	 = $(check_log_DEPENDENCIES) @CHECK_LIBS@
 
-check_mdata_SOURCES = \
-	check_mdata.c
+check_mdata_SOURCES = check_mdata.c
 check_mdata_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_mdata_LDADD = $(check_mdata_DEPENDENCIES) @CHECK_LIBS@
 
-check_playlist_SOURCES = \
-	check_playlist.c
+check_playlist_SOURCES = check_playlist.c
 check_playlist_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_playlist_LDADD = $(check_playlist_DEPENDENCIES) @CHECK_LIBS@
 
-check_stream_SOURCES = \
-	check_stream.c
+check_stream_SOURCES = check_stream.c
 check_stream_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_stream_LDADD = $(check_stream_DEPENDENCIES) @CHECK_LIBS@
 
-check_util_SOURCES = \
-	check_util.c
+check_util_SOURCES = check_util.c
 check_util_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_util_LDADD = $(check_util_DEPENDENCIES) @CHECK_LIBS@
 
-check_xalloc_SOURCES = \
-	check_xalloc.c
+check_xalloc_SOURCES = check_xalloc.c
 check_xalloc_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_xalloc_LDADD = $(check_xalloc_DEPENDENCIES) @CHECK_LIBS@
 
@@ -73,6 +86,7 @@ EXTRA_DIST	 = \
 	config-bad2.xml \
 	config-bad3.xml \
 	config-bad4.xml \
+	config-bad5.xml \
 	play-bad.sh \
 	play-bad2.sh \
 	play-bad3.sh \

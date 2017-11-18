@@ -39,79 +39,144 @@ struct cfg_decoder {
 	char			*program;
 	struct file_ext_list	 exts;
 };
+
 TAILQ_HEAD(cfg_decoder_list, cfg_decoder);
 
-static struct cfg_decoder_list	cfg_decoders;
-
-int
-cfg_decoder_init(void)
+struct cfg_decoder_list *
+cfg_decoder_list_create(void)
 {
-	TAILQ_INIT(&cfg_decoders);
-	return (0);
+	struct cfg_decoder_list *dl;
+
+	dl = xcalloc(1UL, sizeof(*dl));
+	TAILQ_INIT(dl);
+
+	return (dl);
 }
 
 void
-cfg_decoder_exit(void)
+cfg_decoder_list_destroy(cfg_decoder_list_t *dl_p)
 {
+	struct cfg_decoder_list *dl = *dl_p;
 	struct cfg_decoder	*d;
 
-	while (NULL != (d = TAILQ_FIRST(&cfg_decoders))) {
-		struct file_ext *e;
+	if (!dl)
+		return;
 
-		TAILQ_REMOVE(&cfg_decoders, d, entry);
-		xfree(d->name);
-		xfree(d->program);
-		while (NULL != (e = TAILQ_FIRST(&d->exts))) {
-			TAILQ_REMOVE(&d->exts, e, entry);
-			xfree(e->ext);
-			xfree(e);
-		}
-		xfree(d);
+	while (NULL != (d = TAILQ_FIRST(dl))) {
+		TAILQ_REMOVE(dl, d, entry);
+		cfg_decoder_destroy(&d);
 	}
+
+	xfree(dl);
+	*dl_p = NULL;
 }
 
 struct cfg_decoder *
-cfg_decoder_get(const char *name)
+cfg_decoder_list_find(struct cfg_decoder_list *dl, const char *name)
+{
+	struct cfg_decoder	*d;
+
+	TAILQ_FOREACH(d, dl, entry) {
+		if (0 == strcasecmp(d->name, name))
+			return (d);
+	}
+
+	return (NULL);
+}
+
+struct cfg_decoder *
+cfg_decoder_list_findext(struct cfg_decoder_list *dl, const char *ext)
+{
+	struct cfg_decoder	*d;
+
+	TAILQ_FOREACH(d, dl, entry) {
+		if (cfg_decoder_extsupport(d, ext))
+			return (d);
+	}
+
+	return (NULL);
+}
+
+
+struct cfg_decoder *
+cfg_decoder_list_get(struct cfg_decoder_list *dl, const char *name)
+{
+	struct cfg_decoder	*d;
+
+	d = cfg_decoder_list_find(dl, name);
+	if (d)
+		return (d);
+	d = cfg_decoder_create(name);
+	if (!d)
+		return (NULL);
+
+	TAILQ_INSERT_TAIL(dl, d, entry);
+
+	return (d);
+}
+
+struct cfg_decoder *
+cfg_decoder_create(const char *name)
 {
 	struct cfg_decoder	*d;
 
 	if (!name || !name[0])
 		return (NULL);
 
-	TAILQ_FOREACH(d, &cfg_decoders, entry) {
-		if (0 == strcasecmp(d->name, name))
-			return (d);
-	}
-
 	d = xcalloc(1UL, sizeof(*d));
 	d->name = xstrdup(name);
 	TAILQ_INIT(&d->exts);
 
-	TAILQ_INSERT_TAIL(&cfg_decoders, d, entry);
-
 	return (d);
 }
 
-int
-cfg_decoder_set_name(struct cfg_decoder *d, const char *name,
-    const char **errstrp)
+void
+cfg_decoder_destroy(struct cfg_decoder **d_p)
 {
+	struct cfg_decoder	*d = *d_p;
+	struct file_ext 	*e;
+
+	xfree(d->name);
+	xfree(d->program);
+	while (NULL != (e = TAILQ_FIRST(&d->exts))) {
+		TAILQ_REMOVE(&d->exts, e, entry);
+		xfree(e->ext);
+		xfree(e);
+	}
+	xfree(d);
+	*d_p = NULL;
+}
+
+int
+cfg_decoder_set_name(struct cfg_decoder *d, struct cfg_decoder_list *dl,
+    const char *name, const char **errstrp)
+{
+	struct cfg_decoder	*d2;
+
 	if (!name || !name[0]) {
 		if (errstrp)
 			*errstrp = "empty";
 		return (-1);
 	}
 
-	xfree(d->name);
-	d->name = xstrdup(name);
+	d2 = cfg_decoder_list_find(dl, name);
+	if (d2 && d2 != d) {
+		if (errstrp)
+			*errstrp = "already exists";
+		return (-1);
+	}
 
+	SET_XSTRDUP(d->name, name, errstrp);
 	return (0);
 }
 
 int
-cfg_decoder_set_program(struct cfg_decoder *d, const char *program,
+cfg_decoder_set_program(struct cfg_decoder *d,
+    struct cfg_decoder_list *not_used, const char *program,
     const char **errstrp)
 {
+	(void)not_used;
+
 	if (!program || !program[0]) {
 		if (errstrp)
 			*errstrp = "empty";
@@ -125,8 +190,8 @@ cfg_decoder_set_program(struct cfg_decoder *d, const char *program,
 }
 
 int
-cfg_decoder_add_match(struct cfg_decoder *d, const char *ext,
-    const char **errstrp)
+cfg_decoder_add_match(struct cfg_decoder *d, struct cfg_decoder_list *dl,
+    const char *ext, const char **errstrp)
 {
 	struct cfg_decoder	*d2;
 	struct file_ext 	*e, *e2;
@@ -137,7 +202,7 @@ cfg_decoder_add_match(struct cfg_decoder *d, const char *ext,
 		return (-1);
 	}
 
-	d2 = cfg_decoder_find(ext);
+	d2 = cfg_decoder_list_findext(dl, ext);
 	e = NULL;
 	if (d2) {
 		e2 = TAILQ_FIRST(&d2->exts);
@@ -193,21 +258,17 @@ cfg_decoder_validate(struct cfg_decoder *d, const char **errstrp)
 	return (0);
 }
 
-struct cfg_decoder *
-cfg_decoder_find(const char *ext)
+int
+cfg_decoder_extsupport(struct cfg_decoder *d, const char *ext)
 {
-	struct cfg_decoder	*d;
+	struct file_ext *e;
 
-	TAILQ_FOREACH(d, &cfg_decoders, entry) {
-		struct file_ext *e;
-
-		TAILQ_FOREACH(e, &d->exts, entry) {
-			if (0 == strcasecmp(e->ext, ext))
-				return (d);
-		}
+	TAILQ_FOREACH(e, &d->exts, entry) {
+		if (0 == strcasecmp(e->ext, ext))
+			return (1);
 	}
 
-	return (NULL);
+	return (0);
 }
 
 const char *

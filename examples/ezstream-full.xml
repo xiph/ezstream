@@ -13,78 +13,91 @@
   <!--
     Server configuration
     -->
-  <server>
-    <!-- Transport protocol: HTTP, HTTPS -->
-    <protocol>HTTP</protocol>
-    <!-- Server address -->
-    <hostname>127.0.0.1</hostname>
-    <!-- Server port -->
-    <port>8000</port>
+  <servers>
+    <server>
+      <!-- Identifying name; default: "default" -->
+      <name>Default</name>
 
-    <!-- Login user -->
-    <user>source</user>
-    <!-- Login password (check file permissions, or everyone can see this) -->
-    <password>hackme</password>
+      <!-- Transport protocol: HTTP, HTTPS -->
+      <protocol>HTTP</protocol>
+      <!-- Server address -->
+      <hostname>127.0.0.1</hostname>
+      <!-- Server port -->
+      <port>8000</port>
 
-    <!--
-      Configure TLS encryption requirement: none, may (default), required
-      -->
-    <tls>Required</tls>
+      <!-- Login user -->
+      <user>source</user>
+      <!-- Login password (check file permissions, or everyone can see this) -->
+      <password>hackme</password>
 
-    <!--
-      Configure allowed cipher suites for TLS other than the libshout default.
-      See openssl(1)/ciphers(1) for details.
-      -->
-    <tls_cipher_suite>HIGH:!kRSA:!kECDH:!DH:!PKS:!aNULL:!eNULL:!3DES:!MD5:!SHA:!TLSv1</tls_cipher_suite>
+      <!-- Number of reconnection attempts, before giving up: -->
+      <reconnect_attempts>0</reconnect_attempts>
 
-    <!--
-      Directory to use for server certificate verification in "hash format".
-      See openssl(1)/verify(1) for details.
-      -->
-    <ca_dir>/etc/ssl/certs</ca_dir>
+      <!--
+        Configure TLS encryption requirement: none, may (default), required
+        -->
+      <tls>Required</tls>
 
-    <!--
-      CA bundle for both server certificate verification and building the
-      client certificate chain.
-      -->
-    <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file>
+      <!--
+        Configure allowed cipher suites for TLS other than the libshout default.
+        See openssl(1)/ciphers(1) for details.
+        -->
+      <tls_cipher_suite>HIGH:!kRSA:!kECDH:!DH:!PKS:!aNULL:!eNULL:!3DES:!MD5:!SHA:!TLSv1</tls_cipher_suite>
 
-    <!-- 
-      X.503 client certificate, in PEM format, containing both certificate
-      (with public key) and private key in the same file, for authentication.
-      -->
-    <client_cert>/etc/ssl/ezstream.crt</client_cert>
+      <!--
+        Directory to use for server certificate verification in "hash format".
+        See openssl(1)/verify(1) for details.
+        -->
+      <ca_dir>/etc/ssl/certs</ca_dir>
 
-    <!-- Number of reconnection attempts, before giving up: -->
-    <reconnect_attempts>0</reconnect_attempts>
-  </server>
+      <!--
+        CA bundle for both server certificate verification and building the
+        client certificate chain.
+        -->
+      <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file>
+
+      <!--
+        X.503 client certificate, in PEM format, containing both certificate
+        (with public key) and private key in the same file, for authentication.
+        -->
+      <client_cert>/etc/ssl/ezstream.crt</client_cert>
+    </server>
+  </servers>
 
   <!--
     Stream configuration
     -->
-  <stream>
-    <!-- Mount point on server -->
-    <mountpoint>/stream.ogg</mountpoint>
+  <streams>
+    <stream>
+      <!-- Identifying name; default: "default" -->
+      <name>Default</name>
 
-    <!-- Various informational settings -->
-    <name>Test Stream</name>
-    <url>http://localhost:8000/</url>
-    <genre>Beeps</genre>
-    <description>Test tones and noise</description>
-    <quality>1.5</quality>
-    <bitrate>16</bitrate>
-    <samplerate>44100</samplerate>
-    <channels>2</channels>
+      <!-- Mount point on server -->
+      <mountpoint>/stream.ogg</mountpoint>
 
-    <!-- Setting to allow stream to be listed in public YP directory -->
-    <server_public>No</server_public>
+      <!-- Name of the server entry to use (default: "default") -->
+      <server>Default</server>
 
-    <!-- Stream format: Vorbis, MP3, Theora -->
-    <format>Vorbis</format>
+      <!-- Setting to allow stream to be listed in public YP directory -->
+      <public>No</public>
 
-    <!-- Encoder name (defined below) to use for (re)encoding -->
-    <encoder>OggEnc-Q1.5</encoder>
-  </stream>
+      <!-- Stream format: Vorbis, MP3, Theora -->
+      <format>Vorbis</format>
+
+      <!-- Encoder name (defined below) to use for (re)encoding -->
+      <encoder>OggEnc-Q1.5</encoder>
+
+      <!-- Various other informational settings -->
+      <stream_name>Test Stream</stream_name>
+      <stream_url>http://localhost:8000/</stream_url>
+      <stream_genre>Beeps</stream_genre>
+      <stream_description>Test tones and noise</stream_description>
+      <stream_quality>1.5</stream_quality>
+      <stream_bitrate>16</stream_bitrate>
+      <stream_samplerate>44100</stream_samplerate>
+      <stream_channels>2</stream_channels>
+    </stream>
+  </streams>
 
   <!--
     Media configuration

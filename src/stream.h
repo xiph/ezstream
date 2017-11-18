@@ -19,20 +19,28 @@
 
 #include <shout/shout.h>
 
+#include "cfg.h"
 #include "mdata.h"
 
-#define STREAM_DEFAULT	"default"
-
-typedef struct stream *	stream_t;
+typedef struct stream * stream_t;
 
 int	stream_init(void);
 void	stream_exit(void);
 
 stream_t
-	stream_get(const char *);
-int	stream_setup(stream_t);
+	stream_create(const char *);
+void	stream_destroy(stream_t *);
+int	stream_configure(stream_t);
+
 int	stream_set_metadata(stream_t, mdata_t, char **);
+
+const char *
+	stream_get_name(stream_t);
 int	stream_get_connected(stream_t);
+cfg_stream_t
+	stream_get_cfg_stream(stream_t);
+cfg_server_t
+	stream_get_cfg_server(stream_t);
 
 int	stream_connect(stream_t);
 void	stream_disconnect(stream_t);

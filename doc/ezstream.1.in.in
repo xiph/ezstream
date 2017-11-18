@@ -93,8 +93,7 @@ Increase logging verbosity.
 May be used up to three times to also include debug logging output.
 .El
 .Ss Runtime control
-On POSIX systems,
-.Nm
+.Nm Ezstream
 offers limited runtime control via signals.
 By sending a signal to the ezstream process, e.g. with the
 .Xr kill 1
@@ -148,20 +147,40 @@ like in the introductory example shown above.
 .It Sy \&<ezstream\ /\&>
 .Pq Mandatory.
 The configuration file's root element.
-It contains all other configuration elements:
+It contains all other configuration elements.
 .Pp
+.El
+.Ss Servers block
+.Bl -tag -width -Ds
+.It Sy \&<servers\ /\&>
+This element contains all server blocks as child elements.
+Its parent is the
+.Sy \&<ezstream\ /\&>
+element.
+.Pp
+A configuration file may contain multiple named server configurations.
+The stream configuration determines what server configuration should be used.
 .El
 .Ss Server block
 .Bl -tag -width -Ds
 .It Sy \&<server\ /\&>
 .Pq Mandatory.
-This element contains the entire server configuration as child elements.
+This element contains a complete server configuration as child elements.
 Its parent is the
-.Sy \&<ezstream\ /\&>
+.Sy \&<servers\ /\&>
 element.
 .El
 .Ss Server configuration
 .Bl -tag -width -Ds
+.It Sy \&<name\ /\&>
+Set the name of the server configuration.
+This may be referenced in a
+.Sy \&<stream\ /\&> .
+.Pp
+The name is case-aware, but not case-sensitive.
+.Pp
+Default:
+.Ar default
 .It Sy \&<protocol\ /\&>
 Transport protocol used to stream to the server:
 .Pp
@@ -187,6 +206,14 @@ Default:
 .It Sy \&<password\ /\&>
 .Pq Mandatory.
 Password to authenticate with on the server.
+.It Sy \&<reconnect_attempts\ /\&>
+Number of reconnect attempts in case of connection issues with the server,
+or 0
+.Pq zero
+for trying indefinitely.
+.Pp
+Default:
+.Ar 0
 .It Sy \&<tls\ /\&>
 Configure the TLS encryption requirement for the server connection.
 Possible values are:
@@ -233,11 +260,21 @@ server.
 .Pp
 Default:
 .Em no client certificate authentication
-.It Sy \&<reconnect_attempts\ /\&>
-Number of reconnect attempts in case of connection issues with the server,
-or 0
-.Pq zero
-for trying indefinitely (the default).
+.El
+.Ss Streams block
+.Bl -tag -width -Ds
+.It Sy \&<streams\ /\&>
+This element contains all stream blocks as child elements.
+Its parent is the
+.Sy \&<ezstream\ /\&>
+element.
+.Pp
+.Em Note:
+While multiple stream configurations are supported by the file format, only
+the one configuration with the name
+.Ar default
+will be used by
+.Nm .
 .El
 .Ss Stream block
 .Bl -tag -width -Ds
@@ -245,55 +282,22 @@ for trying indefinitely (the default).
 .Pq Mandatory.
 This element contains the entire stream configuration as child elements.
 Its parent is the
-.Sy \&<ezstream\ /\&>
+.Sy \&<streams\ /\&>
 element.
 .El
 .Ss Stream configuration
 .Bl -tag -width -Ds
+.It Sy \&<name\ /\&>
+Set the name of the stream configuration.
+.Pp
+The name is case-aware, but not case-sensitive.
+.Pp
+Default:
+.Ar default
 .It Sy \&<mountpoint\ /\&>
 .Pq Mandatory.
 Stream mountpoint on the server.
-.It Sy \&<name\ /\&>
-Informational name of the broadcast.
-.Pp
-Default:
-.Em none
-.It Sy \&<url\ /\&>
-Informational URL associated with the broadcast, e.g. the web site.
-.Pp
-Default:
-.Em none
-.It Sy \&<genre\ /\&>
-Informational genre of the broadcast.
-.Pp
-Default:
-.Em none
-.It Sy \&<description\ /\&>
-Informational description of the broadcast.
-.Pp
-Default:
-.Em none
-.It Sy \&<quality\ /\&>
-Informational quality setting of the VBR broadcast.
-.Pp
-Default:
-.Em none
-.It Sy \&<bitrate\ /\&>
-Informational bitrate setting of the CBR broadcast.
-.Pp
-Default:
-.Em none
-.It Sy \&<samplerate\ /\&>
-Informational sample rate of the broadcast audio.
-.Pp
-Default:
-.Em none
-.It Sy \&<channels\ /\&>
-Informational number of audio channels of the broadcast.
-.Pp
-Default:
-.Em none
-.It Sy \&<server_public\ /\&>
+.It Sy \&<public\ /\&>
 Boolean setting of whether the broadcast may be listed in a public YP
 directory, or not.
 .Pp
@@ -303,6 +307,11 @@ The broadcast is private (the default).
 .It Ar 1|Yes|True
 The broadcast is public.
 .El
+.It Sy \&<server\ /\&>
+Use the server configuration with the provided symbolic name for this stream.
+.Pp
+Default:
+.Ar default
 .It Sy \&<format\ /\&>
 .Pq Mandatory.
 The stream format.
@@ -316,9 +325,9 @@ MP3 audio format
 Ogg Theora video format
 .El
 .It Sy \&<encoder\ /\&>
-Set the encoder by its configured symbolic name
+Use the encoder configuration with the provided symbolic name
 .Pq see below ,
-which should be used to (re)encode the stream.
+for (re)encoding the stream.
 Not configuring an encoder makes
 .Nm
 stream input media files as-is.
@@ -326,6 +335,46 @@ stream input media files as-is.
 The configured encoder's output stream format must match what is configured
 in
 .Sy \&<format\ /\&> .
+.It Sy \&<stream_name\ /\&>
+Informational name of the broadcast.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_url\ /\&>
+Informational URL associated with the broadcast, e.g. the web site.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_genre\ /\&>
+Informational genre of the broadcast.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_description\ /\&>
+Informational description of the broadcast.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_quality\ /\&>
+Informational quality setting of the VBR broadcast.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_bitrate\ /\&>
+Informational bitrate setting of the CBR broadcast.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_samplerate\ /\&>
+Informational sample rate of the broadcast audio.
+.Pp
+Default:
+.Em none
+.It Sy \&<stream_channels\ /\&>
+Informational number of audio channels of the broadcast.
+.Pp
+Default:
+.Em none
 .El
 .Ss Media block
 .Bl -tag -width -Ds
@@ -477,18 +526,16 @@ This element contains all configuration of a single decoder.
 Its parent is the
 .Sy \&<decoders\ /\&>
 element.
-.Pp
-Many decoders can be configured, but a filename extension can only be
-associated with one decoder.
 .El
 .Ss Decoder configuration
 .Bl -tag -width -Ds
 .It Sy \&<name\ /\&>
 Set the name of the decoder configuration.
-Choosing a meaningful, unique name is beneficial for logging and debugging.
+.Pp
+The name is case-aware, but not case-sensitive.
 .Pp
 Default:
-.Em autoincrementing index
+.Ar default
 .It Sy \&<program\ /\&>
 .Pq Mandatory.
 Set the full command line to decode a media input file, represented by the
@@ -513,6 +560,8 @@ It is possible to specify more than one
 .Sy \&<file_ext\ /\&>
 element per decoder to associate more than one file extension to the same
 decoder.
+.Pp
+A filename extension can only be associated with one decoder.
 .El
 .Ss Encoders block
 .Bl -tag -width -Ds
@@ -529,18 +578,20 @@ This element contains all configuration of a single encoder.
 Its parent is the
 .Sy \&<encoders\ /\&>
 element.
-.Pp
-Many encoders can be configured.
 .El
 .Ss Encoder configuration
 .Bl -tag -width -Ds
 .It Sy \&<name\ /\&>
 .Pq Mandatory.
-Set the name of the encoder configuration, to be referenced in the
+Set the name of the encoder configuration.
+This may be referenced in a
 .Sy \&<stream\ /\&>
 block in case (re)encoding is desired.
 .Pp
 The name is case-aware, but not case-sensitive.
+.Pp
+Default:
+.Ar default
 .It Sy \&<format\ /\&>
 .Pq Mandatory.
 Stream format produced by this encoder.
@@ -549,7 +600,7 @@ This must be one of the available stream formats as specified for the
 block.
 .It Sy \&<program\ /\&>
 .Pq Mandatory.
-Set the full command line to encode
+Set the full command line to encode the
 .Dq canonical internal format
 from standard input into a supported stream format on standard output.
 .Pp

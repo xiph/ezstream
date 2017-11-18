@@ -38,6 +38,7 @@
 #define STREAM_SERVERR	3
 #define STREAM_UPDMDATA 4
 
+stream_t		 main_stream;
 playlist_t		 playlist;
 int			 playlistMode;
 unsigned int		 resource_errors;
@@ -53,8 +54,10 @@ volatile sig_atomic_t	 queryMetadata;
 volatile sig_atomic_t	 quit;
 
 void		sig_handler(int);
-char *		_build_reencode_cmd(const char *, const char *, mdata_t);
-FILE *		openResource(stream_t, const char *, int *, mdata_t *,
+
+static char *	_build_reencode_cmd(const char *, const char *, cfg_stream_t,
+				    mdata_t);
+static FILE *	openResource(stream_t, const char *, int *, mdata_t *,
 			     int *, long *);
 int		reconnect(stream_t);
 const char *	getTimeString(long);
@@ -87,9 +90,9 @@ sig_handler(int sig)
 	}
 }
 
-char *
+static char *
 _build_reencode_cmd(const char *extension, const char *filename,
-    mdata_t md)
+    cfg_stream_t cfg_stream, mdata_t md)
 {
 	cfg_decoder_t		 decoder;
 	cfg_encoder_t		 encoder;
@@ -102,16 +105,17 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	char			*cmd_str;
 	size_t			 cmd_str_size;
 
-	decoder = cfg_decoder_find(extension);
+	decoder = cfg_decoder_list_findext(cfg_get_decoders(), extension);
 	if (!decoder) {
 		log_error("cannot decode: %s: unsupported file extension %s",
 		    filename, extension);
 		return (NULL);
 	}
-	encoder = cfg_encoder_get(cfg_get_stream_encoder());
+	encoder = cfg_encoder_list_get(cfg_get_encoders(),
+	    cfg_stream_get_encoder(cfg_stream));
 	if (!encoder) {
 		log_error("cannot encode: %s: unknown encoder",
-		    cfg_get_stream_encoder());
+		    cfg_stream_get_encoder(cfg_stream));
 		return (NULL);
 	}
 
@@ -201,7 +205,7 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	return (cmd_str);
 }
 
-FILE *
+static FILE *
 openResource(stream_t stream, const char *filename, int *popenFlag,
 	     mdata_t *md_p, int *isStdin, long *songLen)
 {
@@ -210,6 +214,7 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 	char		*p = NULL;
 	char		*pCommandString = NULL;
 	mdata_t 	 md;
+	cfg_stream_t	 cfg_stream = stream_get_cfg_stream(stream);
 
 	if (md_p != NULL)
 		*md_p = NULL;
@@ -268,11 +273,11 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 		*songLen = mdata_get_length(md);
 
 	*popenFlag = 0;
-	if (cfg_get_stream_encoder()) {
+	if (cfg_stream_get_encoder(cfg_stream)) {
 		int	stderr_fd = -1;
 
 		pCommandString = _build_reencode_cmd(extension, filename,
-		    md);
+		    cfg_stream, md);
 		if (md_p != NULL)
 			*md_p = md;
 		else
@@ -338,26 +343,27 @@ int
 reconnect(stream_t stream)
 {
 	unsigned int	i;
+	cfg_server_t	cfg_server = stream_get_cfg_server(stream);
 
 	i = 0;
 	while (++i) {
-		if (cfg_get_server_reconnect_attempts() > 0)
+		if (cfg_server_get_reconnect_attempts(cfg_server) > 0)
 			log_notice("reconnect: %s: attempt #%u/%u ...",
-			    cfg_get_server_hostname(), i,
-			    cfg_get_server_reconnect_attempts());
+			    cfg_server_get_hostname(cfg_server), i,
+			    cfg_server_get_reconnect_attempts(cfg_server));
 		else
 			log_notice("reconnect: %s: attempt #%u ...",
-			    cfg_get_server_hostname(), i);
+			    cfg_server_get_hostname(cfg_server), i);
 
 		stream_disconnect(stream);
 		if (0 == stream_connect(stream)) {
 			log_notice("reconnect: %s: success",
-			    cfg_get_server_hostname());
+			    cfg_server_get_hostname(cfg_server));
 			return (0);
 		}
 
-		if (cfg_get_server_reconnect_attempts() > 0 &&
-		    i >= cfg_get_server_reconnect_attempts())
+		if (cfg_server_get_reconnect_attempts(cfg_server) > 0 &&
+		    i >= cfg_server_get_reconnect_attempts(cfg_server))
 			break;
 
 		if (quit)
@@ -400,6 +406,7 @@ sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 	double		  kbps = -1.0;
 	struct timespec	  timeStamp, *startTime = tv;
 	struct timespec	  callTime, currentTime;
+	cfg_server_t	  cfg_server = stream_get_cfg_server(stream);
 
 	clock_gettime(CLOCK_MONOTONIC, &callTime);
 
@@ -411,7 +418,7 @@ sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 	while ((bytes_read = fread(buff, 1, sizeof(buff), filepstream)) > 0) {
 		if (!stream_get_connected(stream)) {
 			log_warning("%s: connection lost",
-			    cfg_get_server_hostname());
+			    cfg_server_get_hostname(cfg_server));
 			if (0 > reconnect(stream)) {
 				ret = STREAM_SERVERR;
 				break;
@@ -521,6 +528,7 @@ streamFile(stream_t stream, const char *fileName)
 	long		 songLen;
 	mdata_t 	 md = NULL;
 	struct timespec	 startTime;
+	cfg_stream_t	 cfg_stream = stream_get_cfg_stream(stream);
 
 	if ((filepstream = openResource(stream, fileName, &popenFlag, &md, &isStdin, &songLen))
 	    == NULL) {
@@ -546,7 +554,7 @@ streamFile(stream_t stream, const char *fileName)
 		xfree(metaData);
 
 		/* MP3 streams are special, so set the metadata explicitly: */
-		if (CFG_STREAM_MP3 == cfg_get_stream_format())
+		if (CFG_STREAM_MP3 == cfg_stream_get_format(cfg_stream))
 			stream_set_metadata(stream, md, NULL);
 
 		mdata_destroy(&md);
@@ -686,10 +694,11 @@ streamPlaylist(stream_t stream)
 int
 ez_shutdown(int exitval)
 {
+	if (main_stream)
+		stream_destroy(&main_stream);
+
 	stream_exit();
 	playlist_exit();
-	cfg_encoder_exit();
-	cfg_decoder_exit();
 	log_exit();
 	cfg_exit();
 
@@ -701,18 +710,17 @@ main(int argc, char *argv[])
 {
 	int		 ret, cont;
 	const char	*errstr;
-	stream_t	 stream;
 	extern char	*optarg;
 	extern int	 optind;
 	struct sigaction act;
 	unsigned int	 i;
+	cfg_server_t	 cfg_server;
+	cfg_stream_t	 cfg_stream;
 
 	ret = 1;
 	if (0 > cfg_init() ||
 	    0 > cmdline_parse(argc, argv, &ret) ||
 	    0 > log_init() ||
-	    0 > cfg_decoder_init() ||
-	    0 > cfg_encoder_init() ||
 	    0 > playlist_init() ||
 	    0 > cfg_file_reload() ||
 	    0 > stream_init())
@@ -723,9 +731,11 @@ main(int argc, char *argv[])
 		return (ez_shutdown(2));
 	}
 
-	stream = stream_get(STREAM_DEFAULT);
-	if (0 > stream_setup(stream))
+	main_stream = stream_create(CFG_DEFAULT);
+	if (0 > stream_configure(main_stream))
 		return (ez_shutdown(1));
+	cfg_server = stream_get_cfg_server(main_stream);
+	cfg_stream = stream_get_cfg_stream(main_stream);
 
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = sig_handler;
@@ -754,13 +764,15 @@ main(int argc, char *argv[])
 	if (0 > util_write_pid_file(cfg_get_program_pid_file()))
 		log_syserr(WARNING, errno, cfg_get_program_pid_file());
 
-	if (0 > stream_connect(stream)) {
+	if (0 > stream_connect(main_stream)) {
 		log_error("initial server connection failed");
 		return (ez_shutdown(1));
 	}
 	log_notice("connected: %s://%s:%u%s",
-	    cfg_get_server_protocol_str(), cfg_get_server_hostname(),
-	    cfg_get_server_port(), cfg_get_stream_mountpoint());
+	    cfg_server_get_protocol_str(cfg_server),
+	    cfg_server_get_hostname(cfg_server),
+	    cfg_server_get_port(cfg_server),
+	    cfg_stream_get_mountpoint(cfg_stream));
 
 	if (CFG_MEDIA_PROGRAM == cfg_get_media_type() ||
 	    CFG_MEDIA_PLAYLIST == cfg_get_media_type() ||
@@ -773,9 +785,9 @@ main(int argc, char *argv[])
 
 	do {
 		if (playlistMode) {
-			cont = streamPlaylist(stream);
+			cont = streamPlaylist(main_stream);
 		} else {
-			cont = streamFile(stream,
+			cont = streamFile(main_stream,
 			    cfg_get_media_filename());
 		}
 		if (quit)
@@ -784,7 +796,7 @@ main(int argc, char *argv[])
 			break;
 	} while (cont);
 
-	stream_disconnect(stream);
+	stream_disconnect(main_stream);
 
 	if (quit) {
 		if (cfg_get_program_quiet_stderr() &&

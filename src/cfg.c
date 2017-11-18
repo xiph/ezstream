@@ -32,26 +32,24 @@
 #include "log.h"
 #include "xalloc.h"
 
-static struct cfg	cfg;
-static struct cfg	cfg_tmp;
+static struct cfg_program	cfg_program;
+static struct cfg		cfg;
+static struct cfg		cfg_tmp;
 
 static void	_cfg_reset(struct cfg *);
-static void	_cfg_copy(struct cfg *, struct cfg *);
+static void	_cfg_switch(struct cfg *, struct cfg *);
 static int	_cfg_load(void);
+static void	_cfg_save(void);
+static void	_cfg_restore(void);
+static void	_cfg_commit(void);
 
 static void
 _cfg_reset(struct cfg *c)
 {
-	xfree(c->stream.mountpoint);
-	xfree(c->stream.name);
-	xfree(c->stream.url);
-	xfree(c->stream.genre);
-	xfree(c->stream.description);
-	xfree(c->stream.quality);
-	xfree(c->stream.bitrate);
-	xfree(c->stream.samplerate);
-	xfree(c->stream.channels);
-	xfree(c->stream.encoder);
+	cfg_server_list_destroy(&c->servers);
+	cfg_stream_list_destroy(&c->streams);
+	cfg_decoder_list_destroy(&c->decoders);
+	cfg_encoder_list_destroy(&c->encoders);
 
 	xfree(c->metadata.format_str);
 
@@ -61,110 +59,76 @@ _cfg_reset(struct cfg *c)
 }
 
 static void
-_cfg_copy(struct cfg *dst, struct cfg *src)
+_cfg_switch(struct cfg *a, struct cfg *b)
 {
-	dst->_master_cfg = src->_master_cfg;
+	struct cfg	tmp;
 
-	memcpy(&dst->program, &src->program, sizeof(dst->program));
-
-	memcpy(&dst->server, &src->server, sizeof(dst->server));
-
-	if (src->stream.mountpoint)
-		dst->stream.mountpoint = xstrdup(src->stream.mountpoint);
-	if (src->stream.name)
-		dst->stream.name = xstrdup(src->stream.name);
-	if (src->stream.url)
-		dst->stream.url = xstrdup(src->stream.url);
-	if (src->stream.genre)
-		dst->stream.genre = xstrdup(src->stream.genre);
-	if (src->stream.description)
-		dst->stream.description = xstrdup(src->stream.description);
-	if (src->stream.quality)
-		dst->stream.quality = xstrdup(src->stream.quality);
-	if (src->stream.bitrate)
-		dst->stream.bitrate = xstrdup(src->stream.bitrate);
-	if (src->stream.samplerate)
-		dst->stream.samplerate = xstrdup(src->stream.samplerate);
-	if (src->stream.channels)
-		dst->stream.channels = xstrdup(src->stream.channels);
-	dst->stream.server_public = src->stream.server_public;
-	dst->stream.format = src->stream.format;
-	if (src->stream.encoder)
-		dst->stream.encoder = xstrdup(src->stream.encoder);
-
-	memcpy(&dst->media, &src->media, sizeof(dst->media));
-
-	strlcpy(dst->metadata.program, src->metadata.program,
-	    sizeof(dst->metadata.program));
-	if (src->metadata.format_str)
-		dst->metadata.format_str = xstrdup(src->metadata.format_str);
-	dst->metadata.refresh_interval = src->metadata.refresh_interval;
-	dst->metadata.normalize_strings = src->metadata.normalize_strings;
-	dst->metadata.no_updates = src->metadata.no_updates;
+	memcpy(&tmp, a, sizeof(tmp));
+	memcpy(a, b, sizeof(*a));
+	memcpy(b, &tmp, sizeof(*b));
 }
 
 static int
 _cfg_load(void)
 {
-	switch (cfg.program.config_type) {
+	switch (cfg_program.config_type) {
 	case CFG_TYPE_XMLFILE:
-		if (0 > cfg_xmlfile_parse(cfg.program.config_file))
+		if (0 > cfg_xmlfile_parse(cfg_program.config_file))
 			return (-1);
 		break;
 	default:
 		log_alert("unsupported config type %u",
-		    cfg.program.config_type);
+		    cfg_program.config_type);
 		abort();
 	}
 	return (0);
+}
+
+static void
+_cfg_save(void)
+{
+	_cfg_reset(&cfg_tmp);
+	_cfg_switch(&cfg_tmp, &cfg);
+	_cfg_reset(&cfg);
+}
+
+static void
+_cfg_restore(void)
+{
+	_cfg_reset(&cfg);
+	_cfg_switch(&cfg, &cfg_tmp);
+	_cfg_reset(&cfg_tmp);
+}
+
+static void
+_cfg_commit(void)
+{
+	_cfg_reset(&cfg_tmp);
 }
 
 int
 cfg_init(void)
 {
 	_cfg_reset(&cfg);
-	cfg._master_cfg = 1;
+	_cfg_commit();
 	return (0);
 }
 
 void
 cfg_exit(void)
 {
-	_cfg_reset(&cfg);
-}
-
-void
-cfg_save(void)
-{
-	cfg_clear();
-	_cfg_copy(&cfg_tmp, &cfg);
-}
-
-void
-cfg_restore(void)
-{
-	if (!cfg_tmp._master_cfg)
-		return;
-	_cfg_reset(&cfg);
-	_cfg_copy(&cfg, &cfg_tmp);
-	cfg_clear();
-}
-
-void
-cfg_clear(void)
-{
-	_cfg_reset(&cfg_tmp);
+	(void)cfg_init();
 }
 
 int
 cfg_file_reload(void)
 {
-	cfg_save();
+	_cfg_save();
 	if (0 > _cfg_load()) {
-		cfg_restore();
+		_cfg_restore();
 		return (-1);
 	}
-	cfg_clear();
+	_cfg_commit();
 
 	return (0);
 }
@@ -172,28 +136,10 @@ cfg_file_reload(void)
 int
 cfg_check(const char **errstrp)
 {
-	if (!cfg_get_server_hostname()) {
-		if (NULL != errstrp)
-			*errstrp = "server hostname missing";
-		return (-1);
-	}
-
-	if (!cfg_get_server_password()) {
-		if (NULL != errstrp)
-			*errstrp = "server password missing";
-		return (-1);
-	}
-
 	if (!cfg_get_media_filename() &&
 	    CFG_MEDIA_STDIN != cfg_get_media_type()) {
 		if (NULL != errstrp)
 			*errstrp = "media filename missing";
-		return (-1);
-	}
-
-	if (CFG_STREAM_INVALID == cfg_get_stream_format()) {
-		if (NULL != errstrp)
-			*errstrp = "stream format missing or unsupported";
 		return (-1);
 	}
 
@@ -252,10 +198,46 @@ cfg_file_check(const char *file)
 	return (0);
 }
 
+cfg_decoder_list_t
+cfg_get_decoders(void)
+{
+	if (!cfg.decoders)
+		cfg.decoders = cfg_decoder_list_create();
+
+	return (cfg.decoders);
+}
+
+cfg_encoder_list_t
+cfg_get_encoders(void)
+{
+	if (!cfg.encoders)
+		cfg.encoders = cfg_encoder_list_create();
+
+	return (cfg.encoders);
+}
+
+cfg_server_list_t
+cfg_get_servers(void)
+{
+	if (!cfg.servers)
+		cfg.servers = cfg_server_list_create();
+
+	return (cfg.servers);
+}
+
+cfg_stream_list_t
+cfg_get_streams(void)
+{
+	if (!cfg.streams)
+		cfg.streams = cfg_stream_list_create();
+
+	return (cfg.streams);
+}
+
 int
 cfg_set_program_name(const char *progname, const char **errstrp)
 {
-	SET_STRLCPY(cfg.program.name, progname, errstrp);
+	SET_STRLCPY(cfg_program.name, progname, errstrp);
 	return (0);
 }
 
@@ -267,21 +249,21 @@ cfg_set_program_config_type(enum cfg_config_type type, const char **errstrp)
 			*errstrp = "invalid";
 		return (-1);
 	}
-	cfg.program.config_type = type;
+	cfg_program.config_type = type;
 	return (0);
 }
 
 int
 cfg_set_program_config_file(const char *file, const char **errstrp)
 {
-	SET_STRLCPY(cfg.program.config_file, file, errstrp);
+	SET_STRLCPY(cfg_program.config_file, file, errstrp);
 	return (0);
 }
 
 int
 cfg_set_program_pid_file(const char *file, const char **errstrp)
 {
-	SET_STRLCPY(cfg.program.pid_file, file, errstrp);
+	SET_STRLCPY(cfg_program.pid_file, file, errstrp);
 	return (0);
 }
 
@@ -289,7 +271,7 @@ int
 cfg_set_program_quiet_stderr(int quiet_stderr, const char **not_used)
 {
 	(void)not_used;
-	cfg.program.quiet_stderr = quiet_stderr ? 1 : 0;
+	cfg_program.quiet_stderr = quiet_stderr ? 1 : 0;
 	return (0);
 }
 
@@ -297,7 +279,7 @@ int
 cfg_set_program_rtstatus_output(int rtstatus_output, const char **not_used)
 {
 	(void)not_used;
-	cfg.program.rtstatus_output = rtstatus_output ? 1 : 0;
+	cfg_program.rtstatus_output = rtstatus_output ? 1 : 0;
 	return (0);
 }
 
@@ -305,229 +287,7 @@ int
 cfg_set_program_verbosity(unsigned int verbosity, const char **not_used)
 {
 	(void)not_used;
-	cfg.program.verbosity = verbosity;
-	return (0);
-}
-
-int
-cfg_set_server_protocol(const char *protocol, const char **errstrp)
-{
-	if (!protocol || !protocol[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (0 == strcasecmp("http", protocol))
-		cfg.server.protocol = CFG_PROTO_HTTP;
-	else if (0 == strcasecmp("https", protocol))
-		cfg.server.protocol = CFG_PROTO_HTTPS;
-	else {
-		if (NULL != errstrp)
-			*errstrp = "unsupported";
-		return (-1);
-	}
-	return (0);
-}
-
-int
-cfg_set_server_hostname(const char *hostname, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.hostname, hostname, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_port(const char *port_str, const char **errstrp)
-{
-	const char	*errstr;
-	unsigned int	 port;
-
-	if (!port_str || !port_str[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	port = (unsigned int)strtonum(port_str, 1, UINT16_MAX, &errstr);
-	if (errstr) {
-		if (errstrp)
-			*errstrp = errstr;
-		return (-1);
-	}
-	cfg.server.port = port;
-
-	return (0);
-}
-
-int
-cfg_set_server_user(const char *user, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.user, user, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_password(const char *password, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.password, password, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_tls(const char *tls, const char **errstrp)
-{
-	if (!tls || !tls[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (0 == strcasecmp("may", tls))
-		cfg.server.tls = CFG_TLS_MAY;
-	else if (0 == strcasecmp("none", tls))
-		cfg.server.tls = CFG_TLS_NONE;
-	else if (0 == strcasecmp("required", tls))
-		cfg.server.tls = CFG_TLS_REQUIRED;
-	else {
-		if (NULL != errstrp)
-			*errstrp = "invalid";
-		return (-1);
-	}
-	return (0);
-}
-
-int
-cfg_set_server_tls_cipher_suite(const char *suite, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.tls_cipher_suite, suite, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_ca_dir(const char *ca_dir, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.ca_dir, ca_dir, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_ca_file(const char *ca_file, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.ca_file, ca_file, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_client_cert(const char *client_cert, const char **errstrp)
-{
-	SET_STRLCPY(cfg.server.client_cert, client_cert, errstrp);
-	return (0);
-}
-
-int
-cfg_set_server_reconnect_attempts(const char *num_str, const char **errstrp)
-{
-	SET_UINTNUM(cfg.server.reconnect_attempts, num_str, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_mountpoint(const char *mountpoint, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.mountpoint, mountpoint, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_name(const char *name, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.name, name, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_url(const char *url, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.url, url, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_genre(const char *genre, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.genre, genre, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_description(const char *description, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.description, description, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_quality(const char *quality, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.quality, quality, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_bitrate(const char *bitrate, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.bitrate, bitrate, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_samplerate(const char *samplerate, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.samplerate, samplerate, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_channels(const char *channels, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.channels, channels, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_server_public(const char *server_public, const char **errstrp)
-{
-	SET_BOOLEAN(cfg.stream.server_public, server_public, errstrp);
-	return (0);
-}
-
-int
-cfg_set_stream_format(const char *fmt_str, const char **errstrp)
-{
-	enum cfg_stream_format	fmt;
-
-	if (!fmt_str || !fmt_str[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (0 > cfg_stream_str2fmt(fmt_str, &fmt)) {
-		if (errstrp)
-			*errstrp = "unsupported stream format";
-		return (-1);
-	}
-
-	cfg.stream.format = fmt;
-
-	return (0);
-}
-
-int
-cfg_set_stream_encoder(const char *encoder, const char **errstrp)
-{
-	SET_XSTRDUP(cfg.stream.encoder, encoder, errstrp);
+	cfg_program.verbosity = verbosity;
 	return (0);
 }
 
@@ -635,203 +395,43 @@ cfg_set_metadata_no_updates(const char *no_updates, const char **errstrp)
 const char *
 cfg_get_program_name(void)
 {
-	return (cfg.program.name);
+	return (cfg_program.name);
 }
 
 enum cfg_config_type
 cfg_get_program_config_type(void)
 {
-	return (cfg.program.config_type);
+	return (cfg_program.config_type);
 }
 
 const char *
 cfg_get_program_config_file(void)
 {
-	return (cfg.program.config_file[0] ? cfg.program.config_file : NULL);
+	return (cfg_program.config_file[0] ? cfg_program.config_file : NULL);
 }
 
 const char *
 cfg_get_program_pid_file(void)
 {
-	return (cfg.program.pid_file[0] ? cfg.program.pid_file : NULL);
+	return (cfg_program.pid_file[0] ? cfg_program.pid_file : NULL);
 }
 
 int
 cfg_get_program_quiet_stderr(void)
 {
-	return (cfg.program.quiet_stderr);
+	return (cfg_program.quiet_stderr);
 }
 
 int
 cfg_get_program_rtstatus_output(void)
 {
-	return (cfg.program.rtstatus_output);
+	return (cfg_program.rtstatus_output);
 }
 
 unsigned int
 cfg_get_program_verbosity(void)
 {
-	return (cfg.program.verbosity);
-}
-
-enum cfg_server_protocol
-cfg_get_server_protocol(void)
-{
-	return (cfg.server.protocol);
-}
-
-const char *
-cfg_get_server_protocol_str(void)
-{
-	switch (cfg.server.protocol) {
-	case CFG_PROTO_HTTP:
-		return ("http");
-	case CFG_PROTO_HTTPS:
-		return ("https");
-	default:
-		log_alert("unsupported protocol %u", cfg.server.protocol);
-		abort();
-	}
-}
-
-const char *
-cfg_get_server_hostname(void)
-{
-	return (cfg.server.hostname[0] ? cfg.server.hostname : NULL);
-}
-
-unsigned int
-cfg_get_server_port(void)
-{
-	return (cfg.server.port ? cfg.server.port : DEFAULT_PORT);
-}
-
-const char *
-cfg_get_server_user(void)
-{
-	return (cfg.server.user[0] ? cfg.server.user : DEFAULT_USER);
-}
-
-const char *
-cfg_get_server_password(void)
-{
-	return (cfg.server.password[0] ? cfg.server.password : NULL);
-}
-
-enum cfg_server_tls
-cfg_get_server_tls(void)
-{
-	return (cfg.server.tls);
-}
-
-const char *
-cfg_get_server_tls_cipher_suite(void)
-{
-	return (cfg.server.tls_cipher_suite[0]
-	    ? cfg.server.tls_cipher_suite
-	    : NULL);
-}
-
-const char *
-cfg_get_server_ca_dir(void)
-{
-	return (cfg.server.ca_dir[0] ? cfg.server.ca_dir : NULL);
-}
-
-const char *
-cfg_get_server_ca_file(void)
-{
-	return (cfg.server.ca_file[0] ? cfg.server.ca_file : NULL);
-}
-
-const char *
-cfg_get_server_client_cert(void)
-{
-	return (cfg.server.client_cert[0] ? cfg.server.client_cert : NULL);
-}
-
-unsigned int
-cfg_get_server_reconnect_attempts(void)
-{
-	return (cfg.server.reconnect_attempts);
-}
-
-const char *
-cfg_get_stream_mountpoint(void)
-{
-	return (cfg.stream.mountpoint);
-}
-
-const char *
-cfg_get_stream_name(void)
-{
-	return (cfg.stream.name);
-}
-
-const char *
-cfg_get_stream_url(void)
-{
-	return (cfg.stream.url);
-}
-
-const char *
-cfg_get_stream_genre(void)
-{
-	return (cfg.stream.genre);
-}
-
-const char *
-cfg_get_stream_description(void)
-{
-	return (cfg.stream.description);
-}
-
-const char *
-cfg_get_stream_quality(void)
-{
-	return (cfg.stream.quality);
-}
-
-const char *
-cfg_get_stream_bitrate(void)
-{
-	return (cfg.stream.bitrate);
-}
-
-const char *
-cfg_get_stream_samplerate(void)
-{
-	return (cfg.stream.samplerate);
-}
-
-const char *
-cfg_get_stream_channels(void)
-{
-	return (cfg.stream.channels);
-}
-
-int
-cfg_get_stream_server_public(void)
-{
-	return (cfg.stream.server_public);
-}
-
-enum cfg_stream_format
-cfg_get_stream_format(void)
-{
-	return (cfg.stream.format);
-}
-
-const char *
-cfg_get_stream_format_str(void)
-{
-	return (cfg_stream_fmt2str(cfg.stream.format));
-}
-
-const char *
-cfg_get_stream_encoder(void)
-{
-	return (cfg.stream.encoder);
+	return (cfg_program.verbosity);
 }
 
 enum cfg_media_type

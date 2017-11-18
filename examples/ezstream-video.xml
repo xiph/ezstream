@@ -6,16 +6,20 @@
 
 <ezstream>
 
-  <server>
-    <hostname>127.0.0.1</hostname>
-    <password>hackme</password>
-  </server>
+  <servers>
+    <server>
+      <hostname>127.0.0.1</hostname>
+      <password>hackme</password>
+    </server>
+  </servers>
 
-  <stream>
-    <mountpoint>/video.ogg</mountpoint>
-    <format>Theora</format>
-    <encoder>PassThrough</encoder>
-  </stream>
+  <streams>
+    <stream>
+      <mountpoint>/video.ogg</mountpoint>
+      <format>Theora</format>
+      <encoder>PassThrough</encoder>
+    </stream>
+  </streams>
 
   <media>
     <filename>playlist.m3u</filename>

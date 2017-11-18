@@ -37,6 +37,9 @@ START_TEST(test_reload)
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad4.xml",
 	    NULL), 0);
 	ck_assert_int_eq(cfg_file_reload(), -1);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad5.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), -1);
 }
 END_TEST
 
@@ -60,8 +63,6 @@ void
 setup_checked(void)
 {
 	if (0 < cfg_init() ||
-	    0 < cfg_decoder_init() ||
-	    0 < cfg_encoder_init() ||
 	    0 < log_init())
 		ck_abort_msg("setup_checked failed");
 }
@@ -70,8 +71,6 @@ void
 teardown_checked(void)
 {
 	log_exit();
-	cfg_encoder_exit();
-	cfg_decoder_exit();
 	cfg_exit();
 }
 

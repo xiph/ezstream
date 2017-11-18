@@ -18,8 +18,6 @@
 # include "config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include <sys/queue.h>
-
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -36,22 +34,19 @@
 #include "xalloc.h"
 
 struct stream {
-	TAILQ_ENTRY(stream)	 entry;
-	char			*name;
-	shout_t 		*shout;
+	char	*name;
+	shout_t *shout;
 };
-TAILQ_HEAD(stream_list, stream);
 
-static struct stream_list	streams;
-
-static int	_stream_cfg_server(struct stream *);
-static int	_stream_cfg_tls(struct stream *);
-static int	_stream_cfg_stream(struct stream *);
+static int	_stream_cfg_server(struct stream *, cfg_server_t);
+static int	_stream_cfg_tls(struct stream *, cfg_server_t);
+static int	_stream_cfg_stream(struct stream *, cfg_stream_t);
+static void	_stream_reset(struct stream *);
 
 static int
-_stream_cfg_server(struct stream *s)
+_stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 {
-	switch (cfg_get_server_protocol()) {
+	switch (cfg_server_get_protocol(cfg_server)) {
 	case CFG_PROTO_HTTP:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_HTTP)) {
@@ -62,29 +57,29 @@ _stream_cfg_server(struct stream *s)
 		break;
 	default:
 		log_error("%s: protocol: unsupported: %s",
-		    s->name, cfg_get_server_protocol_str());
+		    s->name, cfg_server_get_protocol_str(cfg_server));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
-	    shout_set_host(s->shout, cfg_get_server_hostname())) {
+	    shout_set_host(s->shout, cfg_server_get_hostname(cfg_server))) {
 		log_error("%s: hostname: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
-	    shout_set_port(s->shout, (unsigned short)cfg_get_server_port())) {
+	    shout_set_port(s->shout, (unsigned short)cfg_server_get_port(cfg_server))) {
 		log_error("%s: port: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
-	    shout_set_user(s->shout, cfg_get_server_user())) {
+	    shout_set_user(s->shout, cfg_server_get_user(cfg_server))) {
 		log_error("%s: user: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
-	    shout_set_password(s->shout, cfg_get_server_password())) {
+	    shout_set_password(s->shout, cfg_server_get_password(cfg_server))) {
 		log_error("%s: password: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
@@ -94,12 +89,12 @@ _stream_cfg_server(struct stream *s)
 }
 
 static int
-_stream_cfg_tls(struct stream *s)
+_stream_cfg_tls(struct stream *s, cfg_server_t cfg_server)
 {
 #ifdef SHOUT_TLS_AUTO
 	int	tls_req;
 
-	switch (cfg_get_server_tls()) {
+	switch (cfg_server_get_tls(cfg_server)) {
 	case CFG_TLS_NONE:
 		tls_req = SHOUT_TLS_DISABLED;
 		break;
@@ -117,37 +112,37 @@ _stream_cfg_tls(struct stream *s)
 		log_error("%s: tls: %s", s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_server_ca_dir() &&
+	if (cfg_server_get_ca_dir(cfg_server) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_ca_directory(s->shout, cfg_get_server_ca_dir())) {
+	    shout_set_ca_directory(s->shout, cfg_server_get_ca_dir(cfg_server))) {
 		log_error("%s: ca_dir: %s", s->name,
 		    shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_server_ca_file() &&
+	if (cfg_server_get_ca_file(cfg_server) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_ca_file(s->shout, cfg_get_server_ca_file())) {
+	    shout_set_ca_file(s->shout, cfg_server_get_ca_file(cfg_server))) {
 		log_error("%s: ca_file: %s", s->name,
 		    shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_server_tls_cipher_suite() &&
+	if (cfg_server_get_tls_cipher_suite(cfg_server) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_allowed_ciphers(s->shout, cfg_get_server_tls_cipher_suite())) {
+	    shout_set_allowed_ciphers(s->shout, cfg_server_get_tls_cipher_suite(cfg_server))) {
 		log_error("%s: tls_cipher_suite: %s", s->name,
 		    shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_server_client_cert() &&
+	if (cfg_server_get_client_cert(cfg_server) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_client_certificate(s->shout, cfg_get_server_client_cert())) {
+	    shout_set_client_certificate(s->shout, cfg_server_get_client_cert(cfg_server))) {
 		log_error("%s: client_cert: %s", s->name,
 		    shout_get_error(s->shout));
 		return (-1);
 	}
 #else /* SHOUT_TLS_AUTO */
 # warning "libshout library does not support TLS"
-	switch (cfg_get_server_tls()) {
+	switch (cfg_server_get_tls(cfg_server)) {
 	case CFG_TLS_MAY:
 		log_warning("%s: TLS optional but not supported by libshout",
 		    s->name);
@@ -165,15 +160,15 @@ _stream_cfg_tls(struct stream *s)
 }
 
 static int
-_stream_cfg_stream(struct stream *s)
+_stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 {
 	if (SHOUTERR_SUCCESS !=
-	    shout_set_mount(s->shout, cfg_get_stream_mountpoint())) {
+	    shout_set_mount(s->shout, cfg_stream_get_mountpoint(cfg_stream))) {
 		log_error("%s: mountpoint: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	switch (cfg_get_stream_format()) {
+	switch (cfg_stream_get_format(cfg_stream)) {
 	case CFG_STREAM_VORBIS:
 	case CFG_STREAM_THEORA:
 		if (SHOUTERR_SUCCESS !=
@@ -193,68 +188,68 @@ _stream_cfg_stream(struct stream *s)
 		break;
 	default:
 		log_error("%s: format: unsupported: %s",
-		    s->name, cfg_get_stream_format_str());
+		    s->name, cfg_stream_get_format_str(cfg_stream));
 		return (-1);
 	}
-	if (cfg_get_stream_name() &&
+	if (SHOUTERR_SUCCESS !=
+	    shout_set_public(s->shout, (unsigned int)cfg_stream_get_public(cfg_stream))) {
+		log_error("%s: public: %s",
+		    s->name, shout_get_error(s->shout));
+		return (-1);
+	}
+	if (cfg_stream_get_stream_name(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_name(s->shout, cfg_get_stream_name())) {
+	    shout_set_name(s->shout, cfg_stream_get_stream_name(cfg_stream))) {
 		log_error("%s: name: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_url() &&
+	if (cfg_stream_get_stream_url(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_url(s->shout, cfg_get_stream_url())) {
+	    shout_set_url(s->shout, cfg_stream_get_stream_url(cfg_stream))) {
 		log_error("%s: url: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_genre() &&
+	if (cfg_stream_get_stream_genre(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_genre(s->shout, cfg_get_stream_genre())) {
+	    shout_set_genre(s->shout, cfg_stream_get_stream_genre(cfg_stream))) {
 		log_error("%s: genre: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_description() &&
+	if (cfg_stream_get_stream_description(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_description(s->shout, cfg_get_stream_description())) {
+	    shout_set_description(s->shout, cfg_stream_get_stream_description(cfg_stream))) {
 		log_error("%s: description: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_quality() &&
+	if (cfg_stream_get_stream_quality(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(s->shout, SHOUT_AI_QUALITY, cfg_get_stream_quality())) {
+	    shout_set_audio_info(s->shout, SHOUT_AI_QUALITY, cfg_stream_get_stream_quality(cfg_stream))) {
 		log_error("%s: ai_quality: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_bitrate() &&
+	if (cfg_stream_get_stream_bitrate(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(s->shout, SHOUT_AI_BITRATE, cfg_get_stream_bitrate())) {
+	    shout_set_audio_info(s->shout, SHOUT_AI_BITRATE, cfg_stream_get_stream_bitrate(cfg_stream))) {
 		log_error("%s: ai_bitrate: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_samplerate() &&
+	if (cfg_stream_get_stream_samplerate(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(s->shout, SHOUT_AI_SAMPLERATE, cfg_get_stream_samplerate())) {
+	    shout_set_audio_info(s->shout, SHOUT_AI_SAMPLERATE, cfg_stream_get_stream_samplerate(cfg_stream))) {
 		log_error("%s: ai_samplerate: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_get_stream_channels() &&
+	if (cfg_stream_get_stream_channels(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_audio_info(s->shout, SHOUT_AI_CHANNELS, cfg_get_stream_channels())) {
+	    shout_set_audio_info(s->shout, SHOUT_AI_CHANNELS, cfg_stream_get_stream_channels(cfg_stream))) {
 		log_error("%s: ai_channels: %s",
-		    s->name, shout_get_error(s->shout));
-		return (-1);
-	}
-	if (SHOUTERR_SUCCESS !=
-	    shout_set_public(s->shout, (unsigned int)cfg_get_stream_server_public())) {
-		log_error("%s: public: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
@@ -262,10 +257,22 @@ _stream_cfg_stream(struct stream *s)
 	return (0);
 }
 
+void
+_stream_reset(struct stream *s)
+{
+	if (!s->shout)
+		return;
+	shout_free(s->shout);
+	s->shout = shout_new();
+	if (NULL == s->shout) {
+		log_syserr(ALERT, ENOMEM, "shout_new");
+		exit(1);
+	}
+}
+
 int
 stream_init(void)
 {
-	TAILQ_INIT(&streams);
 	shout_init();
 	return (0);
 }
@@ -273,53 +280,66 @@ stream_init(void)
 void
 stream_exit(void)
 {
-	struct stream	*e;
-
-	while (NULL != (e = TAILQ_FIRST(&streams))) {
-		TAILQ_REMOVE(&streams, e, entry);
-		xfree(e->name);
-		shout_free(e->shout);
-		xfree(e);
-	}
 	shout_shutdown();
 }
 
 struct stream *
-stream_get(const char *name)
+stream_create(const char *name)
 {
-	struct stream	*e;
+	struct stream	*s;
 
-	TAILQ_FOREACH(e, &streams, entry) {
-		if (0 == strcasecmp(e->name, name))
-			return (e);
-	}
-
-	e = xcalloc(1UL, sizeof(*e));
-	e->name = xstrdup(name);
-	e->shout = shout_new();
-	if (NULL == e->shout) {
+	s = xcalloc(1UL, sizeof(*s));
+	s->name = xstrdup(name);
+	s->shout = shout_new();
+	if (NULL == s->shout) {
 		log_syserr(ALERT, ENOMEM, "shout_new");
 		exit(1);
 	}
 
-	TAILQ_INSERT_TAIL(&streams, e, entry);
+	return (s);
+}
 
-	return (e);
+void
+stream_destroy(struct stream **s_p)
+{
+	struct stream	*s = *s_p;
+
+	shout_free(s->shout);
+	xfree(s->name);
+	xfree(s);
+	*s_p = NULL;
 }
 
 int
-stream_setup(struct stream *s)
+stream_configure(struct stream *s)
 {
-	if (0 != _stream_cfg_server(s) ||
-	    0 != _stream_cfg_tls(s) ||
-	    0 != _stream_cfg_stream(s)) {
-		/* Reset handle on error */
-		shout_free(s->shout);
-		s->shout = shout_new();
-		if (NULL == s->shout) {
-			log_syserr(ALERT, ENOMEM, "shout_new");
-			exit(1);
-		}
+	cfg_stream_list_t	 streams;
+	cfg_server_list_t	 servers;
+	cfg_stream_t		 cfg_stream;
+	cfg_server_t		 cfg_server;
+	const char		*server;
+
+	streams = cfg_get_streams();
+	cfg_stream = cfg_stream_list_find(streams, s->name);
+	if (!cfg_stream) {
+		log_error("%s: stream has no configuration", s->name);
+		return (-1);
+	}
+	servers = cfg_get_servers();
+	server = cfg_stream_get_server(cfg_stream);
+	if (!server)
+		server = CFG_DEFAULT;
+	cfg_server = cfg_server_list_find(servers, server);
+	if (!cfg_server) {
+		log_error("%s: stream server has no configuration: %s",
+		    s->name, cfg_stream_get_server(cfg_stream));
+		return (-1);
+	}
+
+	if (0 != _stream_cfg_server(s, cfg_server) ||
+	    0 != _stream_cfg_tls(s, cfg_server) ||
+	    0 != _stream_cfg_stream(s, cfg_stream)) {
+		_stream_reset(s);
 		return (-1);
 	}
 
@@ -419,6 +439,25 @@ int
 stream_get_connected(struct stream *s)
 {
 	return (shout_get_connected(s->shout) == SHOUTERR_CONNECTED ? 1 : 0);
+}
+
+cfg_stream_t
+stream_get_cfg_stream(struct stream *s)
+{
+	return (cfg_stream_list_find(cfg_get_streams(), s->name));
+}
+
+cfg_server_t
+stream_get_cfg_server(struct stream *s)
+{
+	cfg_stream_t	 cfg_stream;
+	const char	*server;
+
+	cfg_stream = cfg_stream_list_get(cfg_get_streams(), s->name);
+	server = cfg_stream_get_server(cfg_stream);
+	if (!server)
+		server = CFG_DEFAULT;
+	return (cfg_server_list_get(cfg_get_servers(), server));
 }
 
 int

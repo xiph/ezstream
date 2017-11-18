@@ -33,82 +33,133 @@ struct cfg_encoder {
 	enum cfg_stream_format	 format;
 	char			*program;
 };
+
 TAILQ_HEAD(cfg_encoder_list, cfg_encoder);
 
-static struct cfg_encoder_list	cfg_encoders;
-
-int
-cfg_encoder_init(void)
+struct cfg_encoder_list *
+cfg_encoder_list_create(void)
 {
-	TAILQ_INIT(&cfg_encoders);
-	return (0);
+	struct cfg_encoder_list *el;
+
+	el = xcalloc(1UL, sizeof(*el));
+	TAILQ_INIT(el);
+
+	return (el);
 }
 
 void
-cfg_encoder_exit(void)
+cfg_encoder_list_destroy(cfg_encoder_list_t *el_p)
 {
+	struct cfg_encoder_list *el = *el_p;
 	struct cfg_encoder	*e;
 
-	while (NULL != (e = TAILQ_FIRST(&cfg_encoders))) {
-		TAILQ_REMOVE(&cfg_encoders, e, entry);
-		xfree(e->name);
-		xfree(e->program);
-		xfree(e);
+	if (!el)
+		return;
+
+	while (NULL != (e = TAILQ_FIRST(el))) {
+		TAILQ_REMOVE(el, e, entry);
+		cfg_encoder_destroy(&e);
 	}
+
+	xfree(el);
+	*el_p = NULL;
 }
 
 struct cfg_encoder *
-cfg_encoder_get(const char *name)
+cfg_encoder_list_find(struct cfg_encoder_list *el, const char *name)
+{
+	struct cfg_encoder	*e;
+
+	TAILQ_FOREACH(e, el, entry) {
+		if (0 == strcasecmp(e->name, name))
+			return (e);
+	}
+
+	return (NULL);
+}
+
+struct cfg_encoder *
+cfg_encoder_list_get(struct cfg_encoder_list *el, const char *name)
+{
+	struct cfg_encoder	*e;
+
+	e = cfg_encoder_list_find(el, name);
+	if (e)
+		return (e);
+	e = cfg_encoder_create(name);
+	if (!e)
+		return (NULL);
+
+	TAILQ_INSERT_TAIL(el, e, entry);
+
+	return (e);
+}
+
+struct cfg_encoder *
+cfg_encoder_create(const char *name)
 {
 	struct cfg_encoder	*e;
 
 	if (!name || !name[0])
 		return (NULL);
 
-	TAILQ_FOREACH(e, &cfg_encoders, entry) {
-		if (0 == strcasecmp(e->name, name))
-			return (e);
-	}
-
 	e = xcalloc(1UL, sizeof(*e));
 	e->name = xstrdup(name);
-
-	TAILQ_INSERT_TAIL(&cfg_encoders, e, entry);
 
 	return (e);
 }
 
-int
-cfg_encoder_set_name(struct cfg_encoder *e, const char *name,
-    const char **errstrp)
+void
+cfg_encoder_destroy(struct cfg_encoder **e_p)
 {
-	if (!name || !name[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
+	struct cfg_encoder	*e = *e_p;
 
 	xfree(e->name);
-	e->name = xstrdup(name);
-
-	return (0);
+	xfree(e->program);
+	xfree(e);
+	*e_p = NULL;
 }
 
 int
-cfg_encoder_set_format(struct cfg_encoder *e, enum cfg_stream_format fmt,
-    const char **not_used)
+cfg_encoder_set_format(struct cfg_encoder *e, enum cfg_stream_format fmt)
 {
-	(void)not_used;
 	assert(CFG_STREAM_MIN <= fmt && CFG_STREAM_MAX >= fmt);
 	e->format = fmt;
 	return (0);
 }
 
 int
-cfg_encoder_set_format_str(struct cfg_encoder *e, const char *fmt_str,
+cfg_encoder_set_name(struct cfg_encoder *e, struct cfg_encoder_list *el,
+    const char *name, const char **errstrp)
+{
+	struct cfg_encoder	*e2;
+
+	if (!name || !name[0]) {
+		if (errstrp)
+			*errstrp = "empty";
+		return (-1);
+	}
+
+	e2 = cfg_encoder_list_find(el, name);
+	if (e2 && e2 != e) {
+		if (errstrp)
+			*errstrp = "already exists";
+		return (-1);
+	}
+
+	SET_XSTRDUP(e->name, name, errstrp);
+
+	return (0);
+}
+
+int
+cfg_encoder_set_format_str(struct cfg_encoder *e,
+    struct cfg_encoder_list *not_used, const char *fmt_str,
     const char **errstrp)
 {
 	enum cfg_stream_format	fmt;
+
+	(void)not_used;
 
 	if (!fmt_str || !fmt_str[0]) {
 		if (errstrp)
@@ -122,16 +173,18 @@ cfg_encoder_set_format_str(struct cfg_encoder *e, const char *fmt_str,
 		return (-1);
 	}
 
-	cfg_encoder_set_format(e, fmt, errstrp);
+	cfg_encoder_set_format(e, fmt);
 
 	return (0);
 }
 
 int
-cfg_encoder_set_program(struct cfg_encoder *e, const char *program,
-    const char **not_used)
+cfg_encoder_set_program(struct cfg_encoder *e,
+    struct cfg_encoder_list *not_used, const char *program,
+    const char **not_used2)
 {
 	(void)not_used;
+	(void)not_used2;
 
 	xfree(e->program);
 

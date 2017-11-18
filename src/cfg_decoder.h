@@ -17,22 +17,34 @@
 #ifndef __CFG_INPUT_H__
 #define __CFG_INPUT_H__
 
-typedef struct cfg_decoder *	cfg_decoder_t;
+typedef struct cfg_decoder *		cfg_decoder_t;
+typedef struct cfg_decoder_list *	cfg_decoder_list_t;
 
-int	cfg_decoder_init(void);
-void	cfg_decoder_exit(void);
+cfg_decoder_list_t
+	cfg_decoder_list_create(void);
+void	cfg_decoder_list_destroy(cfg_decoder_list_t *);
 
 cfg_decoder_t
-	cfg_decoder_get(const char *);
+	cfg_decoder_list_find(cfg_decoder_list_t, const char *);
+cfg_decoder_t
+	cfg_decoder_list_findext(cfg_decoder_list_t, const char *);
+cfg_decoder_t
+	cfg_decoder_list_get(cfg_decoder_list_t, const char *);
 
-int	cfg_decoder_set_name(cfg_decoder_t, const char *, const char **);
-int	cfg_decoder_set_program(cfg_decoder_t, const char *, const char **);
-int	cfg_decoder_add_match(cfg_decoder_t, const char *, const char **);
+cfg_decoder_t
+	cfg_decoder_create(const char *);
+void	cfg_decoder_destroy(cfg_decoder_t *);
+
+int	cfg_decoder_set_name(cfg_decoder_t, cfg_decoder_list_t, const char *,
+	    const char **);
+int	cfg_decoder_set_program(cfg_decoder_t, cfg_decoder_list_t,
+	    const char *, const char **);
+int	cfg_decoder_add_match(cfg_decoder_t, cfg_decoder_list_t, const char *,
+	    const char **);
 
 int	cfg_decoder_validate(cfg_decoder_t, const char **);
 
-cfg_decoder_t
-	cfg_decoder_find(const char *);
+int	cfg_decoder_extsupport(cfg_decoder_t, const char *);
 
 const char *
 	cfg_decoder_get_name(cfg_decoder_t);

@@ -8,15 +8,19 @@
 
 <ezstream>
 
-  <server>
-    <hostname>127.0.0.1</hostname>
-    <password>hackme</password>
-  </server>
+  <servers>
+    <server>
+      <hostname>127.0.0.1</hostname>
+      <password>hackme</password>
+    </server>
+  </servers>
 
-  <stream>
-    <mountpoint>/stream.ogg</mountpoint>
-    <format>Vorbis</format>
-  </stream>
+  <streams>
+    <stream>
+      <mountpoint>/stream.ogg</mountpoint>
+      <format>Vorbis</format>
+    </stream>
+  </streams>
 
   <media>
     <filename>playlist.m3u</filename>

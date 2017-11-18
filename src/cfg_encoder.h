@@ -17,19 +17,30 @@
 #ifndef __CFG_ENCODER_H__
 #define __CFG_ENCODER_H__
 
-typedef struct cfg_encoder *	cfg_encoder_t;
+typedef struct cfg_encoder *		cfg_encoder_t;
+typedef struct cfg_encoder_list *	cfg_encoder_list_t;
 
-int	cfg_encoder_init(void);
-void	cfg_encoder_exit(void);
+cfg_encoder_list_t
+	cfg_encoder_list_create(void);
+void	cfg_encoder_list_destroy(cfg_encoder_list_t *);
 
 cfg_encoder_t
-	cfg_encoder_get(const char *);
+	cfg_encoder_list_find(cfg_encoder_list_t, const char *);
+cfg_encoder_t
+	cfg_encoder_list_get(cfg_encoder_list_t, const char *);
 
-int	cfg_encoder_set_name(cfg_encoder_t, const char *, const char **);
-int	cfg_encoder_set_format(cfg_encoder_t, enum cfg_stream_format,
+cfg_encoder_t
+	cfg_encoder_create(const char *);
+void	cfg_encoder_destroy(cfg_encoder_t *);
+
+int	cfg_encoder_set_format(cfg_encoder_t, enum cfg_stream_format);
+
+int	cfg_encoder_set_name(cfg_encoder_t, cfg_encoder_list_t, const char *,
 	    const char **);
-int	cfg_encoder_set_format_str(cfg_encoder_t, const char *, const char **);
-int	cfg_encoder_set_program(cfg_encoder_t, const char *, const char **);
+int	cfg_encoder_set_format_str(cfg_encoder_t, cfg_encoder_list_t,
+	    const char *, const char **);
+int	cfg_encoder_set_program(cfg_encoder_t, cfg_encoder_list_t,
+	    const char *, const char **);
 
 int	cfg_encoder_validate(cfg_encoder_t, const char **);
 

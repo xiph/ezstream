@@ -28,25 +28,12 @@
 #define PLACEHOLDER_TRACK	"@T@"
 #define PLACEHOLDER_STRING	"@s@"
 
+#define CFG_DEFAULT		"default"
+
 enum cfg_config_type {
 	CFG_TYPE_XMLFILE = 0,
 	CFG_TYPE_MIN = CFG_TYPE_XMLFILE,
 	CFG_TYPE_MAX = CFG_TYPE_XMLFILE,
-};
-
-enum cfg_server_protocol {
-	CFG_PROTO_HTTP = 0,
-	CFG_PROTO_HTTPS,
-	CFG_PROTO_MIN = CFG_PROTO_HTTP,
-	CFG_PROTO_MAX = CFG_PROTO_HTTPS,
-};
-
-enum cfg_server_tls {
-	CFG_TLS_MAY = 0,
-	CFG_TLS_NONE,
-	CFG_TLS_REQUIRED,
-	CFG_TLS_MIN = CFG_TLS_MAY,
-	CFG_TLS_MAX = CFG_TLS_REQUIRED,
 };
 
 enum cfg_media_type {
@@ -70,23 +57,30 @@ enum cfg_stream_format {
 
 #include "cfg_decoder.h"
 #include "cfg_encoder.h"
+#include "cfg_server.h"
+#include "cfg_stream.h"
 
 int	cfg_init(void);
 void	cfg_exit(void);
 
-void	cfg_save(void);
-void	cfg_restore(void);
-void	cfg_clear(void);
+int	cfg_file_reload(void);
 
 int	cfg_check(const char **);
-
-int	cfg_file_reload(void);
 
 int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
 const char *
 	cfg_stream_fmt2str(enum cfg_stream_format);
 
 int	cfg_file_check(const char *);
+
+cfg_decoder_list_t
+	cfg_get_decoders(void);
+cfg_encoder_list_t
+	cfg_get_encoders(void);
+cfg_server_list_t
+	cfg_get_servers(void);
+cfg_stream_list_t
+	cfg_get_streams(void);
 
 int	cfg_set_program_name(const char *, const char **);
 int	cfg_set_program_config_type(enum cfg_config_type, const char **);
@@ -95,31 +89,6 @@ int	cfg_set_program_pid_file(const char *, const char **);
 int	cfg_set_program_quiet_stderr(int, const char **);
 int	cfg_set_program_rtstatus_output(int, const char **);
 int	cfg_set_program_verbosity(unsigned int, const char **);
-
-int	cfg_set_server_protocol(const char *, const char **);
-int	cfg_set_server_hostname(const char *, const char **);
-int	cfg_set_server_port(const char *, const char **);
-int	cfg_set_server_user(const char *, const char **);
-int	cfg_set_server_password(const char *, const char **);
-int	cfg_set_server_tls(const char *, const char **);
-int	cfg_set_server_tls_cipher_suite(const char *, const char **);
-int	cfg_set_server_ca_dir(const char *, const char **);
-int	cfg_set_server_ca_file(const char *, const char **);
-int	cfg_set_server_client_cert(const char *, const char **);
-int	cfg_set_server_reconnect_attempts(const char *, const char **);
-
-int	cfg_set_stream_mountpoint(const char *, const char **);
-int	cfg_set_stream_name(const char *, const char **);
-int	cfg_set_stream_url(const char *, const char **);
-int	cfg_set_stream_genre(const char *, const char **);
-int	cfg_set_stream_description(const char *, const char **);
-int	cfg_set_stream_quality(const char *, const char **);
-int	cfg_set_stream_bitrate(const char *, const char **);
-int	cfg_set_stream_samplerate(const char *, const char **);
-int	cfg_set_stream_channels(const char *, const char **);
-int	cfg_set_stream_server_public(const char *, const char **);
-int	cfg_set_stream_format(const char *, const char **);
-int	cfg_set_stream_encoder(const char *, const char **);
 
 int	cfg_set_media_type(const char *, const char **);
 int	cfg_set_media_filename(const char *, const char **);
@@ -144,57 +113,6 @@ int	cfg_get_program_quiet_stderr(void);
 int	cfg_get_program_rtstatus_output(void);
 unsigned int
 	cfg_get_program_verbosity(void);
-
-enum cfg_server_protocol
-	cfg_get_server_protocol(void);
-const char *
-	cfg_get_server_protocol_str(void);
-const char *
-	cfg_get_server_hostname(void);
-unsigned int
-	cfg_get_server_port(void);
-const char *
-	cfg_get_server_user(void);
-const char *
-	cfg_get_server_password(void);
-enum cfg_server_tls
-	cfg_get_server_tls(void);
-const char *
-	cfg_get_server_tls_cipher_suite(void);
-const char *
-	cfg_get_server_ca_dir(void);
-const char *
-	cfg_get_server_ca_file(void);
-const char *
-	cfg_get_server_client_cert(void);
-unsigned int
-	cfg_get_server_reconnect_attempts(void);
-
-const char *
-	cfg_get_stream_mountpoint(void);
-const char *
-	cfg_get_stream_name(void);
-const char *
-	cfg_get_stream_url(void);
-const char *
-	cfg_get_stream_genre(void);
-const char *
-	cfg_get_stream_description(void);
-const char *
-	cfg_get_stream_quality(void);
-const char *
-	cfg_get_stream_bitrate(void);
-const char *
-	cfg_get_stream_samplerate(void);
-const char *
-	cfg_get_stream_channels(void);
-int	cfg_get_stream_server_public(void);
-enum cfg_stream_format
-	cfg_get_stream_format(void);
-const char *
-	cfg_get_stream_format_str(void);
-const char *
-	cfg_get_stream_encoder(void);
 
 enum cfg_media_type
 	cfg_get_media_type(void);

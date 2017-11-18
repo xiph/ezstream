@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<ezstream>
+
+  <servers>
+    <server>
+      <hostname>localhost</hostname>
+      <password>secret</password>
+      <name>duplicate</name>
+    </server>
+    <server>
+      <hostname>localhost</hostname>
+      <password>secret</password>
+      <name>duplicate</name>
+    </server>
+  </servers>
+
+  <streams>
+    <stream>
+      <format>vorbis</format>
+      <name>duplicate</name>
+    </stream>
+    <stream>
+      <format>vorbis</format>
+      <name>duplicate</name>
+    </stream>
+  </streams>
+
+  <decoders>
+    <decoder>
+      <program>true @T@</program>
+      <name>duplicate</name>
+      <file_ext>.ogg</file_ext>
+    </decoder>
+    <decoder>
+      <program>true @T@</program>
+      <name>duplicate</name>
+      <file_ext>.ogg</file_ext>
+    </decoder>
+    <!-- ... -->
+  </decoders>
+
+  <encoders>
+    <encoder>
+      <format>vorbis</format>
+      <name>duplicate</name>
+    </encoder>
+    <encoder>
+      <format>vorbis</format>
+      <name>duplicate</name>
+    </encoder>
+    <!-- ... -->
+  </encoders>
+
+</ezstream>

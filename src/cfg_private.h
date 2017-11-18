@@ -19,56 +19,33 @@
 
 #include "cfg.h"
 
+#include <sys/queue.h>
+
 #include <limits.h>
 #include <netdb.h>
 #include <stdio.h>
 #include <string.h>
 
-#define EXTENSIONS_MAX		16
-#define UCREDS_SIZE		256
-#define CSUITE_SIZE		2048
+#define EXTENSIONS_MAX	16
+#define UCREDS_SIZE	256
+#define CSUITE_SIZE	2048
 
-#define DEFAULT_PORT		8000
-#define DEFAULT_USER		"source"
+#define DEFAULT_PORT	8000
+#define DEFAULT_USER	"source"
+
+struct cfg_program {
+	char			 name[PATH_MAX];
+	enum cfg_config_type	 config_type;
+	char			 config_file[PATH_MAX];
+	char			 pid_file[PATH_MAX];
+	int			 quiet_stderr;
+	int			 rtstatus_output;
+	unsigned int		 verbosity;
+};
 
 struct cfg {
-	int				 _master_cfg;
-	struct program {
-		char			 name[PATH_MAX];
-		enum cfg_config_type	 config_type;
-		char			 config_file[PATH_MAX];
-		char			 pid_file[PATH_MAX];
-		int			 quiet_stderr;
-		int			 rtstatus_output;
-		unsigned int		 verbosity;
-	} program;
-	struct server {
-		enum cfg_server_protocol protocol;
-		char			 hostname[NI_MAXHOST];
-		unsigned int		 port;
-		char			 user[UCREDS_SIZE];
-		char			 password[UCREDS_SIZE];
-		enum cfg_server_tls	 tls;
-		char			 tls_cipher_suite[CSUITE_SIZE];
-		char			 ca_dir[PATH_MAX];
-		char			 ca_file[PATH_MAX];
-		char			 client_cert[PATH_MAX];
-		unsigned int		 reconnect_attempts;
-	} server;
-	struct stream {
-		char			*mountpoint;
-		char			*name;
-		char			*url;
-		char			*genre;
-		char			*description;
-		char			*quality;
-		char			*bitrate;
-		char			*samplerate;
-		char			*channels;
-		int			 server_public;
-		enum cfg_stream_format	 format;
-		char			*encoder;
-	} stream;
+	cfg_server_list_t		 servers;
+	cfg_stream_list_t		 streams;
 	struct media {
 		enum cfg_media_type	 type;
 		char			 filename[PATH_MAX];
@@ -82,6 +59,8 @@ struct cfg {
 		int			 normalize_strings;
 		int			 no_updates;
 	} metadata;
+	cfg_decoder_list_t		 decoders;
+	cfg_encoder_list_t		 encoders;
 };
 
 #define SET_STRLCPY(t, s, e)	do {		\
@@ -104,8 +83,7 @@ struct cfg {
 			*(e) = "empty"; 	\
 		return (-1);			\
 	}					\
-	if ((t))				\
-		xfree((t));			\
+	xfree((t));				\
 	(t) = xstrdup((s));			\
 } while (0)
 

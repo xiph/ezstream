@@ -10,17 +10,21 @@
 
 <ezstream>
 
-  <server>
-    <hostname>127.0.0.1</hostname>
-    <port>8000</port>
-    <password>hackme</password>
-  </server>
+  <servers>
+    <server>
+      <hostname>127.0.0.1</hostname>
+      <port>8000</port>
+      <password>hackme</password>
+    </server>
+  </servers>
 
-  <stream>
-    <mountpoint>/stream.ogg</mountpoint>
-    <format>Vorbis</format>
-    <encoder>OggEnc-Q1.5</encoder>
-  </stream>
+  <streams>
+    <stream>
+      <mountpoint>/stream.ogg</mountpoint>
+      <format>Vorbis</format>
+      <encoder>OggEnc-Q1.5</encoder>
+    </stream>
+  </streams>
 
   <media>
     <filename>%FILENAME%</filename>

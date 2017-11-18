@@ -2,34 +2,43 @@
 
 <ezstream>
 
-  <server>
-    <protocol></protocol>
-    <hostname></hostname>
-    <port></port>
-    <user></user>
-    <password></password>
-    <tls></tls>
-    <tls_cipher_suite></tls_cipher_suite>
-    <ca_dir></ca_dir>
-    <ca_file></ca_file>
-    <client_cert></client_cert>
-    <reconnect_attempts></reconnect_attempts>
-  </server>
+  <servers>
+    <server>
+      <name></name>
+      <protocol></protocol>
+      <hostname></hostname>
+      <port></port>
+      <user></user>
+      <password></password>
+      <tls></tls>
+      <tls_cipher_suite></tls_cipher_suite>
+      <ca_dir></ca_dir>
+      <ca_file></ca_file>
+      <client_cert></client_cert>
+      <reconnect_attempts></reconnect_attempts>
+    </server>
+    <!-- ... -->
+  </servers>
 
-  <stream>
-    <mountpoint></mountpoint>
-    <name></name>
-    <url></url>
-    <genre></genre>
-    <description></description>
-    <quality></quality>
-    <bitrate></bitrate>
-    <samplerate></samplerate>
-    <channels></channels>
-    <server_public></server_public>
-    <format></format>
-    <encoder></encoder>
-  </stream>
+  <streams>
+    <stream>
+      <name></name>
+      <mountpoint></mountpoint>
+      <public></public>
+      <server></server>
+      <format></format>
+      <encoder></encoder>
+      <stream_name></stream_name>
+      <stream_url></stream_url>
+      <stream_genre></stream_genre>
+      <stream_description></stream_description>
+      <stream_quality></stream_quality>
+      <stream_bitrate></stream_bitrate>
+      <stream_samplerate></stream_samplerate>
+      <stream_channels></stream_channels>
+    </stream>
+    <!-- ... -->
+  </streams>
 
   <media>
     <type></type>
