@@ -59,7 +59,6 @@ configure script, a couple of additional options are available:
   --enable-examplesdir=DIR
                           example configuration files installation directory
                           (default: DATADIR/examples/ezstream)
-  --enable-debug          enable memory debugging (default: no)
   --with-libshout=PFX     prefix where the libshout header files and library
                           are installed (default: autodetect)
   --with-libshout-includes=DIR
