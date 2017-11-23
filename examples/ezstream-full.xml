@@ -75,6 +75,9 @@
       <!-- Mount point on server -->
       <mountpoint>/stream.ogg</mountpoint>
 
+      <!-- Name of the intake entry to use (default: "default") -->
+      <intake>Default</intake>
+
       <!-- Name of the server entry to use (default: "default") -->
       <server>Default</server>
 
@@ -100,21 +103,26 @@
   </streams>
 
   <!--
-    Media configuration
+    Intake configuration
     -->
-  <media>
-    <!-- Media type: autodetect, file, playlist, program, stdin -->
-    <type>autodetect</type>
+  <intakes>
+    <intake>
+      <!-- Identifying name; default: "default" -->
+      <name>Default</name>
 
-    <!-- Input file, program name, or "stdin" keyword -->
-    <filename>playlist.m3u</filename>
+      <!-- Media type: autodetect, file, playlist, program, stdin -->
+      <type>autodetect</type>
 
-    <!-- Setting to shuffle playlists -->
-    <shuffle>Yes</shuffle>
+      <!-- Input file, program name, or "stdin" keyword -->
+      <filename>playlist.m3u</filename>
 
-    <!-- Setting whether to stream input indefinitely or only once -->
-    <stream_once>No</stream_once>
-  </media>
+      <!-- Setting to shuffle playlists -->
+      <shuffle>Yes</shuffle>
+
+      <!-- Setting whether to stream intake indefinitely or only once -->
+      <stream_once>No</stream_once>
+    </intake>
+  </intakes>
 
   <!--
     Metadata configuration

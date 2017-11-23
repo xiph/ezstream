@@ -45,10 +45,11 @@ static void	_cfg_commit(void);
 static void
 _cfg_reset(struct cfg *c)
 {
-	cfg_server_list_destroy(&c->servers);
 	cfg_stream_list_destroy(&c->streams);
-	cfg_decoder_list_destroy(&c->decoders);
+	cfg_server_list_destroy(&c->servers);
+	cfg_intake_list_destroy(&c->intakes);
 	cfg_encoder_list_destroy(&c->encoders);
+	cfg_decoder_list_destroy(&c->decoders);
 
 	xfree(c->metadata.format_str);
 
@@ -133,45 +134,11 @@ cfg_file_reload(void)
 }
 
 int
-cfg_check(const char **errstrp)
+cfg_check(const char **not_used)
 {
-	if (!cfg_get_media_filename() &&
-	    CFG_MEDIA_STDIN != cfg_get_media_type()) {
-		if (NULL != errstrp)
-			*errstrp = "media filename missing";
-		return (-1);
-	}
+	(void)not_used;
 
 	return (0);
-}
-
-int
-cfg_stream_str2fmt(const char *str, enum cfg_stream_format *fmt_p)
-{
-	if (0 == strcasecmp(str, CFG_SFMT_VORBIS)) {
-		*fmt_p = CFG_STREAM_VORBIS;
-	} else if (0 == strcasecmp(str, CFG_SFMT_MP3)) {
-		*fmt_p = CFG_STREAM_MP3;
-	} else if (0 == strcasecmp(str, CFG_SFMT_THEORA)) {
-		*fmt_p = CFG_STREAM_THEORA;
-	} else
-		return (-1);
-	return (0);
-}
-
-const char *
-cfg_stream_fmt2str(enum cfg_stream_format fmt)
-{
-	switch (fmt) {
-	case CFG_STREAM_VORBIS:
-		return (CFG_SFMT_VORBIS);
-	case CFG_STREAM_MP3:
-		return (CFG_SFMT_MP3);
-	case CFG_STREAM_THEORA:
-		return (CFG_SFMT_THEORA);
-	default:
-		return (NULL);
-	}
 }
 
 int
@@ -213,6 +180,15 @@ cfg_get_encoders(void)
 		cfg.encoders = cfg_encoder_list_create();
 
 	return (cfg.encoders);
+}
+
+cfg_intake_list_t
+cfg_get_intakes(void)
+{
+	if (!cfg.intakes)
+		cfg.intakes = cfg_intake_list_create();
+
+	return (cfg.intakes);
 }
 
 cfg_server_list_t
@@ -287,54 +263,6 @@ cfg_set_program_verbosity(unsigned int verbosity, const char **not_used)
 {
 	(void)not_used;
 	cfg_program.verbosity = verbosity;
-	return (0);
-}
-
-int
-cfg_set_media_type(const char *type, const char **errstrp)
-{
-	if (!type || !type[0]) {
-		if (errstrp)
-			*errstrp = "empty";
-		return (-1);
-	}
-
-	if (0 == strcasecmp("autodetect", type))
-		cfg.media.type = CFG_MEDIA_AUTODETECT;
-	else if (0 == strcasecmp("file", type))
-		cfg.media.type = CFG_MEDIA_FILE;
-	else if (0 == strcasecmp("playlist", type))
-		cfg.media.type = CFG_MEDIA_PLAYLIST;
-	else if (0 == strcasecmp("program", type))
-		cfg.media.type = CFG_MEDIA_PROGRAM;
-	else if (0 == strcasecmp("stdin", type))
-		cfg.media.type = CFG_MEDIA_STDIN;
-	else {
-		if (errstrp)
-			*errstrp = "unsupported";
-		return (-1);
-	}
-	return (0);
-}
-
-int
-cfg_set_media_filename(const char *filename, const char **errstrp)
-{
-	SET_STRLCPY(cfg.media.filename, filename, errstrp);
-	return (0);
-}
-
-int
-cfg_set_media_shuffle(const char *shuffle, const char **errstrp)
-{
-	SET_BOOLEAN(cfg.media.shuffle, shuffle, errstrp);
-	return (0);
-}
-
-int
-cfg_set_media_stream_once(const char *stream_once, const char **errstrp)
-{
-	SET_BOOLEAN(cfg.media.stream_once, stream_once, errstrp);
 	return (0);
 }
 
@@ -431,30 +359,6 @@ unsigned int
 cfg_get_program_verbosity(void)
 {
 	return (cfg_program.verbosity);
-}
-
-enum cfg_media_type
-cfg_get_media_type(void)
-{
-	return (cfg.media.type);
-}
-
-const char *
-cfg_get_media_filename(void)
-{
-	return (cfg.media.filename[0] ? cfg.media.filename : NULL);
-}
-
-int
-cfg_get_media_shuffle(void)
-{
-	return (cfg.media.shuffle);
-}
-
-int
-cfg_get_media_stream_once(void)
-{
-	return (cfg.media.stream_once);
 }
 
 const char *

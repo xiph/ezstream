@@ -15,6 +15,17 @@
     </server>
   </servers>
 
+  <intakes>
+    <intake>
+      <filename>secret</filename>
+      <name>duplicate</name>
+    </intake>
+    <intake>
+      <filename>secret</filename>
+      <name>duplicate</name>
+    </intake>
+  </intakes>
+
   <streams>
     <stream>
       <format>vorbis</format>

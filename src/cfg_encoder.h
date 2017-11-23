@@ -17,6 +17,8 @@
 #ifndef __CFG_ENCODER_H__
 #define __CFG_ENCODER_H__
 
+#include "cfg_stream.h"
+
 typedef struct cfg_encoder *		cfg_encoder_t;
 typedef struct cfg_encoder_list *	cfg_encoder_list_t;
 

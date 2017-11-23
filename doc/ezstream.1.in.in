@@ -307,6 +307,15 @@ The broadcast is private (the default).
 .It Ar 1|Yes|True
 The broadcast is public.
 .El
+.It Sy \&<intake\ /\&>
+Use the intake
+.Po
+input media
+.Pc
+configuration with the provided symbolic name for this stream.
+.Pp
+Default:
+.Ar default
 .It Sy \&<server\ /\&>
 Use the server configuration with the provided symbolic name for this stream.
 .Pp
@@ -376,17 +385,41 @@ Informational number of audio channels of the broadcast.
 Default:
 .Em none
 .El
-.Ss Media block
+.Ss Intakes block
 .Bl -tag -width -Ds
-.It Sy \&<media\ /\&>
-.Pq Mandatory.
-This element contains the entire input media configuration as child elements.
+.It Sy \&<intakes\ /\&>
+This element contains all intake blocks as child elements.
 Its parent is the
 .Sy \&<ezstream\ /\&>
 element.
+.Pp
+A configuration file may contain multiple named intake configurations.
+The stream configuration determines what intake
+.Po
+media input
+.Pc
+configuration should be used.
 .El
-.Ss Media configuration
+.Ss Intake block
 .Bl -tag -width -Ds
+.It Sy \&<intake\ /\&>
+.Pq Mandatory.
+This element contains the entire input media configuration as child elements.
+Its parent is the
+.Sy \&<intakes\ /\&>
+element.
+.El
+.Ss Intake configuration
+.Bl -tag -width -Ds
+.It Sy \&<name\ /\&>
+Set the name of the intake configuration.
+This may be referenced in a
+.Sy \&<stream\ /\&> .
+.Pp
+The name is case-aware, but not case-sensitive.
+.Pp
+Default:
+.Ar default
 .It Sy \&<type\ /\&>
 Configure the input media type:
 .Pp

@@ -26,6 +26,32 @@ START_TEST(test_stream_list_get)
 }
 END_TEST
 
+START_TEST(test_stream_str2fmt)
+{
+	enum cfg_stream_format	fmt;
+
+	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_VORBIS, &fmt), 0);
+	ck_assert_int_eq(fmt, CFG_STREAM_VORBIS);
+	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_MP3, &fmt), 0);
+	ck_assert_int_eq(fmt, CFG_STREAM_MP3);
+	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_THEORA, &fmt), 0);
+	ck_assert_int_eq(fmt, CFG_STREAM_THEORA);
+	ck_assert_int_eq(cfg_stream_str2fmt("<something else>", &fmt), -1);
+}
+END_TEST
+
+START_TEST(test_stream_fmt2str)
+{
+	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_VORBIS),
+	    CFG_SFMT_VORBIS);
+	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_MP3),
+	    CFG_SFMT_MP3);
+	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_THEORA),
+	    CFG_SFMT_THEORA);
+	ck_assert_ptr_eq(cfg_stream_fmt2str(CFG_STREAM_INVALID), NULL);
+}
+END_TEST
+
 START_TEST(test_stream_name)
 {
 }
@@ -35,6 +61,13 @@ START_TEST(test_stream_mountpoint)
 {
 	TEST_XSTRDUP_T(cfg_stream_t, cfg_stream_list_get, streams,
 	    cfg_stream_set_mountpoint, cfg_stream_get_mountpoint);
+}
+END_TEST
+
+START_TEST(test_stream_intake)
+{
+	TEST_XSTRDUP_T(cfg_stream_t, cfg_stream_list_get, streams,
+	    cfg_stream_set_intake, cfg_stream_get_intake);
 }
 END_TEST
 
@@ -164,8 +197,11 @@ cfg_suite(void)
 	tc_stream = tcase_create("Stream");
 	tcase_add_checked_fixture(tc_stream, setup_checked, teardown_checked);
 	tcase_add_test(tc_stream, test_stream_list_get);
+	tcase_add_test(tc_stream, test_stream_str2fmt);
+	tcase_add_test(tc_stream, test_stream_fmt2str);
 	tcase_add_test(tc_stream, test_stream_name);
 	tcase_add_test(tc_stream, test_stream_mountpoint);
+	tcase_add_test(tc_stream, test_stream_intake);
 	tcase_add_test(tc_stream, test_stream_server);
 	tcase_add_test(tc_stream, test_stream_public);
 	tcase_add_test(tc_stream, test_stream_format);

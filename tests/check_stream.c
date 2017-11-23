@@ -31,6 +31,7 @@ START_TEST(test_stream)
 	ck_assert_ptr_ne(srv_cfg, NULL);
 	str_cfg = stream_get_cfg_stream(s);
 	ck_assert_ptr_ne(str_cfg, NULL);
+	ck_assert_ptr_ne(stream_get_cfg_intake(s), NULL);
 
 	ck_assert_int_ne(stream_configure(s), 0);
 	cfg_server_set_hostname(srv_cfg, servers, "localhost", NULL);
@@ -94,6 +95,8 @@ START_TEST(test_stream)
 	m_str = NULL;
 
 	mdata_destroy(&m);
+
+	stream_destroy(&s);
 }
 END_TEST
 

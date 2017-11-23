@@ -13,49 +13,7 @@ void	teardown_checked(void);
 
 START_TEST(test_check)
 {
-	const char	*errstr = NULL;
-
-	ck_assert_int_eq(cfg_check(NULL), -1);
-	ck_assert_int_eq(cfg_check(&errstr), -1);
-	ck_assert_str_eq(errstr, "media filename missing");
-	ck_assert_int_eq(cfg_set_media_type("stdin", NULL), 0);
-
 	ck_assert_int_eq(cfg_check(NULL), 0);
-
-	ck_assert_int_eq(cfg_set_media_type("autodetect", NULL), 0);
-	ck_assert_int_eq(cfg_check(NULL), -1);
-	ck_assert_int_eq(cfg_check(&errstr), -1);
-	ck_assert_str_eq(errstr, "media filename missing");
-	ck_assert_int_eq(cfg_set_media_filename(SRCDIR "/playlist.txt", NULL),
-	    0);
-
-	ck_assert_int_eq(cfg_check(NULL), 0);
-}
-END_TEST
-
-START_TEST(test_stream_str2fmt)
-{
-	enum cfg_stream_format	fmt;
-
-	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_VORBIS, &fmt), 0);
-	ck_assert_int_eq(fmt, CFG_STREAM_VORBIS);
-	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_MP3, &fmt), 0);
-	ck_assert_int_eq(fmt, CFG_STREAM_MP3);
-	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_THEORA, &fmt), 0);
-	ck_assert_int_eq(fmt, CFG_STREAM_THEORA);
-	ck_assert_int_eq(cfg_stream_str2fmt("<something else>", &fmt), -1);
-}
-END_TEST
-
-START_TEST(test_stream_fmt2str)
-{
-	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_VORBIS),
-	    CFG_SFMT_VORBIS);
-	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_MP3),
-	    CFG_SFMT_MP3);
-	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_THEORA),
-	    CFG_SFMT_THEORA);
-	ck_assert_ptr_eq(cfg_stream_fmt2str(CFG_STREAM_INVALID), NULL);
 }
 END_TEST
 
@@ -118,46 +76,6 @@ START_TEST(test_program_verbosity)
 {
 	ck_assert_int_eq(cfg_set_program_verbosity(2000, NULL), 0);
 	ck_assert_int_eq(cfg_get_program_verbosity(), 2000);
-}
-END_TEST
-
-START_TEST(test_media_type)
-{
-	const char	*errstr2;
-
-	TEST_EMPTYSTR(cfg_set_media_type);
-
-	ck_assert_int_eq(cfg_set_media_type("<something else>", &errstr2), -1);
-	ck_assert_str_eq(errstr2, "unsupported");
-
-	ck_assert_int_eq(cfg_set_media_type("aUtOdEtEcT", NULL), 0);
-	ck_assert_int_eq(cfg_get_media_type(), CFG_MEDIA_AUTODETECT);
-	ck_assert_int_eq(cfg_set_media_type("FiLe", NULL), 0);
-	ck_assert_int_eq(cfg_get_media_type(), CFG_MEDIA_FILE);
-	ck_assert_int_eq(cfg_set_media_type("pLaYlIsT", NULL), 0);
-	ck_assert_int_eq(cfg_get_media_type(), CFG_MEDIA_PLAYLIST);
-	ck_assert_int_eq(cfg_set_media_type("PrOgRaM", NULL), 0);
-	ck_assert_int_eq(cfg_get_media_type(), CFG_MEDIA_PROGRAM);
-	ck_assert_int_eq(cfg_set_media_type("sTdIn", NULL), 0);
-	ck_assert_int_eq(cfg_get_media_type(), CFG_MEDIA_STDIN);
-}
-END_TEST
-
-START_TEST(test_media_filename)
-{
-	TEST_STRLCPY(cfg_set_media_filename, cfg_get_media_filename, PATH_MAX);
-}
-END_TEST
-
-START_TEST(test_media_shuffle)
-{
-	TEST_BOOLEAN(cfg_set_media_shuffle, cfg_get_media_shuffle);
-}
-END_TEST
-
-START_TEST(test_media_stream_once)
-{
-	TEST_BOOLEAN(cfg_set_media_stream_once, cfg_get_media_stream_once);
 }
 END_TEST
 
@@ -240,7 +158,6 @@ cfg_suite(void)
 	Suite	*s;
 	TCase	*tc_core;
 	TCase	*tc_program;
-	TCase	*tc_media;
 	TCase	*tc_metadata;
 
 	s = suite_create("Config");
@@ -248,8 +165,6 @@ cfg_suite(void)
 	tc_core = tcase_create("Core");
 	tcase_add_checked_fixture(tc_core, setup_checked, teardown_checked);
 	tcase_add_test(tc_core, test_check);
-	tcase_add_test(tc_core, test_stream_str2fmt);
-	tcase_add_test(tc_core, test_stream_fmt2str);
 	tcase_add_test(tc_core, test_file_check);
 	suite_add_tcase(s, tc_core);
 
@@ -264,14 +179,6 @@ cfg_suite(void)
 	tcase_add_test(tc_program, test_program_rtstatus_output);
 	tcase_add_test(tc_program, test_program_verbosity);
 	suite_add_tcase(s, tc_program);
-
-	tc_media = tcase_create("Media");
-	tcase_add_checked_fixture(tc_media, setup_checked, teardown_checked);
-	tcase_add_test(tc_media, test_media_type);
-	tcase_add_test(tc_media, test_media_filename);
-	tcase_add_test(tc_media, test_media_shuffle);
-	tcase_add_test(tc_media, test_media_stream_once);
-	suite_add_tcase(s, tc_media);
 
 	tc_metadata = tcase_create("Metadata");
 	tcase_add_checked_fixture(tc_metadata, setup_checked,

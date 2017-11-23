@@ -25,6 +25,7 @@
       <name></name>
       <mountpoint></mountpoint>
       <public></public>
+      <intake></intake>
       <server></server>
       <format></format>
       <encoder></encoder>
@@ -40,12 +41,15 @@
     <!-- ... -->
   </streams>
 
-  <media>
-    <type></type>
-    <filename></filename>
-    <shuffle></shuffle>
-    <stream_once></stream_once>
-  </media>
+  <intakes>
+    <intake>
+      <name></name>
+      <type></type>
+      <filename></filename>
+      <shuffle></shuffle>
+      <stream_once></stream_once>
+    </intake>
+  </intakes>
 
   <metadata>
     <program></program>

@@ -447,6 +447,19 @@ stream_get_cfg_stream(struct stream *s)
 	return (cfg_stream_list_find(cfg_get_streams(), s->name));
 }
 
+cfg_intake_t
+stream_get_cfg_intake(struct stream *s)
+{
+	cfg_stream_t	 cfg_stream;
+	const char	*intake;
+
+	cfg_stream = cfg_stream_list_get(cfg_get_streams(), s->name);
+	intake = cfg_stream_get_intake(cfg_stream);
+	if (!intake)
+		intake = CFG_DEFAULT;
+	return (cfg_intake_list_get(cfg_get_intakes(), intake));
+}
+
 cfg_server_t
 stream_get_cfg_server(struct stream *s)
 {

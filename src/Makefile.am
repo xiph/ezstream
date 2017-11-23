@@ -6,6 +6,7 @@ noinst_HEADERS	 = \
 	cfg.h \
 	cfg_decoder.h \
 	cfg_encoder.h \
+	cfg_intake.h \
 	cfg_private.h \
 	cfg_server.h \
 	cfg_stream.h \
@@ -22,6 +23,7 @@ libezstream_la_SOURCES = \
 	cfg.c \
 	cfg_decoder.c \
 	cfg_encoder.c \
+	cfg_intake.c \
 	cfg_server.c \
 	cfg_stream.c \
 	cfg_xmlfile.c \

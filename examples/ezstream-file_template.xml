@@ -26,9 +26,11 @@
     </stream>
   </streams>
 
-  <media>
-    <filename>%FILENAME%</filename>
-  </media>
+  <intakes>
+    <intake>
+      <filename>%FILENAME%</filename>
+    </intake>
+  </intakes>
 
   <decoders>
     <decoder>

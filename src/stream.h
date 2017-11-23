@@ -39,6 +39,8 @@ const char *
 int	stream_get_connected(stream_t);
 cfg_stream_t
 	stream_get_cfg_stream(stream_t);
+cfg_intake_t
+	stream_get_cfg_intake(stream_t);
 cfg_server_t
 	stream_get_cfg_server(stream_t);
 

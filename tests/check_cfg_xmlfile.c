@@ -40,6 +40,9 @@ START_TEST(test_reload)
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad5.xml",
 	    NULL), 0);
 	ck_assert_int_eq(cfg_file_reload(), -1);
+	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad6.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), -1);
 }
 END_TEST
 

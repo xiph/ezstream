@@ -29,7 +29,8 @@ static int	_cfg_xmlfile_parse_server(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_servers(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_stream(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_streams(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_media(xmlDocPtr, xmlNodePtr);
+static int	_cfg_xmlfile_parse_intake(xmlDocPtr, xmlNodePtr);
+static int	_cfg_xmlfile_parse_intakes(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_metadata(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_decoder(xmlDocPtr, xmlNodePtr);
 static int	_cfg_xmlfile_parse_decoders(xmlDocPtr, xmlNodePtr);
@@ -46,7 +47,7 @@ static int	_cfg_xmlfile_parse_encoders(xmlDocPtr, xmlNodePtr);
 		int		 error = 0;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {		\
+		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {	\
 			log_error("%s[%ld]: server (%s): %s: %s",	\
 			    doc->name, xmlGetLineNo(cur),		\
 			    cfg_server_get_name((c)), (e), err_str);	\
@@ -112,7 +113,7 @@ _cfg_xmlfile_parse_servers(xmlDocPtr doc, xmlNodePtr cur)
 		int		 error = 0;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {		\
+		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {	\
 			log_error("%s[%ld]: stream (%s): %s: %s",	\
 			    doc->name, xmlGetLineNo(cur),		\
 			    cfg_stream_get_name((c)), (e), err_str);	\
@@ -138,6 +139,7 @@ _cfg_xmlfile_parse_stream(xmlDocPtr doc, xmlNodePtr cur)
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		XML_STREAM_SET(s, sl, cfg_stream_set_name,               "name");
 		XML_STREAM_SET(s, sl, cfg_stream_set_mountpoint,         "mountpoint");
+		XML_STREAM_SET(s, sl, cfg_stream_set_intake,             "intake");
 		XML_STREAM_SET(s, sl, cfg_stream_set_server,             "server");
 		XML_STREAM_SET(s, sl, cfg_stream_set_public,             "public");
 		XML_STREAM_SET(s, sl, cfg_stream_set_format,             "format");
@@ -172,6 +174,65 @@ _cfg_xmlfile_parse_streams(xmlDocPtr doc, xmlNodePtr cur)
 	return (0);
 }
 
+#define XML_INPUT_SET(c, l, f, e)	do {				\
+	if (0 == xmlStrcasecmp(cur->name, XML_CHAR((e)))) {		\
+		xmlChar 	*val;					\
+		const char	*err_str;				\
+		int		 error = 0;				\
+									\
+		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
+		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {	\
+			log_error("%s[%ld]: intake (%s): %s: %s",	\
+			    doc->name, xmlGetLineNo(cur),		\
+			    cfg_intake_get_name((c)), (e), err_str);	\
+			error = 1;					\
+		}							\
+		xmlFree(val);						\
+		if (error)						\
+			return (-1);					\
+	}								\
+} while (0)
+
+static int
+_cfg_xmlfile_parse_intake(xmlDocPtr doc, xmlNodePtr cur)
+{
+	cfg_intake_list_t	 il;
+	cfg_intake_t		 i;
+	const char		*errstr;
+	long int		 line_no = xmlGetLineNo(cur);
+
+	il = cfg_get_intakes();
+	i = cfg_intake_list_get(il, CFG_DEFAULT);
+
+	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
+		XML_INPUT_SET(i, il, cfg_intake_set_name,        "name");
+		XML_INPUT_SET(i, il, cfg_intake_set_type,        "type");
+		XML_INPUT_SET(i, il, cfg_intake_set_filename,    "filename");
+		XML_INPUT_SET(i, il, cfg_intake_set_shuffle,     "shuffle");
+		XML_INPUT_SET(i, il, cfg_intake_set_stream_once, "stream_once");
+	}
+
+	if (0 > cfg_intake_validate(i, &errstr)) {
+		log_error("%s[%ld]: intake (%s): %s", doc->name, line_no,
+		    cfg_intake_get_name(i), errstr);
+		return (-1);
+	}
+
+	return (0);
+}
+
+static int
+_cfg_xmlfile_parse_intakes(xmlDocPtr doc, xmlNodePtr cur)
+{
+	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
+		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("intake")) &&
+		    0 > _cfg_xmlfile_parse_intake(doc, cur))
+			return (-1);
+	}
+
+	return (0);
+}
+
 #define XML_STRCONFIG(s, f, e)	do {					\
 	if (0 == xmlStrcasecmp(cur->name, XML_CHAR((e)))) {		\
 		xmlChar 	*val;					\
@@ -186,24 +247,6 @@ _cfg_xmlfile_parse_streams(xmlDocPtr doc, xmlNodePtr cur)
 		xmlFree(val);						\
 	}								\
 } while (0)
-
-static int
-_cfg_xmlfile_parse_media(xmlDocPtr doc, xmlNodePtr cur)
-{
-	int	error = 0;
-
-	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
-		XML_STRCONFIG("media", cfg_set_media_type,        "type");
-		XML_STRCONFIG("media", cfg_set_media_filename,    "filename");
-		XML_STRCONFIG("media", cfg_set_media_shuffle,     "shuffle");
-		XML_STRCONFIG("media", cfg_set_media_stream_once, "stream_once");
-	}
-
-	if (error)
-		return (-1);
-
-	return (0);
-}
 
 static int
 _cfg_xmlfile_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
@@ -233,7 +276,7 @@ _cfg_xmlfile_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
 		int		 error = 0;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {		\
+		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {	\
 			log_error("%s[%ld]: decoder (%s): %s: %s",	\
 			    doc->name, xmlGetLineNo(cur),		\
 			    cfg_decoder_get_name((c)), (e), err_str);	\
@@ -290,7 +333,7 @@ _cfg_xmlfile_parse_decoders(xmlDocPtr doc, xmlNodePtr cur)
 		int		 error = 0;				\
 									\
 		val = xmlNodeListGetString(doc, cur->xmlChildrenNode, 1); \
-		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {		\
+		if (0 > (f)((c), (l), STD_CHAR(val), &err_str)) {	\
 			log_error("%s[%ld]: encoder (%s): %s: %s",	\
 			    doc->name, xmlGetLineNo(cur),		\
 			    cfg_encoder_get_name((c)), (e), err_str);	\
@@ -364,6 +407,7 @@ _cfg_xmlfile_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
  *             name
  *             mountpoint
  *             public
+ *             intake
  *             server
  *             format
  *             encoder
@@ -376,11 +420,13 @@ _cfg_xmlfile_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
  *             stream_samplerate
  *             stream_channels
  *         ...
- *     media
- *         type
- *         filename
- *         shuffle
- *         stream_once
+ *     intakes
+ *         intake
+ *             type
+ *             filename
+ *             shuffle
+ *             stream_once
+ *         ...
  *     metadata
  *         program
  *         format_str
@@ -441,8 +487,8 @@ cfg_xmlfile_parse(const char *config_file)
 				error = 1;
 			continue;
 		}
-		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("media"))) {
-			if (0 > _cfg_xmlfile_parse_media(doc, cur))
+		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("intakes"))) {
+			if (0 > _cfg_xmlfile_parse_intakes(doc, cur))
 				error = 1;
 			continue;
 		}

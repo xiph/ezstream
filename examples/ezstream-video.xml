@@ -21,9 +21,11 @@
     </stream>
   </streams>
 
-  <media>
-    <filename>playlist.m3u</filename>
-  </media>
+  <intakes>
+    <intake>
+      <filename>playlist.m3u</filename>
+    </intake>
+  </intakes>
 
   <decoders>
     <decoder>

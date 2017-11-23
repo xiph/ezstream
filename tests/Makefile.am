@@ -4,6 +4,7 @@ TESTS		 = \
 	check_cfg \
 	check_cfg_decoder \
 	check_cfg_encoder \
+	check_cfg_intake \
 	check_cfg_server \
 	check_cfg_stream \
 	check_cfg_xmlfile \
@@ -29,6 +30,10 @@ check_cfg_decoder_LDADD = $(check_cfg_decoder_DEPENDENCIES) @CHECK_LIBS@
 check_cfg_encoder_SOURCES = check_cfg_encoder.c
 check_cfg_encoder_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_cfg_encoder_LDADD = $(check_cfg_encoder_DEPENDENCIES) @CHECK_LIBS@
+
+check_cfg_intake_SOURCES = check_cfg_intake.c
+check_cfg_intake_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cfg_intake_LDADD = $(check_cfg_intake_DEPENDENCIES) @CHECK_LIBS@
 
 check_cfg_server_SOURCES = check_cfg_server.c
 check_cfg_server_DEPENDENCIES = $(top_builddir)/src/libezstream.la
@@ -87,6 +92,7 @@ EXTRA_DIST	 = \
 	config-bad3.xml \
 	config-bad4.xml \
 	config-bad5.xml \
+	config-bad6.xml \
 	play-bad.sh \
 	play-bad2.sh \
 	play-bad3.sh \

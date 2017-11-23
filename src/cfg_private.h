@@ -44,14 +44,11 @@ struct cfg_program {
 };
 
 struct cfg {
+	cfg_decoder_list_t		 decoders;
+	cfg_encoder_list_t		 encoders;
+	cfg_intake_list_t		 intakes;
 	cfg_server_list_t		 servers;
 	cfg_stream_list_t		 streams;
-	struct media {
-		enum cfg_media_type	 type;
-		char			 filename[PATH_MAX];
-		int			 shuffle;
-		int			 stream_once;
-	} media;
 	struct metadata {
 		char			 program[PATH_MAX];
 		char			*format_str;
@@ -59,8 +56,6 @@ struct cfg {
 		int			 normalize_strings;
 		int			 no_updates;
 	} metadata;
-	cfg_decoder_list_t		 decoders;
-	cfg_encoder_list_t		 encoders;
 };
 
 #define SET_STRLCPY(t, s, e)	do {		\

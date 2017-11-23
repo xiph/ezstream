@@ -407,6 +407,7 @@ sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 	struct timespec	  timeStamp, *startTime = tv;
 	struct timespec	  callTime, currentTime;
 	cfg_server_t	  cfg_server = stream_get_cfg_server(stream);
+	cfg_intake_t	  cfg_intake = stream_get_cfg_intake(stream);
 
 	clock_gettime(CLOCK_MONOTONIC, &callTime);
 
@@ -437,7 +438,7 @@ sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 			break;
 		if (rereadPlaylist_notify) {
 			rereadPlaylist_notify = 0;
-			if (CFG_MEDIA_PLAYLIST == cfg_get_media_type())
+			if (CFG_INTAKE_PLAYLIST == cfg_intake_get_type(cfg_intake))
 				log_notice("HUP signal received: playlist re-read scheduled");
 		}
 		if (skipTrack) {
@@ -464,8 +465,8 @@ sendStream(stream_t stream, FILE *filepstream, const char *fileName,
 			double	oldTime, newTime;
 
 			if (!isStdin && playlistMode) {
-				if (CFG_MEDIA_PROGRAM == cfg_get_media_type()) {
-					char *tmp = xstrdup(cfg_get_media_filename());
+				if (CFG_INTAKE_PROGRAM == cfg_intake_get_type(cfg_intake)) {
+					char *tmp = xstrdup(cfg_intake_get_filename(cfg_intake));
 					printf("  [%s]", basename(tmp));
 					xfree(tmp);
 				} else
@@ -523,12 +524,13 @@ streamFile(stream_t stream, const char *fileName)
 	FILE		*filepstream = NULL;
 	int		 popenFlag = 0;
 	char		*songLenStr = NULL;
-	int		 isStdin = cfg_get_media_type() == CFG_MEDIA_STDIN;
 	int		 ret, retval = 0;
 	long		 songLen;
 	mdata_t 	 md = NULL;
 	struct timespec	 startTime;
 	cfg_stream_t	 cfg_stream = stream_get_cfg_stream(stream);
+	cfg_intake_t	 cfg_intake = stream_get_cfg_intake(stream);
+	int		 isStdin = cfg_intake_get_type(cfg_intake) == CFG_INTAKE_STDIN;
 
 	if ((filepstream = openResource(stream, fileName, &popenFlag, &md, &isStdin, &songLen))
 	    == NULL) {
@@ -633,23 +635,24 @@ streamPlaylist(stream_t stream)
 {
 	const char	*song;
 	char		 lastSong[PATH_MAX];
+	cfg_intake_t	 cfg_intake = stream_get_cfg_intake(stream);
 
 	if (playlist == NULL) {
-		switch (cfg_get_media_type()) {
-		case CFG_MEDIA_PROGRAM:
-			if ((playlist = playlist_program(cfg_get_media_filename())) == NULL)
+		switch (cfg_intake_get_type(cfg_intake)) {
+		case CFG_INTAKE_PROGRAM:
+			if ((playlist = playlist_program(cfg_intake_get_filename(cfg_intake))) == NULL)
 				return (0);
 			break;
-		case CFG_MEDIA_STDIN:
+		case CFG_INTAKE_STDIN:
 			if ((playlist = playlist_read(NULL)) == NULL)
 				return (0);
 			break;
 		default:
-			if ((playlist = playlist_read(cfg_get_media_filename())) == NULL)
+			if ((playlist = playlist_read(cfg_intake_get_filename(cfg_intake))) == NULL)
 				return (0);
 			if (playlist_get_num_items(playlist) == 0)
 				log_warning("%s: playlist empty",
-				    cfg_get_media_filename());
+				    cfg_intake_get_filename(cfg_intake));
 			break;
 		}
 	} else {
@@ -661,8 +664,8 @@ streamPlaylist(stream_t stream)
 		playlist_rewind(playlist);
 	}
 
-	if (CFG_MEDIA_PROGRAM != cfg_get_media_type() &&
-	    cfg_get_media_shuffle())
+	if (CFG_INTAKE_PROGRAM != cfg_intake_get_type(cfg_intake) &&
+	    cfg_intake_get_shuffle(cfg_intake))
 		playlist_shuffle(playlist);
 
 	while ((song = playlist_get_next(playlist)) != NULL) {
@@ -673,12 +676,12 @@ streamPlaylist(stream_t stream)
 			break;
 		if (rereadPlaylist) {
 			rereadPlaylist = rereadPlaylist_notify = 0;
-			if (CFG_MEDIA_PROGRAM == cfg_get_media_type())
+			if (CFG_INTAKE_PROGRAM == cfg_intake_get_type(cfg_intake))
 				continue;
 			log_notice("rereading playlist");
 			if (!playlist_reread(&playlist))
 				return (0);
-			if (cfg_get_media_shuffle())
+			if (cfg_intake_get_shuffle(cfg_intake))
 				playlist_shuffle(playlist);
 			else {
 				playlist_goto_entry(playlist, lastSong);
@@ -716,6 +719,7 @@ main(int argc, char *argv[])
 	unsigned int	 i;
 	cfg_server_t	 cfg_server;
 	cfg_stream_t	 cfg_stream;
+	cfg_intake_t	 cfg_intake;
 
 	ret = 1;
 	if (0 > cfg_init() ||
@@ -736,6 +740,7 @@ main(int argc, char *argv[])
 		return (ez_shutdown(1));
 	cfg_server = stream_get_cfg_server(main_stream);
 	cfg_stream = stream_get_cfg_stream(main_stream);
+	cfg_intake = stream_get_cfg_intake(main_stream);
 
 	memset(&act, 0, sizeof(act));
 	act.sa_handler = sig_handler;
@@ -774,11 +779,11 @@ main(int argc, char *argv[])
 	    cfg_server_get_port(cfg_server),
 	    cfg_stream_get_mountpoint(cfg_stream));
 
-	if (CFG_MEDIA_PROGRAM == cfg_get_media_type() ||
-	    CFG_MEDIA_PLAYLIST == cfg_get_media_type() ||
-	    (CFG_MEDIA_AUTODETECT == cfg_get_media_type() &&
-		(util_strrcasecmp(cfg_get_media_filename(), ".m3u") == 0 ||
-		    util_strrcasecmp(cfg_get_media_filename(), ".txt") == 0)))
+	if (CFG_INTAKE_PROGRAM == cfg_intake_get_type(cfg_intake) ||
+	    CFG_INTAKE_PLAYLIST == cfg_intake_get_type(cfg_intake) ||
+	    (CFG_INTAKE_AUTODETECT == cfg_intake_get_type(cfg_intake) &&
+		(util_strrcasecmp(cfg_intake_get_filename(cfg_intake), ".m3u") == 0 ||
+		    util_strrcasecmp(cfg_intake_get_filename(cfg_intake), ".txt") == 0)))
 		playlistMode = 1;
 	else
 		playlistMode = 0;
@@ -788,11 +793,11 @@ main(int argc, char *argv[])
 			cont = streamPlaylist(main_stream);
 		} else {
 			cont = streamFile(main_stream,
-			    cfg_get_media_filename());
+			    cfg_intake_get_filename(cfg_intake));
 		}
 		if (quit)
 			break;
-		if (cfg_get_media_stream_once())
+		if (cfg_intake_get_stream_once(cfg_intake))
 			break;
 	} while (cont);
 

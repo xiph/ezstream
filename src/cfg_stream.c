@@ -30,6 +30,7 @@ struct cfg_stream {
 	TAILQ_ENTRY(cfg_stream)  entry;
 	char			*name;
 	char			*mountpoint;
+	char			*intake;
 	char			*server;
 	int			 public;
 	enum cfg_stream_format	 format;
@@ -126,6 +127,7 @@ cfg_stream_destroy(struct cfg_stream **s_p)
 
 	xfree(s->name);
 	xfree(s->mountpoint);
+	xfree(s->intake);
 	xfree(s->server);
 	xfree(s->encoder);
 	xfree(s->stream_name);
@@ -139,6 +141,36 @@ cfg_stream_destroy(struct cfg_stream **s_p)
 	xfree(s);
 	*s_p = NULL;
 }
+
+int
+cfg_stream_str2fmt(const char *str, enum cfg_stream_format *fmt_p)
+{
+	if (0 == strcasecmp(str, CFG_SFMT_VORBIS)) {
+		*fmt_p = CFG_STREAM_VORBIS;
+	} else if (0 == strcasecmp(str, CFG_SFMT_MP3)) {
+		*fmt_p = CFG_STREAM_MP3;
+	} else if (0 == strcasecmp(str, CFG_SFMT_THEORA)) {
+		*fmt_p = CFG_STREAM_THEORA;
+	} else
+		return (-1);
+	return (0);
+}
+
+const char *
+cfg_stream_fmt2str(enum cfg_stream_format fmt)
+{
+	switch (fmt) {
+	case CFG_STREAM_VORBIS:
+		return (CFG_SFMT_VORBIS);
+	case CFG_STREAM_MP3:
+		return (CFG_SFMT_MP3);
+	case CFG_STREAM_THEORA:
+		return (CFG_SFMT_THEORA);
+	default:
+		return (NULL);
+	}
+}
+
 
 int
 cfg_stream_set_name(struct cfg_stream *s, struct cfg_stream_list *sl,
@@ -171,6 +203,15 @@ cfg_stream_set_mountpoint(struct cfg_stream *s,
 {
 	(void)not_used;
 	SET_XSTRDUP(s->mountpoint, mountpoint, errstrp);
+	return (0);
+}
+
+int
+cfg_stream_set_intake(struct cfg_stream *s, struct cfg_stream_list *not_used,
+    const char *intake, const char **errstrp)
+{
+	(void)not_used;
+	SET_XSTRDUP(s->intake, intake, errstrp);
 	return (0);
 }
 
@@ -328,6 +369,12 @@ const char *
 cfg_stream_get_mountpoint(struct cfg_stream *s)
 {
 	return (s->mountpoint);
+}
+
+const char *
+cfg_stream_get_intake(struct cfg_stream *s)
+{
+	return (s->intake);
 }
 
 const char *

@@ -22,8 +22,10 @@
     </stream>
   </streams>
 
-  <media>
-    <type>stdin</type>
-  </media>
+  <intakes>
+    <intake>
+      <type>stdin</type>
+    </intake>
+  </intakes>
 
 </ezstream>

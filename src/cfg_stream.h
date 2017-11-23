@@ -17,6 +17,19 @@
 #ifndef __CFG_STREAM_H__
 #define __CFG_STREAM_H__
 
+#define CFG_SFMT_VORBIS 	"VORBIS"
+#define CFG_SFMT_MP3		"MP3"
+#define CFG_SFMT_THEORA 	"THEORA"
+
+enum cfg_stream_format {
+	CFG_STREAM_INVALID = 0,
+	CFG_STREAM_VORBIS,
+	CFG_STREAM_MP3,
+	CFG_STREAM_THEORA,
+	CFG_STREAM_MIN = CFG_STREAM_VORBIS,
+	CFG_STREAM_MAX = CFG_STREAM_THEORA,
+};
+
 typedef struct cfg_stream *		cfg_stream_t;
 typedef struct cfg_stream_list *	cfg_stream_list_t;
 
@@ -33,10 +46,16 @@ cfg_stream_t
 	cfg_stream_create(const char *);
 void	cfg_stream_destroy(cfg_stream_t *);
 
+int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
+const char *
+	cfg_stream_fmt2str(enum cfg_stream_format);
+
 int	cfg_stream_set_name(cfg_stream_t, cfg_stream_list_t, const char *,
 	    const char **);
 int	cfg_stream_set_mountpoint(cfg_stream_t, cfg_stream_list_t,
 	    const char *, const char **);
+int	cfg_stream_set_intake(cfg_stream_t, cfg_stream_list_t, const char *,
+	    const char **);
 int	cfg_stream_set_server(cfg_stream_t, cfg_stream_list_t, const char *,
 	    const char **);
 int	cfg_stream_set_public(cfg_stream_t, cfg_stream_list_t, const char *,
@@ -68,6 +87,8 @@ const char *
 	cfg_stream_get_name(cfg_stream_t);
 const char *
 	cfg_stream_get_mountpoint(cfg_stream_t);
+const char *
+	cfg_stream_get_intake(cfg_stream_t);
 const char *
 	cfg_stream_get_server(cfg_stream_t);
 int	cfg_stream_get_public(cfg_stream_t);

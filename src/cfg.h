@@ -17,10 +17,6 @@
 #ifndef __CFG_H__
 #define __CFG_H__
 
-#define CFG_SFMT_VORBIS 	"VORBIS"
-#define CFG_SFMT_MP3		"MP3"
-#define CFG_SFMT_THEORA 	"THEORA"
-
 #define PLACEHOLDER_METADATA	"@M@"
 #define PLACEHOLDER_ARTIST	"@a@"
 #define PLACEHOLDER_ALBUM	"@b@"
@@ -36,27 +32,9 @@ enum cfg_config_type {
 	CFG_TYPE_MAX = CFG_TYPE_XMLFILE,
 };
 
-enum cfg_media_type {
-	CFG_MEDIA_AUTODETECT = 0,
-	CFG_MEDIA_FILE,
-	CFG_MEDIA_PLAYLIST,
-	CFG_MEDIA_PROGRAM,
-	CFG_MEDIA_STDIN,
-	CFG_MEDIA_MIN = CFG_MEDIA_AUTODETECT,
-	CFG_MEDIA_MAX = CFG_MEDIA_STDIN,
-};
-
-enum cfg_stream_format {
-	CFG_STREAM_INVALID = 0,
-	CFG_STREAM_VORBIS,
-	CFG_STREAM_MP3,
-	CFG_STREAM_THEORA,
-	CFG_STREAM_MIN = CFG_STREAM_VORBIS,
-	CFG_STREAM_MAX = CFG_STREAM_THEORA,
-};
-
 #include "cfg_decoder.h"
 #include "cfg_encoder.h"
+#include "cfg_intake.h"
 #include "cfg_server.h"
 #include "cfg_stream.h"
 
@@ -67,16 +45,14 @@ int	cfg_file_reload(void);
 
 int	cfg_check(const char **);
 
-int	cfg_stream_str2fmt(const char *, enum cfg_stream_format *);
-const char *
-	cfg_stream_fmt2str(enum cfg_stream_format);
-
 int	cfg_file_check(const char *);
 
 cfg_decoder_list_t
 	cfg_get_decoders(void);
 cfg_encoder_list_t
 	cfg_get_encoders(void);
+cfg_intake_list_t
+	cfg_get_intakes(void);
 cfg_server_list_t
 	cfg_get_servers(void);
 cfg_stream_list_t
@@ -89,11 +65,6 @@ int	cfg_set_program_pid_file(const char *, const char **);
 int	cfg_set_program_quiet_stderr(int, const char **);
 int	cfg_set_program_rtstatus_output(int, const char **);
 int	cfg_set_program_verbosity(unsigned int, const char **);
-
-int	cfg_set_media_type(const char *, const char **);
-int	cfg_set_media_filename(const char *, const char **);
-int	cfg_set_media_shuffle(const char *, const char **);
-int	cfg_set_media_stream_once(const char *, const char **);
 
 int	cfg_set_metadata_program(const char *, const char **);
 int	cfg_set_metadata_format_str(const char *, const char **);
@@ -113,13 +84,6 @@ int	cfg_get_program_quiet_stderr(void);
 int	cfg_get_program_rtstatus_output(void);
 unsigned int
 	cfg_get_program_verbosity(void);
-
-enum cfg_media_type
-	cfg_get_media_type(void);
-const char *
-	cfg_get_media_filename(void);
-int	cfg_get_media_shuffle(void);
-int	cfg_get_media_stream_once(void);
 
 const char *
 	cfg_get_metadata_program(void);
