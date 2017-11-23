@@ -14,8 +14,8 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __CFG_INPUT_H__
-#define __CFG_INPUT_H__
+#ifndef __CFG_DECODER_H__
+#define __CFG_DECODER_H__
 
 typedef struct cfg_decoder *		cfg_decoder_t;
 typedef struct cfg_decoder_list *	cfg_decoder_list_t;
@@ -51,4 +51,4 @@ const char *
 const char *
 	cfg_decoder_get_program(cfg_decoder_t);
 
-#endif /* __CFG_INPUT_H__ */
+#endif /* __CFG_DECODER_H__ */
