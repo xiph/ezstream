@@ -380,7 +380,7 @@ reconnect(stream_t stream)
 const char *
 getTimeString(long seconds)
 {
-	static char	str[20];
+	static char	str[25];
 	long		secs, mins, hours;
 
 	if (seconds < 0)
