@@ -322,7 +322,7 @@ cfg_set_metadata_no_updates(const char *no_updates, const char **errstrp)
 const char *
 cfg_get_program_name(void)
 {
-	return (cfg_program.name);
+	return (cfg_program.name[0] ? cfg_program.name : NULL);
 }
 
 enum cfg_config_type

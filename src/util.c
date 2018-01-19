@@ -145,6 +145,31 @@ _cleanup_pidfile(void)
 	}
 }
 
+const char *
+util_get_progname(const char *argv0)
+{
+#ifdef HAVE___PROGNAME
+	extern char	*__progname;
+
+	(void)argv0;
+
+	return (__progname);
+#else
+	if (argv0 == NULL) {
+		return (UTIL_DEFAULT_PROGNAME);
+	} else {
+		const char	*p = strrchr(argv0, '/');
+
+		if (p == NULL)
+			p = argv0;
+		else
+			p++;
+
+		return (p);
+	}
+#endif /* HAVE___PROGNAME */
+}
+
 int
 util_write_pid_file(const char *path)
 {

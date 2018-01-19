@@ -31,6 +31,7 @@
 #include "cfg.h"
 #include "cmdline.h"
 #include "playlist.h"
+#include "util.h"
 
 #define OPTSTRING	"c:hp:qrs:Vv"
 enum opt_vals {
@@ -47,7 +48,6 @@ enum opt_vals {
 
 static void	_usage(void);
 static void	_usage_help(void);
-static void	_set_program_name(const char *);
 
 static void
 _usage(void)
@@ -72,27 +72,6 @@ _usage_help(void)
 	fprintf(stderr, "    -v          increase logging verbosity\n");
 }
 
-static void
-_set_program_name(const char *argv0)
-{
-#ifdef HAVE___PROGNAME
-	extern char	*__progname;
-	(void)argv0;
-	cfg_set_program_name(__progname, NULL);
-#else
-	if (argv0 == NULL) {
-		cfg_set_program_name("ezstream", NULL);
-	} else {
-		const char	*p = strrchr(argv0, '/');
-		if (p == NULL)
-			p = argv0;
-		else
-			p++;
-		cfg_set_program_name(p, NULL);
-	}
-#endif /* HAVE___PROGNAME */
-}
-
 int
 cmdline_parse(int argc, char *argv[], int *ret_p)
 {
@@ -100,7 +79,7 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 	unsigned int	 verbosity = 0;
 	const char	*err_str;
 
-	_set_program_name(argv[0]);
+	(void)cfg_set_program_name(util_get_progname(argv[0]), NULL);
 
 	optind = 1;
 	for (;;) {

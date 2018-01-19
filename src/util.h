@@ -16,11 +16,17 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
+#ifndef UTIL_DEFAULT_PROGNAME
+# define UTIL_DEFAULT_PROGNAME  "ezstream"
+#endif /* !UTIL_DEFAULT_PROGNAME */
+
 struct util_dict {
 	const char	*from;
 	const char	*to;
 };
 
+const char *
+	util_get_progname(const char *);
 int	util_write_pid_file(const char *);
 int	util_strrcmp(const char *, const char *);
 int	util_strrcasecmp(const char *, const char *);

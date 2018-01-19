@@ -10,6 +10,13 @@
 
 Suite * util_suite(void);
 
+START_TEST(test_util_get_progname)
+{
+	/* Platform-dependent test might fail: */
+	ck_assert_str_ne(util_get_progname(NULL), "");
+}
+END_TEST
+
 START_TEST(test_util_write_pid_file)
 {
 	FILE	*pidfile_2;
@@ -116,6 +123,7 @@ util_suite(void)
 	s = suite_create("Util");
 
 	tc_util = tcase_create("Util");
+	tcase_add_test(tc_util, test_util_get_progname);
 	tcase_add_test(tc_util, test_util_write_pid_file);
 	tcase_add_test(tc_util, test_util_strrcmp);
 	tcase_add_test(tc_util, test_util_utf8sanity);
