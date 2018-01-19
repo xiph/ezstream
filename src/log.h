@@ -28,8 +28,10 @@ enum log_levels {
 	DEBUG
 };
 
-int	log_init(void);
+int	log_init(const char *);
 void	log_exit(void);
+
+void	log_set_verbosity(unsigned int);
 
 int	log_syserr(enum log_levels, int, const char *);
 

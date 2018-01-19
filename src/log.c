@@ -25,8 +25,9 @@
 #include <string.h>
 #include <syslog.h>
 
-#include "cfg.h"
 #include "log.h"
+
+static unsigned int	_log_verbosity;
 
 static int	_log(enum log_levels, const char *, ...)
     ATTRIBUTE_NONNULL(2)
@@ -64,18 +65,18 @@ _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 		p = LOG_WARNING;
 		break;
 	case NOTICE:
-		if (cfg_get_program_verbosity() < 1)
+		if (_log_verbosity < 1)
 			return (0);
 		p = LOG_NOTICE;
 		break;
 	case INFO:
-		if (cfg_get_program_verbosity() < 2)
+		if (_log_verbosity < 2)
 			return (0);
 		p = LOG_INFO;
 		break;
 	case DEBUG:
 	default:
-		if (cfg_get_program_verbosity() < 3)
+		if (_log_verbosity < 3)
 			return (0);
 		p = LOG_DEBUG;
 		break;
@@ -89,9 +90,9 @@ _vlog(enum log_levels lvl, const char *fmt, va_list ap)
 }
 
 int
-log_init(void)
+log_init(const char *program_name)
 {
-	openlog(cfg_get_program_name(),
+	openlog(program_name,
 	    LOG_PID|LOG_CONS|LOG_NDELAY|LOG_PERROR,
 	    LOG_USER);
 	return (0);
@@ -101,6 +102,12 @@ void
 log_exit(void)
 {
 	closelog();
+}
+
+void
+log_set_verbosity(unsigned int verbosity)
+{
+	_log_verbosity = verbosity;
 }
 
 int

@@ -213,7 +213,8 @@ void
 setup_checked(void)
 {
 	if (0 < cfg_init() ||
-	    0 < log_init())
+	    0 < cfg_set_program_name("check_cfg_server", NULL) ||
+	    0 < log_init(cfg_get_program_name()))
 		ck_abort_msg("setup_checked failed");
 
 	servers = cfg_server_list_create();

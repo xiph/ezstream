@@ -1,7 +1,6 @@
 #include <check.h>
 #include <errno.h>
 
-#include "cfg.h"
 #include "log.h"
 
 Suite * log_suite(void);
@@ -15,7 +14,7 @@ START_TEST(test_log)
 	ck_assert_int_eq(log_syserr(ALERT, 0, "alert"), 0);
 
 	verbosity = 0;
-	ck_assert_int_eq(cfg_set_program_verbosity(verbosity, NULL), 0);
+	log_set_verbosity(verbosity);
 	ck_assert_int_ne(log_alert("alert"), 0);
 	ck_assert_int_ne(log_syserr(ALERT, EINVAL, "alert"), 0);
 	ck_assert_int_ne(log_syserr(ALERT, EINVAL, NULL), 0);
@@ -26,19 +25,19 @@ START_TEST(test_log)
 
 	ck_assert_int_eq(log_notice("notice"), 0);
 	ck_assert_int_eq(log_syserr(NOTICE, EINVAL, "notice"), 0);
-	ck_assert_int_eq(cfg_set_program_verbosity(++verbosity, NULL), 0);
+	log_set_verbosity(++verbosity);
 	ck_assert_int_ne(log_notice("notice"), 0);
 	ck_assert_int_ne(log_syserr(NOTICE, EINVAL, "notice"), 0);
 
 	ck_assert_int_eq(log_info("info"), 0);
 	ck_assert_int_eq(log_syserr(INFO, EINVAL, "info"), 0);
-	ck_assert_int_eq(cfg_set_program_verbosity(++verbosity, NULL), 0);
+	log_set_verbosity(++verbosity);
 	ck_assert_int_ne(log_info("info"), 0);
 	ck_assert_int_ne(log_syserr(INFO, EINVAL, "info"), 0);
 
 	ck_assert_int_eq(log_debug("debug"), 0);
 	ck_assert_int_eq(log_syserr(DEBUG, EINVAL, "debug"), 0);
-	ck_assert_int_eq(cfg_set_program_verbosity(++verbosity, NULL), 0);
+	log_set_verbosity(++verbosity);
 	ck_assert_int_ne(log_debug("debug"), 0);
 	ck_assert_int_ne(log_syserr(DEBUG, EINVAL, "debug"), 0);
 }
@@ -63,8 +62,7 @@ log_suite(void)
 void
 setup_checked(void)
 {
-	if (0 < cfg_init() ||
-	    0 < log_init())
+	if (0 < log_init("check_log"))
 		ck_abort_msg("setup_checked failed");
 }
 
@@ -72,7 +70,6 @@ void
 teardown_checked(void)
 {
 	log_exit();
-	cfg_exit();
 }
 
 int

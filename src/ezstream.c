@@ -724,11 +724,13 @@ main(int argc, char *argv[])
 	ret = 1;
 	if (0 > cfg_init() ||
 	    0 > cmdline_parse(argc, argv, &ret) ||
-	    0 > log_init() ||
+	    0 > log_init(cfg_get_program_name()) ||
 	    0 > playlist_init() ||
 	    0 > cfg_file_reload() ||
 	    0 > stream_init())
 		return (ez_shutdown(ret));
+
+	log_set_verbosity(cfg_get_program_verbosity());
 
 	if (0 > cfg_check(&errstr)) {
 		log_error("%s: %s", cfg_get_program_config_file(), errstr);

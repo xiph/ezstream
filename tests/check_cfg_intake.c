@@ -135,7 +135,8 @@ void
 setup_checked(void)
 {
 	if (0 < cfg_init() ||
-	    0 < log_init())
+	    0 < cfg_set_program_name("check_cfg_intake", NULL) ||
+	    0 < log_init(cfg_get_program_name()))
 		ck_abort_msg("setup_checked failed");
 
 	intakes = cfg_intake_list_create();

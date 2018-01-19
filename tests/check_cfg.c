@@ -26,6 +26,7 @@ END_TEST
 
 START_TEST(test_program_name)
 {
+	ck_assert_ptr_eq(cfg_get_program_name(), NULL);
 	TEST_STRLCPY(cfg_set_program_name, cfg_get_program_name, PATH_MAX);
 }
 END_TEST
@@ -197,7 +198,7 @@ void
 setup_checked(void)
 {
 	if (0 < cfg_init() ||
-	    0 < log_init())
+	    0 < log_init(NULL))
 		ck_abort_msg("setup_checked failed");
 }
 

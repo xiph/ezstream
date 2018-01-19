@@ -1,5 +1,7 @@
 #include <check.h>
 
+#include "cfg.h"
+#include "log.h"
 #include "playlist.h"
 
 Suite * playlist_suite(void);
@@ -124,7 +126,10 @@ playlist_suite(void)
 void
 setup_checked(void)
 {
-	if (0 < playlist_init())
+	if (0 < cfg_init() ||
+	    0 < cfg_set_program_name("check_playlist", NULL) ||
+	    0 < log_init(cfg_get_program_name()) ||
+	    0 < playlist_init())
 		ck_abort_msg("setup_checked failed");
 }
 
