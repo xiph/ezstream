@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = 1.10 foreign subdir-objects
 
-noinst_LTLIBRARIES = libezstream.la
+noinst_LTLIBRARIES = libcommon.la libezstream.la
 noinst_HEADERS	 = \
 	attributes.h \
 	cfg.h \
@@ -19,6 +19,12 @@ noinst_HEADERS	 = \
 	stream.h \
 	util.h \
 	xalloc.h
+
+libcommon_la_SOURCES = \
+	log.c \
+	util.c \
+	xalloc.c
+
 libezstream_la_SOURCES = \
 	cfg.c \
 	cfg_decoder.c \
@@ -28,13 +34,11 @@ libezstream_la_SOURCES = \
 	cfg_stream.c \
 	cfg_xmlfile.c \
 	cmdline.c \
-	log.c \
 	mdata.c \
 	playlist.c \
-	stream.c \
-	util.c \
-	xalloc.c
+	stream.c
 libezstream_la_DEPENDENCIES = \
+	$(builddir)/libcommon.la \
 	$(top_builddir)/compat/libcompat.la
 libezstream_la_LIBADD = @EZ_LIBS@ \
 	$(libezstream_la_DEPENDENCIES)
