@@ -15,26 +15,23 @@
     -->
   <servers>
     <server>
-      <!-- Identifying name; default: "default" -->
-      <name>Default</name>
+      <!-- Identifying name (default: "default") -->
+      <name>Test Server</name>
 
-      <!-- Transport protocol: HTTP, HTTPS -->
+      <!-- Transport protocol: HTTP, HTTPS (default: "HTTP") -->
       <protocol>HTTP</protocol>
       <!-- Server address -->
       <hostname>127.0.0.1</hostname>
-      <!-- Server port -->
+      <!-- Server port (default: 8000) -->
       <port>8000</port>
 
-      <!-- Login user -->
+      <!-- Login user (default: "source") -->
       <user>source</user>
       <!-- Login password (check file permissions, or everyone can see this) -->
       <password>hackme</password>
 
-      <!-- Number of reconnection attempts, before giving up: -->
-      <reconnect_attempts>0</reconnect_attempts>
-
       <!--
-        Configure TLS encryption requirement: none, may (default), required
+        Configure TLS requirement: none, may, required (default: "may")
         -->
       <tls>Required</tls>
 
@@ -61,6 +58,9 @@
         (with public key) and private key in the same file, for authentication.
         -->
       <client_cert>/etc/ssl/ezstream.crt</client_cert>
+
+      <!-- Number of reconnection attempts, before giving up (default: 0) -->
+      <reconnect_attempts>20</reconnect_attempts>
     </server>
   </servers>
 
@@ -69,19 +69,26 @@
     -->
   <streams>
     <stream>
-      <!-- Identifying name; default: "default" -->
-      <name>Default</name>
+      <!--
+        Identifying name (default: "default")
+
+        NB: Only the "default" stream is supported at this point.
+        -->
+      <!-- <name>default</name> -->
 
       <!-- Mount point on server -->
       <mountpoint>/stream.ogg</mountpoint>
 
       <!-- Name of the intake entry to use (default: "default") -->
-      <intake>Default</intake>
+      <intake>Test Input</intake>
 
       <!-- Name of the server entry to use (default: "default") -->
-      <server>Default</server>
+      <server>Test Server</server>
 
-      <!-- Setting to allow stream to be listed in public YP directory -->
+      <!--
+        Setting to allow stream to be listed in public YP directory
+        (default: no)
+        -->
       <public>No</public>
 
       <!-- Stream format: Vorbis, MP3, Theora -->
@@ -107,20 +114,23 @@
     -->
   <intakes>
     <intake>
-      <!-- Identifying name; default: "default" -->
-      <name>Default</name>
+      <!-- Identifying name (default: "default") -->
+      <name>Test Input</name>
 
-      <!-- Media type: autodetect, file, playlist, program, stdin -->
-      <type>autodetect</type>
+      <!--
+        Media type: autodetect, file, playlist, program, stdin
+       (default: autodetect)
+        -->
+      <type>playlist</type>
 
-      <!-- Input file, program name, or "stdin" keyword -->
+      <!-- Input file, program name, or "stdin" keyword (deprecated) -->
       <filename>playlist.m3u</filename>
 
       <!-- Setting to shuffle playlists -->
       <shuffle>Yes</shuffle>
 
       <!-- Setting whether to stream intake indefinitely or only once -->
-      <stream_once>No</stream_once>
+      <stream_once>Yes</stream_once>
     </intake>
   </intakes>
 
@@ -134,14 +144,14 @@
     <!-- Metadata format -->
     <format_str>@a@ - @t@</format_str>
 
-    <!-- Interval for additional metadata refreshes (-1 for none) -->
+    <!-- Interval for additional metadata refreshes (default: -1 (none)) -->
     <refresh_interval>-1</refresh_interval>
 
-    <!-- Setting to clean up extraneous whitespace -->
+    <!-- Setting to clean up extraneous whitespace (default: no) -->
     <normalize_strings>Yes</normalize_strings>
 
-    <!-- Setting to suppress all metadata udpates -->
-    <no_updates>No</no_updates>
+    <!-- Setting to suppress all metadata udpates (default: no) -->
+    <no_updates>Yes</no_updates>
   </metadata>
 
   <!--
