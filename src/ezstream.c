@@ -179,8 +179,6 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	dicts[4].from = PLACEHOLDER_METADATA;
 	dicts[4].to = custom_songinfo;
 
-	dec_str = util_expand_words(cfg_decoder_get_program(decoder), dicts);
-
 	if (!cfg_get_metadata_program() &&
 	    strstr(cfg_encoder_get_program(encoder),
 		PLACEHOLDER_TITLE) != NULL) {
@@ -188,13 +186,21 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		dicts[4].to = custom_songinfo = xstrdup("");
 	}
 
-	enc_str = util_expand_words(cfg_encoder_get_program(encoder), dicts);
-
-	cmd_str_size = strlen(dec_str) + strlen(" | ") + strlen(enc_str) + 1;
-	cmd_str = xcalloc(cmd_str_size, sizeof(char));
-	snprintf(cmd_str, cmd_str_size, "%s | %s", dec_str, enc_str);
-	xfree(dec_str);
-	xfree(enc_str);
+	dec_str = util_expand_words(cfg_decoder_get_program(decoder), dicts);
+	cmd_str_size = strlen(dec_str) + 1;
+	if (cfg_encoder_get_program(encoder)) {
+		enc_str = util_expand_words(cfg_encoder_get_program(encoder),
+		    dicts);
+		cmd_str_size += strlen(" | ") + strlen(enc_str);
+		cmd_str = xcalloc(cmd_str_size, sizeof(char));
+		snprintf(cmd_str, cmd_str_size, "%s | %s", dec_str, enc_str);
+		xfree(enc_str);
+		xfree(dec_str);
+	} else {
+		cmd_str = xcalloc(cmd_str_size, sizeof(char));
+		snprintf(cmd_str, cmd_str_size, "%s", dec_str);
+		xfree(dec_str);
+	}
 
 	xfree(artist);
 	xfree(album);
