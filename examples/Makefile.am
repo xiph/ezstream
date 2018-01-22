@@ -4,6 +4,7 @@ examplesdir	 = @EXAMPLES_DIR@
 dist_examples_DATA = \
 	ezstream-file_template.xml \
 	ezstream-full.xml \
+	ezstream-metadata.xml \
 	ezstream-minimal.xml \
 	ezstream-stdin.xml \
 	ezstream-video.xml \

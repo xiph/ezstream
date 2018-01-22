@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  EXAMPLE: A valid configuration that periodically sets metadata via a script
+  -->
+
+<ezstream>
+
+  <servers>
+    <server>
+      <hostname>127.0.0.1</hostname>
+      <password>hackme</password>
+    </server>
+  </servers>
+
+  <streams>
+    <stream>
+      <mountpoint>/stream.ogg</mountpoint>
+      <format>Vorbis</format>
+    </stream>
+  </streams>
+
+  <intakes>
+    <intake>
+      <type>stdin</type>
+    </intake>
+  </intakes>
+
+  <metadata>
+    <program>meta.sh</program>
+    <format_str>@a@ - @t@</format_str>
+    <refresh_interval>5</refresh_interval>
+  </metadata>
+
+</ezstream>
