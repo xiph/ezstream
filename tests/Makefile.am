@@ -7,7 +7,7 @@ TESTS		 = \
 	check_cfg_intake \
 	check_cfg_server \
 	check_cfg_stream \
-	check_cfg_xmlfile \
+	check_cfgfile_xml \
 	check_cmdline \
 	check_log \
 	check_mdata \
@@ -43,9 +43,9 @@ check_cfg_stream_SOURCES = check_cfg_stream.c
 check_cfg_stream_DEPENDENCIES = $(top_builddir)/src/libezstream.la
 check_cfg_stream_LDADD = $(check_cfg_stream_DEPENDENCIES) @CHECK_LIBS@
 
-check_cfg_xmlfile_SOURCES = check_cfg_xmlfile.c
-check_cfg_xmlfile_DEPENDENCIES = $(top_builddir)/src/libezstream.la
-check_cfg_xmlfile_LDADD = $(check_cfg_xmlfile_DEPENDENCIES) @CHECK_LIBS@
+check_cfgfile_xml_SOURCES = check_cfgfile_xml.c
+check_cfgfile_xml_DEPENDENCIES = $(top_builddir)/src/libezstream.la
+check_cfgfile_xml_LDADD = $(check_cfgfile_xml_DEPENDENCIES) @CHECK_LIBS@
 
 check_cmdline_SOURCES = check_cmdline.c
 check_cmdline_DEPENDENCIES = $(top_builddir)/src/libezstream.la

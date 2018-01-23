@@ -76,6 +76,19 @@ cfg_server_list_destroy(cfg_server_list_t *sl_p)
 	*sl_p = NULL;
 }
 
+unsigned int
+cfg_server_list_nentries(struct cfg_server_list *sl)
+{
+	struct cfg_server	*s;
+	unsigned int		 n = 0;
+
+	TAILQ_FOREACH(s, sl, entry) {
+		n++;
+	}
+
+	return (n);
+}
+
 struct cfg_server *
 cfg_server_list_find(struct cfg_server_list *sl, const char *name)
 {
@@ -104,6 +117,17 @@ cfg_server_list_get(struct cfg_server_list *sl, const char *name)
 	TAILQ_INSERT_TAIL(sl, s, entry);
 
 	return (s);
+}
+
+void
+cfg_server_list_foreach(struct cfg_server_list *sl,
+    void (*cb)(cfg_server_t, void *), void *cb_arg)
+{
+	struct cfg_server	*s;
+
+	TAILQ_FOREACH(s, sl, entry) {
+		cb(s, cb_arg);
+	}
 }
 
 struct cfg_server *
@@ -355,13 +379,13 @@ cfg_server_get_hostname(struct cfg_server *s)
 unsigned int
 cfg_server_get_port(struct cfg_server *s)
 {
-	return (s->port ? s->port : DEFAULT_PORT);
+	return (s->port ? s->port : CFG_SERVER_DEFAULT_PORT);
 }
 
 const char *
 cfg_server_get_user(struct cfg_server *s)
 {
-	return (s->user[0] ? s->user : DEFAULT_USER);
+	return (s->user[0] ? s->user : CFG_SERVER_DEFAULT_USER);
 }
 
 const char *
@@ -374,6 +398,20 @@ enum cfg_server_tls
 cfg_server_get_tls(struct cfg_server *s)
 {
 	return (s->tls);
+}
+
+const char *
+cfg_server_get_tls_str(struct cfg_server *s)
+{
+	switch (s->tls) {
+	case CFG_TLS_NONE:
+		return ("none");
+	case CFG_TLS_REQUIRED:
+		return ("required");
+	case CFG_TLS_MAY:
+	default:
+		return ("may");
+	}
 }
 
 const char *

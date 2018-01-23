@@ -36,11 +36,15 @@ typedef struct cfg_stream_list *	cfg_stream_list_t;
 cfg_stream_list_t
 	cfg_stream_list_create(void);
 void	cfg_stream_list_destroy(cfg_stream_list_t *);
+unsigned int
+	cfg_stream_list_nentries(cfg_stream_list_t);
 
 cfg_stream_t
 	cfg_stream_list_find(cfg_stream_list_t, const char *);
 cfg_stream_t
 	cfg_stream_list_get(cfg_stream_list_t, const char *);
+void	cfg_stream_list_foreach(cfg_stream_list_t, void (*)(cfg_stream_t,
+	    void *), void *);
 
 cfg_stream_t
 	cfg_stream_create(const char *);

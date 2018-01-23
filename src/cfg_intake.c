@@ -68,6 +68,19 @@ cfg_intake_list_destroy(cfg_intake_list_t *il_p)
 	*il_p = NULL;
 }
 
+unsigned int
+cfg_intake_list_nentries(struct cfg_intake_list *il)
+{
+	struct cfg_intake	*i;
+	unsigned int		 n = 0;
+
+	TAILQ_FOREACH(i, il, entry) {
+		n++;
+	}
+
+	return (n);
+}
+
 struct cfg_intake *
 cfg_intake_list_find(struct cfg_intake_list *il, const char *name)
 {
@@ -96,6 +109,17 @@ cfg_intake_list_get(struct cfg_intake_list *il, const char *name)
 	TAILQ_INSERT_TAIL(il, i, entry);
 
 	return (i);
+}
+
+void
+cfg_intake_list_foreach(struct cfg_intake_list *il,
+    void (*cb)(cfg_intake_t, void *), void *cb_arg)
+{
+	struct cfg_intake	*i;
+
+	TAILQ_FOREACH(i, il, entry) {
+		cb(i, cb_arg);
+	}
 }
 
 struct cfg_intake *
@@ -226,6 +250,24 @@ enum cfg_intake_type
 cfg_intake_get_type(struct cfg_intake *i)
 {
 	return (i->type);
+}
+
+const char *
+cfg_intake_get_type_str(struct cfg_intake *i)
+{
+	switch (i->type) {
+	case CFG_INTAKE_FILE:
+		return ("file");
+	case CFG_INTAKE_PLAYLIST:
+		return ("playlist");
+	case CFG_INTAKE_PROGRAM:
+		return ("program");
+	case CFG_INTAKE_STDIN:
+		return ("stdin");
+	case CFG_INTAKE_AUTODETECT:
+	default:
+		return ("autodetect");
+	}
 }
 
 const char *

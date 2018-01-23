@@ -1,0 +1,61 @@
+.\" Copyright (c) 2018 Moritz Grimm <mgrimm@mrsserver.net>
+.\"
+.\" Permission to use, copy, modify, and distribute this software for any
+.\" purpose with or without fee is hereby granted, provided that the above
+.\" copyright notice and this permission notice appear in all copies.
+.\"
+.\" THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+.\" WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+.\" MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+.\" ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+.\" WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+.\" ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+.\" OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+.\"
+.Dd @BUILD_DATE@
+.Dt EZSTREAM-CFGMIGRATE 1
+.Os @PACKAGE_NAME@ @PACKAGE_VERSION@
+.Sh NAME
+.Nm ezstream-cfgmigrate
+.Nd migrate old ezstream configuration
+.Sh SYNOPSIS
+.Nm
+.Bk -words
+.Op Fl hv
+.Fl 0 Ar v0-cfgfile
+.Ek
+.Sh DESCRIPTION
+The
+.Nm
+utility reads configuration files from older versions of
+.Nm ezstream
+and prints its current equivalent to standard output.
+.Pp
+It supports reading XML configuration from
+.Nm ezstream
+version 0.x
+.Pq zero .
+.Ss Command line arguments
+.Bl -tag -width Ds
+.It Fl 0 Ar v0-cfgfile
+.Pq The number zero.
+.Pp
+Read the XML configuration in
+.Ar v0-cfgfile
+and print its migrated content to standard output.
+.It Fl h
+Print a summary of available command line arguments with short descriptions
+and exit.
+.It Fl v
+Increase logging verbosity.
+May be used up to three times to also include debug logging output.
+.El
+.Sh SEE ALSO
+.Xr ezstream 1 ,
+.Xr ezstream-file.sh 1
+.Sh AUTHORS
+.An -nosplit
+The
+.Nm
+program and this manual were written by
+.An Moritz Grimm .

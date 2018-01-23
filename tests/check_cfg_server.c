@@ -7,15 +7,27 @@
 
 #include "check_cfg.h"
 
+static void	_sl_cb(cfg_server_t, void *);
+
 Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
 cfg_server_list_t	servers;
 
+static void
+_sl_cb(cfg_server_t srv, void *arg)
+{
+	int	*count = (int *)arg;
+
+	ck_assert_ptr_ne(cfg_server_get_name(srv), NULL);
+	(*count)++;
+}
+
 START_TEST(test_server_list_get)
 {
 	cfg_server_t	srv, srv2;
+	int		count = 0;
 
 	ck_assert_ptr_eq(cfg_server_list_get(servers, NULL), NULL);
 	ck_assert_ptr_eq(cfg_server_list_get(servers, ""), NULL);
@@ -23,6 +35,11 @@ START_TEST(test_server_list_get)
 	srv = cfg_server_list_get(servers, "TeSt");
 	srv2 = cfg_server_list_get(servers, "test");
 	ck_assert_ptr_eq(srv, srv2);
+
+	(void)cfg_server_list_get(servers, "test2");
+	ck_assert_uint_eq(cfg_server_list_nentries(servers), 2);
+	cfg_server_list_foreach(servers, _sl_cb, &count);
+	ck_assert_int_eq(count, 2);
 }
 END_TEST
 
@@ -65,7 +82,7 @@ START_TEST(test_server_port)
 	cfg_server_t	 srv = cfg_server_list_get(servers, "test_server_port");
 	const char	*errstr2;
 
-	ck_assert_uint_eq(cfg_server_get_port(srv), DEFAULT_PORT);
+	ck_assert_uint_eq(cfg_server_get_port(srv), CFG_SERVER_DEFAULT_PORT);
 
 	TEST_EMPTYSTR_T(cfg_server_t, cfg_server_list_get, servers,
 	    cfg_server_set_port);
@@ -89,7 +106,7 @@ START_TEST(test_server_user)
 {
 	cfg_server_t	 srv = cfg_server_list_get(servers, "test_server_user");
 
-	ck_assert_str_eq(cfg_server_get_user(srv), DEFAULT_USER);
+	ck_assert_str_eq(cfg_server_get_user(srv), CFG_SERVER_DEFAULT_USER);
 	TEST_STRLCPY_T(cfg_server_t, cfg_server_list_get, servers,
 	    cfg_server_set_user, cfg_server_get_user, UCREDS_SIZE);
 }
@@ -123,11 +140,14 @@ START_TEST(test_server_tls)
 	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_MAY);
 	ck_assert_int_eq(cfg_server_set_tls(srv, servers, "None", NULL), 0);
 	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_NONE);
+	ck_assert_str_eq(cfg_server_get_tls_str(srv), "none");
 	ck_assert_int_eq(cfg_server_set_tls(srv, servers, "Required", NULL),
 	    0);
 	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_REQUIRED);
+	ck_assert_str_eq(cfg_server_get_tls_str(srv), "required");
 	ck_assert_int_eq(cfg_server_set_tls(srv, servers, "May", NULL), 0);
 	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_MAY);
+	ck_assert_str_eq(cfg_server_get_tls_str(srv), "may");
 }
 END_TEST
 

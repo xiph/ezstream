@@ -114,7 +114,8 @@ Directory containing example configuration files for various uses of
 as well as example playlist and metadata scripts.
 .El
 .Sh SEE ALSO
-.Xr ezstream 1
+.Xr ezstream 1 ,
+.Xr ezstream-cfgmigrate 1
 .Sh AUTHORS
 .An -nosplit
 The

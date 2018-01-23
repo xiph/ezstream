@@ -14,9 +14,10 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef __CFG_XMLFILE_H__
-#define __CFG_XMLFILE_H__
+#ifndef __CFGFILE_XML_H__
+#define __CFGFILE_XML_H__
 
-int	cfg_xmlfile_parse(const char *);
+int	cfgfile_xml_parse(const char *);
+void	cfgfile_xml_print(FILE *);
 
-#endif /* __CFG_XMLFILE_H__ */
+#endif /* __CFGFILE_XML_H__ */

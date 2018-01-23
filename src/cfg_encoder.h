@@ -25,11 +25,16 @@ typedef struct cfg_encoder_list *	cfg_encoder_list_t;
 cfg_encoder_list_t
 	cfg_encoder_list_create(void);
 void	cfg_encoder_list_destroy(cfg_encoder_list_t *);
+unsigned int
+	cfg_encoder_list_nentries(cfg_encoder_list_t);
 
 cfg_encoder_t
 	cfg_encoder_list_find(cfg_encoder_list_t, const char *);
 cfg_encoder_t
 	cfg_encoder_list_get(cfg_encoder_list_t, const char *);
+void	cfg_encoder_list_remove(cfg_encoder_list_t, cfg_encoder_t *o);
+void	cfg_encoder_list_foreach(cfg_encoder_list_t, void (*)(cfg_encoder_t,
+	    void *), void *);
 
 cfg_encoder_t
 	cfg_encoder_create(const char *);

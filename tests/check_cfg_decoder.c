@@ -7,15 +7,36 @@
 
 #include "check_cfg.h"
 
+static void	_d_cb(const char *, void *);
+static void	_dl_cb(cfg_decoder_t, void *);
+
 Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
 cfg_decoder_list_t	decoders;
 
+static void
+_d_cb(const char *ext, void *unused)
+{
+	(void)unused;
+	ck_assert_str_ne(ext, "");
+}
+
+static void
+_dl_cb(cfg_decoder_t dec, void *arg)
+{
+	int	*count = (int *)arg;
+
+	ck_assert_ptr_ne(cfg_decoder_get_name(dec), NULL);
+	cfg_decoder_ext_foreach(dec, _d_cb, NULL);
+	(*count)++;
+}
+
 START_TEST(test_decoder_list_get)
 {
 	cfg_decoder_t	dec, dec2;
+	int		count = 0;
 
 	ck_assert_ptr_eq(cfg_decoder_list_get(decoders, NULL), NULL);
 	ck_assert_ptr_eq(cfg_decoder_list_get(decoders, ""), NULL);
@@ -23,6 +44,12 @@ START_TEST(test_decoder_list_get)
 	dec = cfg_decoder_list_get(decoders, "TeSt");
 	dec2 = cfg_decoder_list_get(decoders, "test");
 	ck_assert_ptr_eq(dec, dec2);
+
+	(void)cfg_decoder_list_get(decoders, "test2");
+	ck_assert_int_eq(cfg_decoder_add_match(dec, decoders, ".test", NULL), 0);
+	ck_assert_uint_eq(cfg_decoder_list_nentries(decoders), 2);
+	cfg_decoder_list_foreach(decoders, _dl_cb, &count);
+	ck_assert_int_eq(count, 2);
 }
 END_TEST
 

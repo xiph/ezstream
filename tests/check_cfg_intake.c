@@ -7,15 +7,27 @@
 
 #include "check_cfg.h"
 
+static void	_il_cb(cfg_intake_t, void *);
+
 Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
 cfg_intake_list_t	intakes;
 
+static void
+_il_cb(cfg_intake_t in, void *arg)
+{
+	int	*count = (int *)arg;
+
+	ck_assert_ptr_ne(cfg_intake_get_name(in), NULL);
+	(*count)++;
+}
+
 START_TEST(test_intake_list_get)
 {
 	cfg_intake_t	in, in2;
+	int		count = 0;
 
 	ck_assert_ptr_eq(cfg_intake_list_get(intakes, NULL), NULL);
 	ck_assert_ptr_eq(cfg_intake_list_get(intakes, ""), NULL);
@@ -23,6 +35,11 @@ START_TEST(test_intake_list_get)
 	in = cfg_intake_list_get(intakes, "TeSt");
 	in2 = cfg_intake_list_get(intakes, "test");
 	ck_assert_ptr_eq(in, in2);
+
+	(void)cfg_intake_list_get(intakes, "test2");
+	ck_assert_uint_eq(cfg_intake_list_nentries(intakes), 2);
+	cfg_intake_list_foreach(intakes, _il_cb, &count);
+	ck_assert_int_eq(count, 2);
 }
 END_TEST
 
@@ -50,15 +67,20 @@ START_TEST(test_intake_set_type)
 	ck_assert_int_eq(cfg_intake_set_type(in, intakes, "aUtOdEtEcT", NULL),
 	    0);
 	ck_assert_int_eq(cfg_intake_get_type(in), CFG_INTAKE_AUTODETECT);
+	ck_assert_str_eq(cfg_intake_get_type_str(in), "autodetect");
 	ck_assert_int_eq(cfg_intake_set_type(in, intakes, "FiLe", NULL), 0);
 	ck_assert_int_eq(cfg_intake_get_type(in), CFG_INTAKE_FILE);
+	ck_assert_str_eq(cfg_intake_get_type_str(in), "file");
 	ck_assert_int_eq(cfg_intake_set_type(in, intakes, "pLaYlIsT", NULL),
 	    0);
 	ck_assert_int_eq(cfg_intake_get_type(in), CFG_INTAKE_PLAYLIST);
+	ck_assert_str_eq(cfg_intake_get_type_str(in), "playlist");
 	ck_assert_int_eq(cfg_intake_set_type(in, intakes, "PrOgRaM", NULL), 0);
 	ck_assert_int_eq(cfg_intake_get_type(in), CFG_INTAKE_PROGRAM);
+	ck_assert_str_eq(cfg_intake_get_type_str(in), "program");
 	ck_assert_int_eq(cfg_intake_set_type(in, intakes, "sTdIn", NULL), 0);
 	ck_assert_int_eq(cfg_intake_get_type(in), CFG_INTAKE_STDIN);
+	ck_assert_str_eq(cfg_intake_get_type_str(in), "stdin");
 }
 END_TEST
 

@@ -212,6 +212,7 @@ AC_CONFIG_FILES([
 	build-aux/Makefile
 	compat/Makefile
 	doc/Makefile
+	doc/ezstream-cfgmigrate.1.in
 	doc/ezstream-file.sh.1.in
 	doc/ezstream.1.in
 	examples/Makefile

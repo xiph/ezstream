@@ -30,9 +30,6 @@
 #define UCREDS_SIZE	256
 #define CSUITE_SIZE	2048
 
-#define DEFAULT_PORT	8000
-#define DEFAULT_USER	"source"
-
 struct cfg_program {
 	char			 name[PATH_MAX];
 	enum cfg_config_type	 config_type;

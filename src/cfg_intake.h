@@ -33,11 +33,15 @@ typedef struct cfg_intake_list *	cfg_intake_list_t;
 cfg_intake_list_t
 	cfg_intake_list_create(void);
 void	cfg_intake_list_destroy(cfg_intake_list_t *);
+unsigned int
+	cfg_intake_list_nentries(cfg_intake_list_t);
 
 cfg_intake_t
 	cfg_intake_list_find(cfg_intake_list_t, const char *);
 cfg_intake_t
 	cfg_intake_list_get(cfg_intake_list_t, const char *);
+void	cfg_intake_list_foreach(cfg_intake_list_t, void (*)(cfg_intake_t,
+	    void *), void *);
 
 cfg_intake_t
 	cfg_intake_create(const char *);
@@ -60,6 +64,8 @@ const char *
 	cfg_intake_get_name(cfg_intake_t);
 enum cfg_intake_type
 	cfg_intake_get_type(cfg_intake_t);
+const char *
+	cfg_intake_get_type_str(cfg_intake_t);
 const char *
 	cfg_intake_get_filename(cfg_intake_t);
 int	cfg_intake_get_shuffle(cfg_intake_t);

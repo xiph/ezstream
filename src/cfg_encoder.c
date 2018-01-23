@@ -48,7 +48,7 @@ cfg_encoder_list_create(void)
 }
 
 void
-cfg_encoder_list_destroy(cfg_encoder_list_t *el_p)
+cfg_encoder_list_destroy(struct cfg_encoder_list **el_p)
 {
 	struct cfg_encoder_list *el = *el_p;
 	struct cfg_encoder	*e;
@@ -56,13 +56,24 @@ cfg_encoder_list_destroy(cfg_encoder_list_t *el_p)
 	if (!el)
 		return;
 
-	while (NULL != (e = TAILQ_FIRST(el))) {
-		TAILQ_REMOVE(el, e, entry);
-		cfg_encoder_destroy(&e);
-	}
+	while (NULL != (e = TAILQ_FIRST(el)))
+		cfg_encoder_list_remove(el, &e);
 
 	xfree(el);
 	*el_p = NULL;
+}
+
+unsigned int
+cfg_encoder_list_nentries(struct cfg_encoder_list *el)
+{
+	struct cfg_encoder	*e;
+	unsigned int		 n = 0;
+
+	TAILQ_FOREACH(e, el, entry) {
+		n++;
+	}
+
+	return (n);
 }
 
 struct cfg_encoder *
@@ -93,6 +104,24 @@ cfg_encoder_list_get(struct cfg_encoder_list *el, const char *name)
 	TAILQ_INSERT_TAIL(el, e, entry);
 
 	return (e);
+}
+
+void
+cfg_encoder_list_foreach(struct cfg_encoder_list *el,
+    void (*cb)(cfg_encoder_t, void *), void *cb_arg)
+{
+	struct cfg_encoder	*e;
+
+	TAILQ_FOREACH(e, el, entry) {
+		cb(e, cb_arg);
+	}
+}
+
+void
+cfg_encoder_list_remove(struct cfg_encoder_list *el, struct cfg_encoder **e_p)
+{
+	TAILQ_REMOVE(el, *e_p, entry);
+	cfg_encoder_destroy(e_p);
 }
 
 struct cfg_encoder *

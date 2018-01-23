@@ -7,15 +7,27 @@
 
 #include "check_cfg.h"
 
+static void	_sl_cb(cfg_stream_t, void *);
+
 Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
 cfg_stream_list_t	streams;
 
+static void
+_sl_cb(cfg_stream_t str, void *arg)
+{
+	int	*count = (int *)arg;
+
+	ck_assert_ptr_ne(cfg_stream_get_name(str), NULL);
+	(*count)++;
+}
+
 START_TEST(test_stream_list_get)
 {
 	cfg_stream_t	str, str2;
+	int		count = 0;
 
 	ck_assert_ptr_eq(cfg_stream_list_get(streams, NULL), NULL);
 	ck_assert_ptr_eq(cfg_stream_list_get(streams, ""), NULL);
@@ -23,6 +35,11 @@ START_TEST(test_stream_list_get)
 	str = cfg_stream_list_get(streams, "TeSt");
 	str2 = cfg_stream_list_get(streams, "test");
 	ck_assert_ptr_eq(str, str2);
+
+	(void)cfg_stream_list_get(streams, "test2");
+	ck_assert_uint_eq(cfg_stream_list_nentries(streams), 2);
+	cfg_stream_list_foreach(streams, _sl_cb, &count);
+	ck_assert_int_eq(count, 2);
 }
 END_TEST
 

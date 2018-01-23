@@ -54,7 +54,7 @@ cfg_decoder_list_create(void)
 }
 
 void
-cfg_decoder_list_destroy(cfg_decoder_list_t *dl_p)
+cfg_decoder_list_destroy(struct cfg_decoder_list **dl_p)
 {
 	struct cfg_decoder_list *dl = *dl_p;
 	struct cfg_decoder	*d;
@@ -62,13 +62,24 @@ cfg_decoder_list_destroy(cfg_decoder_list_t *dl_p)
 	if (!dl)
 		return;
 
-	while (NULL != (d = TAILQ_FIRST(dl))) {
-		TAILQ_REMOVE(dl, d, entry);
-		cfg_decoder_destroy(&d);
-	}
+	while (NULL != (d = TAILQ_FIRST(dl)))
+		cfg_decoder_list_remove(dl, &d);
 
 	xfree(dl);
 	*dl_p = NULL;
+}
+
+unsigned int
+cfg_decoder_list_nentries(struct cfg_decoder_list *dl)
+{
+	struct cfg_decoder	*d;
+	unsigned int		 n = 0;
+
+	TAILQ_FOREACH(d, dl, entry) {
+		n++;
+	}
+
+	return (n);
 }
 
 struct cfg_decoder *
@@ -113,6 +124,24 @@ cfg_decoder_list_get(struct cfg_decoder_list *dl, const char *name)
 	TAILQ_INSERT_TAIL(dl, d, entry);
 
 	return (d);
+}
+
+void
+cfg_decoder_list_remove(struct cfg_decoder_list *dl, struct cfg_decoder **d_p)
+{
+	TAILQ_REMOVE(dl, *d_p, entry);
+	cfg_decoder_destroy(d_p);
+}
+
+void
+cfg_decoder_list_foreach(struct cfg_decoder_list *dl,
+    void (*cb)(cfg_decoder_t, void *), void *cb_arg)
+{
+	struct cfg_decoder	*d;
+
+	TAILQ_FOREACH(d, dl, entry) {
+		cb(d, cb_arg);
+	}
 }
 
 struct cfg_decoder *
@@ -269,6 +298,17 @@ cfg_decoder_extsupport(struct cfg_decoder *d, const char *ext)
 	}
 
 	return (0);
+}
+
+void
+cfg_decoder_ext_foreach(struct cfg_decoder *d,
+    void (*cb)(const char *, void *), void *cb_arg)
+{
+	struct file_ext *e;
+
+	TAILQ_FOREACH(e, &d->exts, entry) {
+		cb(e->ext, cb_arg);
+	}
 }
 
 const char *

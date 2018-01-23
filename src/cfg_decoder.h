@@ -23,6 +23,8 @@ typedef struct cfg_decoder_list *	cfg_decoder_list_t;
 cfg_decoder_list_t
 	cfg_decoder_list_create(void);
 void	cfg_decoder_list_destroy(cfg_decoder_list_t *);
+unsigned int
+	cfg_decoder_list_nentries(cfg_decoder_list_t);
 
 cfg_decoder_t
 	cfg_decoder_list_find(cfg_decoder_list_t, const char *);
@@ -30,6 +32,9 @@ cfg_decoder_t
 	cfg_decoder_list_findext(cfg_decoder_list_t, const char *);
 cfg_decoder_t
 	cfg_decoder_list_get(cfg_decoder_list_t, const char *);
+void	cfg_decoder_list_remove(cfg_decoder_list_t, cfg_decoder_t *);
+void	cfg_decoder_list_foreach(cfg_decoder_list_t, void (*)(cfg_decoder_t,
+	    void *), void *);
 
 cfg_decoder_t
 	cfg_decoder_create(const char *);
@@ -45,6 +50,8 @@ int	cfg_decoder_add_match(cfg_decoder_t, cfg_decoder_list_t, const char *,
 int	cfg_decoder_validate(cfg_decoder_t, const char **);
 
 int	cfg_decoder_extsupport(cfg_decoder_t, const char *);
+void	cfg_decoder_ext_foreach(cfg_decoder_t, void (*)(const char *, void *),
+	    void *);
 
 const char *
 	cfg_decoder_get_name(cfg_decoder_t);

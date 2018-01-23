@@ -76,6 +76,19 @@ cfg_stream_list_destroy(cfg_stream_list_t *sl_p)
 	*sl_p = NULL;
 }
 
+unsigned int
+cfg_stream_list_nentries(struct cfg_stream_list *sl)
+{
+	struct cfg_stream	*s;
+	unsigned int		 n = 0;
+
+	TAILQ_FOREACH(s, sl, entry) {
+		n++;
+	}
+
+	return (n);
+}
+
 struct cfg_stream *
 cfg_stream_list_find(struct cfg_stream_list *sl, const char *name)
 {
@@ -104,6 +117,17 @@ cfg_stream_list_get(struct cfg_stream_list *sl, const char *name)
 	TAILQ_INSERT_TAIL(sl, s, entry);
 
 	return (s);
+}
+
+void
+cfg_stream_list_foreach(struct cfg_stream_list *sl,
+    void (*cb)(cfg_stream_t, void *), void *cb_arg)
+{
+	struct cfg_stream	*s;
+
+	TAILQ_FOREACH(s, sl, entry) {
+		cb(s, cb_arg);
+	}
 }
 
 struct cfg_stream *

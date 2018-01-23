@@ -17,6 +17,9 @@
 #ifndef __CFG_SERVER_H__
 #define __CFG_SERVER_H__
 
+#define CFG_SERVER_DEFAULT_PORT	8000
+#define CFG_SERVER_DEFAULT_USER	"source"
+
 enum cfg_server_protocol {
 	CFG_PROTO_HTTP = 0,
 	CFG_PROTO_HTTPS,
@@ -38,11 +41,15 @@ typedef struct cfg_server_list *	cfg_server_list_t;
 cfg_server_list_t
 	cfg_server_list_create(void);
 void	cfg_server_list_destroy(cfg_server_list_t *);
+unsigned int
+	cfg_server_list_nentries(cfg_server_list_t);
 
 cfg_server_t
 	cfg_server_list_find(cfg_server_list_t, const char *);
 cfg_server_t
 	cfg_server_list_get(cfg_server_list_t, const char *);
+void	cfg_server_list_foreach(cfg_server_list_t, void (*)(cfg_server_t,
+	    void *), void *);
 
 cfg_server_t
 	cfg_server_create(const char *);
@@ -51,27 +58,27 @@ void	cfg_server_destroy(cfg_server_t *);
 int	cfg_server_set_name(cfg_server_t, cfg_server_list_t, const char *,
 	    const char **);
 int	cfg_server_set_protocol(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_hostname(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_port(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_user(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_password(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_tls(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_tls_cipher_suite(cfg_server_t, cfg_server_list_t,
-            const char *, const char **);
+	    const char *, const char **);
 int	cfg_server_set_ca_dir(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_ca_file(cfg_server_t, cfg_server_list_t, const char *,
-            const char **);
+	    const char **);
 int	cfg_server_set_client_cert(cfg_server_t, cfg_server_list_t,
-            const char *, const char **);
+	    const char *, const char **);
 int	cfg_server_set_reconnect_attempts(cfg_server_t, cfg_server_list_t,
-            const char *, const char **);
+	    const char *, const char **);
 
 int	cfg_server_validate(cfg_server_t, const char **);
 
@@ -91,6 +98,8 @@ const char *
 	cfg_server_get_password(cfg_server_t);
 enum cfg_server_tls
 	cfg_server_get_tls(cfg_server_t);
+const char *
+	cfg_server_get_tls_str(cfg_server_t);
 const char *
 	cfg_server_get_tls_cipher_suite(cfg_server_t);
 const char *

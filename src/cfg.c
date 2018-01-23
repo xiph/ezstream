@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "cfg_private.h"
-#include "cfg_xmlfile.h"
+#include "cfgfile_xml.h"
 #include "log.h"
 #include "xalloc.h"
 
@@ -73,7 +73,7 @@ _cfg_load(void)
 {
 	switch (cfg_program.config_type) {
 	case CFG_TYPE_XMLFILE:
-		if (0 > cfg_xmlfile_parse(cfg_program.config_file))
+		if (0 > cfgfile_xml_parse(cfg_program.config_file))
 			return (-1);
 		break;
 	default:

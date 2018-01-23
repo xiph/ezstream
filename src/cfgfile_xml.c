@@ -18,24 +18,33 @@
 # include "config.h"
 #endif /* HAVE_CONFIG_H */
 
+#include <stdio.h>
+#include <string.h>
+
 #include "cfg.h"
-#include "cfg_xmlfile.h"
+#include "cfgfile_xml.h"
 #include "log.h"
 #include "xalloc.h"
 
 #include <libxml/parser.h>
 
-static int	_cfg_xmlfile_parse_server(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_servers(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_stream(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_streams(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_intake(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_intakes(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_metadata(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_decoder(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_decoders(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_encoder(xmlDocPtr, xmlNodePtr);
-static int	_cfg_xmlfile_parse_encoders(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_server(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_servers(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_stream(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_streams(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_intake(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_intakes(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_metadata(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_decoder(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_decoders(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_encoder(xmlDocPtr, xmlNodePtr);
+static int	_cfgfile_xml_parse_encoders(xmlDocPtr, xmlNodePtr);
+static void	_cfgfile_xml_print_server(cfg_server_t, void *);
+static void	_cfgfile_xml_print_stream(cfg_stream_t, void *);
+static void	_cfgfile_xml_print_intake(cfg_intake_t, void *);
+static void	_cfgfile_xml_print_decoder_ext(const char *, void *);
+static void	_cfgfile_xml_print_decoder(cfg_decoder_t, void *);
+static void	_cfgfile_xml_print_encoder(cfg_encoder_t, void *);
 
 #define XML_CHAR(s)	(const xmlChar *)(s)
 #define STD_CHAR(s)	(const char *)(s)
@@ -60,7 +69,7 @@ static int	_cfg_xmlfile_parse_encoders(xmlDocPtr, xmlNodePtr);
 } while (0)
 
 static int
-_cfg_xmlfile_parse_server(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_server(xmlDocPtr doc, xmlNodePtr cur)
 {
 	cfg_server_list_t	 sl;
 	cfg_server_t		 s;
@@ -95,11 +104,11 @@ _cfg_xmlfile_parse_server(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 static int
-_cfg_xmlfile_parse_servers(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_servers(xmlDocPtr doc, xmlNodePtr cur)
 {
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("server")) &&
-		    0 > _cfg_xmlfile_parse_server(doc, cur))
+		    0 > _cfgfile_xml_parse_server(doc, cur))
 			return (-1);
 	}
 
@@ -126,7 +135,7 @@ _cfg_xmlfile_parse_servers(xmlDocPtr doc, xmlNodePtr cur)
 } while (0)
 
 static int
-_cfg_xmlfile_parse_stream(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_stream(xmlDocPtr doc, xmlNodePtr cur)
 {
 	cfg_stream_list_t	 sl;
 	cfg_stream_t		 s;
@@ -163,11 +172,11 @@ _cfg_xmlfile_parse_stream(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 static int
-_cfg_xmlfile_parse_streams(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_streams(xmlDocPtr doc, xmlNodePtr cur)
 {
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("stream")) &&
-		    0 > _cfg_xmlfile_parse_stream(doc, cur))
+		    0 > _cfgfile_xml_parse_stream(doc, cur))
 			return (-1);
 	}
 
@@ -194,7 +203,7 @@ _cfg_xmlfile_parse_streams(xmlDocPtr doc, xmlNodePtr cur)
 } while (0)
 
 static int
-_cfg_xmlfile_parse_intake(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_intake(xmlDocPtr doc, xmlNodePtr cur)
 {
 	cfg_intake_list_t	 il;
 	cfg_intake_t		 i;
@@ -222,11 +231,11 @@ _cfg_xmlfile_parse_intake(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 static int
-_cfg_xmlfile_parse_intakes(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_intakes(xmlDocPtr doc, xmlNodePtr cur)
 {
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("intake")) &&
-		    0 > _cfg_xmlfile_parse_intake(doc, cur))
+		    0 > _cfgfile_xml_parse_intake(doc, cur))
 			return (-1);
 	}
 
@@ -249,7 +258,7 @@ _cfg_xmlfile_parse_intakes(xmlDocPtr doc, xmlNodePtr cur)
 } while (0)
 
 static int
-_cfg_xmlfile_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
 {
 	int	error = 0;
 
@@ -289,7 +298,7 @@ _cfg_xmlfile_parse_metadata(xmlDocPtr doc, xmlNodePtr cur)
 } while (0)
 
 static int
-_cfg_xmlfile_parse_decoder(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_decoder(xmlDocPtr doc, xmlNodePtr cur)
 {
 	cfg_decoder_list_t	 dl;
 	cfg_decoder_t		 d;
@@ -315,11 +324,11 @@ _cfg_xmlfile_parse_decoder(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 static int
-_cfg_xmlfile_parse_decoders(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_decoders(xmlDocPtr doc, xmlNodePtr cur)
 {
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("decoder")) &&
-		    0 > _cfg_xmlfile_parse_decoder(doc, cur))
+		    0 > _cfgfile_xml_parse_decoder(doc, cur))
 			return (-1);
 	}
 
@@ -346,7 +355,7 @@ _cfg_xmlfile_parse_decoders(xmlDocPtr doc, xmlNodePtr cur)
 } while (0)
 
 static int
-_cfg_xmlfile_parse_encoder(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_encoder(xmlDocPtr doc, xmlNodePtr cur)
 {
 	cfg_encoder_list_t	 el;
 	cfg_encoder_t		 e;
@@ -372,11 +381,11 @@ _cfg_xmlfile_parse_encoder(xmlDocPtr doc, xmlNodePtr cur)
 }
 
 static int
-_cfg_xmlfile_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
+_cfgfile_xml_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
 {
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("encoder")) &&
-		    0 > _cfg_xmlfile_parse_encoder(doc, cur))
+		    0 > _cfgfile_xml_parse_encoder(doc, cur))
 			return (-1);
 	}
 
@@ -395,20 +404,20 @@ _cfg_xmlfile_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
  *             port
  *             user
  *             password
- *             reconnect_attempts
  *             tls
  *             tls_cipher_suite
  *             ca_dir
  *             ca_file
  *             client_cert
+ *             reconnect_attempts
  *         ...
  *     streams
  *         stream
  *             name
  *             mountpoint
- *             public
  *             intake
  *             server
+ *             public
  *             format
  *             encoder
  *             stream_name
@@ -448,7 +457,7 @@ _cfg_xmlfile_parse_encoders(xmlDocPtr doc, xmlNodePtr cur)
  *         ...
  */
 int
-cfg_xmlfile_parse(const char *config_file)
+cfgfile_xml_parse(const char *config_file)
 {
 	xmlDocPtr	doc = NULL;
 	xmlNodePtr	cur = NULL;
@@ -478,32 +487,32 @@ cfg_xmlfile_parse(const char *config_file)
 
 	for (cur = cur->xmlChildrenNode; cur; cur = cur->next) {
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("servers"))) {
-			if (0 > _cfg_xmlfile_parse_servers(doc, cur))
+			if (0 > _cfgfile_xml_parse_servers(doc, cur))
 				error = 1;
 			continue;
 		}
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("streams"))) {
-			if (0 > _cfg_xmlfile_parse_streams(doc, cur))
+			if (0 > _cfgfile_xml_parse_streams(doc, cur))
 				error = 1;
 			continue;
 		}
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("intakes"))) {
-			if (0 > _cfg_xmlfile_parse_intakes(doc, cur))
+			if (0 > _cfgfile_xml_parse_intakes(doc, cur))
 				error = 1;
 			continue;
 		}
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("metadata"))) {
-			if (0 > _cfg_xmlfile_parse_metadata(doc, cur))
+			if (0 > _cfgfile_xml_parse_metadata(doc, cur))
 				error = 1;
 			continue;
 		}
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("decoders"))) {
-			if (0 > _cfg_xmlfile_parse_decoders(doc, cur))
+			if (0 > _cfgfile_xml_parse_decoders(doc, cur))
 				error = 1;
 			continue;
 		}
 		if (0 == xmlStrcasecmp(cur->name, XML_CHAR("encoders"))) {
-			if (0 > _cfg_xmlfile_parse_encoders(doc, cur))
+			if (0 > _cfgfile_xml_parse_encoders(doc, cur))
 				error = 1;
 			continue;
 		}
@@ -520,4 +529,221 @@ error:
 		xmlFreeDoc(doc);
 
 	return (-1);
+}
+
+static void
+_cfgfile_xml_print_server(cfg_server_t s, void *arg)
+{
+	FILE	*fp = (FILE *)arg;
+
+	fprintf(fp, "    <server>\n");
+	if (0 != strcasecmp(cfg_server_get_name(s), CFG_DEFAULT))
+		fprintf(fp, "      <name>%s</name>\n",
+		    cfg_server_get_name(s));
+	fprintf(fp, "      <protocol>%s</protocol>\n",
+	    cfg_server_get_protocol_str(s));
+	if (cfg_server_get_hostname(s))
+		fprintf(fp, "      <hostname>%s</hostname>\n",
+		    cfg_server_get_hostname(s));
+	if (cfg_server_get_port(s) != CFG_SERVER_DEFAULT_PORT)
+		fprintf(fp, "      <port>%u</port>\n",
+		    cfg_server_get_port(s));
+	if (0 != strcasecmp(cfg_server_get_user(s), CFG_SERVER_DEFAULT_USER))
+		fprintf(fp, "      <user>%s</user>\n",
+		    cfg_server_get_user(s));
+	if (cfg_server_get_password(s))
+		fprintf(fp, "      <password>%s</password>\n",
+		    cfg_server_get_password(s));
+	if (cfg_server_get_tls(s) != CFG_TLS_MAY)
+		fprintf(fp, "      <tls>%s</tls>\n",
+		    cfg_server_get_tls_str(s));
+	if (cfg_server_get_tls_cipher_suite(s))
+		fprintf(fp, "      <tls_cipher_suite>%s</tls_cipher_suite>\n",
+		    cfg_server_get_tls_cipher_suite(s));
+	if (cfg_server_get_ca_dir(s))
+		fprintf(fp, "      <ca_dir>%s</ca_dir>\n",
+		    cfg_server_get_ca_dir(s));
+	if (cfg_server_get_ca_file(s))
+		fprintf(fp, "      <ca_file>%s</ca_file>\n",
+		    cfg_server_get_ca_file(s));
+	if (cfg_server_get_client_cert(s))
+		fprintf(fp, "      <client_cert>%s</client_cert>\n",
+		    cfg_server_get_client_cert(s));
+	if (cfg_server_get_reconnect_attempts(s))
+		fprintf(fp, "      <reconnect_attempts>%u</reconnect_attempts>\n",
+		    cfg_server_get_reconnect_attempts(s));
+	fprintf(fp, "    </server>\n");
+}
+
+static void
+_cfgfile_xml_print_stream(cfg_stream_t s, void *arg)
+{
+	FILE	*fp = (FILE *)arg;
+
+	fprintf(fp, "    <stream>\n");
+	if (0 != strcasecmp(cfg_stream_get_name(s), CFG_DEFAULT))
+		fprintf(fp, "      <name>%s</name>\n",
+		    cfg_stream_get_name(s));
+	if (cfg_stream_get_mountpoint(s))
+		fprintf(fp, "      <mountpoint>%s</mountpoint>\n",
+		    cfg_stream_get_mountpoint(s));
+	if (cfg_stream_get_intake(s))
+		fprintf(fp, "      <intake>%s</intake>\n",
+		    cfg_stream_get_intake(s));
+	if (cfg_stream_get_server(s))
+		fprintf(fp, "      <server>%s</server>\n",
+		    cfg_stream_get_server(s));
+	if (cfg_stream_get_public(s))
+		fprintf(fp, "      <public>yes</public>\n");
+	fprintf(fp, "      <format>%s</format>\n",
+	    cfg_stream_get_format_str(s));
+	if (cfg_stream_get_encoder(s))
+		fprintf(fp, "      <encoder>%s</encoder>\n",
+		    cfg_stream_get_encoder(s));
+	if (cfg_stream_get_stream_name(s))
+		fprintf(fp, "      <stream_name>%s</stream_name>\n",
+		    cfg_stream_get_stream_name(s));
+	if (cfg_stream_get_stream_url(s))
+		fprintf(fp, "      <stream_url>%s</stream_url>\n",
+		    cfg_stream_get_stream_url(s));
+	if (cfg_stream_get_stream_genre(s))
+		fprintf(fp, "      <stream_genre>%s</stream_genre>\n",
+		    cfg_stream_get_stream_genre(s));
+	if (cfg_stream_get_stream_description(s))
+		fprintf(fp, "      <stream_description>%s</stream_description>\n",
+		    cfg_stream_get_stream_description(s));
+	if (cfg_stream_get_stream_quality(s))
+		fprintf(fp, "      <stream_quality>%s</stream_quality>\n",
+		    cfg_stream_get_stream_quality(s));
+	if (cfg_stream_get_stream_bitrate(s))
+		fprintf(fp, "      <stream_bitrate>%s</stream_bitrate>\n",
+		    cfg_stream_get_stream_bitrate(s));
+	if (cfg_stream_get_stream_samplerate(s))
+		fprintf(fp, "      <stream_samplerate>%s</stream_samplerate>\n",
+		    cfg_stream_get_stream_samplerate(s));
+	if (cfg_stream_get_stream_channels(s))
+		fprintf(fp, "      <stream_channels>%s</stream_channels>\n",
+		    cfg_stream_get_stream_channels(s));
+	fprintf(fp, "    </stream>\n");
+}
+
+static void
+_cfgfile_xml_print_intake(cfg_intake_t i, void *arg)
+{
+	FILE	*fp = (FILE *)arg;
+
+	fprintf(fp, "    <intake>\n");
+	if (0 != strcasecmp(cfg_intake_get_name(i), CFG_DEFAULT))
+		fprintf(fp, "      <name>%s</name>\n",
+		    cfg_intake_get_name(i));
+	if (cfg_intake_get_type(i))
+		fprintf(fp, "      <type>%s</type>\n",
+		    cfg_intake_get_type_str(i));
+	if (cfg_intake_get_filename(i))
+		fprintf(fp, "      <filename>%s</filename>\n",
+		    cfg_intake_get_filename(i));
+	if (cfg_intake_get_shuffle(i))
+		fprintf(fp, "      <shuffle>yes</shuffle>\n");
+	if (cfg_intake_get_stream_once(i))
+		fprintf(fp, "      <stream_once>yes</stream_once>\n");
+	fprintf(fp, "    </intake>\n");
+}
+
+static void
+_cfgfile_xml_print_decoder_ext(const char *ext, void *arg)
+{
+	FILE	*fp = (FILE *)arg;
+
+	fprintf(fp, "      <file_ext>%s</file_ext>\n", ext);
+}
+
+static void
+_cfgfile_xml_print_decoder(cfg_decoder_t d, void *arg)
+{
+	FILE	*fp = (FILE *)arg;
+
+	fprintf(fp, "    <decoder>\n");
+	if (0 != strcasecmp(cfg_decoder_get_name(d), CFG_DEFAULT))
+		fprintf(fp, "      <name>%s</name>\n",
+		    cfg_decoder_get_name(d));
+	if (cfg_decoder_get_program(d))
+		fprintf(fp, "      <program>%s</program>\n",
+		    cfg_decoder_get_program(d));
+	cfg_decoder_ext_foreach(d, _cfgfile_xml_print_decoder_ext, fp);
+	fprintf(fp, "    </decoder>\n");
+}
+
+static void
+_cfgfile_xml_print_encoder(cfg_encoder_t e, void *arg)
+{
+	FILE	*fp = (FILE *)arg;
+
+	fprintf(fp, "    <encoder>\n");
+	if (0 != strcasecmp(cfg_encoder_get_name(e), CFG_DEFAULT))
+		fprintf(fp, "      <name>%s</name>\n",
+		    cfg_encoder_get_name(e));
+	fprintf(fp, "      <format>%s</format>\n",
+	    cfg_stream_fmt2str(cfg_encoder_get_format(e)));
+	if (cfg_encoder_get_program(e))
+		fprintf(fp, "      <program>%s</program>\n",
+		    cfg_encoder_get_program(e));
+	fprintf(fp, "    </encoder>\n");
+}
+
+void
+cfgfile_xml_print(FILE *fp)
+{
+	fprintf(fp, "<ezstream>\n");
+	fprintf(fp, "\n");
+	fprintf(fp, "  <servers>\n");
+	cfg_server_list_foreach(cfg_get_servers(), _cfgfile_xml_print_server,
+	    fp);
+	fprintf(fp, "  </servers>\n");
+	fprintf(fp, "\n");
+	fprintf(fp, "  <streams>\n");
+	cfg_stream_list_foreach(cfg_get_streams(), _cfgfile_xml_print_stream,
+	    fp);
+	fprintf(fp, "  </streams>\n");
+	fprintf(fp, "\n");
+	fprintf(fp, "  <intakes>\n");
+	cfg_intake_list_foreach(cfg_get_intakes(), _cfgfile_xml_print_intake,
+	    fp);
+	fprintf(fp, "  </intakes>\n");
+	if (cfg_decoder_list_nentries(cfg_get_decoders())) {
+		fprintf(fp, "\n");
+		fprintf(fp, "  <decoders>\n");
+		cfg_decoder_list_foreach(cfg_get_decoders(),
+		    _cfgfile_xml_print_decoder, fp);
+		fprintf(fp, "  </decoders>\n");
+	}
+	if (cfg_encoder_list_nentries(cfg_get_encoders())) {
+		fprintf(fp, "\n");
+		fprintf(fp, "  <encoders>\n");
+		cfg_encoder_list_foreach(cfg_get_encoders(),
+		    _cfgfile_xml_print_encoder, fp);
+		fprintf(fp, "  </encoders>\n");
+	}
+	if (cfg_get_metadata_program() ||
+	    cfg_get_metadata_format_str() ||
+	    0 <= cfg_get_metadata_refresh_interval() ||
+	    cfg_get_metadata_normalize_strings() ||
+	    cfg_get_metadata_no_updates()) {
+		fprintf(fp, "\n");
+		fprintf(fp, "  <metadata>\n");
+		if (cfg_get_metadata_program())
+			fprintf(fp, "    <program>%s</program>\n",
+			    cfg_get_metadata_program());
+		if (cfg_get_metadata_format_str())
+			fprintf(fp, "    <format_str>%s</format_str>\n",
+			    cfg_get_metadata_format_str());
+		if (0 <= cfg_get_metadata_refresh_interval())
+			fprintf(fp, "    <refresh_interval>%d</refresh_interval>\n",
+			    cfg_get_metadata_refresh_interval());
+		if (cfg_get_metadata_normalize_strings())
+			fprintf(fp, "    <normalize_strings>yes</normalize_strings>\n");
+		if (cfg_get_metadata_no_updates())
+			fprintf(fp, "    <no_updates>yes</no_updates>\n");
+		fprintf(fp, "  </metadata>\n");
+	}
+	fprintf(fp, "</ezstream>\n");
 }

@@ -7,15 +7,27 @@
 
 #include "check_cfg.h"
 
+static void	_el_cb(cfg_encoder_t, void *);
+
 Suite * cfg_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
 cfg_encoder_list_t	encoders;
 
+static void
+_el_cb(cfg_encoder_t enc, void *arg)
+{
+	int	*count = (int *)arg;
+
+	ck_assert_ptr_ne(cfg_encoder_get_name(enc), NULL);
+	(*count)++;
+}
+
 START_TEST(test_encoder_list_get)
 {
 	cfg_encoder_t	enc, enc2;
+	int		count = 0;
 
 	ck_assert_ptr_eq(cfg_encoder_list_get(encoders, NULL), NULL);
 	ck_assert_ptr_eq(cfg_encoder_list_get(encoders, ""), NULL);
@@ -23,6 +35,11 @@ START_TEST(test_encoder_list_get)
 	enc = cfg_encoder_list_get(encoders, "TeSt");
 	enc2 = cfg_encoder_list_get(encoders, "test");
 	ck_assert_ptr_eq(enc, enc2);
+
+	(void)cfg_encoder_list_get(encoders, "test2");
+	ck_assert_uint_eq(cfg_encoder_list_nentries(encoders), 2);
+	cfg_encoder_list_foreach(encoders, _el_cb, &count);
+	ck_assert_int_eq(count, 2);
 }
 END_TEST
 
