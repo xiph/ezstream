@@ -20,6 +20,9 @@
 
 #include "compat.h"
 
+#if defined(HAVE_LIBGEN_H) && !defined(__linux__)
+# include <libgen.h>
+#endif /* HAVE_LIBGEN_H && !__linux__ */
 #include <limits.h>
 #include <stdio.h>
 #include <string.h>
