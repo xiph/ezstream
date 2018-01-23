@@ -380,7 +380,7 @@ int
 main(int argc, char *argv[])
 {
 	int		 ret;
-	EZCONFIG	*ez;
+	EZCONFIG	*ez = NULL;
 
 	ret = 1;
 	if (0 > cfg_init() ||
