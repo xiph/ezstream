@@ -612,56 +612,36 @@ parseConfig(const char *fileName)
 void
 freeConfig(EZCONFIG *cfg)
 {
+	unsigned int	i;
+
 	if (cfg == NULL)
 		return;
 
-	if (cfg->URL != NULL)
-		free(cfg->URL);
-	if (cfg->password != NULL)
-		free(cfg->password);
-	if (cfg->format != NULL)
-		free(cfg->format);
-	if (cfg->fileName != NULL)
-		free(cfg->fileName);
-	if (cfg->metadataProgram != NULL)
-		free(cfg->metadataProgram);
-	if (cfg->metadataFormat != NULL)
-		free(cfg->metadataFormat);
-	if (cfg->serverName != NULL)
-		free(cfg->serverName);
-	if (cfg->serverURL != NULL)
-		free(cfg->serverURL);
-	if (cfg->serverGenre != NULL)
-		free(cfg->serverGenre);
-	if (cfg->serverDescription != NULL)
-		free(cfg->serverDescription);
-	if (cfg->serverBitrate != NULL)
-		free(cfg->serverBitrate);
-	if (cfg->serverChannels != NULL)
-		free(cfg->serverChannels);
-	if (cfg->serverSamplerate != NULL)
-		free(cfg->serverSamplerate);
-	if (cfg->serverQuality != NULL)
-		free(cfg->serverQuality);
-	if (cfg->encoderDecoders != NULL) {
-		unsigned int	i;
-
-		for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
-			if (cfg->encoderDecoders[i] != NULL) {
-				if (cfg->encoderDecoders[i]->format != NULL)
-					free(cfg->encoderDecoders[i]->format);
-				if (cfg->encoderDecoders[i]->match != NULL)
-					free(cfg->encoderDecoders[i]->match);
-				if (cfg->encoderDecoders[i]->encoder != NULL)
-					free(cfg->encoderDecoders[i]->encoder);
-				if (cfg->encoderDecoders[i]->decoder != NULL)
-					free(cfg->encoderDecoders[i]->decoder);
-				free(cfg->encoderDecoders[i]);
-			}
-		}
+	free(cfg->URL);
+	free(cfg->password);
+	free(cfg->format);
+	free(cfg->fileName);
+	free(cfg->metadataProgram);
+	free(cfg->metadataFormat);
+	free(cfg->serverName);
+	free(cfg->serverURL);
+	free(cfg->serverGenre);
+	free(cfg->serverDescription);
+	free(cfg->serverBitrate);
+	free(cfg->serverChannels);
+	free(cfg->serverSamplerate);
+	free(cfg->serverQuality);
+	for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
+		if (NULL == cfg->encoderDecoders[i])
+			continue;
+		free(cfg->encoderDecoders[i]->format);
+		free(cfg->encoderDecoders[i]->match);
+		free(cfg->encoderDecoders[i]->encoder);
+		free(cfg->encoderDecoders[i]->decoder);
+		free(cfg->encoderDecoders[i]);
 	}
 
-	memset(cfg, 0, sizeof(EZCONFIG));
+	memset(cfg, 0, sizeof(*cfg));
 }
 
 unsigned int
