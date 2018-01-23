@@ -309,7 +309,7 @@ _parse_ezconfig0(EZCONFIG *ez)
 		} else {
 			if (ed->format &&
 			    0 == strcasecmp(ed->format, "THEORA")) {
-				cfg_encoder_t	enc = NULL;
+				cfg_encoder_t	enc;
 
 				enc = cfg_encoder_list_find(enc_list,
 				    ed->format);

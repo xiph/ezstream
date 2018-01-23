@@ -101,7 +101,6 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	char			*custom_songinfo;
 	struct util_dict	 dicts[6];
 	char			*dec_str;
-	char			*enc_str;
 	char			*cmd_str;
 	size_t			 cmd_str_size;
 
@@ -189,6 +188,8 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	dec_str = util_expand_words(cfg_decoder_get_program(decoder), dicts);
 	cmd_str_size = strlen(dec_str) + 1;
 	if (cfg_encoder_get_program(encoder)) {
+		char	*enc_str;
+
 		enc_str = util_expand_words(cfg_encoder_get_program(encoder),
 		    dicts);
 		cmd_str_size += strlen(" | ") + strlen(enc_str);

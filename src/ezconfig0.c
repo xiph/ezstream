@@ -612,8 +612,6 @@ parseConfig(const char *fileName)
 void
 freeConfig(EZCONFIG *cfg)
 {
-	unsigned int	i;
-
 	if (cfg == NULL)
 		return;
 
@@ -646,6 +644,8 @@ freeConfig(EZCONFIG *cfg)
 	if (cfg->serverQuality != NULL)
 		free(cfg->serverQuality);
 	if (cfg->encoderDecoders != NULL) {
+		unsigned int	i;
+
 		for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
 			if (cfg->encoderDecoders[i] != NULL) {
 				if (cfg->encoderDecoders[i]->format != NULL)
