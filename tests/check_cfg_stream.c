@@ -195,6 +195,7 @@ START_TEST(test_stream_validate)
 
 	ck_assert_int_ne(cfg_stream_validate(str, NULL), 0);
 	ck_assert_int_ne(cfg_stream_validate(str, &errstr), 0);
+	ck_assert_ptr_ne(errstr, NULL);
 	ck_assert_str_eq(errstr, "format missing or unsupported");
 	ck_assert_int_eq(cfg_stream_set_format(str, streams, CFG_SFMT_VORBIS,
 	    NULL), 0);
