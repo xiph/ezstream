@@ -1,6 +1,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#include <assert.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -29,7 +30,7 @@ _test_cfgfile_rw(const char *cfgfile)
 	ck_assert_int_eq(cfg_file_reload(), 0);
 
 	fd = open(testfile, O_CREAT|O_EXCL|O_WRONLY, S_IRUSR|S_IWUSR);
-	ck_assert_int_ge(fd, 0);
+	assert(0 <= fd);
 	fp = fdopen(fd, "w");
 	if (NULL == fp) {
 		unlink(testfile);
