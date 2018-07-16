@@ -26,7 +26,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define EXTENSIONS_MAX	16
 #define UCREDS_SIZE	256
 #define CSUITE_SIZE	2048
 
