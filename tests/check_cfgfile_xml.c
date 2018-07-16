@@ -14,7 +14,7 @@
 
 static void	_test_cfgfile_rw(const char *cfgfile);
 
-Suite * cfg_xmlfile_suite(void);
+Suite * cfgfile_xml_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
@@ -80,7 +80,7 @@ START_TEST(test_reload)
 END_TEST
 
 Suite *
-cfg_xmlfile_suite(void)
+cfgfile_xml_suite(void)
 {
 	Suite	*s;
 	TCase	*tc_xmlcfg;
@@ -99,7 +99,7 @@ void
 setup_checked(void)
 {
 	if (0 < cfg_init() ||
-	    0 < cfg_set_program_name("check_cfg_xmlfile", NULL) ||
+	    0 < cfg_set_program_name("check_cfgfile_xml", NULL) ||
 	    0 < log_init(cfg_get_program_name()))
 		ck_abort_msg("setup_checked failed");
 }
@@ -118,7 +118,7 @@ main(void)
 	Suite	*s;
 	SRunner	*sr;
 
-	s = cfg_xmlfile_suite();
+	s = cfgfile_xml_suite();
 	sr = srunner_create(s);
 
 	srunner_run_all(sr, CK_NORMAL);
