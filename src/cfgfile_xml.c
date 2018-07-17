@@ -28,6 +28,8 @@
 
 #include <libxml/parser.h>
 
+#define CFGFILE_XML_NAME	"ezstream"
+
 static int	_cfgfile_xml_parse_server(xmlDocPtr, xmlNodePtr);
 static int	_cfgfile_xml_parse_servers(xmlDocPtr, xmlNodePtr);
 static int	_cfgfile_xml_parse_stream(xmlDocPtr, xmlNodePtr);
@@ -480,8 +482,9 @@ cfgfile_xml_parse(const char *config_file)
 		log_error("%s: empty document", config_file);
 		goto error;
 	}
-	if (0 != xmlStrcasecmp(cur->name, XML_CHAR("ezstream"))) {
-		log_error("%s: not ezstream config", config_file);
+	if (0 != xmlStrcasecmp(cur->name, XML_CHAR(CFGFILE_XML_NAME))) {
+		log_error("%s: %s configuration not recognized", config_file,
+		    CFGFILE_XML_NAME);
 		goto error;
 	}
 
@@ -693,7 +696,7 @@ _cfgfile_xml_print_encoder(cfg_encoder_t e, void *arg)
 void
 cfgfile_xml_print(FILE *fp)
 {
-	fprintf(fp, "<ezstream>\n");
+	fprintf(fp, "<%s>\n", CFGFILE_XML_NAME);
 	fprintf(fp, "\n");
 	fprintf(fp, "  <servers>\n");
 	cfg_server_list_foreach(cfg_get_servers(), _cfgfile_xml_print_server,
@@ -745,5 +748,5 @@ cfgfile_xml_print(FILE *fp)
 			fprintf(fp, "    <no_updates>yes</no_updates>\n");
 		fprintf(fp, "  </metadata>\n");
 	}
-	fprintf(fp, "</ezstream>\n");
+	fprintf(fp, "</%s>\n", CFGFILE_XML_NAME);
 }
