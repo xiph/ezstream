@@ -83,7 +83,7 @@ cmdline_parse(int argc, char *argv[], int *ret_p)
 
 	optind = 1;
 	for (;;) {
-		int	 ch;
+		int	ch;
 
 		ch = getopt(argc, argv, OPTSTRING);
 		if (0 > ch)

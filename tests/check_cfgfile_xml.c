@@ -116,7 +116,7 @@ main(void)
 {
 	int	 num_failed;
 	Suite	*s;
-	SRunner	*sr;
+	SRunner *sr;
 
 	s = cfgfile_xml_suite();
 	sr = srunner_create(s);
