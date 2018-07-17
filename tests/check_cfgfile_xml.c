@@ -8,7 +8,7 @@
 
 #include <check.h>
 
-#include "cfg_private.h"
+#include "cfg.h"
 #include "cfgfile_xml.h"
 #include "log.h"
 
