@@ -13,11 +13,6 @@
  *  GNU General Public License for more details.
  */
 
-/*
- * This file contains utility functions, as well as a few other unexciting
- * but verbose functions outsourced from ezstream.c to make it more readable.
- */
-
 #ifdef HAVE_CONFIG_H
 # include "config.h"
 #endif
@@ -53,11 +48,11 @@ static FILE		*pidfile_file;
 static pid_t		 pidfile_pid;
 static unsigned int	 pidfile_numlocks;
 
-static char *	_iconvert(const char *, const char *, const char *);
-static void	_cleanup_pidfile(void);
+static char *	_util_iconvert(const char *, const char *, const char *);
+static void	_util_cleanup_pidfile(void);
 
 static char *
-_iconvert(const char *in_str, const char *from, const char *to)
+_util_iconvert(const char *in_str, const char *from, const char *to)
 {
 #ifdef HAVE_ICONV
 	iconv_t 		 cd;
@@ -137,7 +132,7 @@ _iconvert(const char *in_str, const char *from, const char *to)
 }
 
 static void
-_cleanup_pidfile(void)
+_util_cleanup_pidfile(void)
 {
 	if (NULL != pidfile_path && getpid() == pidfile_pid) {
 		(void)unlink(pidfile_path);
@@ -198,7 +193,7 @@ util_write_pid_file(const char *path)
 
 	if (0 == pidfile_numlocks) {
 		pidfile_pid = pid;
-		if (0 != atexit(_cleanup_pidfile))
+		if (0 != atexit(_util_cleanup_pidfile))
 			goto error;
 		pidfile_numlocks++;
 	}
@@ -261,7 +256,7 @@ util_char2utf8(const char *in_str)
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 
-	return (_iconvert(in_str, codeset, "UTF-8"));
+	return (_util_iconvert(in_str, codeset, "UTF-8"));
 }
 
 char *
@@ -273,7 +268,7 @@ util_utf82char(const char *in_str)
 	codeset = nl_langinfo((nl_item)CODESET);
 	setlocale(LC_CTYPE, "C");
 
-	return (_iconvert(in_str, "UTF-8", codeset));
+	return (_util_iconvert(in_str, "UTF-8", codeset));
 }
 
 char *
