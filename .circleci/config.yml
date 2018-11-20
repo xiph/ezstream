@@ -5,14 +5,15 @@ jobs:
     parallelism: 1
     shell: /bin/bash --login
     environment:
-    - CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
+#    - CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
     - CIRCLE_TEST_RESULTS: /tmp/circleci-test-results
     docker:
     - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
       command: /sbin/init
     steps:
     - checkout
-    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_RESULTS
+#    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_RESULTS
+    - run: mkdir -p $CIRCLE_TEST_RESULTS
     - restore_cache:
         keys:
         - v1-dep-{{ .Branch }}-
@@ -41,5 +42,5 @@ jobs:
     - run: bash <(curl -s https://codecov.io/bash)
     - store_test_results:
         path: /tmp/circleci-test-results
-    - store_artifacts:
-        path: /tmp/circleci-artifacts
+#    - store_artifacts:
+#        path: /tmp/circleci-artifacts

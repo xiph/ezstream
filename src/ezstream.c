@@ -145,6 +145,7 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	 *   else
 	 *     replacemeta
 	 */
+	log_error("%s:%s:%d", __FILE__, __FUNCTION__, __LINE__); 
 	if (cfg_get_metadata_program() &&
 	    cfg_get_metadata_format_str()) {
 		char	 buf[BUFSIZ];
@@ -156,10 +157,14 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		custom_songinfo = util_shellquote(unquoted, 0);
 		xfree(unquoted);
 	} else {
-		if (!cfg_get_metadata_program() &&
-		    strstr(cfg_decoder_get_program(decoder),
-			PLACEHOLDER_TITLE) != NULL) {
-			custom_songinfo = xstrdup("");
+		const char * md_prog = cfg_get_metadata_program();
+		const char * decoder_program = cfg_decoder_get_program(decoder);
+		if (md_prog == NULL && decoder_program != NULL ) {
+			if ( strstr(decoder_program, PLACEHOLDER_TITLE) != NULL ) {
+				custom_songinfo = xstrdup("");
+			} else {
+				custom_songinfo = xstrdup(songinfo);  
+			}
 		} else {
 			custom_songinfo = xstrdup(songinfo);
 		}
@@ -178,11 +183,12 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	dicts[4].from = PLACEHOLDER_METADATA;
 	dicts[4].to = custom_songinfo;
 
-	if (!cfg_get_metadata_program() &&
-	    strstr(cfg_encoder_get_program(encoder),
-		PLACEHOLDER_TITLE) != NULL) {
-		xfree(custom_songinfo);
-		dicts[4].to = custom_songinfo = xstrdup("");
+	if ( cfg_get_metadata_program() != NULL &&
+		 cfg_encoder_get_program(encoder) != NULL ) {
+		if ( strstr(cfg_encoder_get_program(encoder), PLACEHOLDER_TITLE) != NULL ) {
+			xfree(custom_songinfo);
+			dicts[4].to = custom_songinfo = xstrdup("");
+		}
 	}
 
 	dec_str = util_expand_words(cfg_decoder_get_program(decoder), dicts);
@@ -196,13 +202,12 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		cmd_str = xcalloc(cmd_str_size, sizeof(char));
 		snprintf(cmd_str, cmd_str_size, "%s | %s", dec_str, enc_str);
 		xfree(enc_str);
-		xfree(dec_str);
 	} else {
 		cmd_str = xcalloc(cmd_str_size, sizeof(char));
 		snprintf(cmd_str, cmd_str_size, "%s", dec_str);
-		xfree(dec_str);
 	}
 
+	xfree(dec_str);
 	xfree(artist);
 	xfree(album);
 	xfree(title);
