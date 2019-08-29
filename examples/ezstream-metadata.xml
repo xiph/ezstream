@@ -5,31 +5,20 @@
   -->
 
 <ezstream>
+    <url>http://localhost:8000/stream</url>
+    <sourcepassword>hackme</sourcepassword>
+    <format>MP3</format>
+    <filename>stdin</filename>
 
-  <servers>
-    <server>
-      <hostname>127.0.0.1</hostname>
-      <password>hackme</password>
-    </server>
-  </servers>
-
-  <streams>
-    <stream>
-      <mountpoint>/stream.ogg</mountpoint>
-      <format>Vorbis</format>
-    </stream>
-  </streams>
-
-  <intakes>
-    <intake>
-      <type>stdin</type>
-    </intake>
-  </intakes>
-
-  <metadata>
-    <program>meta.sh</program>
-    <format_str>@a@ - @t@</format_str>
-    <refresh_interval>5</refresh_interval>
-  </metadata>
-
+    <svrinfoname>Great Station</svrinfoname>
+    <svrinfourl>http://greatstation.net</svrinfourl>
+    <svrinfogenre>Great Genre</svrinfogenre>
+    <svrinfodescription>playing great music all the time</svrinfodescription>
+    <svrinfobitrate>192</svrinfobitrate>
+    <svrinfochannels>2</svrinfochannels>
+    <svrinfosamplerate>48000</svrinfosamplerate>
+  
+    <metadata_progname>./meta.sh</metadata_progname>
+    <metadata_format>@s@</metadata_format>
+    <metadata_refreshinterval>5</metadata_refreshinterval>
 </ezstream>
