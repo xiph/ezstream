@@ -11,6 +11,7 @@
 #include "cfg.h"
 #include "cfgfile_xml.h"
 #include "log.h"
+#include "stream.h"
 
 static void	_test_cfgfile_rw(const char *cfgfile);
 
@@ -48,15 +49,50 @@ _test_cfgfile_rw(const char *cfgfile)
 
 START_TEST(test_reload)
 {
+	stream_t	test_stream;
+
 	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-file_template.xml");
+	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-file_template.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
+	test_stream = stream_create(CFG_DEFAULT);
+	ck_assert_int_eq(stream_configure(test_stream), 0);
+	stream_destroy(&test_stream);
 	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-full.xml");
-	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-metadata.xml");
-	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-minimal.xml");
-	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-stdin.xml");
-	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-video.xml");
 	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-full.xml",
 	    NULL), 0);
 	ck_assert_int_eq(cfg_file_reload(), 0);
+	test_stream = stream_create(CFG_DEFAULT);
+	ck_assert_int_eq(stream_configure(test_stream), 0);
+	stream_destroy(&test_stream);
+	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-metadata.xml");
+	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-metadata.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
+	test_stream = stream_create(CFG_DEFAULT);
+	ck_assert_int_eq(stream_configure(test_stream), 0);
+	stream_destroy(&test_stream);
+	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-minimal.xml");
+	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-minimal.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
+	test_stream = stream_create(CFG_DEFAULT);
+	ck_assert_int_eq(stream_configure(test_stream), 0);
+	stream_destroy(&test_stream);
+	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-stdin.xml");
+	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-stdin.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
+	test_stream = stream_create(CFG_DEFAULT);
+	ck_assert_int_eq(stream_configure(test_stream), 0);
+	stream_destroy(&test_stream);
+	_test_cfgfile_rw(EXAMPLESDIR "/ezstream-video.xml");
+	ck_assert_int_eq(cfg_set_program_config_file(EXAMPLESDIR "/ezstream-video.xml",
+	    NULL), 0);
+	ck_assert_int_eq(cfg_file_reload(), 0);
+	test_stream = stream_create(CFG_DEFAULT);
+	ck_assert_int_eq(stream_configure(test_stream), 0);
+	stream_destroy(&test_stream);
 	ck_assert_int_eq(cfg_file_reload(), 0);
 	ck_assert_int_eq(cfg_set_program_config_file(SRCDIR "/config-bad.xml",
 	    NULL), 0);
@@ -100,13 +136,15 @@ setup_checked(void)
 {
 	if (0 < cfg_init() ||
 	    0 < cfg_set_program_name("check_cfgfile_xml", NULL) ||
-	    0 < log_init(cfg_get_program_name()))
+	    0 < log_init(cfg_get_program_name()) ||
+	    0 < stream_init())
 		ck_abort_msg("setup_checked failed");
 }
 
 void
 teardown_checked(void)
 {
+	stream_exit();
 	log_exit();
 	cfg_exit();
 }
