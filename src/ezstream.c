@@ -145,7 +145,6 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	 *   else
 	 *     replacemeta
 	 */
-	log_error("%s:%s:%d", __FILE__, __FUNCTION__, __LINE__); 
 	if (cfg_get_metadata_program() &&
 	    cfg_get_metadata_format_str()) {
 		char	 buf[BUFSIZ];
