@@ -96,10 +96,10 @@ _build_reencode_cmd(const char *extension, const char *filename,
 {
 	cfg_decoder_t		 decoder;
 	cfg_encoder_t		 encoder;
-	char			*artist, *album, *title, *songinfo, *tmp;
+	char			*artist, *album, *title, *songinfo, *tmp, *start_timestamp;
 	char			*filename_quoted;
-	char			*custom_songinfo;
-	struct util_dict	 dicts[6];
+	char			*custom_songinfo = NULL;
+	struct util_dict	 dicts[7];
 	char			*dec_str;
 	char			*cmd_str;
 	size_t			 cmd_str_size;
@@ -134,8 +134,13 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	songinfo = util_shellquote(tmp, 0);
 	xfree(tmp);
 
-	filename_quoted = util_shellquote(filename, 0);
+	tmp = util_utf82char(mdata_get_start_timestamp(md));
+	start_timestamp = util_shellquote(tmp,0);
+	xfree(tmp);
+	log_error("%s:%s:%d %s", __FILE__, __FUNCTION__, __LINE__, start_timestamp);
 
+	filename_quoted = util_shellquote(filename, 0);
+	
 	/*
 	 * if (prog && format)
 	 *    metatoformat
@@ -156,10 +161,14 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		custom_songinfo = util_shellquote(unquoted, 0);
 		xfree(unquoted);
 	} else {
-		if (!cfg_get_metadata_program() &&
-		    strstr(cfg_decoder_get_program(decoder),
-			PLACEHOLDER_TITLE) != NULL) {
-			custom_songinfo = xstrdup("");
+		const char * decoder_program = cfg_decoder_get_program(decoder);
+		if (cfg_get_metadata_program() == NULL && 
+			decoder_program != NULL ) {
+			if ( strstr(decoder_program,PLACEHOLDER_TITLE) != NULL ) {
+				custom_songinfo = xstrdup("");
+			} else {
+				custom_songinfo = xstrdup(songinfo);
+			}
 		} else {
 			custom_songinfo = xstrdup(songinfo);
 		}
@@ -177,12 +186,17 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	dicts[3].to = filename_quoted;
 	dicts[4].from = PLACEHOLDER_METADATA;
 	dicts[4].to = custom_songinfo;
+	dicts[5].from = PLACEHOLDER_START_TIMESTAMP;
+	dicts[5].to = start_timestamp;
 
-	if (!cfg_get_metadata_program() &&
-	    strstr(cfg_encoder_get_program(encoder),
-		PLACEHOLDER_TITLE) != NULL) {
-		xfree(custom_songinfo);
-		dicts[4].to = custom_songinfo = xstrdup("");
+	const char * encoder_program = cfg_encoder_get_program(encoder);
+	if ( encoder_program != NULL ) {
+		if (!cfg_get_metadata_program() &&
+		    strstr(encoder_program,
+			PLACEHOLDER_TITLE) != NULL) {
+			xfree(custom_songinfo);
+			dicts[4].to = custom_songinfo = xstrdup("");
+		}
 	}
 
 	dec_str = util_expand_words(cfg_decoder_get_program(decoder), dicts);
@@ -196,13 +210,12 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		cmd_str = xcalloc(cmd_str_size, sizeof(char));
 		snprintf(cmd_str, cmd_str_size, "%s | %s", dec_str, enc_str);
 		xfree(enc_str);
-		xfree(dec_str);
 	} else {
 		cmd_str = xcalloc(cmd_str_size, sizeof(char));
 		snprintf(cmd_str, cmd_str_size, "%s", dec_str);
-		xfree(dec_str);
 	}
 
+	xfree(dec_str);
 	xfree(artist);
 	xfree(album);
 	xfree(title);
@@ -227,12 +240,14 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 		*md_p = NULL;
 	if (songLen != NULL)
 		*songLen = 0;
+log_error(__FUNCTION__);
+log_error("%s:%d filename=%s",__FUNCTION__, __LINE__,filename);
 
 	if ((isStdin && *isStdin) ||
 	    strcasecmp(filename, "stdin") == 0) {
 		if (cfg_get_metadata_program()) {
 			md = mdata_create();
-
+log_error(__FUNCTION__);
 			if (0 > mdata_run_program(md, cfg_get_metadata_program()) ||
 			    0 > stream_set_metadata(stream, md, NULL)) {
 				mdata_destroy(&md);
@@ -253,37 +268,52 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 
 	if (isStdin != NULL)
 		*isStdin = 0;
-
+	
+	// added to split filename from timestamp
+	char * comma_pos = strchr(filename, ',');
+	char * filename_copy = NULL;
+	if ( comma_pos == NULL ) {
+		filename_copy = xstrdup(filename);
+	} else {
+		filename_copy = (char*) malloc( comma_pos-filename+1 );
+		strncpy( filename_copy, filename, comma_pos - filename);
+		filename_copy[comma_pos - filename] = '\0';
+		log_error("Truncating filename to %s", filename_copy); 
+	} 
 	extension[0] = '\0';
-	p = strrchr(filename, '.');
+	p = strrchr(filename_copy, '.');
 	if (p != NULL)
 		strlcpy(extension, p, sizeof(extension));
 	for (p = extension; *p != '\0'; p++)
 		*p = (char)tolower((int)*p);
-
 	if (strlen(extension) == 0) {
-		log_error("%s: cannot determine file type", filename);
+		log_error("%s: cannot determine file type", filename_copy);
 		return (filep);
 	}
-
+	log_error("extension: %s", extension);
 	md = mdata_create();
 	if (cfg_get_metadata_program()) {
 		if (0 > mdata_run_program(md, cfg_get_metadata_program()))
 			mdata_destroy(&md);
 	} else {
+		log_error("%s:%d parsing mdata (%s)", __FUNCTION__,__LINE__, filename);   
 		if (0 > mdata_parse_file(md, filename))
 			mdata_destroy(&md);
 	}
-	if (NULL == md)
+	if (NULL == md) {
+		log_error("%s:%d mdata is NULL", __FUNCTION__,__LINE__);
 		return (NULL);
+	}
 	if (songLen != NULL)
 		*songLen = mdata_get_length(md);
+
+	log_error("%s %d", __FUNCTION__, __LINE__);
 
 	*popenFlag = 0;
 	if (cfg_stream_get_encoder(cfg_stream)) {
 		int	stderr_fd = -1;
 
-		pCommandString = _build_reencode_cmd(extension, filename,
+		pCommandString = _build_reencode_cmd(extension, filename_copy,
 		    cfg_stream, md);
 		if (md_p != NULL)
 			*md_p = md;
@@ -330,6 +360,8 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 		if (stderr_fd != -1)
 			close(stderr_fd);
 
+		log_error("%s %d",__FILE__,__LINE__);
+		xfree(filename_copy);
 		return (filep);
 	}
 
@@ -338,10 +370,11 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 	else
 		mdata_destroy(&md);
 
-	if ((filep = fopen(filename, "rb")) == NULL) {
-		log_error("%s: %s", filename, strerror(errno));
+	if ((filep = fopen(filename_copy, "rb")) == NULL) {
+		log_error("%s: %s", filename_copy, strerror(errno));
 		return (NULL);
 	}
+	xfree(filename_copy);
 
 	return (filep);
 }
@@ -744,7 +777,9 @@ main(int argc, char *argv[])
 		return (ez_shutdown(2));
 	}
 
+	//cfg_stream_list_t streams = cfg_get_streams();
 	main_stream = stream_create(CFG_DEFAULT);
+	//main_stream = cfg_stream_list_find(streams, CFG_DEFAULT);
 	if (0 > stream_configure(main_stream))
 		return (ez_shutdown(1));
 	cfg_server = stream_get_cfg_server(main_stream);

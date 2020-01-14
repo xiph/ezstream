@@ -48,6 +48,7 @@ struct mdata {
 	char	*album;
 	char	*title;
 	char	*songinfo;
+	char	*start_timestamp;
 	int	 length;
 	int	 normalize_strings;
 	int	 run_program;
@@ -57,7 +58,8 @@ enum mdata_request {
 	MDATA_ARTIST,
 	MDATA_ALBUM,
 	MDATA_TITLE,
-	MDATA_SONGINFO
+	MDATA_SONGINFO,
+	MDATA_START_TIMESTAMP
 };
 
 static void	_mdata_clear(struct mdata *);
@@ -79,6 +81,7 @@ _mdata_clear(struct mdata *md)
 	xfree(md->album);
 	xfree(md->title);
 	xfree(md->songinfo);
+	xfree(md->start_timestamp);
 	memset(md, 0, sizeof(*md));
 	md->length = -1;
 	md->normalize_strings = normalize_strings;
@@ -296,11 +299,22 @@ mdata_parse_file(struct mdata *md, const char *filename)
 	const TagLib_AudioProperties	*ta;
 	char				*str;
 
-	if (0 > access(filename, R_OK)) {
-		log_error("%s: %s", filename, strerror(errno));
+log_error("%s %d", __FUNCTION__, __LINE__);  
+
+	char * filename_copy = xstrdup(filename);
+	char * comma_pos = strchr(filename_copy,','); 
+	int has_timestamp = 0;
+	if ( comma_pos != NULL ) {
+		*comma_pos = '\0';
+		has_timestamp = 1;
+	}
+
+	if (0 > access(filename_copy, R_OK)) {
+		log_error("%s: %s", filename_copy, strerror(errno));
 		return (-1);
 	}
 
+log_error("%s %d", __FUNCTION__, __LINE__);  
 	//taglib_set_string_management_enabled(0);
 #ifdef HAVE_ICONV
 	taglib_set_strings_unicode(1);
@@ -309,8 +323,18 @@ mdata_parse_file(struct mdata *md, const char *filename)
 #endif /* HAVE_ICONV */
 
 	_mdata_clear(md);
-	md->filename = xstrdup(filename);
-	md->name = _mdata_get_name_from_filename(filename);
+	log_error("%s %d", __FUNCTION__, __LINE__);
+	// @todo check for a pipe ',' in filename is so then the start_timestamp is after it
+	if ( has_timestamp > 0 ) {
+		char tmp[10]; // create a short buffer
+		// copy the substring into buffer and then duplicate onto heap
+		md->start_timestamp = xstrdup(strncpy( tmp, comma_pos+1, 8 ));
+		log_error("Setting start timestamp to %s", md->start_timestamp);
+	} else {
+		md->start_timestamp = xstrdup("00:00:00");
+	}
+	md->filename = xstrdup(filename_copy);
+	md->name = _mdata_get_name_from_filename(md->filename);
 
 	if ((tf = taglib_file_new(md->filename)) == NULL) {
 		log_info("%s: unable to extract metadata",
@@ -343,7 +367,8 @@ mdata_parse_file(struct mdata *md, const char *filename)
 	_mdata_generate_songinfo(md);
 
 	md->run_program = 0;
-
+	xfree(filename_copy);
+	log_error("Successfully set mdata structure");
 	return (0);
 }
 
@@ -432,6 +457,12 @@ const char *
 mdata_get_filename(struct mdata *md)
 {
 	return (md->filename);
+}
+
+const char *
+mdata_get_start_timestamp(struct mdata *md)
+{
+	return (md->start_timestamp);
 }
 
 const char *

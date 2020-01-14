@@ -102,9 +102,10 @@ cfg_decoder_list_findext(struct cfg_decoder_list *dl, const char *ext)
 
 	TAILQ_FOREACH(d, dl, entry) {
 		if (cfg_decoder_extsupport(d, ext))
+			log_error("%s:%s:%d",__FILE__,__FUNCTION__, __LINE__);
 			return (d);
 	}
-
+	log_error("%s:%s:%d",__FILE__,__FUNCTION__, __LINE__); 
 	return (NULL);
 }
 
@@ -293,8 +294,10 @@ cfg_decoder_extsupport(struct cfg_decoder *d, const char *ext)
 	struct file_ext *e;
 
 	TAILQ_FOREACH(e, &d->exts, entry) {
-		if (0 == strcasecmp(e->ext, ext))
+		log_error("%s:%d Comparing %s %s = %d", __FILE__, __LINE__, e->ext, ext, strcasecmp(e->ext,ext));
+		if (0 == strcasecmp(e->ext, ext)) {
 			return (1);
+		}
 	}
 
 	return (0);

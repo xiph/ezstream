@@ -1,3 +1,4 @@
+*/.deps/
 Makefile.in
 aclocal.m4
 compile
@@ -15,3 +16,19 @@ ltversion.m4
 lt~obsolete.m4
 missing
 test-driver
+*.o
+*.lo
+*/.libs/
+*.1
+*.in
+src/ezstream
+src/ezstream-cfgmigrate
+src/ezstream-file.sh
+ezstream*.conf
+*.la
+Makefile
+config.log
+config.status
+*-h1
+vgcore*
+libtool

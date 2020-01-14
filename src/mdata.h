@@ -32,6 +32,8 @@ int	mdata_refresh(mdata_t);
 const char *
 	mdata_get_filename(mdata_t);
 const char *
+	mdata_get_start_timestamp(mdata_t);
+const char *
 	mdata_get_name(mdata_t);
 const char *
 	mdata_get_artist(mdata_t);

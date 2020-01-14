@@ -23,6 +23,7 @@
 #define PLACEHOLDER_TITLE	"@t@"
 #define PLACEHOLDER_TRACK	"@T@"
 #define PLACEHOLDER_STRING	"@s@"
+#define PLACEHOLDER_START_TIMESTAMP "@u@"
 
 #define CFG_DEFAULT		"default"
 

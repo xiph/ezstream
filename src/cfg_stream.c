@@ -50,6 +50,7 @@ TAILQ_HEAD(cfg_stream_list, cfg_stream);
 struct cfg_stream_list *
 cfg_stream_list_create(void)
 {
+	log_error(__FUNCTION__);
 	struct cfg_stream_list *sl;
 
 	sl = xcalloc(1UL, sizeof(*sl));
@@ -92,6 +93,7 @@ cfg_stream_list_nentries(struct cfg_stream_list *sl)
 struct cfg_stream *
 cfg_stream_list_find(struct cfg_stream_list *sl, const char *name)
 {
+	log_error(__FUNCTION__);
 	struct cfg_stream	*s;
 
 	TAILQ_FOREACH(s, sl, entry) {
@@ -140,7 +142,6 @@ cfg_stream_create(const char *name)
 
 	s = xcalloc(1UL, sizeof(*s));
 	s->name = xstrdup(name);
-
 	return (s);
 }
 

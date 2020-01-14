@@ -666,6 +666,14 @@ checkDecoderLine(const char *str, const char *file, long line)
 		} else
 			have_track = 1;
 	}
+	if ((p = strstr(str, START_TIMESTAMP_PLACEHOLDER)) != NULL) {                                                          
+        p += strlen(START_TIMESTAMP_PLACEHOLDER);                                                                          
+        if ((p = strstr(p, START_TIMESTAMP_PLACEHOLDER)) != NULL) {                                                        
+            log_error("%s[%ld]: Error: Multiple `%s' placeholders in decoder command\n",                         
+                file, line, START_TIMESTAMP_PLACEHOLDER);                                                                  
+            errors++;                                                                                            
+		}
+    }   	
 	if ((p = strstr(str, METADATA_PLACEHOLDER)) != NULL) {
 		p += strlen(METADATA_PLACEHOLDER);
 		if ((p = strstr(p, METADATA_PLACEHOLDER)) != NULL) {

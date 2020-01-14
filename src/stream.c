@@ -286,6 +286,7 @@ stream_exit(void)
 struct stream *
 stream_create(const char *name)
 {
+	log_error("[%s], Creating stream: %s", __FUNCTION__, name);
 	struct stream	*s;
 
 	s = xcalloc(1UL, sizeof(*s));
@@ -318,7 +319,7 @@ stream_configure(struct stream *s)
 	cfg_stream_t		 cfg_stream;
 	cfg_server_t		 cfg_server;
 	const char		*server;
-
+	
 	streams = cfg_get_streams();
 	cfg_stream = cfg_stream_list_find(streams, s->name);
 	if (!cfg_stream) {
