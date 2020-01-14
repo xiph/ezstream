@@ -161,13 +161,13 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		custom_songinfo = util_shellquote(unquoted, 0);
 		xfree(unquoted);
 	} else {
+		const char * md_prog = cfg_get_metadata_program();
 		const char * decoder_program = cfg_decoder_get_program(decoder);
-		if (cfg_get_metadata_program() == NULL && 
-			decoder_program != NULL ) {
-			if ( strstr(decoder_program,PLACEHOLDER_TITLE) != NULL ) {
+		if (md_prog == NULL && decoder_program != NULL ) {
+			if ( strstr(decoder_program, PLACEHOLDER_TITLE) != NULL ) {
 				custom_songinfo = xstrdup("");
 			} else {
-				custom_songinfo = xstrdup(songinfo);
+				custom_songinfo = xstrdup(songinfo);  
 			}
 		} else {
 			custom_songinfo = xstrdup(songinfo);
@@ -189,11 +189,9 @@ _build_reencode_cmd(const char *extension, const char *filename,
 	dicts[5].from = PLACEHOLDER_START_TIMESTAMP;
 	dicts[5].to = start_timestamp;
 
-	const char * encoder_program = cfg_encoder_get_program(encoder);
-	if ( encoder_program != NULL ) {
-		if (!cfg_get_metadata_program() &&
-		    strstr(encoder_program,
-			PLACEHOLDER_TITLE) != NULL) {
+	if ( cfg_get_metadata_program() != NULL &&
+		 cfg_encoder_get_program(encoder) != NULL ) {
+		if ( strstr(cfg_encoder_get_program(encoder), PLACEHOLDER_TITLE) != NULL ) {
 			xfree(custom_songinfo);
 			dicts[4].to = custom_songinfo = xstrdup("");
 		}
