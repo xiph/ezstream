@@ -52,13 +52,8 @@ END_TEST
 
 START_TEST(test_encoder_set_program)
 {
-	cfg_encoder_t	 enc = cfg_encoder_list_get(encoders, "test_encoder_set_program");
-
-	ck_assert_int_eq(cfg_encoder_set_program(enc, encoders, NULL, NULL), 0);
-	ck_assert_ptr_eq(cfg_encoder_get_program(enc), NULL);
-
-	ck_assert_int_eq(cfg_encoder_set_program(enc, encoders, "test", NULL), 0);
-	ck_assert_str_eq(cfg_encoder_get_program(enc), "test");
+	TEST_XSTRDUP_T(cfg_encoder_t, cfg_encoder_list_get, encoders,
+	    cfg_encoder_set_program, cfg_encoder_get_program);
 }
 END_TEST
 
@@ -94,7 +89,13 @@ END_TEST
 START_TEST(test_encoder_validate)
 {
 	cfg_encoder_t	 enc = cfg_encoder_list_get(encoders, "test_encoder_validate");
+	cfg_encoder_t	 enc2 = cfg_encoder_list_get(encoders, "test_encoder_validate_2");;
 	const char	*errstr;
+
+	errstr = NULL;
+	ck_assert_int_ne(cfg_encoder_set_name(enc2, encoders,
+	    "test_encoder_validate", &errstr), 0);
+	ck_assert_str_eq(errstr, "already exists");
 
 	ck_assert_int_ne(cfg_encoder_validate(enc, NULL), 0);
 	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
@@ -102,6 +103,11 @@ START_TEST(test_encoder_validate)
 
 	ck_assert_int_eq(cfg_encoder_set_format(enc, CFG_STREAM_VORBIS), 0);
 
+	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
+	ck_assert_str_eq(errstr, "program not set");
+
+	ck_assert_int_eq(cfg_encoder_set_program(enc, encoders, "test", NULL),
+	    0);
 	ck_assert_int_eq(cfg_encoder_validate(enc, NULL), 0);
 
 	ck_assert_int_eq(cfg_encoder_set_program(enc, encoders,

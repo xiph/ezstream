@@ -17,7 +17,7 @@
     <stream>
       <mountpoint>/video.ogg</mountpoint>
       <format>Theora</format>
-      <encoder>PassThrough</encoder>
+      <!-- No encoder configured (see below). -->
     </stream>
   </streams>
 
@@ -30,19 +30,14 @@
   <decoders>
     <decoder>
       <name>Theora-192x128</name>
-      <!-- Reencode into Ogg Theora directly -->
+      <!--
+        Reencodes into Ogg Theora directly. The stream should be configured
+        without an encoder, so that the decoder output is passed through as-is.
+        -->
       <program>ffmpeg2theora -x 192 -y 128 -a 0 -v 4 --title @M@ -o - @T@</program>
       <file_ext>.avi</file_ext>
       <file_ext>.mpg</file_ext>
     </decoder>
   </decoders>
-
-  <encoders>
-    <encoder>
-      <name>PassThrough</name>
-      <format>Theora</format>
-      <!-- Do not set an encoder program to pass through data as-is -->
-    </encoder>
-  </encoders>
 
 </ezstream>

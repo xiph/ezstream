@@ -210,17 +210,18 @@ cfg_encoder_set_format_str(struct cfg_encoder *e,
 int
 cfg_encoder_set_program(struct cfg_encoder *e,
     struct cfg_encoder_list *not_used, const char *program,
-    const char **not_used2)
+    const char **errstrp)
 {
 	(void)not_used;
-	(void)not_used2;
+
+	if (!program || !program[0]) {
+		if (errstrp)
+			*errstrp = "empty";
+		return (-1);
+	}
 
 	xfree(e->program);
-
-	if (!program || !program[0])
-		e->program = NULL;
-	else
-		e->program = xstrdup(program);
+	e->program = xstrdup(program);
 
 	return (0);
 }
@@ -234,8 +235,11 @@ cfg_encoder_validate(struct cfg_encoder *e, const char **errstrp)
 		return (-1);
 	}
 
-	if (!e->program)
-		return (0);
+	if (!e->program) {
+		if (errstrp)
+			*errstrp = "program not set";
+		return (-1);
+	}
 
 	CHECKPH_PROHIBITED(e->program, PLACEHOLDER_TRACK);
 	CHECKPH_PROHIBITED(e->program, PLACEHOLDER_STRING);

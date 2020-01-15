@@ -309,27 +309,6 @@ _parse_ezconfig0(EZCONFIG *ez)
 				cfg_encoder_list_remove(enc_list, &enc);
 				warnings++;
 			}
-		} else {
-			if (ed->format &&
-			    0 == strcasecmp(ed->format, "THEORA")) {
-				cfg_encoder_t	enc;
-
-				enc = cfg_encoder_list_find(enc_list,
-				    ed->format);
-				if (NULL == enc)
-					enc = cfg_encoder_list_get(enc_list,
-					    CFG_DEFAULT);
-				ENTITY_SET(enc, enc_list, cfg_encoder_set_name,
-				    "<format> (encoder)", ed->format);
-				ENTITY_SET(enc, enc_list, cfg_encoder_set_format_str,
-				    "<format> (encoder)", ed->format);
-				if (0 > cfg_encoder_validate(enc, &err_str)) {
-					log_warning("%s: %s: %s", v0_cfgfile,
-					    "<encdec> (encoder)", err_str);
-					cfg_encoder_list_remove(enc_list, &enc);
-					warnings++;
-				}
-			}
 		}
 		if (ed->decoder) {
 			cfg_decoder_t	dec = NULL;
