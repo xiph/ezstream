@@ -32,8 +32,14 @@
 
       <!--
         Configure TLS requirement: none, may, required (default: "may")
+
+        For compatibility reasons, the default configuration and this example
+        is "may". THIS IS INSECURE. It allows a MitM to intercept the
+        password and tamper with the stream. It is recommended to set this to
+        "required" when configuring TLS to secure streaming over untrusted
+        networks.
         -->
-      <tls>Required</tls>
+      <tls>May</tls>
 
       <!--
         Configure allowed cipher suites for TLS other than the libshout default.
