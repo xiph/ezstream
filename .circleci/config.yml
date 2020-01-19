@@ -1,37 +1,20 @@
-version: 2
+version: 2.1
 jobs:
   build:
-    working_directory: ~/xiph/ezstream
-    parallelism: 1
-    shell: /bin/bash --login
     environment:
 #    - CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
     - CIRCLE_TEST_RESULTS: /tmp/circleci-test-results
+    parallelism: 1
     docker:
-    - image: circleci/build-image:ubuntu-14.04-XXL-upstart-1189-5614f37
-      command: /sbin/init
+    - image: circleci/buildpack-deps:latest
+    working_directory: ~/xiph/ezstream
+    shell: /bin/bash --login
     steps:
     - checkout
 #    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_RESULTS
     - run: mkdir -p $CIRCLE_TEST_RESULTS
-    - restore_cache:
-        keys:
-        - v1-dep-{{ .Branch }}-
-        - v1-dep-develop-
-        - v1-dep-
     - run: sudo apt-get install lcov check libshout-dev libtagc0-dev libxml2-dev
     - run: ./autogen.sh
-    - save_cache:
-        key: v1-dep-{{ .Branch }}-{{ epoch }}
-        paths:
-        - vendor/bundle
-        - ~/virtualenvs
-        - ~/.m2
-        - ~/.ivy2
-        - ~/.bundle
-        - ~/.go_workspace
-        - ~/.gradle
-        - ~/.cache/bower
     - run: ./configure
     - run: make distcheck distclean
     - run: ./configure CFLAGS='-O0 -fprofile-arcs -ftest-coverage -fstack-protector-all'
