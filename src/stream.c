@@ -523,9 +523,9 @@ stream_connect(struct stream *s)
 	if (shout_open(s->shout) == SHOUTERR_SUCCESS)
 		return (0);
 
-	log_warning("stream: %s: connect: %s: error %d: %s", s->name,
-	    shout_get_host(s->shout), shout_get_errno(s->shout),
-	    shout_get_error(s->shout));
+	log_warning("stream: %s: connect: [%s]:%d: error %d: %s", s->name,
+	    shout_get_host(s->shout), shout_get_port(s->shout),
+	    shout_get_errno(s->shout), shout_get_error(s->shout));
 
 	return (-1);
 }
