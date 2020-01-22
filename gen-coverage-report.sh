@@ -26,7 +26,7 @@ fi
 rm -rf "$DESTDIR"
 
 make distclean || :
-./configure CFLAGS='-O0 -fprofile-arcs -ftest-coverage -fstack-protector-all'
+./configure CFLAGS='-O0 -fprofile-arcs -ftest-coverage -fstack-protector-all' $*
 make ${_pb} check
 
 mkdir -p $DESTDIR
