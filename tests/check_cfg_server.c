@@ -63,10 +63,24 @@ START_TEST(test_server_protocol)
 	    0);
 	ck_assert_int_eq(cfg_server_get_protocol(srv), CFG_PROTO_HTTP);
 	ck_assert_str_eq(cfg_server_get_protocol_str(srv), "http");
+	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_MAY);
+	ck_assert_str_eq(cfg_server_get_tls_str(srv), "may");
 	ck_assert_int_eq(cfg_server_set_protocol(srv, servers, "HtTpS", NULL),
 	    0);
 	ck_assert_int_eq(cfg_server_get_protocol(srv), CFG_PROTO_HTTPS);
 	ck_assert_str_eq(cfg_server_get_protocol_str(srv), "https");
+	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_REQUIRED);
+	ck_assert_str_eq(cfg_server_get_tls_str(srv), "required");
+	ck_assert_int_eq(cfg_server_set_protocol(srv, servers, "iCY", NULL),
+	    0);
+	ck_assert_int_eq(cfg_server_get_protocol(srv), CFG_PROTO_ICY);
+	ck_assert_str_eq(cfg_server_get_protocol_str(srv), "icy");
+	ck_assert_int_eq(cfg_server_get_tls(srv), CFG_TLS_MAY);
+	ck_assert_str_eq(cfg_server_get_tls_str(srv), "may");
+	ck_assert_int_eq(cfg_server_set_protocol(srv, servers, "rOaRaudIo", NULL),
+	    0);
+	ck_assert_int_eq(cfg_server_get_protocol(srv), CFG_PROTO_ROARAUDIO);
+	ck_assert_str_eq(cfg_server_get_protocol_str(srv), "roaraudio");
 }
 END_TEST
 

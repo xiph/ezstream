@@ -48,6 +48,7 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 {
 	switch (cfg_server_get_protocol(cfg_server)) {
 	case CFG_PROTO_HTTP:
+	case CFG_PROTO_HTTPS:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_HTTP)) {
 			log_error("%s: protocol: %s",
@@ -55,6 +56,26 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 			return (-1);
 		}
 		break;
+#ifdef SHOUT_PROTOCOL_ICY
+	case CFG_PROTO_ICY:
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_ICY)) {
+			log_error("%s: protocol: %s",
+			    s->name, shout_get_error(s->shout));
+			return (-1);
+		}
+		break;
+#endif /* SHOUT_PROTOCOL_ICY */
+#ifdef SHOUT_PROTOCOL_ROARAUDIO
+	case CFG_PROTO_ROARAUDIO:
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_ROARAUDIO)) {
+			log_error("%s: protocol: %s",
+			    s->name, shout_get_error(s->shout));
+			return (-1);
+		}
+		break;
+#endif /* SHOUT_PROTOCOL_ROARAUDIO */
 	default:
 		log_error("%s: protocol: unsupported: %s",
 		    s->name, cfg_server_get_protocol_str(cfg_server));

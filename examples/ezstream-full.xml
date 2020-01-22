@@ -18,7 +18,10 @@
       <!-- Identifying name (default: "default") -->
       <name>Test Server</name>
 
-      <!-- Transport protocol: HTTP, HTTPS (default: "HTTP") -->
+      <!--
+        Transport protocol:
+        HTTP (default), HTTPS (implies <tls>required</tls>), ICY, RoarAudio
+        -->
       <protocol>HTTP</protocol>
       <!-- Server address -->
       <hostname>127.0.0.1</hostname>

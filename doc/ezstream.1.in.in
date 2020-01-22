@@ -186,10 +186,19 @@ Transport protocol used to stream to the server:
 .Pp
 .Bl -tag -width HTTPS -compact
 .It Ar HTTP
-Unencrypted HTTP (the default).
+Plain-text HTTP
 .It Ar HTTPS
 HTTP over TLS.
+This option implies that \&<tls\ /\&> is set to
+.Qq required .
+.It Ar ICY
+ICY streaming protocol
+.It Ar RoarAudio
+RoarAudio streaming protocol
 .El
+.Pp
+Default:
+.Ar HTTP
 .It Sy \&<hostname\ /\&>
 .Pq Mandatory.
 The FQDN host name or IP address of the server.
@@ -223,12 +232,19 @@ Possible values are:
 No TLS encryption will be attempted.
 .It Ar May
 Opportunistic TLS encryption may be used, if the server supports it
-.Pq the default .
 .It Ar Required
 TLS encryption is required.
 This is the only setting that is providing security against both passive and
 active attackers.
 .El
+.Pp
+Default:
+.Ar May
+.Pp
+This option is ignored when \&<protocol\ /\&> is set to
+.Ar HTTPS ,
+which implies a value of
+.Ar Required .
 .It Sy \&<tls_cipher_suite\ /\&>
 Configure allowed cipher suites for TLS.
 .Pp

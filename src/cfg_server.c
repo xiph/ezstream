@@ -194,6 +194,10 @@ cfg_server_set_protocol(struct cfg_server *s, struct cfg_server_list *not_used,
 		s->protocol = CFG_PROTO_HTTP;
 	else if (0 == strcasecmp("https", protocol))
 		s->protocol = CFG_PROTO_HTTPS;
+	else if (0 == strcasecmp("icy", protocol))
+		s->protocol = CFG_PROTO_ICY;
+	else if (0 == strcasecmp("roaraudio", protocol))
+		s->protocol = CFG_PROTO_ROARAUDIO;
 	else {
 		if (NULL != errstrp)
 			*errstrp = "unsupported";
@@ -364,6 +368,10 @@ cfg_server_get_protocol_str(struct cfg_server *s)
 	switch (s->protocol) {
 	case CFG_PROTO_HTTPS:
 		return ("https");
+	case CFG_PROTO_ICY:
+		return ("icy");
+	case CFG_PROTO_ROARAUDIO:
+		return ("roaraudio");
 	case CFG_PROTO_HTTP:
 	default:
 		return ("http");
@@ -397,12 +405,16 @@ cfg_server_get_password(struct cfg_server *s)
 enum cfg_server_tls
 cfg_server_get_tls(struct cfg_server *s)
 {
+	if (CFG_PROTO_HTTPS == s->protocol)
+		return (CFG_TLS_REQUIRED);
 	return (s->tls);
 }
 
 const char *
 cfg_server_get_tls_str(struct cfg_server *s)
 {
+	if (CFG_PROTO_HTTPS == s->protocol)
+		return ("required");
 	switch (s->tls) {
 	case CFG_TLS_NONE:
 		return ("none");
