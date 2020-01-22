@@ -45,7 +45,7 @@
         Configure allowed cipher suites for TLS other than the libshout default.
         See openssl(1)/ciphers(1) for details.
         -->
-      <tls_cipher_suite>HIGH:!kRSA:!kECDH:!DH:!PKS:!aNULL:!eNULL:!3DES:!MD5:!SHA:!TLSv1</tls_cipher_suite>
+      <tls_cipher_suite>HIGH:!RSA:!SHA:!DH:!aNULL:!eNULL:!TLSv1</tls_cipher_suite>
 
       <!--
         Directory to use for server certificate verification in "hash format".

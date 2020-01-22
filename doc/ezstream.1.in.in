@@ -232,8 +232,8 @@ active attackers.
 .It Sy \&<tls_cipher_suite\ /\&>
 Configure allowed cipher suites for TLS.
 .Pp
-For example (modern cipher suites, PFS, no deprecated algorithms):
-.Sy HIGH:!kRSA:!kECDH:!DH:!PKS:!aNULL:!eNULL:!3DES:!MD5:!SHA:!TLSv1 .
+For example (modern cipher suites, PFS, TLS 1.2 or better):
+.Sy HIGH:!RSA:!SHA:!DH:!aNULL:!eNULL:!TLSv1 .
 .Pp
 Default:
 .Em libshout default cipher suite
