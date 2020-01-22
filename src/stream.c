@@ -23,6 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <unistd.h>
 
 #include <shout/shout.h>
 
@@ -51,7 +52,7 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 	case CFG_PROTO_HTTPS:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_HTTP)) {
-			log_error("%s: protocol: %s",
+			log_error("stream: %s: protocol: %s",
 			    s->name, shout_get_error(s->shout));
 			return (-1);
 		}
@@ -60,7 +61,7 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 	case CFG_PROTO_ICY:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_ICY)) {
-			log_error("%s: protocol: %s",
+			log_error("stream: %s: protocol: %s",
 			    s->name, shout_get_error(s->shout));
 			return (-1);
 		}
@@ -70,38 +71,38 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 	case CFG_PROTO_ROARAUDIO:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_ROARAUDIO)) {
-			log_error("%s: protocol: %s",
+			log_error("stream: %s: protocol: %s",
 			    s->name, shout_get_error(s->shout));
 			return (-1);
 		}
 		break;
 #endif /* SHOUT_PROTOCOL_ROARAUDIO */
 	default:
-		log_error("%s: protocol: unsupported: %s",
+		log_error("stream: %s: protocol: unsupported: %s",
 		    s->name, cfg_server_get_protocol_str(cfg_server));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_host(s->shout, cfg_server_get_hostname(cfg_server))) {
-		log_error("%s: hostname: %s",
+		log_error("stream: %s: hostname: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_port(s->shout, (unsigned short)cfg_server_get_port(cfg_server))) {
-		log_error("%s: port: %s",
+		log_error("stream: %s: port: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_user(s->shout, cfg_server_get_user(cfg_server))) {
-		log_error("%s: user: %s",
+		log_error("stream: %s: user: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_password(s->shout, cfg_server_get_password(cfg_server))) {
-		log_error("%s: password: %s",
+		log_error("stream: %s: password: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
@@ -126,38 +127,60 @@ _stream_cfg_tls(struct stream *s, cfg_server_t cfg_server)
 		tls_req = SHOUT_TLS_AUTO_NO_PLAIN;
 		break;
 	default:
-		log_error("%s: tls: invalid", s->name);
+		log_error("stream: %s: tls: invalid", s->name);
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS != shout_set_tls(s->shout, tls_req)) {
-		log_error("%s: tls: %s", s->name, shout_get_error(s->shout));
-		return (-1);
-	}
-	if (cfg_server_get_ca_dir(cfg_server) &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_ca_directory(s->shout, cfg_server_get_ca_dir(cfg_server))) {
-		log_error("%s: ca_dir: %s", s->name,
+		log_error("stream: %s: tls: %s", s->name,
 		    shout_get_error(s->shout));
 		return (-1);
 	}
-	if (cfg_server_get_ca_file(cfg_server) &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_ca_file(s->shout, cfg_server_get_ca_file(cfg_server))) {
-		log_error("%s: ca_file: %s", s->name,
-		    shout_get_error(s->shout));
-		return (-1);
+	if (cfg_server_get_ca_dir(cfg_server)) {
+		if (0 > access(cfg_server_get_ca_dir(cfg_server), R_OK|X_OK)) {
+			log_error("stream: %s: ca_dir: %s: not accessible",
+			    s->name, cfg_server_get_ca_dir(cfg_server));
+			return (-1);
+		}
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_ca_directory(s->shout, cfg_server_get_ca_dir(cfg_server))) {
+			log_error("stream: %s: ca_dir: %s: %s", s->name,
+			    cfg_server_get_ca_dir(cfg_server),
+			    shout_get_error(s->shout));
+			return (-1);
+		}
+	}
+	if (cfg_server_get_ca_file(cfg_server)) {
+		if (0 > access(cfg_server_get_ca_file(cfg_server), R_OK)) {
+			log_error("stream: %s: ca_file: %s: not readable",
+			    s->name, cfg_server_get_ca_file(cfg_server));
+			return (-1);
+		}
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_ca_file(s->shout, cfg_server_get_ca_file(cfg_server))) {
+			log_error("stream: %s: ca_file: %s: %s", s->name,
+			    cfg_server_get_ca_file(cfg_server),
+			    shout_get_error(s->shout));
+			return (-1);
+		}
+	}
+	if (cfg_server_get_client_cert(cfg_server)) {
+		if (0 > access(cfg_server_get_client_cert(cfg_server), R_OK)) {
+			log_error("stream: %s: client_cert: %s: not readable", s->name,
+			    cfg_server_get_client_cert(cfg_server));
+			return (-1);
+		}
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_client_certificate(s->shout, cfg_server_get_client_cert(cfg_server))) {
+			log_error("stream: %s: client_cert: %s: %s", s->name,
+			    cfg_server_get_client_cert(cfg_server),
+			    shout_get_error(s->shout));
+			return (-1);
+		}
 	}
 	if (cfg_server_get_tls_cipher_suite(cfg_server) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_allowed_ciphers(s->shout, cfg_server_get_tls_cipher_suite(cfg_server))) {
-		log_error("%s: tls_cipher_suite: %s", s->name,
-		    shout_get_error(s->shout));
-		return (-1);
-	}
-	if (cfg_server_get_client_cert(cfg_server) &&
-	    SHOUTERR_SUCCESS !=
-	    shout_set_client_certificate(s->shout, cfg_server_get_client_cert(cfg_server))) {
-		log_error("%s: client_cert: %s", s->name,
+		log_error("stream: %s: tls_cipher_suite: %s", s->name,
 		    shout_get_error(s->shout));
 		return (-1);
 	}
@@ -165,11 +188,11 @@ _stream_cfg_tls(struct stream *s, cfg_server_t cfg_server)
 # warning "libshout library does not support TLS"
 	switch (cfg_server_get_tls(cfg_server)) {
 	case CFG_TLS_MAY:
-		log_warning("%s: TLS optional but not supported by libshout",
+		log_warning("stream: %s: TLS optional but not supported by libshout",
 		    s->name);
 		break;
 	case CFG_TLS_REQUIRED:
-		log_error("%s: TLS required but not supported by libshout",
+		log_error("stream: %s: TLS required but not supported by libshout",
 		    s->name);
 		return (-1);
 	default:
@@ -185,7 +208,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 {
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_mount(s->shout, cfg_stream_get_mountpoint(cfg_stream))) {
-		log_error("%s: mountpoint: %s",
+		log_error("stream: %s: mountpoint: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
@@ -194,7 +217,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 	case CFG_STREAM_THEORA:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_format(s->shout, SHOUT_FORMAT_OGG)) {
-			log_error("%s: format_ogg: %s",
+			log_error("stream: %s: format_ogg: %s",
 			    s->name, shout_get_error(s->shout));
 			return (-1);
 		}
@@ -202,75 +225,75 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 	case CFG_STREAM_MP3:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_format(s->shout, SHOUT_FORMAT_MP3)) {
-			log_error("%s: format_mp3: %s",
+			log_error("stream: %s: format_mp3: %s",
 			    s->name, shout_get_error(s->shout));
 			return (-1);
 		}
 		break;
 	default:
-		log_error("%s: format: unsupported: %s",
+		log_error("stream: %s: format: unsupported: %s",
 		    s->name, cfg_stream_get_format_str(cfg_stream));
 		return (-1);
 	}
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_public(s->shout, (unsigned int)cfg_stream_get_public(cfg_stream))) {
-		log_error("%s: public: %s",
+		log_error("stream: %s: public: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_name(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_name(s->shout, cfg_stream_get_stream_name(cfg_stream))) {
-		log_error("%s: name: %s",
+		log_error("stream: %s: name: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_url(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_url(s->shout, cfg_stream_get_stream_url(cfg_stream))) {
-		log_error("%s: url: %s",
+		log_error("stream: %s: url: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_genre(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_genre(s->shout, cfg_stream_get_stream_genre(cfg_stream))) {
-		log_error("%s: genre: %s",
+		log_error("stream: %s: genre: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_description(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_description(s->shout, cfg_stream_get_stream_description(cfg_stream))) {
-		log_error("%s: description: %s",
+		log_error("stream: %s: description: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_quality(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_audio_info(s->shout, SHOUT_AI_QUALITY, cfg_stream_get_stream_quality(cfg_stream))) {
-		log_error("%s: ai_quality: %s",
+		log_error("stream: %s: ai_quality: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_bitrate(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_audio_info(s->shout, SHOUT_AI_BITRATE, cfg_stream_get_stream_bitrate(cfg_stream))) {
-		log_error("%s: ai_bitrate: %s",
+		log_error("stream: %s: ai_bitrate: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_samplerate(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_audio_info(s->shout, SHOUT_AI_SAMPLERATE, cfg_stream_get_stream_samplerate(cfg_stream))) {
-		log_error("%s: ai_samplerate: %s",
+		log_error("stream: %s: ai_samplerate: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_channels(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
 	    shout_set_audio_info(s->shout, SHOUT_AI_CHANNELS, cfg_stream_get_stream_channels(cfg_stream))) {
-		log_error("%s: ai_channels: %s",
+		log_error("stream: %s: ai_channels: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
@@ -343,7 +366,7 @@ stream_configure(struct stream *s)
 	streams = cfg_get_streams();
 	cfg_stream = cfg_stream_list_find(streams, s->name);
 	if (!cfg_stream) {
-		log_error("%s: stream has no configuration", s->name);
+		log_error("stream: %s: no configuration", s->name);
 		return (-1);
 	}
 	servers = cfg_get_servers();
@@ -352,7 +375,7 @@ stream_configure(struct stream *s)
 		server = CFG_DEFAULT;
 	cfg_server = cfg_server_list_find(servers, server);
 	if (!cfg_server) {
-		log_error("%s: stream server has no configuration: %s",
+		log_error("stream: %s: no configuration: %s",
 		    s->name, cfg_stream_get_server(cfg_stream));
 		return (-1);
 	}
@@ -500,7 +523,7 @@ stream_connect(struct stream *s)
 	if (shout_open(s->shout) == SHOUTERR_SUCCESS)
 		return (0);
 
-	log_warning("%s: connect: %s: error %d: %s", s->name,
+	log_warning("stream: %s: connect: %s: error %d: %s", s->name,
 	    shout_get_host(s->shout), shout_get_errno(s->shout),
 	    shout_get_error(s->shout));
 
@@ -528,7 +551,7 @@ stream_send(struct stream *s, const char *data, size_t len)
 	    == SHOUTERR_SUCCESS)
 		return (0);
 
-	log_warning("%s: send: %s: error %d: %s", s->name,
+	log_warning("stream: %s: send: %s: error %d: %s", s->name,
 	    shout_get_host(s->shout), shout_get_errno(s->shout),
 	    shout_get_error(s->shout));
 
