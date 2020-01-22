@@ -314,7 +314,7 @@ cfg_server_set_ca_file(struct cfg_server *s, struct cfg_server_list *not_used,
 
 int
 cfg_server_set_client_cert(struct cfg_server *s,
-    struct cfg_server_list *not_used,const char *client_cert,
+    struct cfg_server_list *not_used, const char *client_cert,
     const char **errstrp)
 {
 	(void)not_used;
