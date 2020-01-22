@@ -66,7 +66,7 @@
         X.503 client certificate, in PEM format, containing both certificate
         (with public key) and private key in the same file, for authentication.
         -->
-      <client_cert>/etc/ssl/ezstream.crt</client_cert>
+      <!-- <client_cert>/etc/ssl/private/ezstream.crt</client_cert> -->
 
       <!-- Number of reconnection attempts, before giving up (default: 0) -->
       <reconnect_attempts>20</reconnect_attempts>
