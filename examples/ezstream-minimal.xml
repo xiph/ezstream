@@ -3,7 +3,7 @@
 <!--
   EXAMPLE: A valid configuration that contains the absolute minimum
 
-  This configuration streams Ogg Vorbis files as-is.
+  This configuration streams Ogg files as-is.
   -->
 
 <ezstream>
@@ -18,7 +18,7 @@
   <streams>
     <stream>
       <mountpoint>/stream.ogg</mountpoint>
-      <format>Vorbis</format>
+      <format>Ogg</format>
     </stream>
   </streams>
 

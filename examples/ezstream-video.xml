@@ -16,7 +16,7 @@
   <streams>
     <stream>
       <mountpoint>/video.ogg</mountpoint>
-      <format>Theora</format>
+      <format>Ogg</format>
       <!-- No encoder configured (see below). -->
     </stream>
   </streams>

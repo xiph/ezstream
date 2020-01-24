@@ -21,7 +21,7 @@
   <streams>
     <stream>
       <mountpoint>/stream.ogg</mountpoint>
-      <format>Vorbis</format>
+      <format>Ogg</format>
       <encoder>OggEnc-Q1.5</encoder>
     </stream>
   </streams>
@@ -56,7 +56,7 @@
   <encoders>
     <encoder>
       <name>OggEnc-Q1.5</name>
-      <format>Vorbis</format>
+      <format>Ogg</format>
       <program>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t @M@ -</program>
     </encoder>
 

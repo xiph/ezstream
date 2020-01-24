@@ -77,12 +77,14 @@ START_TEST(test_encoder_set_format_str)
 	ck_assert_str_eq(errstr, "unsupported stream format");
 
 	ck_assert_int_eq(cfg_encoder_set_format_str(enc, encoders,
-	    CFG_SFMT_VORBIS, NULL), 0);
+	    CFG_SFMT_OGG, NULL), 0);
 	ck_assert_int_eq(cfg_encoder_set_format_str(enc, encoders,
 	    CFG_SFMT_MP3, NULL), 0);
 	ck_assert_int_eq(cfg_encoder_set_format_str(enc, encoders,
-	    CFG_SFMT_THEORA, NULL), 0);
-	ck_assert_uint_eq(cfg_encoder_get_format(enc), CFG_STREAM_THEORA);
+	    CFG_SFMT_MP3, NULL), 0);
+	ck_assert_int_eq(cfg_encoder_set_format_str(enc, encoders,
+	    CFG_SFMT_MATROSKA, NULL), 0);
+	ck_assert_uint_eq(cfg_encoder_get_format(enc), CFG_STREAM_MATROSKA);
 }
 END_TEST
 
@@ -101,7 +103,7 @@ START_TEST(test_encoder_validate)
 	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
 	ck_assert_str_eq(errstr, "format not set");
 
-	ck_assert_int_eq(cfg_encoder_set_format(enc, CFG_STREAM_VORBIS), 0);
+	ck_assert_int_eq(cfg_encoder_set_format(enc, CFG_STREAM_OGG), 0);
 
 	ck_assert_int_ne(cfg_encoder_validate(enc, &errstr), 0);
 	ck_assert_str_eq(errstr, "program not set");

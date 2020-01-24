@@ -206,9 +206,15 @@ _parse_ezconfig0(EZCONFIG *ez)
 	if (ez->password)
 		ENTITY_SET(srv, srv_list, cfg_server_set_password,
 		    "<sourcepassword>", ez->password);
-	if (ez->format)
-		ENTITY_SET(str, str_list, cfg_stream_set_format,
-		    "<format>", ez->format);
+	if (ez->format) {
+		if (0 == strcasecmp(ez->format, "vorbis") ||
+		    0 == strcasecmp(ez->format, "theora"))
+			ENTITY_SET(str, str_list, cfg_stream_set_format,
+			    "<format>", "Ogg");
+		else
+			ENTITY_SET(str, str_list, cfg_stream_set_format,
+			    "<format>", ez->format);
+	}
 	if (ez->fileName) {
 		if (0 == strcasecmp(ez->fileName, "stdin"))
 			ENTITY_SET(in, in_list, cfg_intake_set_type,
@@ -281,9 +287,15 @@ _parse_ezconfig0(EZCONFIG *ez)
 		    "<svrinfoquality>", ez->serverQuality);
 	ENTITY_SET(str, str_list, cfg_stream_set_public,
 	    "<svrinfopublic>", ez->serverPublic ? "yes" : "no");
-	if (ez->reencode)
-		ENTITY_SET(str, str_list, cfg_stream_set_encoder, "<reencode>",
-		    ez->format);
+	if (ez->reencode) {
+		if (0 == strcasecmp(ez->format, "vorbis") ||
+		    0 == strcasecmp(ez->format, "theora"))
+			ENTITY_SET(str, str_list, cfg_stream_set_encoder,
+			    "<reencode>", "Ogg");
+		else
+			ENTITY_SET(str, str_list, cfg_stream_set_encoder,
+			    "<reencode>", ez->format);
+	}
 
 	for (i = 0; i < MAX_FORMAT_ENCDEC; i++) {
 		FORMAT_ENCDEC	*ed = ez->encoderDecoders[i];
@@ -298,10 +310,26 @@ _parse_ezconfig0(EZCONFIG *ez)
 			ENTITY_SET(enc, enc_list, cfg_encoder_set_program,
 			    "<encode>", ed->encoder);
 			if (ed->format) {
-				ENTITY_SET(enc, enc_list, cfg_encoder_set_name,
-				    "<format> (encoder)", ed->format);
-				ENTITY_SET(enc, enc_list, cfg_encoder_set_format_str,
-				    "<format> (encoder)", ed->format);
+				if (0 == strcasecmp(ed->format, "vorbis") ||
+				    0 == strcasecmp(ed->format, "theora")) {
+					ENTITY_SET(enc, enc_list,
+					    cfg_encoder_set_name,
+					    "<format> (encoder)",
+					    "Ogg");
+					ENTITY_SET(enc, enc_list,
+					    cfg_encoder_set_format_str,
+					    "<format> (encoder)",
+					    "Ogg");
+				} else {
+					ENTITY_SET(enc, enc_list,
+					    cfg_encoder_set_name,
+					    "<format> (encoder)",
+					    ed->format);
+					ENTITY_SET(enc, enc_list,
+					    cfg_encoder_set_format_str,
+					    "<format> (encoder)",
+					    ed->format);
+				}
 			}
 			if (0 > cfg_encoder_validate(enc, &err_str)) {
 				log_warning("%s: %s: %s", v0_cfgfile,
@@ -313,16 +341,33 @@ _parse_ezconfig0(EZCONFIG *ez)
 		if (ed->decoder) {
 			cfg_decoder_t	dec = NULL;
 
-			if (ed->format)
-				dec = cfg_decoder_list_find(dec_list, ed->format);
+			if (ed->format) {
+				if (0 == strcasecmp(ed->format, "vorbis") ||
+				    0 == strcasecmp(ed->format, "theora"))
+					dec = cfg_decoder_list_find(dec_list,
+					    "Ogg");
+				else
+					dec = cfg_decoder_list_find(dec_list,
+					    ed->format);
+			}
 			if (NULL == dec)
 				dec = cfg_decoder_list_get(dec_list, CFG_DEFAULT);
 
 			ENTITY_SET(dec, dec_list, cfg_decoder_set_program,
 			    "<decode>", ed->decoder);
-			if (ed->format)
-				ENTITY_SET(dec, dec_list, cfg_decoder_set_name,
-				    "<format> (decoder)", ed->format);
+			if (ed->format) {
+				if (0 == strcasecmp(ed->format, "vorbis") ||
+				    0 == strcasecmp(ed->format, "theora"))
+					ENTITY_SET(dec, dec_list,
+					    cfg_decoder_set_name,
+					    "<format> (decoder)",
+					    "Ogg");
+				else
+					ENTITY_SET(dec, dec_list,
+					    cfg_decoder_set_name,
+					    "<format> (decoder)",
+					    ed->format);
+			}
 			if (ed->match)
 				ENTITY_SET(dec, dec_list, cfg_decoder_add_match,
 				    "<match>", ed->match);

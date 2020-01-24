@@ -18,7 +18,7 @@
   <streams>
     <stream>
       <mountpoint>/stream.ogg</mountpoint>
-      <format>Vorbis</format>
+      <format>Ogg</format>
     </stream>
   </streams>
 

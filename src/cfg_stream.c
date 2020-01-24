@@ -169,12 +169,14 @@ cfg_stream_destroy(struct cfg_stream **s_p)
 int
 cfg_stream_str2fmt(const char *str, enum cfg_stream_format *fmt_p)
 {
-	if (0 == strcasecmp(str, CFG_SFMT_VORBIS)) {
-		*fmt_p = CFG_STREAM_VORBIS;
+	if (0 == strcasecmp(str, CFG_SFMT_OGG)) {
+		*fmt_p = CFG_STREAM_OGG;
 	} else if (0 == strcasecmp(str, CFG_SFMT_MP3)) {
 		*fmt_p = CFG_STREAM_MP3;
-	} else if (0 == strcasecmp(str, CFG_SFMT_THEORA)) {
-		*fmt_p = CFG_STREAM_THEORA;
+	} else if (0 == strcasecmp(str, CFG_SFMT_WEBM)) {
+		*fmt_p = CFG_STREAM_WEBM;
+	} else if (0 == strcasecmp(str, CFG_SFMT_MATROSKA)) {
+		*fmt_p = CFG_STREAM_MATROSKA;
 	} else
 		return (-1);
 	return (0);
@@ -184,12 +186,14 @@ const char *
 cfg_stream_fmt2str(enum cfg_stream_format fmt)
 {
 	switch (fmt) {
-	case CFG_STREAM_VORBIS:
-		return (CFG_SFMT_VORBIS);
+	case CFG_STREAM_OGG:
+		return (CFG_SFMT_OGG);
 	case CFG_STREAM_MP3:
 		return (CFG_SFMT_MP3);
-	case CFG_STREAM_THEORA:
-		return (CFG_SFMT_THEORA);
+	case CFG_STREAM_WEBM:
+		return (CFG_SFMT_WEBM);
+	case CFG_STREAM_MATROSKA:
+		return (CFG_SFMT_MATROSKA);
 	default:
 		return (NULL);
 	}

@@ -47,24 +47,28 @@ START_TEST(test_stream_str2fmt)
 {
 	enum cfg_stream_format	fmt;
 
-	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_VORBIS, &fmt), 0);
-	ck_assert_int_eq(fmt, CFG_STREAM_VORBIS);
+	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_OGG, &fmt), 0);
+	ck_assert_int_eq(fmt, CFG_STREAM_OGG);
 	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_MP3, &fmt), 0);
 	ck_assert_int_eq(fmt, CFG_STREAM_MP3);
-	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_THEORA, &fmt), 0);
-	ck_assert_int_eq(fmt, CFG_STREAM_THEORA);
+	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_WEBM, &fmt), 0);
+	ck_assert_int_eq(fmt, CFG_STREAM_WEBM);
+	ck_assert_int_eq(cfg_stream_str2fmt(CFG_SFMT_MATROSKA, &fmt), 0);
+	ck_assert_int_eq(fmt, CFG_STREAM_MATROSKA);
 	ck_assert_int_eq(cfg_stream_str2fmt("<something else>", &fmt), -1);
 }
 END_TEST
 
 START_TEST(test_stream_fmt2str)
 {
-	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_VORBIS),
-	    CFG_SFMT_VORBIS);
+	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_OGG),
+	    CFG_SFMT_OGG);
 	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_MP3),
 	    CFG_SFMT_MP3);
-	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_THEORA),
-	    CFG_SFMT_THEORA);
+	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_WEBM),
+	    CFG_SFMT_WEBM);
+	ck_assert_str_eq(cfg_stream_fmt2str(CFG_STREAM_MATROSKA),
+	    CFG_SFMT_MATROSKA);
 	ck_assert_ptr_eq(cfg_stream_fmt2str(CFG_STREAM_INVALID), NULL);
 }
 END_TEST
@@ -116,11 +120,11 @@ START_TEST(test_stream_format)
 	    "<something else>", &errstr2), -1);
 	ck_assert_str_eq(errstr2, "unsupported stream format");
 
-	ck_assert_int_eq(cfg_stream_set_format(str, streams, CFG_SFMT_VORBIS,
+	ck_assert_int_eq(cfg_stream_set_format(str, streams, CFG_SFMT_OGG,
 	    NULL), 0);
-	ck_assert_int_eq(cfg_stream_get_format(str), CFG_STREAM_VORBIS);
+	ck_assert_int_eq(cfg_stream_get_format(str), CFG_STREAM_OGG);
 	ck_assert_str_eq(cfg_stream_get_format_str(str),
-	    cfg_stream_fmt2str(CFG_STREAM_VORBIS));
+	    cfg_stream_fmt2str(CFG_STREAM_OGG));
 }
 END_TEST
 
@@ -197,7 +201,7 @@ START_TEST(test_stream_validate)
 	ck_assert_int_ne(cfg_stream_validate(str, &errstr), 0);
 	ck_assert_ptr_ne(errstr, NULL);
 	ck_assert_str_eq(errstr, "format missing or unsupported");
-	ck_assert_int_eq(cfg_stream_set_format(str, streams, CFG_SFMT_VORBIS,
+	ck_assert_int_eq(cfg_stream_set_format(str, streams, CFG_SFMT_OGG,
 	    NULL), 0);
 
 	ck_assert_int_eq(cfg_stream_validate(str, NULL), 0);

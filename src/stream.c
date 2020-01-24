@@ -216,8 +216,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 		return (-1);
 	}
 	switch (cfg_stream_get_format(cfg_stream)) {
-	case CFG_STREAM_VORBIS:
-	case CFG_STREAM_THEORA:
+	case CFG_STREAM_OGG:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_format(s->shout, SHOUT_FORMAT_OGG)) {
 			log_error("stream: %s: format_ogg: %s",
@@ -233,6 +232,24 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 			return (-1);
 		}
 		break;
+	case CFG_STREAM_WEBM:
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_format(s->shout, SHOUT_FORMAT_WEBM)) {
+			log_error("stream: %s: format_mp3: %s",
+			    s->name, shout_get_error(s->shout));
+			return (-1);
+		}
+		break;
+#ifdef SHOUT_FORMAT_MATROSKA
+	case CFG_STREAM_MATROSKA:
+		if (SHOUTERR_SUCCESS !=
+		    shout_set_format(s->shout, SHOUT_FORMAT_MATROSKA)) {
+			log_error("stream: %s: format_mp3: %s",
+			    s->name, shout_get_error(s->shout));
+			return (-1);
+		}
+		break;
+#endif /* SHOUT_FORMAT_MATROSKA */
 	default:
 		log_error("stream: %s: format: unsupported: %s",
 		    s->name, cfg_stream_get_format_str(cfg_stream));

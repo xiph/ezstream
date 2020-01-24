@@ -343,13 +343,15 @@ Default:
 .Pq Mandatory.
 The stream format.
 .Pp
-.Bl -tag -width VORBIS -compact
-.It Ar Vorbis
-Ogg Vorbis audio format
+.Bl -tag -width Matroska -compact
+.It Ar Ogg
+Ogg media format
 .It Ar MP3
 MP3 audio format
-.It Ar Theora
-Ogg Theora video format
+.It Ar WebM
+WebM media format
+.It Ar Matroska
+Matroska media format
 .El
 .It Sy \&<encoder\ /\&>
 Use the encoder configuration with the provided symbolic name
