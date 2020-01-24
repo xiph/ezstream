@@ -184,9 +184,11 @@ Default:
 .It Sy \&<protocol\ /\&>
 Transport protocol used to stream to the server:
 .Pp
-.Bl -tag -width HTTPS -compact
+.Bl -tag -width RoarAudio -compact
 .It Ar HTTP
-Plain-text HTTP
+Plain-text HTTP.
+The \&<tls\ /\&> option defines, if TLS via RFC2817 or RFC2818 is also
+attempted.
 .It Ar HTTPS
 HTTP over TLS.
 This option implies that \&<tls\ /\&> is set to

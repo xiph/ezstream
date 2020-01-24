@@ -124,7 +124,10 @@ _stream_cfg_tls(struct stream *s, cfg_server_t cfg_server)
 		tls_req = SHOUT_TLS_AUTO;
 		break;
 	case CFG_TLS_REQUIRED:
-		tls_req = SHOUT_TLS_AUTO_NO_PLAIN;
+		if (CFG_PROTO_HTTPS == cfg_server_get_protocol(cfg_server))
+			tls_req = SHOUT_TLS_RFC2818;
+		else
+			tls_req = SHOUT_TLS_AUTO_NO_PLAIN;
 		break;
 	default:
 		log_error("stream: %s: tls: invalid", s->name);
