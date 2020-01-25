@@ -28,11 +28,11 @@
 
   <streams>
     <stream>
-      <format>vorbis</format>
+      <format>ogg</format>
       <name>duplicate</name>
     </stream>
     <stream>
-      <format>vorbis</format>
+      <format>ogg</format>
       <name>duplicate</name>
     </stream>
   </streams>
@@ -53,11 +53,11 @@
 
   <encoders>
     <encoder>
-      <format>vorbis</format>
+      <format>ogg</format>
       <name>duplicate</name>
     </encoder>
     <encoder>
-      <format>vorbis</format>
+      <format>ogg</format>
       <name>duplicate</name>
     </encoder>
     <!-- ... -->

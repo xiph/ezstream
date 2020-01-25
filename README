@@ -17,7 +17,7 @@ can also use various external decoders and encoders to re-encode from one
 format to another, and stream the result to an Icecast server. With re-
 encoding enabled, ezstream is a very flexible source client.
 
-Supported media formats for streaming are MP3, Ogg Vorbis and Ogg Theora.
+Supported media formats for streaming are Ogg, MP3, WebM, and Matroska.
 Ezstream natively supports metadata in MP3 (ID3v1 only) and Ogg Vorbis, or
 many more formats when it is built with the TagLib option.
 
