@@ -57,7 +57,6 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 			return (-1);
 		}
 		break;
-#ifdef SHOUT_PROTOCOL_ICY
 	case CFG_PROTO_ICY:
 		if (SHOUTERR_SUCCESS !=
 		    shout_set_protocol(s->shout, SHOUT_PROTOCOL_ICY)) {
@@ -66,7 +65,6 @@ _stream_cfg_server(struct stream *s, cfg_server_t cfg_server)
 			return (-1);
 		}
 		break;
-#endif /* SHOUT_PROTOCOL_ICY */
 #ifdef SHOUT_PROTOCOL_ROARAUDIO
 	case CFG_PROTO_ROARAUDIO:
 		if (SHOUTERR_SUCCESS !=
