@@ -130,7 +130,15 @@ END_TEST
 
 START_TEST(test_stream_encoder)
 {
-	TEST_XSTRDUP_T(cfg_stream_t, cfg_stream_list_get, streams,
+	cfg_stream_t	 str = cfg_stream_list_get(streams, "test_stream_encoder");
+
+	ck_assert_ptr_eq(cfg_stream_get_encoder(str), NULL);
+	ck_assert_int_eq(cfg_stream_set_encoder(str, NULL, "test", NULL), 0);
+	ck_assert_str_eq(cfg_stream_get_encoder(str), "test");
+	ck_assert_int_eq(cfg_stream_set_encoder(str, NULL, NULL, NULL), 0);
+	ck_assert_ptr_eq(cfg_stream_get_encoder(str), NULL);
+
+	TEST_XSTRDUP_T_NULL(cfg_stream_t, cfg_stream_list_get, streams,
 	    cfg_stream_set_encoder, cfg_stream_get_encoder);
 }
 END_TEST

@@ -28,6 +28,16 @@
 	ck_assert_str_eq(errstr, "empty");				\
 } while (0)
 
+#define TEST_EMPTYSTR_T_NULL(type, objget, list, setter)	do {	\
+	type		obj3 = objget(list, #setter);			\
+	const char	*errstr;					\
+									\
+	errstr = NULL;							\
+	ck_assert_int_eq(setter(obj3, list, NULL, NULL), 0);		\
+	ck_assert_int_eq(setter(obj3, list, "", &errstr), -1);		\
+	ck_assert_str_eq(errstr, "empty");				\
+} while (0)
+
 #define TEST_XSTRDUP(setter, getter)	do {				\
 	TEST_EMPTYSTR(setter);						\
 									\
@@ -39,6 +49,15 @@
 	type		obj2 = objget(list, #setter);			\
 									\
 	TEST_EMPTYSTR_T(type, objget, list, setter);			\
+									\
+	ck_assert_int_eq(setter(obj2, list, "check_cfg", NULL), 0);	\
+	ck_assert_str_eq(getter(obj2), "check_cfg");			\
+} while (0)
+
+#define TEST_XSTRDUP_T_NULL(type, objget, list, setter, getter) do {	\
+	type		obj2 = objget(list, #setter);			\
+									\
+	TEST_EMPTYSTR_T_NULL(type, objget, list, setter);		\
 									\
 	ck_assert_int_eq(setter(obj2, list, "check_cfg", NULL), 0);	\
 	ck_assert_str_eq(getter(obj2), "check_cfg");			\

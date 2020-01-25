@@ -387,9 +387,9 @@ _parse_ezconfig0(EZCONFIG *ez)
 	if (cfg_stream_get_encoder(str) &&
 	    NULL == cfg_encoder_list_find(enc_list,
 		cfg_stream_get_encoder(str))) {
-		log_error("%s: %s encoder not found due to errors",
+		log_warning("%s: %s encoder not found; disabling reencoding",
 		    v0_cfgfile, cfg_stream_get_encoder(str));
-		return (-1);
+		cfg_stream_set_encoder(str, NULL, NULL, NULL);
 	}
 
 	if (0 > cfg_server_validate(srv, &err_str) ||

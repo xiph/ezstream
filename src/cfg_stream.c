@@ -291,6 +291,14 @@ cfg_stream_set_encoder(struct cfg_stream *s, struct cfg_stream_list *not_used,
     const char *encoder, const char **errstrp)
 {
 	(void)not_used;
+
+	if (NULL == encoder) {
+		if (s->encoder)
+			xfree(s->encoder);
+		s->encoder = NULL;
+		return (0);
+	}
+
 	SET_XSTRDUP(s->encoder, encoder, errstrp);
 	return (0);
 }
