@@ -15,7 +15,12 @@ Changes in 1.0.0, released on XXXX-XX-XX:
    locked PID file to a given location
  * The configuration file structure has changed significantly. A configuration
    migration tool (ezstream-cfgmigrate) has been added to assist in the
-   upgrade.
+   upgrade from previous versions.
+ * Added support for modern libshout functionality:
+   - WebM and Matroska media formats
+   - ICY and RoarAudio streaming protocols
+   - TLS encryption
+ * Several bug fixes and an extensive unit test suite
 
 
 Changes in 0.6.0, released on 2015-01-18:
