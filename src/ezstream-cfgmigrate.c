@@ -100,8 +100,6 @@ _cmdline_parse(int argc, char *argv[], int *ret_p)
 			return (-1);
 		}
 	}
-	argc -= optind;
-	argv += optind;
 
 	if (!v0_cfgfile) {
 		fprintf(stderr, "-%c must be provided\n",
