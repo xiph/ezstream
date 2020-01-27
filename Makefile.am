@@ -3,7 +3,7 @@ ACLOCAL_AMFLAGS  = -I m4
 
 SUBDIRS 	 = build-aux compat doc examples m4 src tests
 
-dist_doc_DATA	 = COPYING NEWS README
+dist_doc_DATA	 = COPYING NEWS README.md
 
 EXTRA_DIST	 = \
 	autogen.sh \
