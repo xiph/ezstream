@@ -13,7 +13,7 @@ jobs:
     - checkout
 #    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_RESULTS
     - run: mkdir -p $CIRCLE_TEST_RESULTS
-    - run: sudo apt-get install lcov check libshout-dev libtagc0-dev libxml2-dev
+    - run: sudo apt-get install gettext lcov check libshout-dev libtagc0-dev libxml2-dev
     - run: ./autogen.sh
     - run: ./configure
     - run: make distcheck distclean
