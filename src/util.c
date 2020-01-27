@@ -357,7 +357,6 @@ util_shellquote(const char *in, size_t outlen_max)
 		out_len--;
 	}
 	*out_p++ = '\'';
-	out_len--;
 
 	return (out);
 }
