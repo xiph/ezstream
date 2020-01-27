@@ -366,7 +366,7 @@ mdata_run_program(struct mdata *md, const char *program)
 		return (-1);
 	}
 
-	artist = album = title = songinfo = NULL;
+	album = title = songinfo = NULL;
 	if (NULL == (artist   = _mdata_run(program, MDATA_ARTIST)) ||
 	    NULL == (album    = _mdata_run(program, MDATA_ALBUM)) ||
 	    NULL == (title    = _mdata_run(program, MDATA_TITLE)) ||
