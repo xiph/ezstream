@@ -1,9 +1,6 @@
 version: 2.1
 jobs:
   build:
-    environment:
-#    - CIRCLE_ARTIFACTS: /tmp/circleci-artifacts
-    - CIRCLE_TEST_RESULTS: /tmp/circleci-test-results
     parallelism: 1
     docker:
     - image: circleci/buildpack-deps:latest
@@ -11,8 +8,6 @@ jobs:
     shell: /bin/bash --login
     steps:
     - checkout
-#    - run: mkdir -p $CIRCLE_ARTIFACTS $CIRCLE_TEST_RESULTS
-    - run: mkdir -p $CIRCLE_TEST_RESULTS
     - run: sudo apt-get install gettext lcov check libshout-dev libtagc0-dev libxml2-dev
     - run: ./autogen.sh
     - run: ./configure
@@ -23,7 +18,3 @@ jobs:
     - run: lcov --capture --output-file coverage/ezstream.lcov --rc lcov_branch_coverage=1 --directory src --test-name ezstream
     - run: make distclean
     - run: bash <(curl -s https://codecov.io/bash)
-    - store_test_results:
-        path: /tmp/circleci-test-results
-#    - store_artifacts:
-#        path: /tmp/circleci-artifacts
