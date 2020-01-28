@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018 Moritz Grimm <mgrimm@mrsserver.net>
+ * Copyright (c) 2018, 2020 Moritz Grimm <mgrimm@mrsserver.net>
  *
  * Permission to use, copy, modify, and distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above

@@ -1,7 +1,7 @@
 /*
  *  ezstream - source client for Icecast with external en-/decoder support
  *  Copyright (C) 2003, 2004, 2005, 2006  Ed Zaleski <oddsock@oddsock.org>
- *  Copyright (C) 2007, 2009, 2017        Moritz Grimm <mgrimm@mrsserver.net>
+ *  Copyright (C) 2007, 2009, 2017, 2020  Moritz Grimm <mgrimm@mrsserver.net>
  *
  *  This program is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License version 2 as
