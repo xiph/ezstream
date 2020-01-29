@@ -8,33 +8,33 @@ input that is piped through an optional external de- and encoder. As every
 part of this chain is highly configurable, ezstream can be useful in a large
 number of streaming setups.
 
-It uses the libshout library to communicate with streaming servers and
-currently supports Ogg, MP3, WebM, and Matroska streams using the HTTP, ICY,
-and RoarAudio protocols. It uses TagLib to read and manage metadata in
-numerous media files.
+It uses libshout to communicate with streaming servers and currently supports
+Ogg, MP3, WebM, and Matroska streams using the HTTP, ICY, and RoarAudio
+protocols. It uses TagLib to read and manage metadata in numerous media
+files.
 
 Ezstream is free software and licensed under the GNU General Public License.
 See the COPYING file for details.
 
 
-# Prerequisites
+# Dependencies
 
 Ezstream depends on:
- * libshout 2.x
-   (https://www.icecast.org/)
- * libxml 2.x
-   (http://xmlsoft.org/)
- * TagLib 1.x (1.4 or newer recommended, will be used via the libtag_c
-   wrapper)
-   (https://taglib.github.io/)
- * Check Unit testing framework for C
-   (https://libcheck.github.io/check)
+
+ - [libshout](https://www.icecast.org/download/) version 2.2.x or newer
+ - [libxml](http://xmlsoft.org/) version 2.x
+ - [TagLib](https://taglib.github.io/) for C version 1.x (1.4 or newer
+   recommended)
 
 Ezstream optionally uses:
- * For basic non-ASCII charset support in metadata and filenames:
-   - Libiconv, if iconv() is not available in the system libc.
-     (https://www.gnu.org/software/libiconv/)
 
+ - [libiconv](https://www.gnu.org/software/libiconv/) on systems where
+   `iconv()` is not available in libc, for basic non-ASCII charset support in
+   metadata and filenames
+
+Building ezstream depends on:
+
+ - [check](https://libcheck.github.io/check) unit testing framework for C
 
 # Installation
 
@@ -104,28 +104,28 @@ fulfills the following requirements:
 The following incomplete list of programs shows a few that are known to work.
 These are also used in the example configuration files:
 
- * MP3
+ - MP3
    - Decoder: madplay (https://www.underbit.com/products/mad/)
    - Encoder: lame (https://lame.sourceforge.io/)
 
- * Ogg Vorbis (https://xiph.org/vorbis/):
+ - Ogg Vorbis (https://xiph.org/vorbis/):
    - Decoder: oggdec
    - Encoder: oggenc
 
- * FLAC (https://xiph.org/flac/):
+ - FLAC (https://xiph.org/flac/):
    - Decoder: flac
    - Encoder: flac (requires Ogg FLAC output)
 
- * Ogg Theora:
+ - Ogg Theora:
    - Decoder/Encoder: ffmpeg2theora (http://v2v.cc/~j/ffmpeg2theora/)
 
 
 # Development
 
- * Xiph.org Gitlab: https://gitlab.xiph.org/xiph/ezstream/
- * GitHub mirror: https://github.com/xiph/ezstream/
- * Travis CI: https://travis-ci.org/xiph/ezstream/
- * CircleCI: https://circleci.com/gh/xiph/ezstream/
- * Codecov: https://codecov.io/gh/xiph/ezstream/
- * Codacy: https://www.codacy.com/app/mgrimm/ezstream/
- * Coverity: https://scan.coverity.com/projects/xiph-ezstream/
+ - Xiph.org Gitlab: https://gitlab.xiph.org/xiph/ezstream/
+ - GitHub mirror: https://github.com/xiph/ezstream/
+ - Travis CI: https://travis-ci.org/xiph/ezstream/
+ - CircleCI: https://circleci.com/gh/xiph/ezstream/
+ - Codecov: https://codecov.io/gh/xiph/ezstream/
+ - Codacy: https://www.codacy.com/app/mgrimm/ezstream/
+ - Coverity: https://scan.coverity.com/projects/xiph-ezstream/
