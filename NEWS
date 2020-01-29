@@ -1,4 +1,4 @@
-Changes in 0.6.1, released on XXXX-XX-XX:
+Changes in 0.6.1, released on 2020-01-29:
 
 * src/util.c
    - [FIX]   Fix crash on missing <format/> element. From Petr Pisar.
