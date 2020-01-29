@@ -1,26 +1,26 @@
-Changes in 1.0.0, released on XXXX-XX-XX:
+Changes in 1.0.0, released on 2020-01-29:
 
- * Windows is no longer actively supported.
- * Certain legacy UNIX systems are no longer actively supported.
- * The behaviour of the -s command line argument was changed:
-   To shuffle lines from standard input, the special file name "-" needs
-   to be provided.
- * The command line options -m and -n have been removed, and new configuration
-   file settings have been added accordingly.
- * The real-time status information is now enabled explicitly with the new
-   command line option -r.
- * TagLib (its C wrapper library) is now a mandatory dependency
- * Support the new '@b@' placeholder for separate album metadata.
- * The command line option -p has been added, causing ezstream to write a
-   locked PID file to a given location
- * The configuration file structure has changed significantly. A configuration
-   migration tool (ezstream-cfgmigrate) has been added to assist in the
-   upgrade from previous versions.
+ * Major feature release with a new configuration file structure
+ * New configuration migration tool to help with the upgrade
+   (ezstream-cfgmigrate)
  * Added support for modern libshout functionality:
    - WebM and Matroska media formats
    - ICY and RoarAudio streaming protocols
    - TLS encryption
  * Several bug fixes and an extensive unit test suite
+ * Support the new '@b@' placeholder for separate album metadata
+ * The command line option -p has been added, causing ezstream to write a
+   locked PID file to a given location
+ * The command line options -m and -n have been removed, and new configuration
+   file settings have been added accordingly
+ * The real-time status information is now enabled explicitly with the new
+   command line option -r
+ * The behaviour of the -s command line argument was changed:
+   To shuffle lines from standard input, the special file name "-" needs
+   to be provided.
+ * TagLib (its C wrapper library) is now a mandatory dependency
+ * Native support for MS Windows and certain legacy UNIX systems has been
+   removed
 
 
 Changes in 0.6.0, released on 2015-01-18:
