@@ -23,6 +23,15 @@ Changes in 1.0.0, released on 2020-01-29:
    removed
 
 
+
+Changes in 0.6.1, released on 2020-01-29:
+
+* src/util.c
+   - [FIX]   Fix crash on missing <format/> element. From Petr Pisar.
+             (Ticket #2208)
+
+
+
 Changes in 0.6.0, released on 2015-01-18:
 
  * This release contains a SECURITY FIX for a command injection vulnerability
