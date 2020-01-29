@@ -1,7 +1,7 @@
 # About
 
 Ezstream is a command line source client for media streams, primarily for
-Icecast servers.
+streaming to Icecast servers.
 
 It allows the creation of media streams based on input from files or standard
 input that is piped through an optional external de- and encoder. As every
@@ -14,7 +14,7 @@ protocols. It uses TagLib to read and manage metadata in numerous media
 files.
 
 Ezstream is free software and licensed under the GNU General Public License.
-See the COPYING file for details.
+See the `COPYING` file for details.
 
 
 # Dependencies
