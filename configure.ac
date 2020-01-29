@@ -2,8 +2,7 @@ dnl ###########
 dnl ## SETUP ###########################################################
 dnl ###########
 
-AC_INIT([ezstream], [0.6.0],
-	[https://trac.xiph.org/newticket?component=ezstream])
+AC_INIT([ezstream], [0.6.1], [https://gitlab.xiph.org/xiph/ezstream/issues])
 AC_REVISION([$Id$])
 AC_PREREQ([2.61])
 AC_CONFIG_SRCDIR([src/ezstream.c])
