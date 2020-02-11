@@ -110,7 +110,7 @@ _build_reencode_cmd(const char *extension, const char *filename,
 		    filename, extension);
 		return (NULL);
 	}
-	encoder = cfg_encoder_list_get(cfg_get_encoders(),
+	encoder = cfg_encoder_list_find(cfg_get_encoders(),
 	    cfg_stream_get_encoder(cfg_stream));
 	if (!encoder) {
 		log_error("cannot encode: %s: unknown encoder",
