@@ -1,3 +1,10 @@
+Changes in 1.0.1, released on XXXX-XX-XX:
+
+ * Fix a crash if there is a typo in the <encoder /> setting
+ * Minor example and documentation tweaks
+
+
+
 Changes in 1.0.0, released on 2020-01-29:
 
  * Major feature release with a new configuration file structure
