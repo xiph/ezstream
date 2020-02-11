@@ -45,7 +45,8 @@
       <tls>May</tls>
 
       <!--
-        Configure allowed cipher suites for TLS other than the libshout default.
+        Configure allowed cipher suites for TLS other than the libshout
+        default.
         See openssl(1)/ciphers(1) for details.
         -->
       <tls_cipher_suite>HIGH:!RSA:!SHA:!DH:!aNULL:!eNULL:!TLSv1</tls_cipher_suite>
@@ -53,18 +54,25 @@
       <!--
         Directory to use for server certificate verification in "hash format".
         See openssl(1)/verify(1) for details.
+
+        One of the <ca_dir /> or <ca_file /> settings must be enabled for
+        certificate verification to succeed.
         -->
-      <ca_dir>/etc/ssl/certs</ca_dir>
+      <!-- <ca_dir>/etc/ssl/certs</ca_dir> -->
 
       <!--
         CA bundle for both server certificate verification and building the
         client certificate chain.
+
+        One of the <ca_dir /> or <ca_file /> settings must be enabled for
+        certificate verification to succeed.
         -->
-      <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file>
+      <!-- <ca_file>/etc/ssl/certs/ca-certificates.crt</ca_file> -->
 
       <!--
         X.503 client certificate, in PEM format, containing both certificate
-        (with public key) and private key in the same file, for authentication.
+        (with public key) and private key in the same file, for
+        authentication.
         -->
       <!-- <client_cert>/etc/ssl/private/ezstream.crt</client_cert> -->
 
