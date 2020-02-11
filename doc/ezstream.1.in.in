@@ -27,17 +27,14 @@
 .Fl s Ar file
 .Ek
 .Sh DESCRIPTION
-The
 .Nm
-utility is a source client for the Icecast media streaming server.
-In its basic mode of operation, it streams media files and data from standard
-input
-.Qq as-is
-\(em such as Ogg Vorbis, Ogg Theora and MP3 \(em to a server.
-It can also use various external decoders and encoders to re-encode from one
-format to another, and stream the result.
-The only requirement is that the external programs support writing to or
-reading from standard input, and can be used from the command line.
+is a command line source client for media streams, primarily for streaming
+to Icecast servers.
+.Pp
+It allows the creation of media streams based on input from files or standard
+input that is piped through an optional external de- and encoder.
+As every part of this chain is highly configurable, ezstream can be useful in
+a large number of streaming setups.
 .Ss Command line arguments
 .Bl -tag -width Ds
 .It Fl c Ar configfile
