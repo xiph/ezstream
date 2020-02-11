@@ -208,7 +208,7 @@
       <!-- Output stream format -->
       <format>Ogg</format>
       <!-- Program and options -->
-      <program>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 1 -q 1.5 -t @M@ -</program>
+      <program>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t @M@ -</program>
     </encoder>
 
     <encoder>
