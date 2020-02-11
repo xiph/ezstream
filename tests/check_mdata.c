@@ -194,6 +194,7 @@ void
 teardown_checked(void)
 {
 	mdata_destroy(&md);
+	mdata_destroy(&md);
 	ck_assert_ptr_eq(md, NULL);
 
 	log_exit();

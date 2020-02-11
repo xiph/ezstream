@@ -277,7 +277,8 @@ mdata_destroy(struct mdata **md_p)
 {
 	struct mdata	*md = *md_p;
 
-	_mdata_clear(md);
+	if (md)
+		_mdata_clear(md);
 	xfree(md);
 	*md_p = NULL;
 }
