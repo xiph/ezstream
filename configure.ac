@@ -2,7 +2,7 @@ dnl ###########
 dnl ## SETUP ###########################################################
 dnl ###########
 
-AC_INIT([ezstream], [1.0.0], [https://gitlab.xiph.org/xiph/ezstream/issues])
+AC_INIT([ezstream], [1.0.1], [https://gitlab.xiph.org/xiph/ezstream/issues])
 AC_PREREQ([2.61])
 AC_CONFIG_SRCDIR([src/ezstream.c])
 AC_CONFIG_AUX_DIR([build-aux])
