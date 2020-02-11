@@ -212,6 +212,12 @@
     </encoder>
 
     <encoder>
+      <name>Opus-VBR96</name>
+      <format>Ogg</format>
+      <program>opusenc --vbr --bitrate 96 --title @t@ --artist @a@ --raw --raw-rate 44100 - -</program>
+    </encoder>
+
+    <encoder>
       <name>Lame-CBR128</name>
       <format>MP3</format>
       <program>lame --preset cbr 128 -r -s 44.1 --bitwidth 16 - -</program>
