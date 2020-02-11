@@ -285,6 +285,8 @@ openResource(stream_t stream, const char *filename, int *popenFlag,
 
 		pCommandString = _build_reencode_cmd(extension, filename,
 		    cfg_stream, md);
+		if (NULL == pCommandString)
+			return (NULL);
 		if (md_p != NULL)
 			*md_p = md;
 		else
