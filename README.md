@@ -127,5 +127,5 @@ These are also used in the example configuration files:
  - Travis CI: https://travis-ci.org/xiph/ezstream/
  - CircleCI: https://circleci.com/gh/xiph/ezstream/
  - Codecov: https://codecov.io/gh/xiph/ezstream/
- - Codacy: https://www.codacy.com/app/mgrimm/ezstream/
+ - Codacy: https://app.codacy.com/manual/mgrimm/ezstream/dashboard
  - Coverity: https://scan.coverity.com/projects/xiph-ezstream/
