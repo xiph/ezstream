@@ -1,6 +1,7 @@
 Changes in 1.0.1, released on XXXX-XX-XX:
 
  * Fix a crash if there is a typo in the <encoder /> setting
+ * Fix regression setting the stream name. From zygmund2000 on Github.
  * Minor example and documentation tweaks
 
 

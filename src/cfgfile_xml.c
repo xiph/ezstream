@@ -155,6 +155,7 @@ _cfgfile_xml_parse_stream(xmlDocPtr doc, xmlNodePtr cur)
 		XML_STREAM_SET(s, sl, cfg_stream_set_public,             "public");
 		XML_STREAM_SET(s, sl, cfg_stream_set_format,             "format");
 		XML_STREAM_SET(s, sl, cfg_stream_set_encoder,            "encoder");
+		XML_STREAM_SET(s, sl, cfg_stream_set_stream_name,        "stream_name");
 		XML_STREAM_SET(s, sl, cfg_stream_set_stream_url,         "stream_url");
 		XML_STREAM_SET(s, sl, cfg_stream_set_stream_genre,       "stream_genre");
 		XML_STREAM_SET(s, sl, cfg_stream_set_stream_description, "stream_description");
