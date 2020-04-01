@@ -1,3 +1,10 @@
+Changes in 1.0.2, released on XXXX-XX-XX:
+
+ * Fix a crash, if metadata placeholders are configured for input files
+   that do not contain the respective values. From gui-lux on Github (#16).
+
+
+
 Changes in 1.0.1, released on 2020-02-22:
 
  * Fix a crash, if there is a typo in the <encoder /> setting

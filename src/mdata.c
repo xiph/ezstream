@@ -483,15 +483,15 @@ mdata_strformat(struct mdata *md, char *buf, size_t bufsize, const char *format)
 
 	memset(dicts, 0, sizeof(dicts));
 	dicts[0].from = PLACEHOLDER_ARTIST;
-	dicts[0].to = mdata_get_artist(md);
+	dicts[0].to = mdata_get_artist(md) ? mdata_get_artist(md) : "";
 	dicts[1].from = PLACEHOLDER_ALBUM;
-	dicts[1].to = mdata_get_album(md);
+	dicts[1].to = mdata_get_album(md) ? mdata_get_album(md) : "";
 	dicts[2].from = PLACEHOLDER_TITLE;
-	dicts[2].to = mdata_get_title(md);
+	dicts[2].to = mdata_get_title(md) ? mdata_get_title(md) : "";
 	dicts[3].from = PLACEHOLDER_TRACK;
 	dicts[3].to = mdata_get_filename(md);
 	dicts[4].from = PLACEHOLDER_STRING;
-	dicts[4].to = mdata_get_songinfo(md);
+	dicts[4].to = mdata_get_songinfo(md) ? mdata_get_songinfo(md) : "";
 
 	str = util_expand_words(format, dicts);
 	ret = (int)strlen(str);

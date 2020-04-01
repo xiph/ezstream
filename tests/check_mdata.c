@@ -147,15 +147,38 @@ START_TEST(test_mdata_strformat)
 	int	ret;
 
 	ck_assert_int_eq(mdata_parse_file(md, SRCDIR "/test01-artist+album+title.ogg"), 0);
-
-	ck_assert_int_lt(mdata_strformat(md, buf, sizeof(buf), NULL), 0);
-
 	ret = mdata_strformat(md, buf, sizeof(buf), "@a@/@b@/@t@/@T@/@s@");
 	ck_assert_int_eq(ret, (int)strlen(buf));
 	ck_assert_str_eq(buf,
 	    "test artist/test album/test title"
 	    "/" SRCDIR "/test01-artist+album+title.ogg"
 	    "/test artist - test title - test album");
+
+	ck_assert_int_eq(mdata_parse_file(md, SRCDIR "/test12-artist.ogg"), 0);
+	ret = mdata_strformat(md, buf, sizeof(buf), "@a@/@b@/@t@/@T@/@s@");
+	ck_assert_int_eq(ret, (int)strlen(buf));
+	ck_assert_str_eq(buf,
+	    "test artist//"
+	    "/" SRCDIR "/test12-artist.ogg"
+	    "/test artist");
+
+	ck_assert_int_eq(mdata_parse_file(md, SRCDIR "/test15-title.ogg"), 0);
+	ret = mdata_strformat(md, buf, sizeof(buf), "@a@/@b@/@t@/@T@/@s@");
+	ck_assert_int_eq(ret, (int)strlen(buf));
+	ck_assert_str_eq(buf,
+	    "//test title"
+	    "/" SRCDIR "/test15-title.ogg"
+	    "/test title");
+
+	ck_assert_int_eq(mdata_parse_file(md, SRCDIR "/test16-nometa.ogg"), 0);
+	ret = mdata_strformat(md, buf, sizeof(buf), "@a@/@b@/@t@/@T@/@s@");
+	ck_assert_int_eq(ret, (int)strlen(buf));
+	ck_assert_str_eq(buf,
+	    "//"
+	    "/" SRCDIR "/test16-nometa.ogg"
+	    "/");
+
+	ck_assert_int_lt(mdata_strformat(md, buf, sizeof(buf), NULL), 0);
 }
 END_TEST
 
