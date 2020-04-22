@@ -568,6 +568,11 @@ This element contains all decoder blocks as child elements.
 Its parent is the
 .Sy \&<ezstream\ /\&>
 element.
+.Pp
+.Em Note:
+Decoders are ignored for
+.Ar stdin
+intake.
 .El
 .Ss Decoder block
 .Bl -tag -width -Ds
@@ -620,6 +625,11 @@ This element contains all encoder blocks as child elements.
 Its parent is the
 .Sy \&<ezstream\ /\&>
 element.
+.Pp
+.Em Note:
+Encoders are ignored for
+.Ar stdin
+intake.
 .El
 .Ss Encoder block
 .Bl -tag -width -Ds

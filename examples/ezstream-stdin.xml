@@ -19,6 +19,7 @@
     <stream>
       <mountpoint>/stream.ogg</mountpoint>
       <format>Ogg</format>
+      <!-- No encoder configured, not supported for stdin. -->
     </stream>
   </streams>
 
