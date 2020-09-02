@@ -106,10 +106,8 @@ following it, or restarts from the beginning of the list otherwise.
 Skips the currently playing track and moves on to the next in playlist mode, or
 restarts the current track when streaming a single file.
 .It Cd SIGUSR2
-Triggers rereading of metadata for the stream by running the program or script
-specified in
-.Li \&<metadata_progname/\&>
-.Pq see below.
+Triggers rereading of metadata for the stream by running the configured
+program or script.
 This is the only meaningful signal when streaming from standard input.
 .El
 .Pp
