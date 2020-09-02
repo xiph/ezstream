@@ -605,19 +605,18 @@ streamFile(stream_t stream, const char *fileName)
 					continue;
 				if (cfg_get_metadata_program()) {
 					char		*mdataStr = NULL;
-					mdata_t 	 prog_md;
 
 					log_info("running metadata program: %s",
 					    cfg_get_metadata_program());
-					prog_md = mdata_create();
+					md = mdata_create();
 					if (0 > mdata_run_program(md, cfg_get_metadata_program()) ||
-					    0 > stream_set_metadata(stream, prog_md, &mdataStr)) {
-						mdata_destroy(&prog_md);
+					    0 > stream_set_metadata(stream, md, &mdataStr)) {
+						mdata_destroy(&md);
 						retval = 0;
 						ret = STREAM_DONE;
 						continue;
 					}
-					mdata_destroy(&prog_md);
+					mdata_destroy(&md);
 					log_info("new metadata: %s", mdataStr);
 					xfree(mdataStr);
 				}

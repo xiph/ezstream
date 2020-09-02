@@ -2,6 +2,9 @@ Changes in 1.0.2, released on XXXX-XX-XX:
 
  * Fix a crash, if metadata placeholders are configured for input files
    that do not contain the respective values. From gui-lux on Github (#16).
+ * Fix a crash in one instance of querying the metadata program. From taku0220
+   on Github (#23).
+ * Minor documentation tweak
 
 
 
