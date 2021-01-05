@@ -196,6 +196,12 @@
       <program>flac -s -d --force-raw-format --sign=signed --endian=little -o - @T@</program>
       <file_ext>.flac</file_ext>
     </decoder>
+
+    <decoder>
+      <name>AAC</name>
+      <program>faad -d -f 2 -w @T@</program>
+      <file_ext>.m4a</file_ext>
+    </decoder>
   </decoders>
 
   <!--
