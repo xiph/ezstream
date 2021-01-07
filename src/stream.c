@@ -383,6 +383,7 @@ stream_configure(struct stream *s)
 	cfg_server_list_t	 servers;
 	cfg_stream_t		 cfg_stream;
 	cfg_server_t		 cfg_server;
+	cfg_intake_t		 cfg_intake;
 	const char		*server;
 
 	streams = cfg_get_streams();
@@ -405,6 +406,14 @@ stream_configure(struct stream *s)
 	if (0 != _stream_cfg_server(s, cfg_server) ||
 	    0 != _stream_cfg_tls(s, cfg_server) ||
 	    0 != _stream_cfg_stream(s, cfg_stream)) {
+		_stream_reset(s);
+		return (-1);
+	}
+
+	cfg_intake = stream_get_cfg_intake(s);
+	if (0 > cfg_intake_validate(cfg_intake, NULL)) {
+		log_error("stream: %s: referencing unconfigured intake (%s)",
+		    s->name, cfg_intake_get_name(cfg_intake));
 		_stream_reset(s);
 		return (-1);
 	}

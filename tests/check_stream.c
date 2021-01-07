@@ -10,6 +10,8 @@ Suite * stream_suite(void);
 void	setup_checked(void);
 void	teardown_checked(void);
 
+cfg_intake_list_t	intakes;
+
 START_TEST(test_stream)
 {
 	stream_t		 s;
@@ -17,6 +19,7 @@ START_TEST(test_stream)
 	char			*m_str;
 	cfg_server_t		 srv_cfg;
 	cfg_stream_t		 str_cfg;
+	cfg_intake_t		 int_cfg;
 	cfg_server_list_t	 servers = cfg_get_servers();
 	cfg_stream_list_t	 streams = cfg_get_streams();
 
@@ -32,7 +35,8 @@ START_TEST(test_stream)
 	ck_assert_ptr_ne(srv_cfg, NULL);
 	str_cfg = stream_get_cfg_stream(s);
 	ck_assert_ptr_ne(str_cfg, NULL);
-	ck_assert_ptr_ne(stream_get_cfg_intake(s), NULL);
+	int_cfg = stream_get_cfg_intake(s);
+	ck_assert_ptr_ne(int_cfg, NULL);
 
 	ck_assert_int_ne(stream_configure(s), 0);
 	ck_assert_int_eq(cfg_server_set_hostname(srv_cfg, servers, "localhost", NULL), 0);
@@ -48,6 +52,8 @@ START_TEST(test_stream)
 	ck_assert_int_eq(cfg_stream_set_mountpoint(str_cfg, streams, "/test.ogg", NULL), 0);
 	ck_assert_int_ne(stream_configure(s), 0);
 	ck_assert_int_eq(cfg_stream_set_format(str_cfg, streams, "mp3", NULL), 0);
+	ck_assert_int_ne(stream_configure(s), 0);
+	cfg_intake_set_filename(int_cfg, intakes, "stream_test", NULL);
 	ck_assert_int_eq(stream_configure(s), 0);
 	ck_assert_int_eq(cfg_stream_set_format(str_cfg, streams, "ogg", NULL), 0);
 	ck_assert_int_eq(stream_configure(s), 0);
