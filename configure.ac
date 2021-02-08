@@ -99,6 +99,24 @@ AC_SUBST([CFG_ATTRIBUTE_NONNULL])
 AC_C_CONST
 AC_C_VOLATILE
 
+want_asan="no"
+AC_ARG_WITH([asan],
+	[AS_HELP_STRING([--with-asan=yes],
+		[build with AddressSanitizer (for debugging) (default: no)])],
+	[
+case "${withval}" in
+	no)
+		;;
+	*)
+		want_asan="yes"
+		;;
+esac
+	]
+)
+if test x"${want_asan}" = "xyes"; then
+	AX_UNIQVAR_APPEND([EZ_CFLAGS], [-fsanitize=address -fno-omit-frame-pointer])
+	AX_UNIQVAR_APPEND([EZ_LDFLAGS], [-fsanitize=address -fno-omit-frame-pointer])
+fi
 
 dnl #############
 dnl ## HEADERS #########################################################
@@ -127,7 +145,7 @@ dnl ## LIBRARIES #######################################################
 dnl ###############
 
 AC_CHECK_LIB([gen], [basename],
-	[ AX_UNIQVAR_PREPEND([EZ_LIBS], [-lgen]) ])
+	[AX_UNIQVAR_PREPEND([EZ_LIBS], [-lgen]) ])
 
 AX_CHECK_LIBSHOUT([], [],
 	[AC_MSG_ERROR([libshout is missing], [1])])
@@ -231,5 +249,6 @@ ${PACKAGE_STRING} has been configured successfully.
 Configuration:
     Charset conversion support .... : ${use_iconv}
     Prefix ........................ : ${prefix}
+    AddressSanitizer (debugging) .. : ${want_asan}
 
 __EOT
