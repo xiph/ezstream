@@ -359,6 +359,15 @@ stream input media files as-is.
 The configured encoder's output stream format must match what is configured
 in
 .Sy \&<format\ /\&> .
+.It Sy \&<language_tag\ /\&>
+RFC 5646 language tag, such as
+.Em en-US ,
+describing the target audience
+.Pq not necessarily the actual content
+language(s) of the stream.
+.Pp
+Default:
+.Em none
 .It Sy \&<stream_name\ /\&>
 Informational name of the broadcast.
 .Pp

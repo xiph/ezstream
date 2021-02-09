@@ -200,6 +200,13 @@ START_TEST(test_stream_stream_channels)
 }
 END_TEST
 
+START_TEST(test_stream_language_tag)
+{
+	TEST_XSTRDUP_T(cfg_stream_t, cfg_stream_list_get, streams,
+	    cfg_stream_set_language_tag, cfg_stream_get_language_tag);
+}
+END_TEST
+
 START_TEST(test_stream_validate)
 {
 	cfg_stream_t	 str = cfg_stream_list_get(streams, "test_stream_validate");
@@ -244,6 +251,7 @@ cfg_suite(void)
 	tcase_add_test(tc_stream, test_stream_stream_bitrate);
 	tcase_add_test(tc_stream, test_stream_stream_samplerate);
 	tcase_add_test(tc_stream, test_stream_stream_channels);
+	tcase_add_test(tc_stream, test_stream_language_tag);
 	tcase_add_test(tc_stream, test_stream_validate);
 	suite_add_tcase(s, tc_stream);
 

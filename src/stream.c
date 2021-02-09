@@ -257,6 +257,13 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 		    s->name, cfg_stream_get_format_str(cfg_stream));
 		return (-1);
 	}
+	if (cfg_stream_get_language_tag(cfg_stream) &&
+	    SHOUTERR_SUCCESS !=
+	    shout_set_content_language(s->shout, cfg_stream_get_language_tag(cfg_stream))) {
+		log_error("stream: %s: language: %s",
+		    s->name, shout_get_error(s->shout));
+		return (-1);
+	}
 	if (SHOUTERR_SUCCESS !=
 	    shout_set_public(s->shout, (unsigned int)cfg_stream_get_public(cfg_stream))) {
 		log_error("stream: %s: public: %s",

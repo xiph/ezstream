@@ -86,6 +86,8 @@ int	cfg_stream_set_stream_samplerate(cfg_stream_t, cfg_stream_list_t,
 	    const char *, const char **);
 int	cfg_stream_set_stream_channels(cfg_stream_t, cfg_stream_list_t,
 	    const char *, const char **);
+int	cfg_stream_set_language_tag(cfg_stream_t, cfg_stream_list_t,
+	    const char *, const char **);
 
 int	cfg_stream_validate(cfg_stream_t, const char **);
 
@@ -120,5 +122,7 @@ const char *
 	cfg_stream_get_stream_samplerate(cfg_stream_t);
 const char *
 	cfg_stream_get_stream_channels(cfg_stream_t);
+const char *
+	cfg_stream_get_language_tag(cfg_stream_t);
 
 #endif /* __CFG_STREAM_H__ */

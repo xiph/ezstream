@@ -72,6 +72,7 @@ START_TEST(test_stream)
 	ck_assert_int_eq(cfg_stream_set_stream_bitrate(str_cfg, streams, "test", NULL), 0);
 	ck_assert_int_eq(cfg_stream_set_stream_samplerate(str_cfg, streams, "test", NULL), 0);
 	ck_assert_int_eq(cfg_stream_set_stream_channels(str_cfg, streams, "test", NULL), 0);
+	ck_assert_int_eq(cfg_stream_set_language_tag(str_cfg, streams, "test", NULL), 0);
 	ck_assert_int_eq(cfg_stream_set_public(str_cfg, streams, "true", NULL), 0);
 	ck_assert_int_eq(stream_configure(s), 0);
 

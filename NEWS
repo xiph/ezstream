@@ -1,5 +1,7 @@
 Changes in 1.0.2, released on XXXX-XX-XX:
 
+ * Add support for setting an RFC 5646 language tag on streams via the
+   <language_tag/> option
  * Fix a crash, if metadata placeholders are configured for input files
    that do not contain the respective values. From gui-lux on Github (#16).
  * Fix a crash in one instance of querying the metadata program. From taku0220

@@ -114,6 +114,9 @@
       <!-- Encoder name (defined below) to use for (re)encoding -->
       <encoder>OggEnc-Q1.5</encoder>
 
+      <!-- RFC 5646 language tag describing target audience language(s) -->
+      <language_tag>en-US, i-klingon</language_tag>
+
       <!-- Various other informational settings -->
       <stream_name>Test Stream</stream_name>
       <stream_url>http://localhost:8000/</stream_url>

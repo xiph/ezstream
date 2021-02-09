@@ -163,6 +163,7 @@ _cfgfile_xml_parse_stream(xmlDocPtr doc, xmlNodePtr cur)
 		XML_STREAM_SET(s, sl, cfg_stream_set_stream_bitrate,     "stream_bitrate");
 		XML_STREAM_SET(s, sl, cfg_stream_set_stream_samplerate,  "stream_samplerate");
 		XML_STREAM_SET(s, sl, cfg_stream_set_stream_channels,    "stream_channels");
+		XML_STREAM_SET(s, sl, cfg_stream_set_language_tag,       "language_tag");
 	}
 
 	if (0 > cfg_stream_validate(s, &errstr)) {

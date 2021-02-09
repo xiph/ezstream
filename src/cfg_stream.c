@@ -43,6 +43,7 @@ struct cfg_stream {
 	char			*stream_bitrate;
 	char			*stream_samplerate;
 	char			*stream_channels;
+	char			*language_tag;
 };
 
 TAILQ_HEAD(cfg_stream_list, cfg_stream);
@@ -162,6 +163,7 @@ cfg_stream_destroy(struct cfg_stream **s_p)
 	xfree(s->stream_bitrate);
 	xfree(s->stream_samplerate);
 	xfree(s->stream_channels);
+	xfree(s->language_tag);
 	xfree(s);
 	*s_p = NULL;
 }
@@ -384,6 +386,16 @@ cfg_stream_set_stream_channels(struct cfg_stream *s,
 }
 
 int
+cfg_stream_set_language_tag(struct cfg_stream *s,
+    struct cfg_stream_list *not_used, const char *language_tag,
+    const char **errstrp)
+{
+	(void)not_used;
+	SET_XSTRDUP(s->language_tag, language_tag, errstrp);
+	return (0);
+}
+
+int
 cfg_stream_validate(struct cfg_stream *s, const char **errstrp)
 {
 	if (CFG_STREAM_INVALID == cfg_stream_get_format(s)) {
@@ -489,4 +501,10 @@ const char *
 cfg_stream_get_stream_channels(struct cfg_stream *s)
 {
 	return (s->stream_channels);
+}
+
+const char *
+cfg_stream_get_language_tag(struct cfg_stream *s)
+{
+	return (s->language_tag);
 }
