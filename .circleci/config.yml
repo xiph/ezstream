@@ -3,7 +3,7 @@ jobs:
   build:
     parallelism: 1
     machine:
-    - image: ubuntu-2004:202101-01
+      image: ubuntu-2004:202101-01
     working_directory: ~/xiph/ezstream
     shell: /bin/bash --login
     steps:
