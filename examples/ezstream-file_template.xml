@@ -51,6 +51,12 @@
       <program>flac -s -d --force-raw-format --sign=signed --endian=little -o - @T@</program>
       <file_ext>.flac</file_ext>
     </decoder>
+
+    <decoder>
+      <name>AAC</name>
+      <program>faad -d -f 2 -w @T@</program>
+      <file_ext>.m4a</file_ext>
+    </decoder>
   </decoders>
 
   <encoders>
@@ -58,6 +64,12 @@
       <name>OggEnc-Q1.5</name>
       <format>Ogg</format>
       <program>oggenc -r -B 16 -C 2 -R 44100 --raw-endianness 0 -q 1.5 -t @M@ -</program>
+    </encoder>
+
+    <encoder>
+      <name>Opus-VBR96</name>
+      <format>Ogg</format>
+      <program>opusenc --vbr --bitrate 96 --title @t@ --artist @a@ --raw --raw-rate 44100 - -</program>
     </encoder>
 
     <encoder>
