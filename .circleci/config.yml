@@ -3,7 +3,7 @@ jobs:
   build:
     parallelism: 1
     docker:
-    - image: circleci/buildpack-deps:latest
+    - image: circleci/buildpack-deps:20.04
     working_directory: ~/xiph/ezstream
     shell: /bin/bash --login
     steps:
