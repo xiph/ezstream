@@ -265,28 +265,28 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 	}
 	if (cfg_stream_get_stream_name(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_name(s->shout, cfg_stream_get_stream_name(cfg_stream))) {
+	    shout_set_meta(s->shout, SHOUT_META_NAME, cfg_stream_get_stream_name(cfg_stream))) {
 		log_error("stream: %s: name: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_url(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_url(s->shout, cfg_stream_get_stream_url(cfg_stream))) {
+	    shout_set_meta(s->shout, SHOUT_META_URL, cfg_stream_get_stream_url(cfg_stream))) {
 		log_error("stream: %s: url: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_genre(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_genre(s->shout, cfg_stream_get_stream_genre(cfg_stream))) {
+	    shout_set_meta(s->shout, SHOUT_META_GENRE, cfg_stream_get_stream_genre(cfg_stream))) {
 		log_error("stream: %s: genre: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
 	}
 	if (cfg_stream_get_stream_description(cfg_stream) &&
 	    SHOUTERR_SUCCESS !=
-	    shout_set_description(s->shout, cfg_stream_get_stream_description(cfg_stream))) {
+	    shout_set_meta(s->shout, SHOUT_META_DESCRIPTION, cfg_stream_get_stream_description(cfg_stream))) {
 		log_error("stream: %s: description: %s",
 		    s->name, shout_get_error(s->shout));
 		return (-1);
