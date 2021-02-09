@@ -748,8 +748,10 @@ main(int argc, char *argv[])
 	}
 
 	main_stream = stream_create(CFG_DEFAULT);
-	if (0 > stream_configure(main_stream))
+	if (0 > stream_configure(main_stream)) {
+		stream_destroy(&main_stream);
 		return (ez_shutdown(1));
+	}
 	cfg_server = stream_get_cfg_server(main_stream);
 	cfg_stream = stream_get_cfg_stream(main_stream);
 	cfg_intake = stream_get_cfg_intake(main_stream);
@@ -762,6 +764,7 @@ main(int argc, char *argv[])
 	for (i = 0; i < sizeof(ezstream_signals) / sizeof(int); i++) {
 		if (sigaction(ezstream_signals[i], &act, NULL) == -1) {
 			log_syserr(ERROR, errno, "sigaction");
+			stream_destroy(&main_stream);
 			return (ez_shutdown(1));
 		}
 	}
@@ -775,6 +778,7 @@ main(int argc, char *argv[])
 	act.sa_handler = SIG_IGN;
 	if (sigaction(SIGPIPE, &act, NULL) == -1) {
 		log_syserr(ERROR, errno, "sigaction");
+		stream_destroy(&main_stream);
 		return (ez_shutdown(1));
 	}
 
@@ -783,6 +787,7 @@ main(int argc, char *argv[])
 
 	if (0 > stream_connect(main_stream)) {
 		log_error("initial server connection failed");
+		stream_destroy(&main_stream);
 		return (ez_shutdown(1));
 	}
 	log_notice("connected: %s://%s:%u%s",
@@ -814,6 +819,7 @@ main(int argc, char *argv[])
 	} while (cont);
 
 	stream_disconnect(main_stream);
+	stream_destroy(&main_stream);
 
 	if (quit) {
 		if (cfg_get_program_quiet_stderr() &&
