@@ -2,8 +2,8 @@ version: 2.1
 jobs:
   build:
     parallelism: 1
-    machine:
-      image: ubuntu-2004:202101-01
+    docker:
+    - image: circleci/buildpack-deps:20.04
     working_directory: ~/xiph/ezstream
     shell: /bin/bash --login
     steps:
