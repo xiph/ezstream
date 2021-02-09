@@ -216,7 +216,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 	switch (cfg_stream_get_format(cfg_stream)) {
 	case CFG_STREAM_OGG:
 		if (SHOUTERR_SUCCESS !=
-		    shout_set_format(s->shout, SHOUT_FORMAT_OGG)) {
+		    shout_set_content_format(s->shout, SHOUT_FORMAT_OGG, 0, NULL)) {
 			log_error("stream: %s: format: %s: %s",
 			    s->name, cfg_stream_get_format_str(cfg_stream),
 			    shout_get_error(s->shout));
@@ -225,7 +225,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 		break;
 	case CFG_STREAM_MP3:
 		if (SHOUTERR_SUCCESS !=
-		    shout_set_format(s->shout, SHOUT_FORMAT_MP3)) {
+		    shout_set_content_format(s->shout, SHOUT_FORMAT_MP3, 0, NULL)) {
 			log_error("stream: %s: format: %s: %s",
 			    s->name, cfg_stream_get_format_str(cfg_stream),
 			    shout_get_error(s->shout));
@@ -234,7 +234,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 		break;
 	case CFG_STREAM_WEBM:
 		if (SHOUTERR_SUCCESS !=
-		    shout_set_format(s->shout, SHOUT_FORMAT_WEBM)) {
+		    shout_set_content_format(s->shout, SHOUT_FORMAT_WEBM, 0, NULL)) {
 			log_error("stream: %s: format: %s: %s",
 			    s->name, cfg_stream_get_format_str(cfg_stream),
 			    shout_get_error(s->shout));
@@ -244,7 +244,7 @@ _stream_cfg_stream(struct stream *s, cfg_stream_t cfg_stream)
 #ifdef SHOUT_FORMAT_MATROSKA
 	case CFG_STREAM_MATROSKA:
 		if (SHOUTERR_SUCCESS !=
-		    shout_set_format(s->shout, SHOUT_FORMAT_MATROSKA)) {
+		    shout_set_content_format(s->shout, SHOUT_FORMAT_MATROSKA, 0, NULL)) {
 			log_error("stream: %s: format: %s: %s",
 			    s->name, cfg_stream_get_format_str(cfg_stream),
 			    shout_get_error(s->shout));
