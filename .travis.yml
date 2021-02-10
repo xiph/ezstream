@@ -7,7 +7,7 @@ env:
 compiler:
   - gcc
 
-dist: trusty
+dist: focal
 sudo: required
 addons:
   apt:
