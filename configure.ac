@@ -247,8 +247,8 @@ cat << __EOT
 ${PACKAGE_STRING} has been configured successfully.
 
 Configuration:
-    Charset conversion support .... : ${use_iconv}
-    Prefix ........................ : ${prefix}
-    AddressSanitizer (debugging) .. : ${want_asan}
+    Charset conversion support ......... : ${use_iconv}
+    Prefix ............................. : ${prefix}
+    AddressSanitizer (for debugging) ... : ${want_asan}
 
 __EOT
