@@ -464,7 +464,8 @@ See
 .Xr SCRIPTING
 for more information.
 .It Ar stdin
-The input is read from standard input.
+The input is read from standard input and streamed as-is without any
+reencoding.
 .El
 .It Sy \&<filename\ /\&>
 The input media file name; mandatory for all but the
