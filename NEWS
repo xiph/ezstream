@@ -1,4 +1,4 @@
-Changes in 1.0.2, released on 2021-02-11:
+Changes in 1.0.2, released on 2021-02-12:
 
  * Fix a crash, if metadata placeholders are configured for input files
    that do not contain the respective values. From gui-lux on Github (#16).
