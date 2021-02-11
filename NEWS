@@ -6,7 +6,7 @@ Changes in 1.0.2, released on 2021-02-11:
    on Github (#23).
  * Fix a crash when referencing an unconfigured intake in a stream. From
    Optiqus on Github (#28).
- * Minor documentation and example tweaks
+ * Documentation and example improvements
 
 
 

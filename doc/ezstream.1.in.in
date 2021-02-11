@@ -305,6 +305,10 @@ Set the name of the stream configuration.
 .Pp
 The name is case-aware, but not case-sensitive.
 .Pp
+.Em Note:
+At this time, only the stream configuration with the default name is
+used and must be present.
+.Pp
 Default:
 .Ar default
 .It Sy \&<mountpoint\ /\&>
